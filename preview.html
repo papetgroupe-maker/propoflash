@@ -1,0 +1,75 @@
+<script>
+(function(){
+  const byId = (id)=>document.getElementById(id);
+  const btn = byId('startBtn');
+  if(!btn) return;
+
+  btn.addEventListener('click', ()=>{
+    const brief = (byId('brief')?.value || '').trim();
+    const lang  = (byId('lang')?.value || 'fr');
+
+    // Un proposalSpec minimal pour tester (tu pourras le remplacer par ta vraie génération IA)
+    const spec = {
+      meta: {
+        lang,
+        theme: 'corp',          // 'corp' | 'min' | 'serif' | 'vibr'
+        palette: 'ocean',       // 'ocean' | 'emerald' | 'sunset' | 'slate' | 'custom'
+        cover: 'rings',         // 'rings' | 'band' | 'solid' | 'photo'
+        project_title: lang==='fr' ? 'Proposition commerciale' : 'Business Proposal',
+        client: lang==='fr' ? 'Client à confirmer' : 'Client TBC',
+        company: 'PropoFlash'
+      },
+      letter: lang==='fr'
+        ? "Madame, Monsieur, merci pour votre intérêt. Vous trouverez ci-après une proposition structurée alignée sur vos objectifs."
+        : "Dear team, thank you for your interest. Below is a structured proposal aligned with your objectives.",
+      executive_summary: brief || (lang==='fr'
+        ? "Cette proposition résume le contexte, les objectifs et l’approche recommandée."
+        : "This proposal summarizes context, objectives and the recommended approach."),
+      objectives: [
+        lang==='fr' ? "Atteindre le ROI cible sous 90 jours." : "Reach target ROI within 90 days.",
+        lang==='fr' ? "Améliorer le taux de conversion." : "Improve conversion rate."
+      ],
+      approach: { phases: [
+        { name: lang==='fr' ? "Phase 1 — Cadrage" : "Phase 1 — Discovery", steps: [lang==='fr'?'Ateliers':'Workshops', 'Scope'], description:'' },
+        { name: lang==='fr' ? "Phase 2 — Exécution" : "Phase 2 — Execution", steps: ['Build', 'QA', 'Launch'], description:'' }
+      ]},
+      deliverables: {
+        in:  [ lang==='fr'?'Cadrage détaillé':'Detailed scoping', 'Wireframe', 'MVP' ],
+        out: [ lang==='fr'?'Hébergement':'Hosting', lang==='fr'?'Support 24/7':'24/7 support' ]
+      },
+      timeline: { milestones: [
+        { name: lang==='fr'?'Kick-off':'Kick-off', time: 'D0' },
+        { name: lang==='fr'?'Livrable principal':'Main deliverable', time: 'D+21' }
+      ]},
+      pricing: {
+        model: lang==='fr'?'Forfait':'Fixed price',
+        price: lang==='fr'?'€4 900':'€4,900',
+        terms: [
+          lang==='fr'?'50% à la commande, 50% à la livraison':'50% upfront, 50% on delivery',
+          lang==='fr'?'Validité 15 jours':'Valid for 15 days'
+        ]
+      },
+      assumptions: [
+        lang==='fr'?'Accès aux contenus et logos fournis par le client.':'Access to content and logos provided by client.'
+      ],
+      metrics: [
+        { label: lang==='fr'?'Taux de conversion cible':'Target CVR', value:'+25%' },
+        { label: lang==='fr'?'Temps de mise sur le marché':'Time-to-market', value:'< 4 weeks' }
+      ],
+      case_studies: [
+        { title: 'Case A', client: 'ACME', highlights: ['Scope', 'Result'], result: lang==='fr'?'+18% CA':' +18% revenue' }
+      ],
+      team: [
+        { name: 'Lead PM', role: lang==='fr'?'Chef de projet':'Project Lead', bio: lang==='fr'?'10 ans d’expérience.':'10 years experience.' }
+      ],
+      next_steps: [
+        lang==='fr'?'Validation du périmètre','Planification','Lancement'
+        : 'Scope sign-off','Planning','Launch'
+      ]
+    };
+
+    localStorage.setItem('pf_proposal', JSON.stringify(spec));
+    location.href = 'preview.html';
+  });
+})();
+</script>
