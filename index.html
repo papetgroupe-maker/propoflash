@@ -95,6 +95,14 @@
     .footer{padding:36px 0;color:var(--muted);font-size:14px}
     .footer a{color:inherit}
 
+    /* Chat UI */
+    .chat{display:flex;flex-direction:column;gap:12px;max-height:420px;overflow:auto}
+    .msg{display:flex}
+    .msg.me{justify-content:flex-end}
+    .bubble{background:#fff;border:1px solid var(--stroke);padding:12px 14px;border-radius:14px;max-width:80%;box-shadow:var(--shadow)}
+    .msg.me .bubble{background:#0b2446;color:#e8eefc}
+    .send.loading{opacity:.6;pointer-events:none}
+
     /* UTIL */
     .hidden{display:none}
     @media (max-width:980px){.grid3,.price-grid{grid-template-columns:1fr}.nav-inner{border-radius:18px}}
@@ -162,6 +170,14 @@
     </div>
   </section>
 
+  <!-- CHAT (ajouté) -->
+  <section class="section" id="chat">
+    <div class="container">
+      <h2 class="h2" data-i18n="assistant_h2">Assistant</h2>
+      <div id="chatThread" class="chat" aria-live="polite"></div>
+    </div>
+  </section>
+
   <div class="sep"></div>
 
   <!-- WHY -->
@@ -219,7 +235,6 @@
             <li>• <span data-i18n="p1_b2">Chat IA guidé</span></li>
             <li>• <span data-i18n="p1_b3">Export PDF verrouillé</span></li>
           </ul>
-          <!-- Essayer = lien <a> pour uniformiser la police avec les autres CTA -->
           <a class="btn btn-ghost" href="#hero" aria-disabled="true"
              title="L’export est réservé aux offres payantes" data-i18n="cta_try">Essayer</a>
         </div>
@@ -249,7 +264,6 @@
             <li>• <span data-i18n="p3_b2">Sections &amp; modèles illimités</span></li>
             <li>• <span data-i18n="p3_b3">Micro-échantillon si aucune preuve</span></li>
           </ul>
-          <!-- Nouveau CTA Pro -->
           <a class="btn btn-ghost" href="#checkout-pro" data-i18n="cta_choose_pro">Choisir Pro</a>
         </div>
       </div>
@@ -290,7 +304,8 @@
         rights:"Tous droits réservés.",legal:"Mentions légales",privacy:"Confidentialité",
         placeholder:"Collez votre brief ici… (objectif, cible, offre, contraintes…)",
         free_limit_reached:"Limite atteinte : 3 aperçus gratuits/mois. Passez au plan Starter pour davantage d’aperçus et l’export PDF.",
-        left_label:"Aperçus restants ce mois"
+        left_label:"Aperçus restants ce mois",
+        assistant_h2:"Assistant"
       },
       en:{nav_why:"Why us",nav_use:"Use cases",nav_pricing:"Pricing",cta_start:"Start",
         headline:"Make your proposal a <span class='accent-word'>reality</span>. Right now.",
@@ -313,7 +328,8 @@
         rights:"All rights reserved.",legal:"Legal",privacy:"Privacy",
         placeholder:"Paste your brief here… (goal, audience, offer, constraints…)",
         free_limit_reached:"Limit reached: 3 free previews/month. Upgrade to Starter for more previews and PDF export.",
-        left_label:"Previews left this month"
+        left_label:"Previews left this month",
+        assistant_h2:"Assistant"
       }
     };
     const $=(q,ctx=document)=>ctx.querySelector(q); const $$=(q,ctx=document)=>Array.from(ctx.querySelectorAll(q));
@@ -358,18 +374,63 @@
       badge.textContent = l==='fr' ? `${left}/mois` : `${left}/mo`;
     }
 
-    /* Send (simulate preview generation & count) */
-    $("#sendBrief").addEventListener("click",()=>{
-      const t=I18N[document.documentElement.lang];
+    /* ==== Chat IA branché sur /api/chat ==== */
+    const thread = $('#chatThread');
+    function addMsg(text, who='ai'){
+      const row=document.createElement('div'); row.className='msg'+(who==='me'?' me':'');
+      const b=document.createElement('div'); b.className='bubble'; b.textContent=String(text||'');
+      row.appendChild(b); thread.appendChild(row); thread.scrollTop=thread.scrollHeight;
+    }
+
+    async function callChatAPI(message, proposalSpec, history){
+      const res = await fetch('/api/chat',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ message, proposalSpec, history })
+      });
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      return res.json();
+    }
+
+    $("#sendBrief").addEventListener("click",async ()=>{
+      const lang=document.documentElement.lang||'fr';
+      const t=I18N[lang];
       const v=$("#brief").value.trim(); if(!v){$("#brief").focus();return;}
       if(PLAN==='free' && leftCount('free')<=0){
         alert(t.free_limit_reached);
         document.querySelector('#pricing').scrollIntoView({behavior:'smooth'}); return;
       }
-      if(PLAN==='free'){ incCount('free'); updateFreeBadge(); }
-      const left = PLAN==='free' ? leftCount('free') : '∞';
-      alert( (document.documentElement.lang==='fr' ? "Brief reçu ✅\n\n" : "Brief received ✅\n\n")
-        + v + "\n\n" + t.left_label + " : " + left);
+
+      addMsg(v,'me');
+      const btn=$("#sendBrief"); btn.classList.add('loading'); btn.disabled=true;
+
+      try{
+        const history = JSON.parse(localStorage.getItem('pf_chat')||'[]');
+        const proposalSpec = JSON.parse(localStorage.getItem('pf_proposal')||'{"meta":{"lang":"'+lang+'"}}');
+
+        const data = await callChatAPI(v, proposalSpec, history);
+
+        if(data.reply) addMsg(data.reply,'ai');
+
+        if(data.proposalSpec){
+          const merged = { ...proposalSpec, ...data.proposalSpec, meta:{ ...(proposalSpec.meta||{}), ...(data.proposalSpec.meta||{}) } };
+          localStorage.setItem('pf_proposal', JSON.stringify(merged));
+        }
+
+        const newHist = [...history, {role:'user',content:v}, {role:'assistant',content:(data.reply||'')}].slice(-20);
+        localStorage.setItem('pf_chat', JSON.stringify(newHist));
+
+        if(PLAN==='free'){ incCount('free'); updateFreeBadge(); }
+
+        const ask = Array.isArray(data.actions) && data.actions.find(a=>a.type==='ask');
+        if(ask){ $("#brief").value += `\n${ask.field}: `; $("#brief").focus(); }
+      }catch(e){
+        console.error(e);
+        addMsg(lang==='fr'?'Erreur serveur. Réessayez.':'Server error. Please retry.','ai');
+      }finally{
+        btn.classList.remove('loading'); btn.disabled=false;
+        $("#brief").value='';
+      }
     });
 
     /* 3D tilt + parallax */
