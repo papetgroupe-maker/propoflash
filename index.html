@@ -1,399 +1,386 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!doctype html>
+<html lang="fr">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2566">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px 'Helvetica Neue'}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px 'Helvetica Neue'; min-height: 15.0px}
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>PropoFlash — Proposals that convert</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      /* PALETTE CORPORATE BLEU */
+      --bg-start:#f3f6fb; --bg-end:#eaf2ff;
+      --ink:#0a1020; --muted:#5c667a; --stroke:#dfe6f4;
+      --accent:#3b82f6; --accent2:#8b5cf6; --accent-ink:#fff;
+      --card:#ffffffee; --shadow:0 12px 36px rgba(10,16,32,.10); --r:16px;
+    }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);
+      background:linear-gradient(180deg,var(--bg-start),var(--bg-end));-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+    .container{max-width:1200px;margin:0 auto;padding:0 24px}
+
+    /* NAV */
+    .nav{position:fixed;top:12px;left:0;right:0;z-index:50;backdrop-filter:saturate(140%) blur(8px)}
+    .nav-inner{border:1px solid var(--stroke);background:#fff7;box-shadow:var(--shadow);
+      border-radius:999px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px}
+    .spark{width:26px;height:26px;border-radius:8px;
+      background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd);
+      box-shadow:inset 0 0 0 2px #0001, 0 1px 2px #0001}
+    .menu{display:flex;gap:22px;align-items:center}
+    .menu a{color:var(--muted);text-decoration:none;font-weight:600;font-size:14px;padding:8px 10px;border-radius:10px}
+    .menu a:hover{color:var(--ink);background:#ffffffa6}
+    .right{display:flex;align-items:center;gap:10px}
+    select.lang{appearance:none;border:1px solid var(--stroke);background:#fff;color:var(--ink);
+      border-radius:12px;padding:8px 26px 8px 12px;font-weight:700;font-size:14px;
+      background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="%230a1020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');
+      background-repeat:no-repeat;background-position:right 8px center}
+    .btn{
+      display:inline-grid;place-items:center;gap:8px;
+      padding:10px 16px;border-radius:999px;border:1px solid #0000;
+      font-weight:800;cursor:pointer;transition:transform .12s ease, box-shadow .12s ease;
+      font-family:inherit;
+    }
+    .btn-accent{background:var(--accent);color:var(--accent-ink);box-shadow:0 10px 28px rgba(59,130,246,.35)}
+    .btn-accent:hover{transform:translateY(-1px)}
+    .btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--stroke)}
+    .btn-ghost:hover{box-shadow:var(--shadow)}
+
+    /* HERO + SIGNATURE */
+    .hero{position:relative;overflow:hidden;padding-top:120px;padding-bottom:80px;isolation:isolate}
+    .hero .orb{position:absolute;inset:-25% -10% auto -10%;height:120%;
+      background:
+        radial-gradient(45% 45% at 70% 30%, rgba(59,130,246,.35), transparent 60%),
+        radial-gradient(45% 45% at 30% 70%, rgba(139,92,246,.28), transparent 60%);
+      filter:blur(40px);will-change:transform;pointer-events:none;z-index:-1}
+    .ribbon{position:absolute;left:-10%;right:-10%;top:58%;height:120px;transform:rotate(-6deg);
+      background:linear-gradient(90deg, #ffffff90, #ffffff40);border:1px solid #ffffff80;border-left:none;border-right:none;z-index:-1}
+    .grid-overlay{position:absolute;inset:0;pointer-events:none;opacity:.35;mix-blend:overlay}
+    .lead{text-align:center;max-width:1000px;margin:0 auto 18px auto;letter-spacing:-.02em}
+    .lead h1{font-weight:900;line-height:1.02;margin:0;font-size:clamp(40px,7vw,72px)}
+    .accent-word{background:linear-gradient(90deg,#60a5fa,#93c5fd);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .lead p{margin:14px auto 0;color:var(--muted);font-size:18px;max-width:720px}
+
+    /* PROMPT (magnetic) */
+    .prompt-wrap{margin:30px auto 16px;max-width:960px;padding:12px;border-radius:24px;
+      background:linear-gradient(180deg,#ffffffcc,#ffffff80);border:1px solid var(--stroke);box-shadow:var(--shadow);transform-style:preserve-3d}
+    .prompt{background:#fff;border:1px solid var(--stroke);border-radius:18px;display:flex;align-items:center;gap:12px;padding:10px}
+    .prompt textarea{flex:1;min-height:92px;border:none;outline:none;resize:vertical;font:500 16px/1.5 Inter,system-ui;color:var(--ink)}
+    .send{width:42px;height:42px;border-radius:12px;border:1px solid var(--stroke);background:var(--ink);color:#fff;display:grid;place-items:center;cursor:pointer}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .chip{border:1px solid var(--stroke);background:#fff;color:var(--muted);padding:8px 12px;border-radius:999px;font-size:13px;cursor:pointer}
+    .chip:hover{color:var(--ink)}
+
+    /* SECTIONS */
+    .section{padding:84px 0}
+    .sep{height:56px;background:linear-gradient(180deg, #0000, #00000006, #0000)}
+    .h2{font-size:34px;line-height:1.1;margin:0 0 12px;font-weight:900;letter-spacing:-.01em}
+    .sub{color:var(--muted);margin:0 0 26px}
+    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .card{background:var(--card);border:1px solid var(--stroke);border-radius:20px;padding:20px;box-shadow:var(--shadow)}
+    .card h3{margin:2px 0 6px;font-size:18px}.card p{margin:0;color:var(--muted);font-size:14px}
+    .icon{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#93c5fd,#c4b5fd);display:grid;place-items:center;color:#fff;margin-bottom:8px}
+
+    /* PRICING */
+    .pricing{background:#061830;color:#e8eefc}
+    .pricing .h2{color:#fff}.pricing .sub{color:#9fb0d0}
+    .price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .pcard{background:#0b2446;border:1px solid #1e3358;border-radius:20px;padding:20px;box-shadow:0 14px 34px rgba(0,0,0,.25)}
+    .pcard .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .tier{font-weight:800}.price{font-weight:900;font-size:28px}
+    .bullets{margin:10px 0 16px 0;padding:0;list-style:none;color:#c8d6f2}
+    .bullets li{margin:8px 0;display:flex;gap:8px;align-items:flex-start}
+    .badge{display:inline-block;font-size:11px;background:#ffffff14;border:1px solid #ffffff22;padding:4px 8px;border-radius:999px}
+
+    /* FOOTER */
+    .footer{padding:36px 0;color:var(--muted);font-size:14px}
+    .footer a{color:inherit}
+
+    /* UTIL */
+    .hidden{display:none}
+    @media (max-width:980px){.grid3,.price-grid{grid-template-columns:1fr}.nav-inner{border-radius:18px}}
   </style>
 </head>
 <body>
-<p class="p1">&lt;!doctype html&gt;</p>
-<p class="p1">&lt;html lang="fr"&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1">&lt;meta charset="utf-8"/&gt;</p>
-<p class="p1">&lt;meta name="viewport" content="width=device-width, initial-scale=1"/&gt;</p>
-<p class="p1">&lt;title&gt;PropoFlash — Proposals that convert&lt;/title&gt;</p>
-<p class="p1">&lt;link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"&gt;</p>
-<p class="p1">&lt;style&gt;</p>
-<p class="p1">:root{</p>
-<p class="p1"><span class="Apple-converted-space">  </span>/* PALETTE CORPORATE BLEU */</p>
-<p class="p1"><span class="Apple-converted-space">  </span>--bg-start:#f3f6fb; --bg-end:#eaf2ff;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>--ink:#0a1020; --muted:#5c667a; --stroke:#dfe6f4;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>--accent:#3b82f6; --accent2:#8b5cf6; --accent-ink:#fff;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>--card:#ffffffee; --shadow:0 12px 36px rgba(10,16,32,.10); --r:16px;</p>
-<p class="p1">}</p>
-<p class="p1">*{box-sizing:border-box} html,body{height:100%}</p>
-<p class="p1">body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>background:linear-gradient(180deg,var(--bg-start),var(--bg-end));-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}</p>
-<p class="p1">.container{max-width:1200px;margin:0 auto;padding:0 24px}</p>
-<p class="p2"><br></p>
-<p class="p1">/* NAV */</p>
-<p class="p1">.nav{position:fixed;top:12px;left:0;right:0;z-index:50;backdrop-filter:saturate(140%) blur(8px)}</p>
-<p class="p1">.nav-inner{border:1px solid var(--stroke);background:#fff7;box-shadow:var(--shadow);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>border-radius:999px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}</p>
-<p class="p1">.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px}</p>
-<p class="p1">.spark{width:26px;height:26px;border-radius:8px;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>box-shadow:inset 0 0 0 2px #0001, 0 1px 2px #0001}</p>
-<p class="p1">.menu{display:flex;gap:22px;align-items:center}</p>
-<p class="p1">.menu a{color:var(--muted);text-decoration:none;font-weight:600;font-size:14px;padding:8px 10px;border-radius:10px}</p>
-<p class="p1">.menu a:hover{color:var(--ink);background:#ffffffa6}</p>
-<p class="p1">.right{display:flex;align-items:center;gap:10px}</p>
-<p class="p1">select.lang{appearance:none;border:1px solid var(--stroke);background:#fff;color:var(--ink);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>border-radius:12px;padding:8px 26px 8px 12px;font-weight:700;font-size:14px;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>background-image:url('data:image/svg+xml;utf8,&lt;svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="%230a1020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"&gt;&lt;polyline points="6 9 12 15 18 9"/&gt;&lt;/svg&gt;');</p>
-<p class="p1"><span class="Apple-converted-space">  </span>background-repeat:no-repeat;background-position:right 8px center}</p>
-<p class="p1">.btn{</p>
-<p class="p1"><span class="Apple-converted-space">  </span>display:inline-grid;place-items:center;gap:8px;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>padding:10px 16px;border-radius:999px;border:1px solid #0000;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>font-weight:800;cursor:pointer;transition:transform .12s ease, box-shadow .12s ease;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>font-family:inherit; /* même police pour &lt;a&gt; et &lt;button&gt; */</p>
-<p class="p1">}</p>
-<p class="p1">.btn-accent{background:var(--accent);color:var(--accent-ink);box-shadow:0 10px 28px rgba(59,130,246,.35)}</p>
-<p class="p1">.btn-accent:hover{transform:translateY(-1px)}</p>
-<p class="p1">.btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--stroke)}</p>
-<p class="p1">.btn-ghost:hover{box-shadow:var(--shadow)}</p>
-<p class="p2"><br></p>
-<p class="p1">/* HERO + SIGNATURE */</p>
-<p class="p1">.hero{position:relative;overflow:hidden;padding-top:120px;padding-bottom:80px;isolation:isolate}</p>
-<p class="p1">.hero .orb{position:absolute;inset:-25% -10% auto -10%;height:120%;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>background:</p>
-<p class="p1"><span class="Apple-converted-space">    </span>radial-gradient(45% 45% at 70% 30%, rgba(59,130,246,.35), transparent 60%),</p>
-<p class="p1"><span class="Apple-converted-space">    </span>radial-gradient(45% 45% at 30% 70%, rgba(139,92,246,.28), transparent 60%);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>filter:blur(40px);will-change:transform;pointer-events:none;z-index:-1}</p>
-<p class="p1">.ribbon{position:absolute;left:-10%;right:-10%;top:58%;height:120px;transform:rotate(-6deg);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>background:linear-gradient(90deg, #ffffff90, #ffffff40);border:1px solid #ffffff80;border-left:none;border-right:none;z-index:-1}</p>
-<p class="p1">.grid-overlay{position:absolute;inset:0;pointer-events:none;opacity:.35;mix-blend:overlay}</p>
-<p class="p1">.lead{text-align:center;max-width:1000px;margin:0 auto 18px auto;letter-spacing:-.02em}</p>
-<p class="p1">.lead h1{font-weight:900;line-height:1.02;margin:0;font-size:clamp(40px,7vw,72px)}</p>
-<p class="p1">.accent-word{background:linear-gradient(90deg,#60a5fa,#93c5fd);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}</p>
-<p class="p1">.lead p{margin:14px auto 0;color:var(--muted);font-size:18px;max-width:720px}</p>
-<p class="p2"><br></p>
-<p class="p1">/* PROMPT (magnetic) */</p>
-<p class="p1">.prompt-wrap{margin:30px auto 16px;max-width:960px;padding:12px;border-radius:24px;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>background:linear-gradient(180deg,#ffffffcc,#ffffff80);border:1px solid var(--stroke);box-shadow:var(--shadow);transform-style:preserve-3d}</p>
-<p class="p1">.prompt{background:#fff;border:1px solid var(--stroke);border-radius:18px;display:flex;align-items:center;gap:12px;padding:10px}</p>
-<p class="p1">.prompt textarea{flex:1;min-height:92px;border:none;outline:none;resize:vertical;font:500 16px/1.5 Inter,system-ui;color:var(--ink)}</p>
-<p class="p1">.send{width:42px;height:42px;border-radius:12px;border:1px solid var(--stroke);background:var(--ink);color:#fff;display:grid;place-items:center;cursor:pointer}</p>
-<p class="p1">.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}</p>
-<p class="p1">.chip{border:1px solid var(--stroke);background:#fff;color:var(--muted);padding:8px 12px;border-radius:999px;font-size:13px;cursor:pointer}</p>
-<p class="p1">.chip:hover{color:var(--ink)}</p>
-<p class="p2"><br></p>
-<p class="p1">/* SECTIONS */</p>
-<p class="p1">.section{padding:84px 0}</p>
-<p class="p1">.sep{height:56px;background:linear-gradient(180deg, #0000, #00000006, #0000)}</p>
-<p class="p1">.h2{font-size:34px;line-height:1.1;margin:0 0 12px;font-weight:900;letter-spacing:-.01em}</p>
-<p class="p1">.sub{color:var(--muted);margin:0 0 26px}</p>
-<p class="p1">.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}</p>
-<p class="p1">.card{background:var(--card);border:1px solid var(--stroke);border-radius:20px;padding:20px;box-shadow:var(--shadow)}</p>
-<p class="p1">.card h3{margin:2px 0 6px;font-size:18px}.card p{margin:0;color:var(--muted);font-size:14px}</p>
-<p class="p1">.icon{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#93c5fd,#c4b5fd);display:grid;place-items:center;color:#fff;margin-bottom:8px}</p>
-<p class="p2"><br></p>
-<p class="p1">/* PRICING */</p>
-<p class="p1">.pricing{background:#061830;color:#e8eefc}</p>
-<p class="p1">.pricing .h2{color:#fff}.pricing .sub{color:#9fb0d0}</p>
-<p class="p1">.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}</p>
-<p class="p1">.pcard{background:#0b2446;border:1px solid #1e3358;border-radius:20px;padding:20px;box-shadow:0 14px 34px rgba(0,0,0,.25)}</p>
-<p class="p1">.pcard .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}</p>
-<p class="p1">.tier{font-weight:800}.price{font-weight:900;font-size:28px}</p>
-<p class="p1">.bullets{margin:10px 0 16px 0;padding:0;list-style:none;color:#c8d6f2}</p>
-<p class="p1">.bullets li{margin:8px 0;display:flex;gap:8px;align-items:flex-start}</p>
-<p class="p1">.badge{display:inline-block;font-size:11px;background:#ffffff14;border:1px solid #ffffff22;padding:4px 8px;border-radius:999px}</p>
-<p class="p2"><br></p>
-<p class="p1">/* FOOTER */</p>
-<p class="p1">.footer{padding:36px 0;color:var(--muted);font-size:14px}</p>
-<p class="p1">.footer a{color:inherit}</p>
-<p class="p2"><br></p>
-<p class="p1">/* UTIL */</p>
-<p class="p1">.hidden{display:none}</p>
-<p class="p1">@media (max-width:980px){.grid3,.price-grid{grid-template-columns:1fr}.nav-inner{border-radius:18px}}</p>
-<p class="p1">&lt;/style&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p1">&lt;body&gt;</p>
-<p class="p1">&lt;!-- NAV --&gt;</p>
-<p class="p1">&lt;div class="nav"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="container nav-inner"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="brand"&gt;&lt;div class="spark" aria-hidden="true"&gt;&lt;/div&gt;&lt;div&gt;PropoFlash&lt;/div&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;nav class="menu" aria-label="Primary"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;a href="#why" data-i18n="nav_why"&gt;Pourquoi nous&lt;/a&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;a href="#use" data-i18n="nav_use"&gt;Cas d’usage&lt;/a&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;a href="#pricing" data-i18n="nav_pricing"&gt;Tarifs&lt;/a&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/nav&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="right"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;select class="lang" id="lang" aria-label="Language"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;option value="fr"&gt;FR&lt;/option&gt;&lt;option value="en"&gt;EN&lt;/option&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/select&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="btn btn-accent" id="startBtn" data-i18n="cta_start"&gt;Commencer&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p1">&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;!-- HERO --&gt;</p>
-<p class="p1">&lt;section class="hero" id="hero"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="orb" id="orb"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="ribbon"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;!-- subtle grid --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;svg class="grid-overlay" viewBox="0 0 100 100" preserveAspectRatio="none"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;defs&gt;&lt;pattern id="g" width="10" height="10" patternUnits="userSpaceOnUse"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;path d="M10 0 L0 0 0 10" fill="none" stroke="#cfd8ee" stroke-width=".25"/&gt;&lt;/pattern&gt;&lt;/defs&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;rect width="100%" height="100%" fill="url(#g)"/&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/svg&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="container"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="lead"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;h1 id="headline" data-i18n-html="headline"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>Donnez vie à vos propositions. &lt;span class="accent-word"&gt;Maintenant.&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/h1&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;p data-i18n="subhead"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>Générez des offres et propositions professionnelles en minutes, à partir d’un simple brief. Zéro complexité.</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="prompt-wrap" id="tilt"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="prompt"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;textarea id="brief" placeholder="Collez votre brief ici… (objectif, cible, offre, contraintes…)"&gt;&lt;/textarea&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;button class="send" id="sendBrief" title="Envoyer"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"&gt;&lt;path d="M22 2L11 13"&gt;&lt;/path&gt;&lt;path d="M22 2l-7 20-4-9-9-4 20-7z"&gt;&lt;/path&gt;&lt;/svg&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="chips"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="chip" id="chip1" data-i18n="chip_b2b" data-chip="B2B quotes"&gt;Demandes de devis B2B&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="chip" id="chip2" data-i18n="chip_ecom" data-chip="E-commerce sales"&gt;Ventes e-commerce&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="chip" id="chip3" data-i18n="chip_marketing" data-chip="Marketing services"&gt;Prestation marketing&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="chip" id="chip4" data-i18n="chip_website" data-chip="Website redesign"&gt;Refonte de site&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div style="text-align:center;margin-top:14px"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;button class="btn btn-ghost" onclick="document.querySelector('#why').scrollIntoView({behavior:'smooth'})" data-i18n="see_how"&gt;Voir comment ça marche&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p1">&lt;/section&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;div class="sep"&gt;&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;!-- WHY --&gt;</p>
-<p class="p1">&lt;section class="section" id="why"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="container"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;h2 class="h2" data-i18n="why_h2"&gt;Pourquoi PropoFlash ?&lt;/h2&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;p class="sub" data-i18n="why_sub"&gt;Notre signature : qualité éditoriale + exécution instantanée, sans vous perdre dans des outils.&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="grid3"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="card"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="icon"&gt;✍️&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;h3 data-i18n="why1_t"&gt;Rédaction premium&lt;/h3&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;p data-i18n="why1_p"&gt;Ton professionnel, argumentation claire, structure prête à envoyer à des décideurs.&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="card"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="icon"&gt;🎯&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;h3 data-i18n="why2_t"&gt;Adaptée au contexte&lt;/h3&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;p data-i18n="why2_p"&gt;Chaque proposition s’appuie sur votre brief et vos preuves pour coller à l’objectif.&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="card"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="icon"&gt;⚡&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;h3 data-i18n="why3_t"&gt;Aperçu instantané&lt;/h3&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;p data-i18n="why3_p"&gt;Vous collez le brief, vous prévisualisez, vous peaufinez — puis PDF en 1 clic.&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p1">&lt;/section&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;!-- USE CASES --&gt;</p>
-<p class="p1">&lt;section class="section" id="use"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="container"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;h2 class="h2" data-i18n="use_h2"&gt;Cas d’usage fréquents&lt;/h2&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;p class="sub" data-i18n="use_sub"&gt;Du devis B2B aux offres e-commerce, PropoFlash couvre les besoins essentiels.&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="grid3"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="card"&gt;&lt;h3 data-i18n="use_t1"&gt;Devis B2B&lt;/h3&gt;&lt;p data-i18n="use1"&gt;Qualification, périmètre, livrables, échéancier et conditions.&lt;/p&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="card"&gt;&lt;h3 data-i18n="use_t2"&gt;Services&lt;/h3&gt;&lt;p data-i18n="use2"&gt;Marketing, design, développement, conseil, formation.&lt;/p&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="card"&gt;&lt;h3 data-i18n="use_t3"&gt;E-commerce&lt;/h3&gt;&lt;p data-i18n="use3"&gt;Fiches produits, packs et offres saisonnières structurées.&lt;/p&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p1">&lt;/section&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;!-- PRICING --&gt;</p>
-<p class="p1">&lt;section class="section pricing" id="pricing"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="container"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;h2 class="h2" data-i18n="price_h2"&gt;Des plans clairs pour chaque besoin&lt;/h2&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;p class="sub" data-i18n="price_sub"&gt;Commencez gratuitement, évoluez quand vous êtes prêt.&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="price-grid"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="pcard" data-plan="free"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="head"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;span class="tier" data-i18n="p1_t"&gt;Gratuit&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;span class="badge" id="freeBadge"&gt;3/mois&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="price"&gt;€0&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;ul class="bullets"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;li&gt;• &lt;span data-i18n="p1_b1"&gt;3 aperçus par mois&lt;/span&gt;&lt;/li&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;li&gt;• &lt;span data-i18n="p1_b2"&gt;Chat IA guidé&lt;/span&gt;&lt;/li&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;li&gt;• &lt;span data-i18n="p1_b3"&gt;Export PDF verrouillé&lt;/span&gt;&lt;/li&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/ul&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- Essayer = lien &lt;a&gt; pour uniformiser la police avec les autres CTA --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;a class="btn btn-ghost" href="#hero" aria-disabled="true"</p>
-<p class="p1"><span class="Apple-converted-space">           </span>title="L’export est réservé aux offres payantes" data-i18n="cta_try"&gt;Essayer&lt;/a&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="pcard" style="border-color:#2a4c8c" data-plan="starter"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="head"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;span class="tier" data-i18n="p2_t"&gt;Starter&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;span class="badge" data-i18n="badge_popular"&gt;Populaire&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="price"&gt;€19&lt;span style="font-weight:700;font-size:14px"&gt;/mo&lt;/span&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;ul class="bullets"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;li&gt;• &lt;span data-i18n="p2_b1"&gt;PDF sans filigrane&lt;/span&gt;&lt;/li&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;li&gt;• &lt;span data-i18n="p2_b2"&gt;50 aperçus / mois&lt;/span&gt;&lt;/li&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;li&gt;• &lt;span data-i18n="p2_b3"&gt;Jusqu’à 3 preuves intégrées&lt;/span&gt;&lt;/li&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/ul&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;a class="btn btn-accent" href="#checkout-starter" data-i18n="cta_choose"&gt;Choisir Starter&lt;/a&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;div class="pcard" data-plan="pro"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="head"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;span class="tier" data-i18n="p3_t"&gt;Pro&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;span class="badge" data-i18n="badge_teams"&gt;Équipes&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="price"&gt;€49&lt;span style="font-weight:700;font-size:14px"&gt;/mo&lt;/span&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;ul class="bullets"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;li&gt;• &lt;span data-i18n="p3_b1"&gt;Aperçus illimités&lt;/span&gt;&lt;/li&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;li&gt;• &lt;span data-i18n="p3_b2"&gt;Sections &amp; modèles illimités&lt;/span&gt;&lt;/li&gt;</p>
-<p class="p1"><span class="Apple-converted-space">          </span>&lt;li&gt;• &lt;span data-i18n="p3_b3"&gt;Micro-échantillon si aucune preuve&lt;/span&gt;&lt;/li&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/ul&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;!-- Nouveau CTA Pro --&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;a class="btn btn-ghost" href="#checkout-pro" data-i18n="cta_choose_pro"&gt;Choisir Pro&lt;/a&gt;</p>
-<p class="p1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p1">&lt;/section&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;!-- FOOTER --&gt;</p>
-<p class="p1">&lt;footer class="footer"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="container" style="display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div&gt;© &lt;span id="y"&gt;&lt;/span&gt; PropoFlash. &lt;span data-i18n="rights"&gt;Tous droits réservés.&lt;/span&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div&gt;&lt;a href="#" data-i18n="legal"&gt;Mentions légales&lt;/a&gt; · &lt;a href="#" data-i18n="privacy"&gt;Confidentialité&lt;/a&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
-<p class="p1">&lt;/footer&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;script&gt;</p>
-<p class="p1">/* ===== i18n FR/EN (complète) ===== */</p>
-<p class="p1">const I18N={</p>
-<p class="p1"><span class="Apple-converted-space"> </span>fr:{nav_why:"Pourquoi nous",nav_use:"Cas d’usage",nav_pricing:"Tarifs",cta_start:"Commencer",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>headline:"Donnez vie à vos propositions. &lt;span class='accent-word'&gt;Maintenant.&lt;/span&gt;",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>subhead:"Générez des offres et propositions professionnelles en minutes, à partir d’un simple brief. Zéro complexité.",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>see_how:"Voir comment ça marche",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>chip_b2b:"Demandes de devis B2B", chip_ecom:"Ventes e-commerce", chip_marketing:"Prestation marketing", chip_website:"Refonte de site",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>why_h2:"Pourquoi PropoFlash ?",why_sub:"Notre signature : qualité éditoriale + exécution instantanée, sans vous perdre dans des outils.",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>why1_t:"Rédaction premium",why1_p:"Ton professionnel, argumentation claire, structure prête à envoyer à des décideurs.",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>why2_t:"Adaptée au contexte",why2_p:"Chaque proposition s’appuie sur votre brief et vos preuves pour coller à l’objectif.",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>why3_t:"Aperçu instantané",why3_p:"Vous collez le brief, vous prévisualisez, vous peaufinez — puis PDF en 1 clic.",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>use_h2:"Cas d’usage fréquents",use_sub:"Du devis B2B aux offres e-commerce, PropoFlash couvre les besoins essentiels.",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>use_t1:"Devis B2B",use_t2:"Services",use_t3:"E-commerce",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>use1:"Qualification, périmètre, livrables, échéancier et conditions.",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>use2:"Marketing, design, développement, conseil, formation.",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>use3:"Fiches produits, packs et offres saisonnières structurées.",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>price_h2:"Des plans clairs pour chaque besoin",price_sub:"Commencez gratuitement, évoluez quand vous êtes prêt.",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>p1_t:"Gratuit",p1_b1:"3 aperçus par mois",p1_b2:"Chat IA guidé",p1_b3:"Export PDF verrouillé",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>p2_t:"Starter",p2_b1:"PDF sans filigrane",p2_b2:"50 aperçus / mois",p2_b3:"Jusqu’à 3 preuves intégrées",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>p3_t:"Pro",p3_b1:"Aperçus illimités",p3_b2:"Sections &amp; modèles illimités",p3_b3:"Micro-échantillon si aucune preuve",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>badge_popular:"Populaire",badge_teams:"Équipes",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>cta_try:"Essayer",cta_choose:"Choisir Starter",cta_choose_pro:"Choisir Pro",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>rights:"Tous droits réservés.",legal:"Mentions légales",privacy:"Confidentialité",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>placeholder:"Collez votre brief ici… (objectif, cible, offre, contraintes…)",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>free_limit_reached:"Limite atteinte : 3 aperçus gratuits/mois. Passez au plan Starter pour davantage d’aperçus et l’export PDF.",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>left_label:"Aperçus restants ce mois"</p>
-<p class="p1"><span class="Apple-converted-space"> </span>},</p>
-<p class="p1"><span class="Apple-converted-space"> </span>en:{nav_why:"Why us",nav_use:"Use cases",nav_pricing:"Pricing",cta_start:"Start",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>headline:"Make your proposal a &lt;span class='accent-word'&gt;reality&lt;/span&gt;. Right now.",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>subhead:"Generate professional proposals in minutes from a simple brief. Zero complexity.",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>see_how:"See how it works",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>chip_b2b:"B2B quotes", chip_ecom:"E-commerce sales", chip_marketing:"Marketing services", chip_website:"Website redesign",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>why_h2:"Why PropoFlash?",why_sub:"Our signature: editorial excellence + instant execution, without tool overload.",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>why1_t:"Premium writing",why1_p:"Executive tone, clear argumentation, structure ready to send to decision-makers.",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>why2_t:"Context-aware",why2_p:"Every proposal adapts to your brief and evidence to match the goal.",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>why3_t:"Instant preview",why3_p:"Paste brief, preview, refine — then 1-click PDF.",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>use_h2:"Popular use cases",use_sub:"From B2B quotes to e-commerce offers, we cover the essentials.",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>use_t1:"B2B quotes",use_t2:"Services",use_t3:"E-commerce",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>use1:"Scoping, deliverables, timeline, terms.",use2:"Marketing, design, engineering, consulting, training.",use3:"Product pages, bundles and seasonal offers.",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>price_h2:"Clear plans for every need",price_sub:"Start free and scale when ready.",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>p1_t:"Free",p1_b1:"3 previews per month",p1_b2:"Guided AI chat",p1_b3:"Locked PDF export",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>p2_t:"Starter",p2_b1:"No-watermark PDF",p2_b2:"50 previews / month",p2_b3:"Up to 3 embedded proofs",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>p3_t:"Pro",p3_b1:"Unlimited previews",p3_b2:"Unlimited sections &amp; templates",p3_b3:"Micro-sample when no proof",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>badge_popular:"Most popular",badge_teams:"Teams",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>cta_try:"Try it",cta_choose:"Choose Starter",cta_choose_pro:"Choose Pro",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>rights:"All rights reserved.",legal:"Legal",privacy:"Privacy",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>placeholder:"Paste your brief here… (goal, audience, offer, constraints…)",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>free_limit_reached:"Limit reached: 3 free previews/month. Upgrade to Starter for more previews and PDF export.",</p>
-<p class="p1"><span class="Apple-converted-space">     </span>left_label:"Previews left this month"</p>
-<p class="p1"><span class="Apple-converted-space"> </span>}</p>
-<p class="p1">};</p>
-<p class="p1">const $=(q,ctx=document)=&gt;ctx.querySelector(q); const $$=(q,ctx=document)=&gt;Array.from(ctx.querySelectorAll(q));</p>
-<p class="p2"><br></p>
-<p class="p1">/* === i18n apply === */</p>
-<p class="p1">function setLang(lang){</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const t=I18N[lang]||I18N.fr; document.documentElement.lang=lang;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>$$("[data-i18n]").forEach(el=&gt;{ const k=el.dataset.i18n; if(k &amp;&amp; t[k]!=null) el.textContent=t[k]; });</p>
-<p class="p1"><span class="Apple-converted-space">  </span>$$("[data-i18n-html]").forEach(el=&gt;{ const k=el.dataset.i18nHtml; if(k &amp;&amp; t[k]!=null) el.innerHTML=t[k]; });</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const brief=$("#brief"); if(brief) brief.placeholder=t.placeholder;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const chipsMap = [["chip1","chip_b2b"],["chip2","chip_ecom"],["chip3","chip_marketing"],["chip4","chip_website"]];</p>
-<p class="p1"><span class="Apple-converted-space">  </span>chipsMap.forEach(([id,key])=&gt;{ const el=$("#"+id); if(el &amp;&amp; t[key]){ el.textContent=t[key]; el.dataset.chip=t[key]; }});</p>
-<p class="p1"><span class="Apple-converted-space">  </span>updateFreeBadge();</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">/* === initial language (by browser), then user select === */</p>
-<p class="p1">document.addEventListener("DOMContentLoaded", ()=&gt;{</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const navLang=(navigator.language||"fr").slice(0,2);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const sel=$("#lang"); sel.value=(["fr","en"].includes(navLang)?navLang:"en");</p>
-<p class="p1"><span class="Apple-converted-space">  </span>setLang(sel.value);</p>
-<p class="p1"><span class="Apple-converted-space">  </span>sel.addEventListener("change", e=&gt;setLang(e.target.value));</p>
-<p class="p1"><span class="Apple-converted-space">  </span>$("#y").textContent=new Date().getFullYear();</p>
-<p class="p1">});</p>
-<p class="p2"><br></p>
-<p class="p1">/* ==== Chips &gt; autofill ==== */</p>
-<p class="p1">$$(".chip").forEach(c=&gt;c.addEventListener("click",()=&gt;{const v=$("#brief").value.trim();</p>
-<p class="p1"><span class="Apple-converted-space">  </span>$("#brief").value=(v?v+"\n":"")+"Contexte : "+c.dataset.chip; $("#brief").focus()}));</p>
-<p class="p2"><br></p>
-<p class="p1">/* ==== FREE PREVIEW LIMIT (front-only demo) ==== */</p>
-<p class="p1">const PLAN='free';</p>
-<p class="p1">const LIMITS={free:3, starter:50, pro:1e9};</p>
-<p class="p1">const monthKey=(plan)=&gt;{const d=new Date(); return `pf_${plan}_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`;}</p>
-<p class="p1">const getCount=(plan)=&gt;parseInt(localStorage.getItem(monthKey(plan))||'0',10);</p>
-<p class="p1">const incCount=(plan)=&gt;localStorage.setItem(monthKey(plan), String(getCount(plan)+1));</p>
-<p class="p1">const leftCount=(plan)=&gt; (LIMITS[plan]||0) - getCount(plan);</p>
-<p class="p1">function updateFreeBadge(){</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const badge=$("#freeBadge"); if(!badge) return;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const l=document.documentElement.lang;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const left=Math.max(0,leftCount('free'));</p>
-<p class="p1"><span class="Apple-converted-space">  </span>badge.textContent = l==='fr' ? `${left}/mois` : `${left}/mo`;</p>
-<p class="p1">}</p>
-<p class="p2"><br></p>
-<p class="p1">/* Send (simulate preview generation &amp; count) */</p>
-<p class="p1">$("#sendBrief").addEventListener("click",()=&gt;{</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const t=I18N[document.documentElement.lang];</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const v=$("#brief").value.trim(); if(!v){$("#brief").focus();return;}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if(PLAN==='free' &amp;&amp; leftCount('free')&lt;=0){</p>
-<p class="p1"><span class="Apple-converted-space">    </span>alert(t.free_limit_reached);</p>
-<p class="p1"><span class="Apple-converted-space">    </span>document.querySelector('#pricing').scrollIntoView({behavior:'smooth'}); return;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>}</p>
-<p class="p1"><span class="Apple-converted-space">  </span>if(PLAN==='free'){ incCount('free'); updateFreeBadge(); }</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const left = PLAN==='free' ? leftCount('free') : '∞';</p>
-<p class="p1"><span class="Apple-converted-space">  </span>alert( (document.documentElement.lang==='fr' ? "Brief reçu ✅\n\n" : "Brief received ✅\n\n")</p>
-<p class="p1"><span class="Apple-converted-space">    </span>+ v + "\n\n" + t.left_label + " : " + left);</p>
-<p class="p1">});</p>
-<p class="p2"><br></p>
-<p class="p1">/* 3D tilt + parallax */</p>
-<p class="p1">(()=&gt;{const el=$("#tilt");const rect=()=&gt;el.getBoundingClientRect();</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const on=e=&gt;{const r=rect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>el.style.transform=`rotateX(${(-y*3).toFixed(2)}deg) rotateY(${(x*3).toFixed(2)}deg)`};</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const off=()=&gt;{el.style.transform="rotateX(0) rotateY(0)"}; el.addEventListener("mousemove",on); el.addEventListener("mouseleave",off);</p>
-<p class="p1">})();</p>
-<p class="p1">(()=&gt;{const orb=$("#orb");window.addEventListener("mousemove",(e)=&gt;{</p>
-<p class="p1"><span class="Apple-converted-space">  </span>const x=(e.clientX/window.innerWidth-.5)*14,y=(e.clientY/window.innerHeight-.5)*14;</p>
-<p class="p1"><span class="Apple-converted-space">  </span>orb.style.transform=`translate(${x}px, ${y}px)`;});})();</p>
-<p class="p1">&lt;/script&gt;</p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p1">&lt;/html&gt;</p>
+  <!-- NAV -->
+  <div class="nav">
+    <div class="container nav-inner">
+      <div class="brand"><div class="spark" aria-hidden="true"></div><div>PropoFlash</div></div>
+      <nav class="menu" aria-label="Primary">
+        <a href="#why" data-i18n="nav_why">Pourquoi nous</a>
+        <a href="#use" data-i18n="nav_use">Cas d’usage</a>
+        <a href="#pricing" data-i18n="nav_pricing">Tarifs</a>
+      </nav>
+      <div class="right">
+        <select class="lang" id="lang" aria-label="Language">
+          <option value="fr">FR</option><option value="en">EN</option>
+        </select>
+        <button class="btn btn-accent" id="startBtn" data-i18n="cta_start">Commencer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="orb" id="orb"></div>
+    <div class="ribbon"></div>
+    <!-- subtle grid -->
+    <svg class="grid-overlay" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <defs><pattern id="g" width="10" height="10" patternUnits="userSpaceOnUse">
+        <path d="M10 0 L0 0 0 10" fill="none" stroke="#cfd8ee" stroke-width=".25"/>
+      </pattern></defs>
+      <rect width="100%" height="100%" fill="url(#g)"/>
+    </svg>
+
+    <div class="container">
+      <div class="lead">
+        <h1 id="headline" data-i18n-html="headline">
+          Donnez vie à vos propositions. <span class="accent-word">Maintenant.</span>
+        </h1>
+        <p data-i18n="subhead">
+          Générez des offres et propositions professionnelles en minutes, à partir d’un simple brief. Zéro complexité.
+        </p>
+      </div>
+
+      <div class="prompt-wrap" id="tilt">
+        <div class="prompt">
+          <textarea id="brief" placeholder="Collez votre brief ici… (objectif, cible, offre, contraintes…)"></textarea>
+          <button class="send" id="sendBrief" title="Envoyer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
+          </button>
+        </div>
+        <div class="chips">
+          <div class="chip" id="chip1" data-i18n="chip_b2b" data-chip="B2B quotes">Demandes de devis B2B</div>
+          <div class="chip" id="chip2" data-i18n="chip_ecom" data-chip="E-commerce sales">Ventes e-commerce</div>
+          <div class="chip" id="chip3" data-i18n="chip_marketing" data-chip="Marketing services">Prestation marketing</div>
+          <div class="chip" id="chip4" data-i18n="chip_website" data-chip="Website redesign">Refonte de site</div>
+        </div>
+      </div>
+
+      <div style="text-align:center;margin-top:14px">
+        <button class="btn btn-ghost" onclick="document.querySelector('#why').scrollIntoView({behavior:'smooth'})" data-i18n="see_how">Voir comment ça marche</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="sep"></div>
+
+  <!-- WHY -->
+  <section class="section" id="why">
+    <div class="container">
+      <h2 class="h2" data-i18n="why_h2">Pourquoi PropoFlash ?</h2>
+      <p class="sub" data-i18n="why_sub">Notre signature : qualité éditoriale + exécution instantanée, sans vous perdre dans des outils.</p>
+      <div class="grid3">
+        <div class="card">
+          <div class="icon">✍️</div>
+          <h3 data-i18n="why1_t">Rédaction premium</h3>
+          <p data-i18n="why1_p">Ton professionnel, argumentation claire, structure prête à envoyer à des décideurs.</p>
+        </div>
+        <div class="card">
+          <div class="icon">🎯</div>
+          <h3 data-i18n="why2_t">Adaptée au contexte</h3>
+          <p data-i18n="why2_p">Chaque proposition s’appuie sur votre brief et vos preuves pour coller à l’objectif.</p>
+        </div>
+        <div class="card">
+          <div class="icon">⚡</div>
+          <h3 data-i18n="why3_t">Aperçu instantané</h3>
+          <p data-i18n="why3_p">Vous collez le brief, vous prévisualisez, vous peaufinez — puis PDF en 1 clic.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- USE CASES -->
+  <section class="section" id="use">
+    <div class="container">
+      <h2 class="h2" data-i18n="use_h2">Cas d’usage fréquents</h2>
+      <p class="sub" data-i18n="use_sub">Du devis B2B aux offres e-commerce, PropoFlash couvre les besoins essentiels.</p>
+      <div class="grid3">
+        <div class="card"><h3 data-i18n="use_t1">Devis B2B</h3><p data-i18n="use1">Qualification, périmètre, livrables, échéancier et conditions.</p></div>
+        <div class="card"><h3 data-i18n="use_t2">Services</h3><p data-i18n="use2">Marketing, design, développement, conseil, formation.</p></div>
+        <div class="card"><h3 data-i18n="use_t3">E-commerce</h3><p data-i18n="use3">Fiches produits, packs et offres saisonnières structurées.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="section pricing" id="pricing">
+    <div class="container">
+      <h2 class="h2" data-i18n="price_h2">Des plans clairs pour chaque besoin</h2>
+      <p class="sub" data-i18n="price_sub">Commencez gratuitement, évoluez quand vous êtes prêt.</p>
+      <div class="price-grid">
+        <div class="pcard" data-plan="free">
+          <div class="head">
+            <span class="tier" data-i18n="p1_t">Gratuit</span>
+            <span class="badge" id="freeBadge">3/mois</span>
+          </div>
+          <div class="price">€0</div>
+          <ul class="bullets">
+            <li>• <span data-i18n="p1_b1">3 aperçus par mois</span></li>
+            <li>• <span data-i18n="p1_b2">Chat IA guidé</span></li>
+            <li>• <span data-i18n="p1_b3">Export PDF verrouillé</span></li>
+          </ul>
+          <!-- Essayer = lien <a> pour uniformiser la police avec les autres CTA -->
+          <a class="btn btn-ghost" href="#hero" aria-disabled="true"
+             title="L’export est réservé aux offres payantes" data-i18n="cta_try">Essayer</a>
+        </div>
+
+        <div class="pcard" style="border-color:#2a4c8c" data-plan="starter">
+          <div class="head">
+            <span class="tier" data-i18n="p2_t">Starter</span>
+            <span class="badge" data-i18n="badge_popular">Populaire</span>
+          </div>
+          <div class="price">€19<span style="font-weight:700;font-size:14px">/mo</span></div>
+          <ul class="bullets">
+            <li>• <span data-i18n="p2_b1">PDF sans filigrane</span></li>
+            <li>• <span data-i18n="p2_b2">50 aperçus / mois</span></li>
+            <li>• <span data-i18n="p2_b3">Jusqu’à 3 preuves intégrées</span></li>
+          </ul>
+          <a class="btn btn-accent" href="#checkout-starter" data-i18n="cta_choose">Choisir Starter</a>
+        </div>
+
+        <div class="pcard" data-plan="pro">
+          <div class="head">
+            <span class="tier" data-i18n="p3_t">Pro</span>
+            <span class="badge" data-i18n="badge_teams">Équipes</span>
+          </div>
+          <div class="price">€49<span style="font-weight:700;font-size:14px">/mo</span></div>
+          <ul class="bullets">
+            <li>• <span data-i18n="p3_b1">Aperçus illimités</span></li>
+            <li>• <span data-i18n="p3_b2">Sections &amp; modèles illimités</span></li>
+            <li>• <span data-i18n="p3_b3">Micro-échantillon si aucune preuve</span></li>
+          </ul>
+          <!-- Nouveau CTA Pro -->
+          <a class="btn btn-ghost" href="#checkout-pro" data-i18n="cta_choose_pro">Choisir Pro</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container" style="display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap">
+      <div>© <span id="y"></span> PropoFlash. <span data-i18n="rights">Tous droits réservés.</span></div>
+      <div><a href="#" data-i18n="legal">Mentions légales</a> · <a href="#" data-i18n="privacy">Confidentialité</a></div>
+    </div>
+  </footer>
+
+  <script>
+    /* ===== i18n FR/EN ===== */
+    const I18N={
+      fr:{nav_why:"Pourquoi nous",nav_use:"Cas d’usage",nav_pricing:"Tarifs",cta_start:"Commencer",
+        headline:"Donnez vie à vos propositions. <span class='accent-word'>Maintenant.</span>",
+        subhead:"Générez des offres et propositions professionnelles en minutes, à partir d’un simple brief. Zéro complexité.",
+        see_how:"Voir comment ça marche",
+        chip_b2b:"Demandes de devis B2B", chip_ecom:"Ventes e-commerce", chip_marketing:"Prestation marketing", chip_website:"Refonte de site",
+        why_h2:"Pourquoi PropoFlash ?",why_sub:"Notre signature : qualité éditoriale + exécution instantanée, sans vous perdre dans des outils.",
+        why1_t:"Rédaction premium",why1_p:"Ton professionnel, argumentation claire, structure prête à envoyer à des décideurs.",
+        why2_t:"Adaptée au contexte",why2_p:"Chaque proposition s’appuie sur votre brief et vos preuves pour coller à l’objectif.",
+        why3_t:"Aperçu instantané",why3_p:"Vous collez le brief, vous prévisualisez, vous peaufinez — puis PDF en 1 clic.",
+        use_h2:"Cas d’usage fréquents",use_sub:"Du devis B2B aux offres e-commerce, PropoFlash couvre les besoins essentiels.",
+        use_t1:"Devis B2B",use_t2:"Services",use_t3:"E-commerce",
+        use1:"Qualification, périmètre, livrables, échéancier et conditions.",
+        use2:"Marketing, design, développement, conseil, formation.",
+        use3:"Fiches produits, packs et offres saisonnières structurées.",
+        price_h2:"Des plans clairs pour chaque besoin",price_sub:"Commencez gratuitement, évoluez quand vous êtes prêt.",
+        p1_t:"Gratuit",p1_b1:"3 aperçus par mois",p1_b2:"Chat IA guidé",p1_b3:"Export PDF verrouillé",
+        p2_t:"Starter",p2_b1:"PDF sans filigrane",p2_b2:"50 aperçus / mois",p2_b3:"Jusqu’à 3 preuves intégrées",
+        p3_t:"Pro",p3_b1:"Aperçus illimités",p3_b2:"Sections & modèles illimités",p3_b3:"Micro-échantillon si aucune preuve",
+        badge_popular:"Populaire",badge_teams:"Équipes",
+        cta_try:"Essayer",cta_choose:"Choisir Starter",cta_choose_pro:"Choisir Pro",
+        rights:"Tous droits réservés.",legal:"Mentions légales",privacy:"Confidentialité",
+        placeholder:"Collez votre brief ici… (objectif, cible, offre, contraintes…)",
+        free_limit_reached:"Limite atteinte : 3 aperçus gratuits/mois. Passez au plan Starter pour davantage d’aperçus et l’export PDF.",
+        left_label:"Aperçus restants ce mois"
+      },
+      en:{nav_why:"Why us",nav_use:"Use cases",nav_pricing:"Pricing",cta_start:"Start",
+        headline:"Make your proposal a <span class='accent-word'>reality</span>. Right now.",
+        subhead:"Generate professional proposals in minutes from a simple brief. Zero complexity.",
+        see_how:"See how it works",
+        chip_b2b:"B2B quotes", chip_ecom:"E-commerce sales", chip_marketing:"Marketing services", chip_website:"Website redesign",
+        why_h2:"Why PropoFlash?",why_sub:"Our signature: editorial excellence + instant execution, without tool overload.",
+        why1_t:"Premium writing",why1_p:"Executive tone, clear argumentation, structure ready to send to decision-makers.",
+        why2_t:"Context-aware",why2_p:"Every proposal adapts to your brief and evidence to match the goal.",
+        why3_t:"Instant preview",why3_p:"Paste brief, preview, refine — then 1-click PDF.",
+        use_h2:"Popular use cases",use_sub:"From B2B quotes to e-commerce offers, we cover the essentials.",
+        use_t1:"B2B quotes",use_t2:"Services",use_t3:"E-commerce",
+        use1:"Scoping, deliverables, timeline, terms.",use2:"Marketing, design, engineering, consulting, training.",use3:"Product pages, bundles and seasonal offers.",
+        price_h2:"Clear plans for every need",price_sub:"Start free and scale when ready.",
+        p1_t:"Free",p1_b1:"3 previews per month",p1_b2:"Guided AI chat",p1_b3:"Locked PDF export",
+        p2_t:"Starter",p2_b1:"No-watermark PDF",p2_b2:"50 previews / month",p2_b3:"Up to 3 embedded proofs",
+        p3_t:"Pro",p3_b1:"Unlimited previews",p3_b2:"Unlimited sections & templates",p3_b3:"Micro-sample when no proof",
+        badge_popular:"Most popular",badge_teams:"Teams",
+        cta_try:"Try it",cta_choose:"Choose Starter",cta_choose_pro:"Choose Pro",
+        rights:"All rights reserved.",legal:"Legal",privacy:"Privacy",
+        placeholder:"Paste your brief here… (goal, audience, offer, constraints…)",
+        free_limit_reached:"Limit reached: 3 free previews/month. Upgrade to Starter for more previews and PDF export.",
+        left_label:"Previews left this month"
+      }
+    };
+    const $=(q,ctx=document)=>ctx.querySelector(q); const $$=(q,ctx=document)=>Array.from(ctx.querySelectorAll(q));
+
+    /* i18n apply */
+    function setLang(lang){
+      const t=I18N[lang]||I18N.fr; document.documentElement.lang=lang;
+      $$("[data-i18n]").forEach(el=>{ const k=el.dataset.i18n; if(k && t[k]!=null) el.textContent=t[k]; });
+      $$("[data-i18n-html]").forEach(el=>{ const k=el.dataset.i18nHtml; if(k && t[k]!=null) el.innerHTML=t[k]; });
+      const brief=$("#brief"); if(brief) brief.placeholder=t.placeholder;
+      const chipsMap = [["chip1","chip_b2b"],["chip2","chip_ecom"],["chip3","chip_marketing"],["chip4","chip_website"]];
+      chipsMap.forEach(([id,key])=>{ const el=$("#"+id); if(el && t[key]){ el.textContent=t[key]; el.dataset.chip=t[key]; }});
+      updateFreeBadge();
+    }
+
+    /* initial language */
+    document.addEventListener("DOMContentLoaded", ()=>{
+      const navLang=(navigator.language||"fr").slice(0,2);
+      const sel=$("#lang"); sel.value=(["fr","en"].includes(navLang)?navLang:"en");
+      setLang(sel.value);
+      sel.addEventListener("change", e=>setLang(e.target.value));
+      $("#y").textContent=new Date().getFullYear();
+    });
+
+    /* Chips autofill */
+    $$(".chip").forEach(c=>c.addEventListener("click",()=>{
+      const v=$("#brief").value.trim();
+      $("#brief").value=(v?v+"\n":"")+"Contexte : "+c.dataset.chip; $("#brief").focus()
+    }));
+
+    /* FREE PREVIEW LIMIT (front-only demo) */
+    const PLAN='free';
+    const LIMITS={free:3, starter:50, pro:1e9};
+    const monthKey=(plan)=>{const d=new Date(); return `pf_${plan}_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`;}
+    const getCount=(plan)=>parseInt(localStorage.getItem(monthKey(plan))||'0',10);
+    const incCount=(plan)=>localStorage.setItem(monthKey(plan), String(getCount(plan)+1));
+    const leftCount=(plan)=> (LIMITS[plan]||0) - getCount(plan);
+    function updateFreeBadge(){
+      const badge=$("#freeBadge"); if(!badge) return;
+      const l=document.documentElement.lang;
+      const left=Math.max(0,leftCount('free'));
+      badge.textContent = l==='fr' ? `${left}/mois` : `${left}/mo`;
+    }
+
+    /* Send (simulate preview generation & count) */
+    $("#sendBrief").addEventListener("click",()=>{
+      const t=I18N[document.documentElement.lang];
+      const v=$("#brief").value.trim(); if(!v){$("#brief").focus();return;}
+      if(PLAN==='free' && leftCount('free')<=0){
+        alert(t.free_limit_reached);
+        document.querySelector('#pricing').scrollIntoView({behavior:'smooth'}); return;
+      }
+      if(PLAN==='free'){ incCount('free'); updateFreeBadge(); }
+      const left = PLAN==='free' ? leftCount('free') : '∞';
+      alert( (document.documentElement.lang==='fr' ? "Brief reçu ✅\n\n" : "Brief received ✅\n\n")
+        + v + "\n\n" + t.left_label + " : " + left);
+    });
+
+    /* 3D tilt + parallax */
+    (()=>{const el=$("#tilt");const rect=()=>el.getBoundingClientRect();
+      const on=e=>{const r=rect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+        el.style.transform=`rotateX(${(-y*3).toFixed(2)}deg) rotateY(${(x*3).toFixed(2)}deg)`};
+      const off=()=>{el.style.transform="rotateX(0) rotateY(0)"}; el.addEventListener("mousemove",on); el.addEventListener("mouseleave",off);
+    })();
+    (()=>{const orb=$("#orb");window.addEventListener("mousemove",(e)=>{
+      const x=(e.clientX/window.innerWidth-.5)*14,y=(e.clientY/window.innerHeight-.5)*14;
+      orb.style.transform=`translate(${x}px, ${y}px)`;});})();
+  </script>
 </body>
 </html>
