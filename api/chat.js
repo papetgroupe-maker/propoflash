@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Use POST' });
 
   try {
-    const apiKey = process.env.OPENAI_API_KEY; // ← définis sur Vercel
+    const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       return res.status(500).json({
         reply: '',
@@ -21,12 +21,14 @@ export default async function handler(req, res) {
       });
     }
 
+    const MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+
     const { message = '', proposalSpec = {}, history = [] } = req.body || {};
     const lang = proposalSpec?.meta?.lang ? String(proposalSpec.meta.lang) : 'fr';
 
     /* ───── (Optionnel) Gating avec Supabase (plans/limites) ───── */
-    const supaUrl = process.env.SUPABASE_URL;            // ← définis sur Vercel
-    const supaSrv = process.env.SUPABASE_SERVICE_ROLE;   // ← clé service_role
+    const supaUrl = process.env.SUPABASE_URL;
+    const supaSrv = process.env.SUPABASE_SERVICE_ROLE; // service_role
     const authHeader = req.headers.authorization || '';
     const supaJwt = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
 
@@ -34,12 +36,10 @@ export default async function handler(req, res) {
       try {
         const { createClient } = await import('@supabase/supabase-js');
 
-        // client admin (service_role)
         const sbAdmin = createClient(supaUrl, supaSrv, {
           auth: { autoRefreshToken: false, persistSession: false },
         });
 
-        // vérifie le JWT utilisateur
         const { data: u, error: uErr } = await sbAdmin.auth.getUser(supaJwt);
         if (!uErr && u?.user) {
           const uid = u.user.id;
@@ -82,26 +82,33 @@ export default async function handler(req, res) {
           }
         }
       } catch (gErr) {
-        // on n'interrompt pas la requête si Supabase est mal configuré
         console.warn('Supabase gating warning:', gErr?.message || gErr);
       }
     }
     /* ───────────────────────────────────────────────────────────── */
 
     const SYSTEM_PROMPT = `
-Tu es un rédacteur de propositions B2B senior.
+Tu es un rédacteur de propositions commerciales B2B senior.
 Réponds TOUJOURS en JSON strict: {"reply","proposalSpec","actions"}.
-- "reply": texte court pour le chat (langue = "${lang}").
-- "proposalSpec": meta/style/sections (patch minimal).
-- "actions": 0–2 parmi {"type":"ask","field":"...","hint":"..."}, {"type":"preview"}, {"type":"update_style","patch":{...}}.
-Règles:
-- Pose 1–2 questions ciblées UNIQUEMENT si info essentielle manquante (ne répète pas ce qui est déjà fourni).
-- Style pro, clair, orienté résultats.
-- Si des infos manquent: mets "à confirmer" sans bloquer.
-Structure: letter, executive_summary, objectives, approach(phases[]), deliverables(in/out), timeline(milestones[]), pricing(model/price/terms[]), assumptions(paragraphs[]), next_steps(paragraphs[]).
+
+Contraintes:
+- "reply": réponse courte (≤ 120 mots), claire, professionnelle, dans la langue "${lang}".
+- "proposalSpec": patch minimal (ajoute/actualise meta/style/sections sans tout réécrire).
+- "actions": 0–2 éléments parmi:
+   {"type":"ask","field":"...","hint":"..."}  // si une info BLOQUANTE manque (une question max)
+   {"type":"preview"}                          // quand un premier aperçu PDF serait utile
+   {"type":"update_style","patch":{...}}       // micro-ajustements de ton/brand
+
+Lignes directrices:
+- Sois orienté résultats (valeur, ROI, délais, périmètre clair).
+- Si des infos manquent, marque "à confirmer" mais avance quand même.
+- Structure cible (dans proposalSpec) : letter, executive_summary, objectives,
+  approach(phases[]), deliverables(in/out), timeline(milestones[]),
+  pricing(model/price/terms[]), assumptions(paragraphs[]), next_steps(paragraphs[]).
+- Pas de jargon inutile ; évite les promesses vagues.
     `.trim();
 
-    // historique nettoyé
+    // Historique nettoyé
     const safeHistory = Array.isArray(history)
       ? history
           .filter(m => m && typeof m.content === 'string' && (m.role === 'user' || m.role === 'assistant'))
@@ -123,9 +130,10 @@ Structure: letter, executive_summary, objectives, approach(phases[]), deliverabl
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: MODEL,
         temperature: 0.5,
         response_format: { type: 'json_object' },
+        max_tokens: 900, // suffisant pour une réponse + petit patch
         messages,
       }),
     });
@@ -142,25 +150,44 @@ Structure: letter, executive_summary, objectives, approach(phases[]), deliverabl
       });
     }
 
-    // Parse réponse OpenAI (JSON externe puis JSON content)
-    let data;
-    try { data = JSON.parse(rawText); } catch { data = null; }
+    // --- Parsing robuste (gère ```json ... ```, texte parasite, virgules traînantes) ---
+    let outer;
+    try { outer = JSON.parse(rawText); } catch { outer = null; }
 
-    let content = data?.choices?.[0]?.message?.content ?? '';
-    if (!content || typeof content !== 'string') content = String(rawText || '');
+    let content = outer?.choices?.[0]?.message?.content ?? '';
+
+    // Si le modèle renvoie des fences ```json ... ```
+    if (typeof content === 'string') {
+      content = content.trim();
+      if (content.startsWith('```')) {
+        content = content.replace(/^```(?:json)?/i, '').replace(/```$/,'').trim();
+      }
+      // Si du texte entoure le JSON, on tente d'isoler le 1er bloc {...}
+      if (!(content.startsWith('{') && content.endsWith('}'))) {
+        const first = content.indexOf('{');
+        const last  = content.lastIndexOf('}');
+        if (first !== -1 && last !== -1 && last > first) {
+          content = content.slice(first, last + 1);
+        }
+      }
+    } else {
+      content = '';
+    }
 
     let out;
     try {
       out = JSON.parse(content);
     } catch {
       try {
-        out = JSON.parse(content.replace(/,\s*([}\]])/g, '$1')); // supprime virgules traînantes
+        // supprime virgules traînantes
+        const fixed = content.replace(/,\s*([}\]])/g, '$1');
+        out = JSON.parse(fixed);
       } catch {
         out = { reply: content || '', proposalSpec: {}, actions: [] };
       }
     }
 
-    // formes par défaut
+    // Formes par défaut
     if (typeof out !== 'object' || out === null) out = { reply: String(out || '') };
     if (typeof out.reply !== 'string') out.reply = '';
     if (!out.proposalSpec || typeof out.proposalSpec !== 'object') out.proposalSpec = {};
