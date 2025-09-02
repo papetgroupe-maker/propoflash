@@ -170,7 +170,7 @@
     </div>
   </section>
 
-  <!-- CHAT (ajouté) -->
+  <!-- CHAT -->
   <section class="section" id="chat">
     <div class="container">
       <h2 class="h2" data-i18n="assistant_h2">Assistant</h2>
@@ -374,9 +374,10 @@
       badge.textContent = l==='fr' ? `${left}/mois` : `${left}/mo`;
     }
 
-    /* ==== Chat IA branché sur /api/chat ==== */
+    /* ==== Utilitaires chat ==== */
     const thread = $('#chatThread');
     function addMsg(text, who='ai'){
+      if(!thread) return;
       const row=document.createElement('div'); row.className='msg'+(who==='me'?' me':'');
       const b=document.createElement('div'); b.className='bubble'; b.textContent=String(text||'');
       row.appendChild(b); thread.appendChild(row); thread.scrollTop=thread.scrollHeight;
@@ -392,6 +393,7 @@
       return res.json();
     }
 
+    /* ==== Bouton Envoyer (chat) ==== */
     $("#sendBrief").addEventListener("click",async ()=>{
       const lang=document.documentElement.lang||'fr';
       const t=I18N[lang];
@@ -432,6 +434,40 @@
         $("#brief").value='';
       }
     });
+
+    /* ==== Bouton Commencer (génère et ouvre l’aperçu) ==== */
+    (function(){
+      const startBtn = document.getElementById('startBtn');
+      if(!startBtn) return;
+
+      startBtn.addEventListener('click', async () => {
+        const lang = document.documentElement.lang || 'fr';
+        const briefEl = document.getElementById('brief');
+        let msg = '';
+        if (briefEl && briefEl.value) {
+          msg = briefEl.value.trim();
+        }
+        if (!msg) {
+          if (lang === 'fr') {
+            msg = "Crée une proposition commerciale complète à partir d'un brief vide (exemple).";
+          } else {
+            msg = "Create a complete business proposal from an empty brief (sample).";
+          }
+        }
+
+        try {
+          const baseSpec = JSON.parse(localStorage.getItem('pf_proposal') || '{"meta":{"lang":"'+lang+'"},"sections":[]}');
+          const data = await callChatAPI(msg, baseSpec, []);
+          const nextSpec = data && data.proposalSpec ? data.proposalSpec : baseSpec;
+          const merged = { ...baseSpec, ...nextSpec, meta:{ ...(baseSpec.meta||{}), ...((nextSpec&&nextSpec.meta)||{}) } };
+          localStorage.setItem('pf_proposal', JSON.stringify(merged));
+          window.location.href = 'preview.html?t=modern';
+        } catch (e) {
+          console.error(e);
+          alert((lang === 'fr' ? 'Erreur: ' : 'Error: ') + e.message);
+        }
+      });
+    })();
 
     /* 3D tilt + parallax */
     (()=>{const el=$("#tilt");const rect=()=>el.getBoundingClientRect();
