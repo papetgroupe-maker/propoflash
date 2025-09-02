@@ -103,6 +103,9 @@
     .msg.me .bubble{background:#0b2446;color:#e8eefc}
     .send.loading{opacity:.6;pointer-events:none}
 
+    /* Fil dans la carte HERO */
+    .prompt-wrap .chat{max-height:260px;margin-top:12px;overflow:auto}
+
     /* UTIL */
     .hidden{display:none}
     @media (max-width:980px){.grid3,.price-grid{grid-template-columns:1fr}.nav-inner{border-radius:18px}}
@@ -162,19 +165,14 @@
           <div class="chip" id="chip3" data-i18n="chip_marketing" data-chip="Marketing services">Prestation marketing</div>
           <div class="chip" id="chip4" data-i18n="chip_website" data-chip="Website redesign">Refonte de site</div>
         </div>
+
+        <!-- Fil de conversation INSÉRÉ dans la carte -->
+        <div id="threadHero" class="chat" aria-live="polite"></div>
       </div>
 
       <div style="text-align:center;margin-top:14px">
         <button class="btn btn-ghost" onclick="document.querySelector('#why').scrollIntoView({behavior:'smooth'})" data-i18n="see_how">Voir comment ça marche</button>
       </div>
-    </div>
-  </section>
-
-  <!-- CHAT -->
-  <section class="section" id="chat">
-    <div class="container">
-      <h2 class="h2" data-i18n="assistant_h2">Assistant</h2>
-      <div id="chatThread" class="chat" aria-live="polite"></div>
     </div>
   </section>
 
@@ -375,7 +373,7 @@
     }
 
     /* ==== Utilitaires chat ==== */
-    const thread = $('#chatThread');
+    const thread = $('#threadHero'); // <-- fil dans la carte du HERO
     function addMsg(text, who='ai'){
       if(!thread) return;
       const row=document.createElement('div'); row.className='msg'+(who==='me'?' me':'');
