@@ -373,7 +373,7 @@
     }
 
     /* ==== Utilitaires chat ==== */
-    const thread = $('#threadHero'); // <-- fil dans la carte du HERO
+    const thread = $('#threadHero'); // fil dans la carte du HERO
     function addMsg(text, who='ai'){
       if(!thread) return;
       const row=document.createElement('div'); row.className='msg'+(who==='me'?' me':'');
@@ -390,6 +390,15 @@
       if(!res.ok) throw new Error('HTTP '+res.status);
       return res.json();
     }
+
+    /* Rendu de l'historique au chargement */
+    document.addEventListener('DOMContentLoaded', () => {
+      const hist = JSON.parse(localStorage.getItem('pf_chat') || '[]');
+      if (hist.length) {
+        thread.innerHTML = '';
+        hist.forEach(m => addMsg(m.content, m.role === 'user' ? 'me' : 'ai'));
+      }
+    });
 
     /* ==== Bouton Envoyer (chat) ==== */
     $("#sendBrief").addEventListener("click",async ()=>{
