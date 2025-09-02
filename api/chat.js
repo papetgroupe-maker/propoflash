@@ -1,5 +1,12 @@
 // /api/chat.js — Vercel Serverless Function (Node runtime)
 export default async function handler(req, res) {
+  // (optionnel) CORS simple + no-store pour éviter tout cache gênant
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Cache-Control', 'no-store');
+
+  if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Use POST' });
   }
@@ -7,11 +14,10 @@ export default async function handler(req, res) {
   try {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
-      return res.status(500).json({ error: 'Missing OPENAI_API_KEY on Vercel' });
+      return res.status(500).json({ reply: '', proposalSpec: {}, actions: [], error: 'Missing OPENAI_API_KEY on Vercel' });
     }
 
-    // On accepte des champs facultatifs
-    const { message = '', proposalSpec = null, history = [] } = req.body || {};
+    const { message = '', proposalSpec = {}, history = [] } = req.body || {};
 
     const SYSTEM_PROMPT = `
 Tu es un rédacteur de propositions B2B senior.
@@ -26,10 +32,15 @@ Règles:
 Structure: letter, executive_summary, objectives, approach(phases[]), deliverables(in/out), timeline(milestones[]), pricing(model/price/terms[]), assumptions(paragraphs[]), next_steps(paragraphs[]).
 `.trim();
 
-    // On garde un petit historique si tu veux faire une vraie conversation.
-    const msgs = [
+    // Normalisation de l’historique (sécurité)
+    const safeHistory = Array.isArray(history) ? history
+      .filter(m => m && typeof m.content === 'string' && (m.role === 'user' || m.role === 'assistant'))
+      .slice(-12)
+      .map(m => ({ role: m.role, content: m.content })) : [];
+
+    const messages = [
       { role: 'system', content: SYSTEM_PROMPT },
-      ...(Array.isArray(history) ? history : []).slice(-8), // sécurité
+      ...safeHistory,
       { role: 'user', content: JSON.stringify({ message, proposalSpec }) }
     ];
 
@@ -43,30 +54,61 @@ Structure: letter, executive_summary, objectives, approach(phases[]), deliverabl
         model: 'gpt-4o-mini',
         temperature: 0.5,
         response_format: { type: 'json_object' },
-        messages: msgs,
+        messages
       }),
     });
 
-    const raw = await r.text();
+    const rawText = await r.text();
     if (!r.ok) {
-      return res.status(r.status).json({ error: 'OpenAI error', detail: raw });
+      // On renvoie un objet sûr pour que le front n’affiche jamais "undefined"
+      return res.status(r.status).json({
+        reply: "Désolé, une erreur est survenue côté modèle. Réessayez.",
+        proposalSpec: {},
+        actions: [],
+        error: rawText?.slice(0, 500)
+      });
     }
 
-    // raw -> JSON OpenAI -> content (string JSON) -> objet
-    let data; try { data = JSON.parse(raw); } catch {}
-    let content = data?.choices?.[0]?.message?.content ?? raw;
+    // Parse la réponse OpenAI
+    let data;
+    try { data = JSON.parse(rawText); } catch { data = null; }
 
+    // Récupère le "content" (le JSON string retourné par le modèle)
+    let content = data?.choices?.[0]?.message?.content ?? '';
+
+    // Filets de sécurité: si vide, essaie d’autres champs ou renvoie une chaîne sûre
+    if (!content || typeof content !== 'string') {
+      content = typeof rawText === 'string' ? rawText : '';
+    }
+
+    // Tente de parser le JSON; en cas d’échec, tente une réparation légère
     let out;
     try {
       out = JSON.parse(content);
     } catch {
-      // Tolérance légère aux virgules traînantes
-      out = JSON.parse(content.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']'));
+      try {
+        const fixed = content.replace(/,\s*([}\]])/g, '$1'); // supprime virgules traînantes
+        out = JSON.parse(fixed);
+      } catch {
+        // Dernier fallback: renvoyer un objet minimal lisible par le front
+        out = { reply: content || '', proposalSpec: {}, actions: [] };
+      }
     }
+
+    // Défauts pour éviter tout "undefined" côté front
+    if (typeof out !== 'object' || out === null) out = { reply: String(out || '') };
+    if (!('reply' in out) || typeof out.reply !== 'string') out.reply = '';
+    if (!('proposalSpec' in out) || typeof out.proposalSpec !== 'object' || out.proposalSpec === null) out.proposalSpec = {};
+    if (!('actions' in out) || !Array.isArray(out.actions)) out.actions = [];
 
     return res.status(200).json(out);
   } catch (e) {
-    console.error('API error:', e);
-    return res.status(500).json({ reply: 'Erreur serveur', error: e.message });
+    console.error('API /api/chat error:', e);
+    return res.status(500).json({
+      reply: 'Erreur serveur',
+      proposalSpec: {},
+      actions: [],
+      error: e?.message?.slice(0, 300) || 'unknown'
+    });
   }
 }
