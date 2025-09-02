@@ -1,75 +1,316 @@
-<script>
-(function(){
-  const byId = (id)=>document.getElementById(id);
-  const btn = byId('startBtn');
-  if(!btn) return;
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>PropoFlash — Aperçu</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --paper-w:210mm; --paper-h:297mm;
+      --bg:#f3f6fb; --ink:#0a1020; --muted:#5c667a; --stroke:#e7ecf6;
+      --accent:#3b82f6; --accent-ink:#fff;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,#f6f8fc,#eef3ff);font-family:Inter,system-ui,sans-serif;color:var(--ink)}
+    /* Top bar */
+    .bar{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--stroke);
+      display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px}
+    .left,.right{display:flex;gap:8px;align-items:center}
+    .brand{display:flex;gap:10px;align-items:center;font-weight:800}
+    .spark{width:22px;height:22px;border-radius:6px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd)}
+    .btn{border:1px solid var(--stroke);background:#fff;border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer}
+    .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:#0000}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .sel,.color{border:1px solid var(--stroke);border-radius:10px;padding:7px 10px;background:#fff}
+    .hint{color:var(--muted);font-size:12px}
+    /* Sheet */
+    .wrap{display:grid;place-items:center;padding:22px}
+    .sheet{width:var(--paper-w); min-height:var(--paper-h); background:#fff; border:1px solid var(--stroke);
+      box-shadow:0 20px 60px rgba(10,16,32,.12); border-radius:12px; padding:28mm 22mm;}
+    .h1{font-size:28px;line-height:1.1;margin:0 0 6px;font-weight:800;letter-spacing:-.01em}
+    .meta{color:var(--muted);font-size:14px;margin-bottom:18px}
+    h2{margin:22px 0 8px;font-size:18px;letter-spacing:.2px}
+    .hr{height:1px;background:var(--stroke);margin:12px 0}
+    p{margin:8px 0 10px}
+    ul{margin:8px 0 10px 18px}
+    .tag{display:inline-block;padding:3px 8px;border-radius:999px;background:#eef4ff;border:1px solid var(--stroke);font-size:12px;color:#28436d}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .card{border:1px solid var(--stroke);border-radius:12px;padding:12px}
+    .price{font-weight:800;font-size:18px}
+    .muted{color:var(--muted)}
+    /* Editable mode */
+    .edit-on [contenteditable="true"]{outline:2px solid #e0ecff;border-radius:6px;padding:2px 4px}
+    /* Print */
+    @media print{
+      .bar{display:none}
+      body{background:#fff}
+      .wrap{padding:0}
+      .sheet{box-shadow:none;border:none;border-radius:0;width:auto;min-height:auto;padding:18mm 16mm}
+      a[href]:after{content:""}
+    }
+  </style>
+</head>
+<body>
+  <!-- Top bar -->
+  <div class="bar" id="bar">
+    <div class="left">
+      <div class="brand"><div class="spark" aria-hidden="true"></div>PropoFlash</div>
+      <button class="btn" id="backBtn">← Retour au chat</button>
+      <span class="hint" id="status">Chargement de l’aperçu…</span>
+    </div>
+    <div class="right">
+      <label class="hint">Langue</label>
+      <select class="sel" id="langSel">
+        <option value="fr">FR</option><option value="en">EN</option>
+      </select>
+      <label class="hint">Couleur</label>
+      <input type="color" class="color" id="accentPick" value="#3b82f6" title="Couleur d’accent"/>
+      <button class="btn" id="editBtn">Éditer</button>
+      <button class="btn primary" id="pdfBtn">Exporter PDF</button>
+    </div>
+  </div>
 
-  btn.addEventListener('click', ()=>{
-    const brief = (byId('brief')?.value || '').trim();
-    const lang  = (byId('lang')?.value || 'fr');
+  <!-- Page -->
+  <div class="wrap">
+    <div class="sheet" id="sheet" aria-live="polite">
+      <!-- contenu injecté par JS -->
+    </div>
+  </div>
 
-    // Un proposalSpec minimal pour tester (tu pourras le remplacer par ta vraie génération IA)
-    const spec = {
-      meta: {
-        lang,
-        theme: 'corp',          // 'corp' | 'min' | 'serif' | 'vibr'
-        palette: 'ocean',       // 'ocean' | 'emerald' | 'sunset' | 'slate' | 'custom'
-        cover: 'rings',         // 'rings' | 'band' | 'solid' | 'photo'
-        project_title: lang==='fr' ? 'Proposition commerciale' : 'Business Proposal',
-        client: lang==='fr' ? 'Client à confirmer' : 'Client TBC',
-        company: 'PropoFlash'
+  <script>
+    const $ = (q,ctx=document)=>ctx.querySelector(q);
+    const t = {
+      fr: {
+        title:"Proposition commerciale",
+        to:"Pour",
+        from:"Émis par",
+        date:"Date",
+        letter:"Lettre d’introduction",
+        executive:"Résumé exécutif",
+        objectives:"Objectifs",
+        approach:"Approche & phasage",
+        deliverables:"Livrables",
+        in_scope:"Inclus",
+        out_scope:"Hors-périmètre",
+        timeline:"Planning",
+        pricing:"Tarification",
+        assumptions:"Hypothèses / Risques",
+        next:"Prochaines étapes",
+        price_model:"Modèle",
+        terms:"Conditions"
       },
-      letter: lang==='fr'
-        ? "Madame, Monsieur, merci pour votre intérêt. Vous trouverez ci-après une proposition structurée alignée sur vos objectifs."
-        : "Dear team, thank you for your interest. Below is a structured proposal aligned with your objectives.",
-      executive_summary: brief || (lang==='fr'
-        ? "Cette proposition résume le contexte, les objectifs et l’approche recommandée."
-        : "This proposal summarizes context, objectives and the recommended approach."),
-      objectives: [
-        lang==='fr' ? "Atteindre le ROI cible sous 90 jours." : "Reach target ROI within 90 days.",
-        lang==='fr' ? "Améliorer le taux de conversion." : "Improve conversion rate."
-      ],
-      approach: { phases: [
-        { name: lang==='fr' ? "Phase 1 — Cadrage" : "Phase 1 — Discovery", steps: [lang==='fr'?'Ateliers':'Workshops', 'Scope'], description:'' },
-        { name: lang==='fr' ? "Phase 2 — Exécution" : "Phase 2 — Execution", steps: ['Build', 'QA', 'Launch'], description:'' }
-      ]},
-      deliverables: {
-        in:  [ lang==='fr'?'Cadrage détaillé':'Detailed scoping', 'Wireframe', 'MVP' ],
-        out: [ lang==='fr'?'Hébergement':'Hosting', lang==='fr'?'Support 24/7':'24/7 support' ]
-      },
-      timeline: { milestones: [
-        { name: lang==='fr'?'Kick-off':'Kick-off', time: 'D0' },
-        { name: lang==='fr'?'Livrable principal':'Main deliverable', time: 'D+21' }
-      ]},
-      pricing: {
-        model: lang==='fr'?'Forfait':'Fixed price',
-        price: lang==='fr'?'€4 900':'€4,900',
-        terms: [
-          lang==='fr'?'50% à la commande, 50% à la livraison':'50% upfront, 50% on delivery',
-          lang==='fr'?'Validité 15 jours':'Valid for 15 days'
-        ]
-      },
-      assumptions: [
-        lang==='fr'?'Accès aux contenus et logos fournis par le client.':'Access to content and logos provided by client.'
-      ],
-      metrics: [
-        { label: lang==='fr'?'Taux de conversion cible':'Target CVR', value:'+25%' },
-        { label: lang==='fr'?'Temps de mise sur le marché':'Time-to-market', value:'< 4 weeks' }
-      ],
-      case_studies: [
-        { title: 'Case A', client: 'ACME', highlights: ['Scope', 'Result'], result: lang==='fr'?'+18% CA':' +18% revenue' }
-      ],
-      team: [
-        { name: 'Lead PM', role: lang==='fr'?'Chef de projet':'Project Lead', bio: lang==='fr'?'10 ans d’expérience.':'10 years experience.' }
-      ],
-      next_steps: [
-        lang==='fr'?'Validation du périmètre','Planification','Lancement'
-        : 'Scope sign-off','Planning','Launch'
-      ]
+      en: {
+        title:"Business Proposal",
+        to:"To",
+        from:"Issued by",
+        date:"Date",
+        letter:"Cover Letter",
+        executive:"Executive Summary",
+        objectives:"Objectives",
+        approach:"Approach & Phasing",
+        deliverables:"Deliverables",
+        in_scope:"In scope",
+        out_scope:"Out of scope",
+        timeline:"Timeline",
+        pricing:"Pricing",
+        assumptions:"Assumptions / Risks",
+        next:"Next Steps",
+        price_model:"Model",
+        terms:"Terms"
+      }
     };
 
-    localStorage.setItem('pf_proposal', JSON.stringify(spec));
-    location.href = 'preview.html';
-  });
-})();
-</script>
+    let spec = null;
+    const sheet = $('#sheet');
+    const statusEl = $('#status');
+    const langSel = $('#langSel');
+    const accentPick = $('#accentPick');
+    const editBtn = $('#editBtn');
+
+    function safeArr(v){ return Array.isArray(v) ? v : []; }
+    function safeStr(v, fallback=''){ return (v==null?'':String(v)).trim() || fallback; }
+    function fmtDate(d){
+      try{
+        const dt = d ? new Date(d) : new Date();
+        return dt.toLocaleDateString(document.documentElement.lang||'fr', { year:'numeric', month:'short', day:'2-digit' });
+      }catch{ return '' }
+    }
+
+    function section(titleHTML){
+      const h = document.createElement('h2'); h.innerHTML = titleHTML;
+      sheet.appendChild(h);
+    }
+    function para(text){
+      const p = document.createElement('p'); p.textContent = text; p.setAttribute('contenteditable','true'); p.classList.add('editable');
+      sheet.appendChild(p);
+    }
+    function list(items){
+      if(!items || !items.length) return;
+      const ul = document.createElement('ul');
+      items.forEach(it=>{ const li=document.createElement('li'); li.textContent=String(it); li.setAttribute('contenteditable','true'); li.classList.add('editable'); ul.appendChild(li); });
+      sheet.appendChild(ul);
+    }
+
+    function render(){
+      sheet.innerHTML = '';
+      if(!spec){ sheet.innerHTML='<p class="muted">Aucune donnée. Revenez au chat pour générer un aperçu.</p>'; return; }
+      const L = t[spec.meta?.lang || 'fr'] || t.fr;
+      document.documentElement.lang = spec.meta?.lang || 'fr';
+
+      // Header
+      const title = safeStr(spec.meta?.title, L.title);
+      const company = safeStr(spec.meta?.company, 'Votre société');
+      const client = safeStr(spec.meta?.client, 'Client');
+      const date = safeStr(spec.meta?.date, fmtDate());
+
+      const h1 = document.createElement('div');
+      h1.innerHTML = `<div class="h1" contenteditable="true">${title}</div>
+        <div class="meta">${L.to}: <span class="tag" contenteditable="true">${client}</span> &nbsp;•&nbsp;
+        ${L.from}: <span class="tag" contenteditable="true">${company}</span> &nbsp;•&nbsp; ${L.date}: ${date}</div>`;
+      sheet.appendChild(h1);
+      sheet.appendChild(Object.assign(document.createElement('div'),{className:'hr'}));
+
+      // Letter
+      if (safeArr(spec.letter?.paragraphs).length){
+        section(L.letter);
+        safeArr(spec.letter.paragraphs).forEach(p=>para(p));
+      }
+
+      // Executive summary
+      if (safeArr(spec.executive_summary?.paragraphs).length){
+        section(L.executive);
+        safeArr(spec.executive_summary.paragraphs).forEach(p=>para(p));
+      }
+
+      // Objectives
+      if (safeArr(spec.objectives?.bullets).length){
+        section(L.objectives);
+        list(spec.objectives.bullets);
+      }
+
+      // Approach (phases)
+      if (safeArr(spec.approach?.phases).length){
+        section(L.approach);
+        safeArr(spec.approach.phases).forEach((ph,i)=>{
+          const card = document.createElement('div'); card.className='card';
+          card.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+              <strong contenteditable="true">Phase ${i+1} — ${safeStr(ph.title,'À confirmer')}</strong>
+              <span class="tag">${safeStr(ph.duration || '', '')}</span>
+            </div>`;
+          sheet.appendChild(card);
+          if (ph.description) para(ph.description);
+          if (safeArr(ph.steps).length) list(ph.steps);
+        });
+      }
+
+      // Deliverables
+      if (spec.deliverables && (safeArr(spec.deliverables.in).length || safeArr(spec.deliverables.out).length)){
+        section(L.deliverables);
+        const grid = document.createElement('div'); grid.className='grid2';
+        const a=document.createElement('div'); a.className='card';
+        a.innerHTML = `<div class="muted" style="margin-bottom:6px">${L.in_scope}</div>`;
+        grid.appendChild(a);
+        const b=document.createElement('div'); b.className='card';
+        b.innerHTML = `<div class="muted" style="margin-bottom:6px">${L.out_scope}</div>`;
+        grid.appendChild(b);
+        sheet.appendChild(grid);
+        // fill lists
+        const ulA=document.createElement('ul'); safeArr(spec.deliverables.in).forEach(x=>{const li=document.createElement('li'); li.textContent=x; li.setAttribute('contenteditable','true'); ulA.appendChild(li);});
+        const ulB=document.createElement('ul'); safeArr(spec.deliverables.out).forEach(x=>{const li=document.createElement('li'); li.textContent=x; li.setAttribute('contenteditable','true'); ulB.appendChild(li);});
+        a.appendChild(ulA); b.appendChild(ulB);
+      }
+
+      // Timeline
+      if (safeArr(spec.timeline?.milestones).length){
+        section(L.timeline);
+        const grid=document.createElement('div'); grid.className='grid2';
+        safeArr(spec.timeline.milestones).forEach(ms=>{
+          const c=document.createElement('div'); c.className='card';
+          c.innerHTML = `<div><strong contenteditable="true">${safeStr(ms.title,'Étape')}</strong></div>
+                         <div class="muted">${safeStr(ms.date || ms.duration || '', '')}</div>`;
+          if (ms.notes) { const p=document.createElement('p'); p.textContent=ms.notes; p.setAttribute('contenteditable','true'); c.appendChild(p); }
+          grid.appendChild(c);
+        });
+        sheet.appendChild(grid);
+      }
+
+      // Pricing
+      if (spec.pricing && (spec.pricing.price || safeStr(spec.pricing.model))){
+        section(L.pricing);
+        const priceBox=document.createElement('div'); priceBox.className='card';
+        const price = spec.pricing.price!=null ? String(spec.pricing.price) : '—';
+        const currency = spec.pricing.currency || (spec.meta?.currency || '€');
+        priceBox.innerHTML = `
+          <div class="price" contenteditable="true">${price} ${currency}</div>
+          <div class="muted" style="margin-top:4px">${L.price_model}: <span contenteditable="true">${safeStr(spec.pricing.model,'Forfait')}</span></div>
+        `;
+        sheet.appendChild(priceBox);
+        if (safeArr(spec.pricing.terms).length){
+          const terms=document.createElement('div'); terms.className='card'; terms.style.marginTop='8px';
+          terms.innerHTML = `<div class="muted" style="margin-bottom:6px">${L.terms}</div>`;
+          const ul=document.createElement('ul');
+          spec.pricing.terms.forEach(x=>{const li=document.createElement('li'); li.textContent=x; li.setAttribute('contenteditable','true'); ul.appendChild(li);});
+          terms.appendChild(ul); sheet.appendChild(terms);
+        }
+      }
+
+      // Assumptions
+      if (safeArr(spec.assumptions?.paragraphs).length){
+        section(L.assumptions);
+        safeArr(spec.assumptions.paragraphs).forEach(p=>para(p));
+      }
+
+      // Next steps
+      if (safeArr(spec.next_steps?.paragraphs).length){
+        section(L.next);
+        safeArr(spec.next_steps.paragraphs).forEach(p=>para(p));
+      }
+
+      statusEl.textContent = (spec.meta?.lang==='en') ? 'Preview ready' : 'Aperçu prêt';
+    }
+
+    // Load spec
+    (function init(){
+      try {
+        const raw = localStorage.getItem('pf_proposal');
+        if(raw){ spec = JSON.parse(raw); }
+      } catch {}
+      if(!spec) spec = { meta:{ lang: 'fr', title:'Proposition commerciale' } };
+      // init UI from spec
+      langSel.value = spec.meta?.lang || 'fr';
+      const acc = spec.meta?.accent || getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+      if(acc) { document.documentElement.style.setProperty('--accent', acc); accentPick.value = acc.startsWith('#') ? acc : '#3b82f6'; }
+      render();
+    })();
+
+    // Controls
+    $('#backBtn').onclick = ()=>{ location.href = 'index.html'; };
+    $('#pdfBtn').onclick  = ()=> { statusEl.textContent = (spec.meta?.lang==='en') ? 'Preparing PDF…' : 'Préparation du PDF…'; setTimeout(()=>{ window.print(); statusEl.textContent = (spec.meta?.lang==='en') ? 'Preview ready' : 'Aperçu prêt'; }, 100); };
+
+    langSel.onchange = (e)=>{
+      const lang = e.target.value;
+      spec.meta = Object.assign({}, spec.meta, { lang });
+      localStorage.setItem('pf_proposal', JSON.stringify(spec));
+      render();
+    };
+
+    accentPick.oninput = (e)=>{
+      const v = e.target.value || '#3b82f6';
+      document.documentElement.style.setProperty('--accent', v);
+      spec.meta = Object.assign({}, spec.meta, { accent: v });
+      localStorage.setItem('pf_proposal', JSON.stringify(spec));
+    };
+
+    let editing = false;
+    editBtn.onclick = ()=>{
+      editing = !editing;
+      document.body.classList.toggle('edit-on', editing);
+      editBtn.textContent = editing ? 'Terminer édition' : 'Éditer';
+      // Note: on n’essaie pas d’écrire chaque champ dans l’objet — on laisse l’utilisateur ajuster
+      // l’aperçu puis imprimer. (Tu pourras brancher une persistance plus fine plus tard.)
+    };
+  </script>
+</body>
+</html>
