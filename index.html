@@ -107,6 +107,13 @@
     /* Fil dans la carte HERO */
     .prompt-wrap .chat{max-height:260px;margin-top:12px;overflow:auto}
 
+    /* Typing indicator */
+    .bubble.typing{display:flex;gap:6px;align-items:center}
+    .dot{width:6px;height:6px;border-radius:50%;background:#9aa6bf;opacity:.3;animation:blink 1s infinite}
+    .dot:nth-child(2){animation-delay:.2s}
+    .dot:nth-child(3){animation-delay:.4s}
+    @keyframes blink{0%,80%,100%{opacity:.3}40%{opacity:1}}
+
     /* UTIL */
     .hidden{display:none}
     @media (max-width:980px){.grid3,.price-grid{grid-template-columns:1fr}.nav-inner{border-radius:18px}}
@@ -156,27 +163,34 @@
         </p>
       </div>
 
+      <!-- CARTE CHAT -->
       <div class="prompt-wrap" id="tilt">
-        <div class="prompt">
+        <!-- barre haute -->
+        <div style="display:flex;align-items:center;gap:10px;justify-content:space-between;margin:4px 4px 6px">
+          <strong style="font-size:14px" data-i18n="assistant_h2">Assistant</strong>
+          <div style="display:flex;gap:8px">
+            <button id="openPreviewBtn" class="btn btn-ghost btn--xs hidden">Ouvrir l’aperçu</button>
+            <button id="newChatBtn" class="btn btn-ghost btn--xs">Nouvelle discussion</button>
+          </div>
+        </div>
+
+        <!-- fil de conversation intégré -->
+        <div id="threadHero" class="chat" aria-live="polite"></div>
+
+        <!-- zone de saisie -->
+        <div class="prompt" style="margin-top:8px">
           <textarea id="brief" placeholder="Collez votre brief ici… (objectif, cible, offre, contraintes…)"></textarea>
-          <button class="send" id="sendBrief" title="Envoyer">
+          <button class="send" id="sendBrief" title="Envoyer" aria-label="Envoyer">
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
           </button>
         </div>
+
+        <!-- raccourcis -->
         <div class="chips">
           <div class="chip" id="chip1" data-i18n="chip_b2b" data-chip="B2B quotes">Demandes de devis B2B</div>
           <div class="chip" id="chip2" data-i18n="chip_ecom" data-chip="E-commerce sales">Ventes e-commerce</div>
           <div class="chip" id="chip3" data-i18n="chip_marketing" data-chip="Marketing services">Prestation marketing</div>
           <div class="chip" id="chip4" data-i18n="chip_website" data-chip="Website redesign">Refonte de site</div>
-        </div>
-
-        <!-- Fil de conversation INSÉRÉ dans la carte -->
-        <div id="threadHero" class="chat" aria-live="polite"></div>
-
-        <!-- Boutons sous la carte -->
-        <div style="display:flex;justify-content:space-between;margin-top:8px;gap:8px">
-          <button id="newChatBtn" class="btn btn-ghost btn--xs">Nouvelle discussion</button>
-          <span style="flex:1"></span>
         </div>
       </div>
 
@@ -389,7 +403,7 @@
     }
 
     /* ==== Utilitaires chat (UI locale) ==== */
-    const thread = $('#threadHero'); // fil dans la carte du HERO
+    const thread = $('#threadHero');
     function addMsg(text, who='ai'){
       if(!thread) return;
       const row=document.createElement('div'); row.className='msg'+(who==='me'?' me':'');
@@ -397,11 +411,31 @@
       row.appendChild(b); thread.appendChild(row); thread.scrollTop=thread.scrollHeight;
     }
 
+    // Typing indicator
+    function showTyping(){
+      removeTyping();
+      const row=document.createElement('div'); row.className='msg'; row.id='typingRow';
+      const b=document.createElement('div'); b.className='bubble typing';
+      b.innerHTML='<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+      row.appendChild(b); thread.appendChild(row); thread.scrollTop=thread.scrollHeight;
+    }
+    function removeTyping(){ const t=document.getElementById('typingRow'); if(t) t.remove(); }
+
+    function enablePreviewIfReady(){
+      try{
+        const spec = JSON.parse(localStorage.getItem('pf_proposal')||'{}');
+        const hasContent = Array.isArray(spec.sections) ? spec.sections.length>0 : Object.keys(spec).length>0;
+        const btn = document.getElementById('openPreviewBtn');
+        if(btn) btn.classList.toggle('hidden', !hasContent);
+      }catch{}
+    }
+
     function resetDiscussion(){
       localStorage.removeItem('pf_chat');
       localStorage.removeItem('pf_proposal');
       localStorage.removeItem('pf_chat_ts');
       if(thread) thread.innerHTML='';
+      enablePreviewIfReady();
     }
     const CHAT_TTL_MS = 6*60*60*1000; // 6 heures
     function maybeExpireChat(){
@@ -420,12 +454,14 @@
         thread.innerHTML = '';
         hist.forEach(m => addMsg(m.content, m.role === 'user' ? 'me' : 'ai'));
       }
+      document.getElementById('openPreviewBtn')?.addEventListener('click',()=>{ window.location.href='preview.html?t=modern'; });
+      enablePreviewIfReady();
     });
 
     /* ===== Supabase Auth + Cloud Chats ===== */
     // ⚠️ REMPLACE ICI par tes valeurs de projet Supabase :
-    const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co'; // ← à remplacer
-    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';                         // ← à remplacer
+    const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co'; // ← à remplacer si besoin
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
     const authBtn     = document.getElementById('authBtn');
@@ -489,6 +525,7 @@
       if(error){ console.error(error); return; }
       data.forEach(m => addMsg(m.content, m.role==='user' ? 'me' : 'ai'));
       document.getElementById('brief').focus();
+      enablePreviewIfReady();
     }
 
     async function ensureChat(titleFallback='Sans titre'){
@@ -534,6 +571,7 @@
           thread.innerHTML = '';
           document.getElementById('brief').value = '';
           document.getElementById('brief').focus();
+          enablePreviewIfReady();
           return;
         }
         // local : 1 discussion max
@@ -550,9 +588,12 @@
 
     /* ==== API chat ==== */
     async function callChatAPI(message, proposalSpec, history){
+      const { data:{ session } } = await sb.auth.getSession();
+      const headers = {'Content-Type':'application/json'};
+      if(session?.access_token){ headers.Authorization = `Bearer ${session.access_token}`; }
       const res = await fetch('/api/chat',{
         method:'POST',
-        headers:{'Content-Type':'application/json'},
+        headers,
         body: JSON.stringify({ message, proposalSpec, history })
       });
       if(!res.ok) throw new Error('HTTP '+res.status);
@@ -562,15 +603,16 @@
     /* ==== Bouton Envoyer (chat) ==== */
     $("#sendBrief").addEventListener("click",async ()=>{
       const lang=document.documentElement.lang||'fr';
-      const t=I18N[lang];
       const v=$("#brief").value.trim(); if(!v){$("#brief").focus();return;}
+
+      // On laisse discuter même si la limite "free" est atteinte (on se contente de prévenir en console).
       if(PLAN==='free' && leftCount('free')<=0){
-        alert(t.free_limit_reached);
-        document.querySelector('#pricing').scrollIntoView({behavior:'smooth'}); return;
+        console.warn('[FREE] Limite de prévisualisations atteinte. Le chat reste utilisable.');
       }
 
       addMsg(v,'me');
       const btn=$("#sendBrief"); btn.classList.add('loading'); btn.disabled=true;
+      showTyping();
 
       try{
         // cloud : s'assurer d'avoir un chat si connecté
@@ -586,13 +628,17 @@
         const data = await callChatAPI(v, proposalSpec, history);
 
         if(data.reply){
+          removeTyping();
           addMsg(data.reply,'ai');
           await saveMessage('assistant', data.reply); // cloud only si connecté + chat_id
+        }else{
+          removeTyping();
         }
 
         if(data.proposalSpec){
           const merged = { ...proposalSpec, ...data.proposalSpec, meta:{ ...(proposalSpec.meta||{}), ...(data.proposalSpec.meta||{}) } };
           localStorage.setItem('pf_proposal', JSON.stringify(merged));
+          enablePreviewIfReady();
         }
 
         const newHist = [...history, {role:'user',content:v}, {role:'assistant',content:(data.reply||'')}].slice(-20);
@@ -602,12 +648,19 @@
         const { data:{ user } } = await sb.auth.getUser();
         if(!user){ incCount('free'); updateFreeBadge(); }
 
+        const wantPreview = Array.isArray(data.actions) && data.actions.some(a => a.type === 'preview');
+        if (wantPreview) {
+          setTimeout(()=>{ window.location.href='preview.html?t=modern'; }, 150);
+        }
+
         const ask = Array.isArray(data.actions) && data.actions.find(a=>a.type==='ask');
         if(ask){ $("#brief").value += `\n${ask.field}: `; $("#brief").focus(); }
       }catch(e){
         console.error(e);
+        removeTyping();
         addMsg(lang==='fr'?'Erreur serveur. Réessayez.':'Server error. Please retry.','ai');
       }finally{
+        removeTyping();
         btn.classList.remove('loading'); btn.disabled=false;
         $("#brief").value='';
       }
