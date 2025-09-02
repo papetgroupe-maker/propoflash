@@ -397,7 +397,6 @@
       row.appendChild(b); thread.appendChild(row); thread.scrollTop=thread.scrollHeight;
     }
 
-    // Reset, expiration et helpers (pour l'historique local)
     function resetDiscussion(){
       localStorage.removeItem('pf_chat');
       localStorage.removeItem('pf_proposal');
@@ -425,8 +424,8 @@
 
     /* ===== Supabase Auth + Cloud Chats ===== */
     // ⚠️ REMPLACE ICI par tes valeurs de projet Supabase :
-    const SUPABASE_URL  = 'https://YOUR-PROJECT-REF.supabase.co'; // ← à remplacer
-    const SUPABASE_ANON = 'YOUR-ANON-KEY';                         // ← à remplacer
+    const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co'; // ← à remplacer
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';                         // ← à remplacer
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
     const authBtn     = document.getElementById('authBtn');
@@ -449,7 +448,7 @@
         authBtn.onclick = async ()=>{
           const email = prompt('Votre email pour recevoir un lien magique :');
           if(!email) return;
-          const { error } = await sb.auth.signInWithOtp({ email });
+          const { error } = await sb.auth.signInWithOtp({ email, options:{ emailRedirectTo: window.location.origin }});
           if(!error) alert('Lien envoyé ✅. Ouvrez l’email pour vous connecter.');
         };
         hide(historyCard);
@@ -530,7 +529,6 @@
       newChatBtn.addEventListener('click', async ()=>{
         const { data:{ user } } = await sb.auth.getUser();
         if(user){
-          // cloud : on vide l’écran, le chat sera créé au prochain envoi
           currentChatId = null;
           localStorage.removeItem('pf_chat_id');
           thread.innerHTML = '';
@@ -576,8 +574,7 @@
 
       try{
         // cloud : s'assurer d'avoir un chat si connecté
-        const cid = await ensureChat('Nouvelle discussion');
-        const { data:{ user } } = await sb.auth.getUser();
+        await ensureChat('Nouvelle discussion');
 
         // persistance du message user si cloud
         await saveMessage('user', v);
@@ -598,14 +595,12 @@
           localStorage.setItem('pf_proposal', JSON.stringify(merged));
         }
 
-        // On garde un petit historique local (utile même en cloud pour le contexte)
         const newHist = [...history, {role:'user',content:v}, {role:'assistant',content:(data.reply||'')}].slice(-20);
         localStorage.setItem('pf_chat', JSON.stringify(newHist));
         localStorage.setItem('pf_chat_ts', String(Date.now()));
 
-        if(!user){ // comptage preview seulement pour la démo/free
-          incCount('free'); updateFreeBadge();
-        }
+        const { data:{ user } } = await sb.auth.getUser();
+        if(!user){ incCount('free'); updateFreeBadge(); }
 
         const ask = Array.isArray(data.actions) && data.actions.find(a=>a.type==='ask');
         if(ask){ $("#brief").value += `\n${ask.field}: `; $("#brief").focus(); }
