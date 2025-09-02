@@ -111,6 +111,8 @@
     .hidden{display:none}
     @media (max-width:980px){.grid3,.price-grid{grid-template-columns:1fr}.nav-inner{border-radius:18px}}
   </style>
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <!-- NAV -->
@@ -126,6 +128,7 @@
         <select class="lang" id="lang" aria-label="Language">
           <option value="fr">FR</option><option value="en">EN</option>
         </select>
+        <button class="btn btn-ghost" id="authBtn">Se connecter</button>
         <button class="btn btn-accent" id="startBtn" data-i18n="cta_start">Commencer</button>
       </div>
     </div>
@@ -170,10 +173,17 @@
         <!-- Fil de conversation INSÉRÉ dans la carte -->
         <div id="threadHero" class="chat" aria-live="polite"></div>
 
-        <!-- Bouton reset discussion -->
-        <div style="display:flex;justify-content:flex-end;margin-top:8px">
-          <button id="resetChat" class="btn btn-ghost btn--xs">Nouvelle discussion</button>
+        <!-- Boutons sous la carte -->
+        <div style="display:flex;justify-content:space-between;margin-top:8px;gap:8px">
+          <button id="newChatBtn" class="btn btn-ghost btn--xs">Nouvelle discussion</button>
+          <span style="flex:1"></span>
         </div>
+      </div>
+
+      <!-- Historique (connecté) -->
+      <div id="historyCard" class="card hidden" style="margin-top:12px">
+        <div class="h2" style="font-size:20px;margin:0 0 8px">Mes discussions</div>
+        <div id="chatList" style="display:flex;flex-direction:column;gap:8px"></div>
       </div>
 
       <div style="text-align:center;margin-top:14px">
@@ -361,7 +371,7 @@
     /* Chips autofill */
     $$(".chip").forEach(c=>c.addEventListener("click",()=>{
       const v=$("#brief").value.trim();
-      $("#brief").value=(v?v+"\n":"")+"Contexte : "+c.dataset.chip; $("#brief").focus()
+      $("#brief").value=(v?v+"\n":"")+"Contexte : "+c.dataset.chip; $("#brief").focus();
     }));
 
     /* FREE PREVIEW LIMIT (front-only demo) */
@@ -378,9 +388,8 @@
       badge.textContent = l==='fr' ? `${left}/mois` : `${left}/mo`;
     }
 
-    /* ==== Utilitaires chat & persistance ==== */
+    /* ==== Utilitaires chat (UI locale) ==== */
     const thread = $('#threadHero'); // fil dans la carte du HERO
-
     function addMsg(text, who='ai'){
       if(!thread) return;
       const row=document.createElement('div'); row.className='msg'+(who==='me'?' me':'');
@@ -388,7 +397,7 @@
       row.appendChild(b); thread.appendChild(row); thread.scrollTop=thread.scrollHeight;
     }
 
-    // Reset, expiration et helpers
+    // Reset, expiration et helpers (pour l'historique local)
     function resetDiscussion(){
       localStorage.removeItem('pf_chat');
       localStorage.removeItem('pf_proposal');
@@ -402,10 +411,9 @@
         resetDiscussion();
       }
     }
-    // Reset via ?new=1
     if(new URLSearchParams(location.search).has('new')) resetDiscussion();
 
-    /* Rendu de l'historique au chargement + bouton reset */
+    /* Rendu de l'historique local au chargement */
     document.addEventListener('DOMContentLoaded', () => {
       maybeExpireChat();
       const hist = JSON.parse(localStorage.getItem('pf_chat') || '[]');
@@ -413,10 +421,136 @@
         thread.innerHTML = '';
         hist.forEach(m => addMsg(m.content, m.role === 'user' ? 'me' : 'ai'));
       }
-      const rc = document.getElementById('resetChat');
-      if(rc) rc.addEventListener('click', resetDiscussion);
     });
 
+    /* ===== Supabase Auth + Cloud Chats ===== */
+    // ⚠️ REMPLACE ICI par tes valeurs de projet Supabase :
+    const SUPABASE_URL  = 'https://YOUR-PROJECT-REF.supabase.co'; // ← à remplacer
+    const SUPABASE_ANON = 'YOUR-ANON-KEY';                         // ← à remplacer
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    const authBtn     = document.getElementById('authBtn');
+    const historyCard = document.getElementById('historyCard');
+    const chatList    = document.getElementById('chatList');
+    let currentChatId = localStorage.getItem('pf_chat_id') || null;
+
+    function show(el){ el && el.classList.remove('hidden'); }
+    function hide(el){ el && el.classList.add('hidden'); }
+
+    async function refreshAuthUI(){
+      const { data:{ session } } = await sb.auth.getSession();
+      if(session){
+        authBtn.textContent = 'Se déconnecter';
+        authBtn.onclick = async ()=>{ await sb.auth.signOut(); localStorage.removeItem('pf_chat_id'); location.reload(); };
+        show(historyCard);
+        await listChats();
+      }else{
+        authBtn.textContent = 'Se connecter';
+        authBtn.onclick = async ()=>{
+          const email = prompt('Votre email pour recevoir un lien magique :');
+          if(!email) return;
+          const { error } = await sb.auth.signInWithOtp({ email });
+          if(!error) alert('Lien envoyé ✅. Ouvrez l’email pour vous connecter.');
+        };
+        hide(historyCard);
+      }
+    }
+    sb.auth.onAuthStateChange(()=>refreshAuthUI());
+    document.addEventListener('DOMContentLoaded', refreshAuthUI);
+
+    async function listChats(){
+      const { data:{ user } } = await sb.auth.getUser();
+      if(!user) return;
+      const { data, error } = await sb.from('chats')
+        .select('id,title,created_at')
+        .order('created_at', { ascending:false })
+        .limit(20);
+      if(error){ console.error(error); return; }
+      chatList.innerHTML = '';
+      data.forEach(c=>{
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-ghost';
+        btn.style.justifyContent='space-between';
+        btn.style.textAlign='left';
+        btn.innerHTML = `<span>${c.title || 'Sans titre'}</span>
+                         <span style="color:var(--muted);font-size:12px">${new Date(c.created_at).toLocaleString()}</span>`;
+        btn.onclick = ()=> openChat(c.id);
+        chatList.appendChild(btn);
+      });
+    }
+
+    async function openChat(chatId){
+      currentChatId = chatId;
+      localStorage.setItem('pf_chat_id', chatId);
+      thread.innerHTML = '';
+      const { data, error } = await sb.from('messages')
+        .select('role,content,created_at')
+        .eq('chat_id', chatId)
+        .order('created_at', { ascending:true });
+      if(error){ console.error(error); return; }
+      data.forEach(m => addMsg(m.content, m.role==='user' ? 'me' : 'ai'));
+      document.getElementById('brief').focus();
+    }
+
+    async function ensureChat(titleFallback='Sans titre'){
+      if(currentChatId) return currentChatId;
+      const { data:{ user } } = await sb.auth.getUser();
+      if(!user) return null; // non connecté → local only
+
+      // (Option) limite plan Free via RPC can_create_chat
+      try{
+        const { data:can } = await sb.rpc('can_create_chat', { uid: user.id });
+        if(can === false){
+          alert('Votre plan Free permet 1 discussion / mois. Passez à Starter pour continuer.');
+          return null;
+        }
+      }catch(_e){ /* RPC peut ne pas exister : on ignore. */ }
+
+      const title = (document.getElementById('brief').value || titleFallback).slice(0,80);
+      const { data, error } = await sb.from('chats')
+        .insert({ user_id:user.id, title })
+        .select()
+        .single();
+      if(error){ console.error(error); return null; }
+      currentChatId = data.id;
+      localStorage.setItem('pf_chat_id', data.id);
+      listChats();
+      return data.id;
+    }
+
+    async function saveMessage(role, content){
+      const { data:{ user } } = await sb.auth.getUser();
+      if(!user || !currentChatId) return;
+      await sb.from('messages').insert({ chat_id: currentChatId, user_id: user.id, role, content });
+    }
+
+    // Bouton "Nouvelle discussion"
+    const newChatBtn = document.getElementById('newChatBtn');
+    if(newChatBtn){
+      newChatBtn.addEventListener('click', async ()=>{
+        const { data:{ user } } = await sb.auth.getUser();
+        if(user){
+          // cloud : on vide l’écran, le chat sera créé au prochain envoi
+          currentChatId = null;
+          localStorage.removeItem('pf_chat_id');
+          thread.innerHTML = '';
+          document.getElementById('brief').value = '';
+          document.getElementById('brief').focus();
+          return;
+        }
+        // local : 1 discussion max
+        const used = parseInt(localStorage.getItem('pf_local_chats')||'0',10);
+        if(used >= 1){
+          alert("Vous avez déjà utilisé la discussion gratuite.\nConnectez-vous pour sauvegarder l’historique et créer d’autres discussions.");
+          return;
+        }
+        localStorage.setItem('pf_local_chats', String(used+1));
+        resetDiscussion();
+        document.getElementById('brief').focus();
+      });
+    }
+
+    /* ==== API chat ==== */
     async function callChatAPI(message, proposalSpec, history){
       const res = await fetch('/api/chat',{
         method:'POST',
@@ -441,23 +575,37 @@
       const btn=$("#sendBrief"); btn.classList.add('loading'); btn.disabled=true;
 
       try{
+        // cloud : s'assurer d'avoir un chat si connecté
+        const cid = await ensureChat('Nouvelle discussion');
+        const { data:{ user } } = await sb.auth.getUser();
+
+        // persistance du message user si cloud
+        await saveMessage('user', v);
+
+        // historique local pour fournir du contexte au modèle
         const history = JSON.parse(localStorage.getItem('pf_chat')||'[]');
         const proposalSpec = JSON.parse(localStorage.getItem('pf_proposal')||'{"meta":{"lang":"'+lang+'"}}');
 
         const data = await callChatAPI(v, proposalSpec, history);
 
-        if(data.reply) addMsg(data.reply,'ai');
+        if(data.reply){
+          addMsg(data.reply,'ai');
+          await saveMessage('assistant', data.reply); // cloud only si connecté + chat_id
+        }
 
         if(data.proposalSpec){
           const merged = { ...proposalSpec, ...data.proposalSpec, meta:{ ...(proposalSpec.meta||{}), ...(data.proposalSpec.meta||{}) } };
           localStorage.setItem('pf_proposal', JSON.stringify(merged));
         }
 
+        // On garde un petit historique local (utile même en cloud pour le contexte)
         const newHist = [...history, {role:'user',content:v}, {role:'assistant',content:(data.reply||'')}].slice(-20);
         localStorage.setItem('pf_chat', JSON.stringify(newHist));
-        localStorage.setItem('pf_chat_ts', String(Date.now())); // <-- timestamp MAJ
+        localStorage.setItem('pf_chat_ts', String(Date.now()));
 
-        if(PLAN==='free'){ incCount('free'); updateFreeBadge(); }
+        if(!user){ // comptage preview seulement pour la démo/free
+          incCount('free'); updateFreeBadge();
+        }
 
         const ask = Array.isArray(data.actions) && data.actions.find(a=>a.type==='ask');
         if(ask){ $("#brief").value += `\n${ask.field}: `; $("#brief").focus(); }
@@ -479,9 +627,7 @@
         const lang = document.documentElement.lang || 'fr';
         const briefEl = document.getElementById('brief');
         let msg = '';
-        if (briefEl && briefEl.value) {
-          msg = briefEl.value.trim();
-        }
+        if (briefEl && briefEl.value) msg = briefEl.value.trim();
         if (!msg) {
           msg = (lang === 'fr')
             ? "Crée une proposition commerciale complète à partir d'un brief vide (exemple)."
@@ -494,7 +640,7 @@
           const nextSpec = data && data.proposalSpec ? data.proposalSpec : baseSpec;
           const merged = { ...baseSpec, ...nextSpec, meta:{ ...(baseSpec.meta||{}), ...((nextSpec&&nextSpec.meta)||{}) } };
           localStorage.setItem('pf_proposal', JSON.stringify(merged));
-          localStorage.setItem('pf_chat_ts', String(Date.now())); // garde le même TTL
+          localStorage.setItem('pf_chat_ts', String(Date.now()));
           window.location.href = 'preview.html?t=modern';
         } catch (e) {
           console.error(e);
