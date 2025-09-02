@@ -44,6 +44,7 @@
     .btn-accent:hover{transform:translateY(-1px)}
     .btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--stroke)}
     .btn-ghost:hover{box-shadow:var(--shadow)}
+    .btn--xs{padding:6px 10px;font-size:12px;font-weight:700}
 
     /* HERO + SIGNATURE */
     .hero{position:relative;overflow:hidden;padding-top:120px;padding-bottom:80px;isolation:isolate}
@@ -168,6 +169,11 @@
 
         <!-- Fil de conversation INSÉRÉ dans la carte -->
         <div id="threadHero" class="chat" aria-live="polite"></div>
+
+        <!-- Bouton reset discussion -->
+        <div style="display:flex;justify-content:flex-end;margin-top:8px">
+          <button id="resetChat" class="btn btn-ghost btn--xs">Nouvelle discussion</button>
+        </div>
       </div>
 
       <div style="text-align:center;margin-top:14px">
@@ -372,14 +378,44 @@
       badge.textContent = l==='fr' ? `${left}/mois` : `${left}/mo`;
     }
 
-    /* ==== Utilitaires chat ==== */
+    /* ==== Utilitaires chat & persistance ==== */
     const thread = $('#threadHero'); // fil dans la carte du HERO
+
     function addMsg(text, who='ai'){
       if(!thread) return;
       const row=document.createElement('div'); row.className='msg'+(who==='me'?' me':'');
       const b=document.createElement('div'); b.className='bubble'; b.textContent=String(text||'');
       row.appendChild(b); thread.appendChild(row); thread.scrollTop=thread.scrollHeight;
     }
+
+    // Reset, expiration et helpers
+    function resetDiscussion(){
+      localStorage.removeItem('pf_chat');
+      localStorage.removeItem('pf_proposal');
+      localStorage.removeItem('pf_chat_ts');
+      if(thread) thread.innerHTML='';
+    }
+    const CHAT_TTL_MS = 6*60*60*1000; // 6 heures
+    function maybeExpireChat(){
+      const ts = Number(localStorage.getItem('pf_chat_ts')||0);
+      if(ts && (Date.now() - ts > CHAT_TTL_MS)){
+        resetDiscussion();
+      }
+    }
+    // Reset via ?new=1
+    if(new URLSearchParams(location.search).has('new')) resetDiscussion();
+
+    /* Rendu de l'historique au chargement + bouton reset */
+    document.addEventListener('DOMContentLoaded', () => {
+      maybeExpireChat();
+      const hist = JSON.parse(localStorage.getItem('pf_chat') || '[]');
+      if (hist.length && thread) {
+        thread.innerHTML = '';
+        hist.forEach(m => addMsg(m.content, m.role === 'user' ? 'me' : 'ai'));
+      }
+      const rc = document.getElementById('resetChat');
+      if(rc) rc.addEventListener('click', resetDiscussion);
+    });
 
     async function callChatAPI(message, proposalSpec, history){
       const res = await fetch('/api/chat',{
@@ -390,15 +426,6 @@
       if(!res.ok) throw new Error('HTTP '+res.status);
       return res.json();
     }
-
-    /* Rendu de l'historique au chargement */
-    document.addEventListener('DOMContentLoaded', () => {
-      const hist = JSON.parse(localStorage.getItem('pf_chat') || '[]');
-      if (hist.length) {
-        thread.innerHTML = '';
-        hist.forEach(m => addMsg(m.content, m.role === 'user' ? 'me' : 'ai'));
-      }
-    });
 
     /* ==== Bouton Envoyer (chat) ==== */
     $("#sendBrief").addEventListener("click",async ()=>{
@@ -428,6 +455,7 @@
 
         const newHist = [...history, {role:'user',content:v}, {role:'assistant',content:(data.reply||'')}].slice(-20);
         localStorage.setItem('pf_chat', JSON.stringify(newHist));
+        localStorage.setItem('pf_chat_ts', String(Date.now())); // <-- timestamp MAJ
 
         if(PLAN==='free'){ incCount('free'); updateFreeBadge(); }
 
@@ -455,11 +483,9 @@
           msg = briefEl.value.trim();
         }
         if (!msg) {
-          if (lang === 'fr') {
-            msg = "Crée une proposition commerciale complète à partir d'un brief vide (exemple).";
-          } else {
-            msg = "Create a complete business proposal from an empty brief (sample).";
-          }
+          msg = (lang === 'fr')
+            ? "Crée une proposition commerciale complète à partir d'un brief vide (exemple)."
+            : "Create a complete business proposal from an empty brief (sample).";
         }
 
         try {
@@ -468,6 +494,7 @@
           const nextSpec = data && data.proposalSpec ? data.proposalSpec : baseSpec;
           const merged = { ...baseSpec, ...nextSpec, meta:{ ...(baseSpec.meta||{}), ...((nextSpec&&nextSpec.meta)||{}) } };
           localStorage.setItem('pf_proposal', JSON.stringify(merged));
+          localStorage.setItem('pf_chat_ts', String(Date.now())); // garde le même TTL
           window.location.href = 'preview.html?t=modern';
         } catch (e) {
           console.error(e);
