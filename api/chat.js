@@ -10,22 +10,8 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Use POST' });
 
-  // --- petits utilitaires ---
-  const safeJson = (s) => { try { return JSON.parse(s); } catch { return null; } };
-  const stripTrailingCommas = (s) => s.replace(/,\s*([}\]])/g, '$1');
-
-  const deepMerge = (a, b) => {
-    if (Array.isArray(a) && Array.isArray(b)) return b; // on remplace (sections, phases, etc.)
-    if (a && typeof a === 'object' && b && typeof b === 'object') {
-      const out = { ...a };
-      for (const k of Object.keys(b)) out[k] = deepMerge(a[k], b[k]);
-      return out;
-    }
-    return b === undefined ? a : b;
-  };
-
   try {
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env.OPENAI_API_KEY; // ← définis sur Vercel
     if (!apiKey) {
       return res.status(500).json({
         reply: '',
@@ -37,10 +23,8 @@ export default async function handler(req, res) {
 
     const { message = '', proposalSpec = {}, history = [] } = req.body || {};
     const lang = proposalSpec?.meta?.lang ? String(proposalSpec.meta.lang) : 'fr';
-    const style = proposalSpec?.meta?.style || {}; // ex. {voice, tone, forbid[], currency, pages, etc.}
-    const quality = proposalSpec?.meta?.quality || 'strict'; // 'strict' par défaut
 
-    /* ───── (Optionnel) Gating Supabase (plans/limites) ───── */
+    /* ───── (Optionnel) Gating avec Supabase (plans/limites) ───── */
     const supaUrl = process.env.SUPABASE_URL;
     const supaSrv = process.env.SUPABASE_SERVICE_ROLE;
     const authHeader = req.headers.authorization || '';
@@ -49,6 +33,7 @@ export default async function handler(req, res) {
     if (supaUrl && supaSrv && supaJwt) {
       try {
         const { createClient } = await import('@supabase/supabase-js');
+
         const sbAdmin = createClient(supaUrl, supaSrv, {
           auth: { autoRefreshToken: false, persistSession: false },
         });
@@ -56,7 +41,8 @@ export default async function handler(req, res) {
         const { data: u, error: uErr } = await sbAdmin.auth.getUser(supaJwt);
         if (!uErr && u?.user) {
           const uid = u.user.id;
-          // plan
+
+          // plan depuis profiles (default: free)
           let plan = 'free';
           const { data: prof, error: pErr } = await sbAdmin
             .from('profiles')
@@ -72,6 +58,7 @@ export default async function handler(req, res) {
             const now = new Date();
             const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0));
             const end   = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0));
+
             const { count, error: cErr } = await sbAdmin
               .from('messages')
               .select('*', { count: 'exact', head: true })
@@ -79,6 +66,7 @@ export default async function handler(req, res) {
               .eq('role', 'assistant')
               .gte('created_at', start.toISOString())
               .lt('created_at',  end.toISOString());
+
             if (!cErr && typeof count === 'number' && count >= limit) {
               return res.status(402).json({
                 reply: lang === 'fr'
@@ -94,64 +82,67 @@ export default async function handler(req, res) {
         console.warn('Supabase gating warning:', gErr?.message || gErr);
       }
     }
-    /* ──────────────────────────────────────────────────────── */
-
-    // ========= PROMPTS HAUTE QUALITÉ =========
-    const STYLE_RULES = `
-Règles de style fermes:
-- Langue: "${lang}". Respecte la typographie locale (espaces insécables avant : ; ? ! en FR si nécessaire).
-- Ton: ${style.tone || 'professionnel, clair, confiant'} ; Voix: ${style.voice || 'exécutive/concise'}.
-- Interdits (remplacer par concret): ${Array.isArray(style.forbid) ? style.forbid.join(', ') : 'synergie, best-in-class, solution clé en main, révolutionner'}.
-- Jamais inventer de chiffres/preuves. Utiliser "à confirmer" quand l’info manque.
-- Orienté valeur et résultat, pas de remplissage. Phrases courtes. Listes à puces denses.
-- Chiffrages: ${style.currency || 'EUR'} ; formats FR (1 234,56). Si incertitude → fourchettes + hypothèses.
-- Prix: modèle, inclus/exclus, jalons de facturation, conditions (validité, délais, révisions).
-- Toujours proposer des "next_steps" actionnables (appel, atelier, livrables attendus côté client).
-    `.trim();
-
-    const STRUCTURE_RULES = `
-Structure cible (complète mais compacte):
-- letter
-- executive_summary
-- objectives
-- approach (phases[])
-- deliverables (in/out)
-- timeline (milestones[])
-- pricing (model, price, terms[])
-- assumptions (paragraphs[])
-- risks (mitigations[]) si pertinent
-- next_steps (paragraphs[])
-Toujours marquer les trous par "à confirmer" sans bloquer. 
-    `.trim();
+    /* ───────────────────────────────────────────────────────────── */
 
     const SYSTEM_PROMPT = `
-Tu es un RÉDACTEUR DE PROPOSITIONS B2B senior.
-Tu dois générer UNIQUEMENT du JSON strict: {"reply","proposalSpec","actions"}.
-${STYLE_RULES}
+Tu es **Rédacteur senior de propositions commerciales B2B** (stratégie + copywriting).
+Objectif: générer et itérer des offres **professionnelles, actionnables et envoyables** à un décideur.
 
-${STRUCTURE_RULES}
+Réponds TOUJOURS en JSON strict: {"reply","proposalSpec","actions"}.
 
-Comportement:
-- Pose max 2 questions UNIQUEMENT si l'information est indispensable à la validité (pas de redites).
-- "reply": très courte réponse de chat (2–3 phrases max).
-- "proposalSpec": patch minimal (meta/style/sections). Ne réécris pas tout si un patch suffit.
-- "actions": parmi {"type":"ask","field","hint"}, {"type":"preview"}, {"type":"update_style","patch":{...}}.
+- "reply": court message de chat (langue = "${lang}") qui:
+  · résume ce que tu as compris / ce que tu viens de changer,
+  · propose 1 question ciblée si une info critique manque,
+  · suggère une prochaine étape claire (ex: "ouvrir l’aperçu").
+- "proposalSpec": **patch minimal** à appliquer sur l’état courant (pas un dump complet).
+  · Ne renvoie que les champs modifiés/ajoutés/supprimés, jamais tout l’objet si inutile.
+  · Respecte le schéma ci-dessous.
+- "actions": 0–3 parmi:
+  · {"type":"ask","field":"<label>","hint":"<exemple>"}  ← poser 1 question essentielle max par tour
+  · {"type":"preview"}                                   ← demander d’ouvrir/rafraîchir l’aperçu
+  · {"type":"update_style","patch":{...}}                ← ajuster meta.style (tone, politeness, font…)
+  · {"type":"focus","target":"<path>"}                   ← suggérer à l’UI quelle section regarder
 
-Ne fournis aucune explication hors JSON. 
-Si un élément n'est pas justifié par le brief ou le style, mets "à confirmer".
-`.trim();
+RÈGLES D’ITÉRATION / FEEDBACK:
+- Quand l’utilisateur demande une modification ("raccourcis le mail", "passe à 4 900€", "supprime la phase 3", "ajoute un livrable SEO"):
+  · Identifie la/les section(s) concernée(s).
+  · Renvoie un **patch minimal** dans "proposalSpec" qui reflète précisément ce changement.
+  · Garde les IDs et la structure existante quand fournie; sinon crée des IDs stables (ex: "sec_xxx").
+  · Si ambigu, pose UNE question concrète ("volume mensuel ?", "facturation au forfait ou au temps ?") plutôt que d’inventer.
 
-    const CRITIC_PROMPT = `
-Tu es RELECTEUR/QA de propositions B2B.
-Objectif: élever la proposition au niveau "direction" sans blabla.
-Retourne du JSON strict: {"reply","scorecard","issues","proposalSpecPatch","actions"}.
+STYLE DE MARQUE (meta.style):
+- Respecte strictement meta.style si présent:
+  · tone ∈ {executive,premium,energetic,institutional,technical}
+  · politeness ∈ {vous,tu}
+  · font, primary, secondary, logoDataUrl (pour le rendu; ne pas verbaliser des noms de couleurs dans le texte).
+- Toujours aligner l’email, les CTA et l’argumentaire avec ce tone/politeness.
 
-Règles:
-- Évalue: ton/voix, clarté, adéquation objectifs, différenciation, crédibilité, pricing/ROI, risques/assumptions, next_steps.
-- Ne jamais inventer. Remplacer les zones floues par "à confirmer" + hypothèse courte.
-- "proposalSpecPatch": un patch minimal et sûr (pas de refonte totale inutile).
-- "reply": 1 phrase max (ex: "J'ai resserré le pricing, clarifié les hypothèses et renforcé l’ESG.").
-`.trim();
+SCHÉMA CANONIQUE (sections clés):
+meta: { lang, style? }
+style: { primary?, secondary?, font?, tone?, politeness?, logoDataUrl? }
+sections (exemples):
+- letter: { subject, preheader?, greeting, body_paragraphs:[...], closing, signature }
+- executive_summary: { paragraphs:[...]}
+- objectives: { bullets:[...] }
+- approach: { phases:[ { id, title, description?, activities:[...], outcomes:[...], duration? } ] }
+- deliverables: { in:[...], out:[...] }
+- timeline: { milestones:[ { id, title, dateOrWeek, owner? } ] }
+- pricing: { model, currency?, total?, items?:[ { id, name, qty?, unit?, unit_price?, subtotal? } ], terms:[ ... ] }
+- assumptions: { paragraphs:[...] }
+- next_steps: { paragraphs:[...] }
+
+QUALITÉ & TON:
+- Pro, clair, orienté valeur business. Évite le jargon vide; privilégie bénéfices mesurables.
+- Par défaut, inclure "letter" (corps d’email prêt à envoyer) + toutes les sections majeures.
+- Si des infos manquent: "à confirmer" sans bloquer. Tu peux proposer un **chiffrage de départ** (fourchette) avec hypothèses.
+
+FORMAT DE SORTIE:
+{
+  "reply": "…",
+  "proposalSpec": { ...patch minimal... },
+  "actions": [ {"type":"preview"}? , {"type":"ask",...}? , {"type":"focus","target":"pricing"}? ]
+}
+    `.trim();
 
     // historique nettoyé
     const safeHistory = Array.isArray(history)
@@ -161,103 +152,66 @@ Règles:
           .map(m => ({ role: m.role, content: m.content }))
       : [];
 
-    const baseMessages = [
+    const messages = [
       { role: 'system', content: SYSTEM_PROMPT },
       ...safeHistory,
-      { role: 'user', content: JSON.stringify({ message, proposalSpec, style, lang }) },
+      { role: 'user', content: JSON.stringify({ message, proposalSpec }) },
     ];
 
-    // === 1) PASSAGE RÉDACTEUR ===
-    const r1 = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Appel OpenAI
+    const r = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         temperature: 0.4,
         response_format: { type: 'json_object' },
-        messages: baseMessages
+        // Laisse assez de marge pour un patch conséquent (email + sections)
+        max_tokens: 2000,
+        messages,
       }),
     });
-    const raw1 = await r1.text();
-    if (!r1.ok) {
-      return res.status(r1.status).json({
+
+    const rawText = await r.text();
+    if (!r.ok) {
+      return res.status(r.status).json({
         reply: lang === 'fr'
           ? 'Désolé, une erreur est survenue côté modèle. Réessayez.'
           : 'Sorry, a model error occurred. Please try again.',
         proposalSpec: {},
         actions: [],
-        error: raw1?.slice(0, 800),
+        error: rawText?.slice(0, 800),
       });
     }
 
-    let out = safeJson(raw1)?.choices?.[0]?.message?.content || '';
-    if (typeof out !== 'string') out = String(out || '');
-    let draft = safeJson(out) || safeJson(stripTrailingCommas(out)) || { reply: out || '', proposalSpec: {}, actions: [] };
+    // Parse réponse OpenAI (JSON externe puis JSON content)
+    let data;
+    try { data = JSON.parse(rawText); } catch { data = null; }
 
-    // formes par défaut
-    if (typeof draft !== 'object' || draft === null) draft = { reply: String(draft || '') };
-    if (typeof draft.reply !== 'string') draft.reply = '';
-    if (!draft.proposalSpec || typeof draft.proposalSpec !== 'object') draft.proposalSpec = {};
-    if (!Array.isArray(draft.actions)) draft.actions = [];
+    let content = data?.choices?.[0]?.message?.content ?? '';
+    if (!content || typeof content !== 'string') content = String(rawText || '');
 
-    // === 2) PASSAGE RELECTEUR/QA (si quality=strict) ===
-    let mergedSpec = deepMerge(proposalSpec || {}, draft.proposalSpec || {});
-    if (quality === 'strict') {
-      const criticMessages = [
-        { role: 'system', content: CRITIC_PROMPT + '\n' + STYLE_RULES + '\n' + STRUCTURE_RULES },
-        { role: 'user', content: JSON.stringify({
-            lang, style, brief: message, draft: mergedSpec
-          }) }
-      ];
-
-      const r2 = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          temperature: 0.2,
-          response_format: { type: 'json_object' },
-          messages: criticMessages
-        }),
-      });
-
-      const raw2 = await r2.text();
-      if (r2.ok) {
-        let criticOut = safeJson(raw2)?.choices?.[0]?.message?.content || '';
-        if (typeof criticOut !== 'string') criticOut = String(criticOut || '');
-        let review = safeJson(criticOut) || safeJson(stripTrailingCommas(criticOut));
-        if (review && typeof review === 'object') {
-          if (review.proposalSpecPatch && typeof review.proposalSpecPatch === 'object') {
-            mergedSpec = deepMerge(mergedSpec, review.proposalSpecPatch);
-          }
-          // Option: raccourcir la reply
-          if (typeof review.reply === 'string' && review.reply.trim()) {
-            draft.reply = review.reply.trim();
-          }
-          // On pousse un preview si on a un contenu exploitable
-          if (!Array.isArray(draft.actions)) draft.actions = [];
-          const hasSections = mergedSpec && (
-            (Array.isArray(mergedSpec.sections) && mergedSpec.sections.length) ||
-            Object.keys(mergedSpec).length > 0
-          );
-          if (hasSections && !draft.actions.some(a => a.type === 'preview')) {
-            draft.actions.push({ type: 'preview' });
-          }
-        }
-      } else {
-        // En cas d'échec du relecteur, on continue avec le 1er jet
-        console.warn('Critic pass failed:', raw2?.slice(0, 400));
+    let out;
+    try {
+      out = JSON.parse(content);
+    } catch {
+      try {
+        out = JSON.parse(content.replace(/,\s*([}\]])/g, '$1')); // supprime virgules traînantes
+      } catch {
+        out = { reply: content || '', proposalSpec: {}, actions: [] };
       }
     }
 
-    // sortie finale
-    const finalOut = {
-      reply: (draft.reply || '').slice(0, 600),
-      proposalSpec: mergedSpec || {},
-      actions: Array.isArray(draft.actions) ? draft.actions.slice(0, 2) : [],
-    };
+    // formes par défaut
+    if (typeof out !== 'object' || out === null) out = { reply: String(out || '') };
+    if (typeof out.reply !== 'string') out.reply = '';
+    if (!out.proposalSpec || typeof out.proposalSpec !== 'object') out.proposalSpec = {};
+    if (!Array.isArray(out.actions)) out.actions = [];
 
-    return res.status(200).json(finalOut);
+    return res.status(200).json(out);
   } catch (e) {
     console.error('API /api/chat error:', e);
     return res.status(500).json({
