@@ -179,7 +179,7 @@
 
         <!-- zone de saisie -->
         <div class="prompt" style="margin-top:8px">
-          <textarea id="brief" placeholder="Collez votre brief ici… (objectif, cible, offre, contraintes…)"></textarea>
+          <textarea id="brief" placeholder="Collez votre brief ici… (Entrée = envoyer • Maj+Entrée = nouvelle ligne)"></textarea>
           <button class="send" id="sendBrief" title="Envoyer" aria-label="Envoyer">
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
           </button>
@@ -330,7 +330,7 @@
         badge_popular:"Populaire",badge_teams:"Équipes",
         cta_try:"Essayer",cta_choose:"Choisir Starter",cta_choose_pro:"Choisir Pro",
         rights:"Tous droits réservés.",legal:"Mentions légales",privacy:"Confidentialité",
-        placeholder:"Collez votre brief ici… (objectif, cible, offre, contraintes…)",
+        placeholder:"Collez votre brief ici… (Entrée = envoyer • Maj+Entrée = nouvelle ligne)",
         free_limit_reached:"Limite atteinte : 3 aperçus gratuits/mois. Passez au plan Starter pour davantage d’aperçus et l’export PDF.",
         left_label:"Aperçus restants ce mois",
         assistant_h2:"Assistant"
@@ -354,7 +354,7 @@
         badge_popular:"Most popular",badge_teams:"Teams",
         cta_try:"Try it",cta_choose:"Choose Starter",cta_choose_pro:"Choose Pro",
         rights:"All rights reserved.",legal:"Legal",privacy:"Privacy",
-        placeholder:"Paste your brief here… (goal, audience, offer, constraints…)",
+        placeholder:"Paste your brief here… (Enter = send • Shift+Enter = new line)",
         free_limit_reached:"Limit reached: 3 free previews/month. Upgrade to Starter for more previews and PDF export.",
         left_label:"Previews left this month",
         assistant_h2:"Assistant"
@@ -680,6 +680,26 @@
         $("#brief").value='';
       }
     });
+
+    /* ==== ENTRÉE = envoyer | Maj+Entrée = nouvelle ligne | Ctrl/Cmd+Entrée = envoyer ==== */
+    (function () {
+      const briefEl = document.getElementById('brief');
+      const sendBtn = document.getElementById('sendBrief');
+      if (!briefEl || !sendBtn) return;
+
+      briefEl.addEventListener('keydown', (e) => {
+        // Ignore composition (IME)
+        if (e.isComposing || e.keyCode === 229) return;
+
+        const isEnter = e.key === 'Enter';
+        const sendCombo = (isEnter && !e.shiftKey) || (isEnter && (e.ctrlKey || e.metaKey));
+
+        if (sendCombo) {
+          e.preventDefault();
+          sendBtn.click();
+        }
+      });
+    })();
 
     /* ==== Bouton Commencer (génère et ouvre l’aperçu) ==== */
     (function(){
