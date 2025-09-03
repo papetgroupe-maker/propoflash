@@ -639,6 +639,21 @@
           const merged = { ...proposalSpec, ...data.proposalSpec, meta:{ ...(proposalSpec.meta||{}), ...(data.proposalSpec.meta||{}) } };
           localStorage.setItem('pf_proposal', JSON.stringify(merged));
           enablePreviewIfReady();
+
+          /* ⬇️ Sauvegarde cloud de l’aperçu (si connecté) */
+          try {
+            const { data:{ user } } = await sb.auth.getUser();
+            if (user && currentChatId) {
+              await sb.from('proposals').upsert(
+                {
+                  user_id: user.id,
+                  chat_id: currentChatId,
+                  spec: JSON.parse(localStorage.getItem('pf_proposal') || '{}'),
+                },
+                { onConflict: 'chat_id' }
+              );
+            }
+          } catch(_) {}
         }
 
         const newHist = [...history, {role:'user',content:v}, {role:'assistant',content:(data.reply||'')}].slice(-20);
@@ -689,6 +704,25 @@
           const merged = { ...baseSpec, ...nextSpec, meta:{ ...(baseSpec.meta||{}), ...((nextSpec&&nextSpec.meta)||{}) } };
           localStorage.setItem('pf_proposal', JSON.stringify(merged));
           localStorage.setItem('pf_chat_ts', String(Date.now()));
+
+          /* ⬇️ Sauvegarde cloud de l’aperçu (si connecté) */
+          try {
+            const { data:{ user } } = await sb.auth.getUser();
+            if (user) {
+              if (!currentChatId) { await ensureChat('Aperçu'); }
+              if (currentChatId) {
+                await sb.from('proposals').upsert(
+                  {
+                    user_id: user.id,
+                    chat_id: currentChatId,
+                    spec: JSON.parse(localStorage.getItem('pf_proposal') || '{}'),
+                  },
+                  { onConflict: 'chat_id' }
+                );
+              }
+            }
+          } catch(_) {}
+
           window.location.href = 'preview.html?t=modern';
         } catch (e) {
           console.error(e);
