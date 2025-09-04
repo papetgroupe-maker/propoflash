@@ -10,11 +10,10 @@
       --paper-w:210mm; --paper-h:297mm;
       --bg:#f3f6fb; --ink:#0a1020; --muted:#5c667a; --stroke:#e7ecf6;
       --accent:#3b82f6; --accent-ink:#fff;
-      --font: "Inter", system-ui, sans-serif;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;background:linear-gradient(180deg,#f6f8fc,#eef3ff);font-family:var(--font);color:var(--ink)}
+    body{margin:0;background:linear-gradient(180deg,#f6f8fc,#eef3ff);font-family:Inter,system-ui,sans-serif;color:var(--ink)}
     /* Top bar */
     .bar{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--stroke);
       display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px}
@@ -26,15 +25,12 @@
     .btn:disabled{opacity:.6;cursor:not-allowed}
     .sel,.color{border:1px solid var(--stroke);border-radius:10px;padding:7px 10px;background:#fff}
     .hint{color:var(--muted);font-size:12px}
-    /* Page */
+    /* Sheet */
     .wrap{display:grid;place-items:center;padding:22px}
     .sheet{width:var(--paper-w); min-height:var(--paper-h); background:#fff; border:1px solid var(--stroke);
       box-shadow:0 20px 60px rgba(10,16,32,.12); border-radius:12px; padding:28mm 22mm;}
-    .header{display:flex;align-items:center;gap:14px;margin-bottom:12px}
-    .logo{width:40px;height:40px;border-radius:8px;background:#eef2ff;display:grid;place-items:center;overflow:hidden}
-    .logo img{max-width:100%;max-height:100%;display:block}
     .h1{font-size:28px;line-height:1.1;margin:0 0 6px;font-weight:800;letter-spacing:-.01em}
-    .meta{color:var(--muted);font-size:14px;margin-bottom:18px}
+    .meta{color:var(--muted);font-size:14px;margin-bottom:12px}
     h2{margin:22px 0 8px;font-size:18px;letter-spacing:.2px}
     .hr{height:1px;background:var(--stroke);margin:12px 0}
     p{margin:8px 0 10px}
@@ -42,17 +38,10 @@
     .tag{display:inline-block;padding:3px 8px;border-radius:999px;background:#eef4ff;border:1px solid var(--stroke);font-size:12px;color:#28436d}
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
     .card{border:1px solid var(--stroke);border-radius:12px;padding:12px}
-    .muted{color:var(--muted)}
     .price{font-weight:800;font-size:18px}
-    table.items{width:100%;border-collapse:collapse;margin-top:8px}
-    table.items th, table.items td{border:1px solid var(--stroke);padding:8px;font-size:13px;text-align:left}
-    table.items th{background:#f7f9ff}
-    .tfoot{display:flex;justify-content:flex-end;margin-top:8px}
-    .total{border:1px solid var(--stroke);border-radius:10px;padding:10px 12px;font-weight:800}
-
+    .muted{color:var(--muted)}
     /* Editable mode */
     .edit-on [contenteditable="true"]{outline:2px solid #e0ecff;border-radius:6px;padding:2px 4px}
-
     /* Print */
     @media print{
       .bar{display:none}
@@ -79,6 +68,7 @@
       <label class="hint">Couleur</label>
       <input type="color" class="color" id="accentPick" value="#3b82f6" title="Couleur d’accent"/>
       <button class="btn" id="editBtn">Éditer</button>
+      <button class="btn" id="saveEditsBtn">Sauver</button>
       <button class="btn primary" id="pdfBtn">Exporter PDF</button>
     </div>
   </div>
@@ -92,7 +82,6 @@
 
   <script>
     const $ = (q,ctx=document)=>ctx.querySelector(q);
-
     const t = {
       fr: {
         title:"Proposition commerciale",
@@ -100,7 +89,6 @@
         from:"Émis par",
         date:"Date",
         letter:"Lettre d’introduction",
-        subject:"Objet",
         executive:"Résumé exécutif",
         objectives:"Objectifs",
         approach:"Approche & phasage",
@@ -112,9 +100,7 @@
         assumptions:"Hypothèses / Risques",
         next:"Prochaines étapes",
         price_model:"Modèle",
-        terms:"Conditions",
-        owner:"Responsable",
-        items:"Détail"
+        terms:"Conditions"
       },
       en: {
         title:"Business Proposal",
@@ -122,7 +108,6 @@
         from:"Issued by",
         date:"Date",
         letter:"Cover Letter",
-        subject:"Subject",
         executive:"Executive Summary",
         objectives:"Objectives",
         approach:"Approach & Phasing",
@@ -134,9 +119,7 @@
         assumptions:"Assumptions / Risks",
         next:"Next Steps",
         price_model:"Model",
-        terms:"Terms",
-        owner:"Owner",
-        items:"Items"
+        terms:"Terms"
       }
     };
 
@@ -149,14 +132,12 @@
 
     function safeArr(v){ return Array.isArray(v) ? v : []; }
     function safeStr(v, fallback=''){ return (v==null?'':String(v)).trim() || fallback; }
-    function n(v){ const x = Number(v); return Number.isFinite(x) ? x : 0; }
     function fmtDate(d){
       try{
         const dt = d ? new Date(d) : new Date();
         return dt.toLocaleDateString(document.documentElement.lang||'fr', { year:'numeric', month:'short', day:'2-digit' });
       }catch{ return '' }
     }
-    function money(v, curr){ return `${(n(v)).toLocaleString(document.documentElement.lang||'fr')} ${curr||''}`.trim(); }
 
     function section(titleHTML){
       const h = document.createElement('h2'); h.innerHTML = titleHTML;
@@ -176,46 +157,60 @@
     function render(){
       sheet.innerHTML = '';
       if(!spec){ sheet.innerHTML='<p class="muted">Aucune donnée. Revenez au chat pour générer un aperçu.</p>'; return; }
-      const lang = spec.meta?.lang || 'fr';
-      const L = t[lang] || t.fr;
-      document.documentElement.lang = lang;
-
-      /* Apply style (color + font + logo) */
-      const primary = safeStr(spec.meta?.style?.primary, getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#3b82f6');
-      document.documentElement.style.setProperty('--accent', primary);
-      const font = safeStr(spec.meta?.style?.font);
-      if (font) document.documentElement.style.setProperty('--font', font);
+      const L = t[spec.meta?.lang || 'fr'] || t.fr;
+      document.documentElement.lang = spec.meta?.lang || 'fr';
 
       // Header
       const title = safeStr(spec.meta?.title, L.title);
       const company = safeStr(spec.meta?.company, 'Votre société');
       const client = safeStr(spec.meta?.client, 'Client');
       const date = safeStr(spec.meta?.date, fmtDate());
-      const logoDataUrl = safeStr(spec.meta?.style?.logoDataUrl);
 
-      const hdr = document.createElement('div');
-      hdr.className = 'header';
-      const logo = document.createElement('div');
-      logo.className = 'logo';
-      logo.innerHTML = logoDataUrl ? `<img alt="logo" src="${logoDataUrl}"/>` : `<span style="width:16px;height:16px;border-radius:999px;background:var(--accent);display:inline-block"></span>`;
-      const tt = document.createElement('div');
-      tt.innerHTML = `<div class="h1" contenteditable="true">${title}</div>
+      const headerWrap = document.createElement('div');
+      headerWrap.innerHTML = `<div class="h1" contenteditable="true">${title}</div>
         <div class="meta">${L.to}: <span class="tag" contenteditable="true">${client}</span> &nbsp;•&nbsp;
         ${L.from}: <span class="tag" contenteditable="true">${company}</span> &nbsp;•&nbsp; ${L.date}: ${date}</div>`;
-      hdr.appendChild(logo); hdr.appendChild(tt); sheet.appendChild(hdr);
+      sheet.appendChild(headerWrap);
+
+      // Logo (si présent) + accent auto si non défini
+      const logoUrl = spec.meta?.style?.logoDataUrl;
+      if (logoUrl) {
+        const logo = new Image();
+        logo.src = logoUrl; logo.alt = 'Logo';
+        logo.style.cssText = 'max-height:36px; margin-left:auto; display:block;';
+        headerWrap.appendChild(logo);
+
+        if (!spec.meta?.accent) {
+          const img = new Image();
+          img.onload = () => {
+            try{
+              const c = document.createElement('canvas');
+              const x = c.getContext('2d');
+              c.width = img.naturalWidth; c.height = img.naturalHeight;
+              x.drawImage(img, 0, 0);
+              const d = x.getImageData(0, 0, c.width, c.height).data;
+              let r=0,g=0,b=0,n=0;
+              for (let i=0;i<d.length;i+=4){ r+=d[i]; g+=d[i+1]; b+=d[i+2]; n++; }
+              r=Math.round(r/n); g=Math.round(g/n); b=Math.round(b/n);
+              const hex = '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+              document.documentElement.style.setProperty('--accent', hex);
+              spec.meta = Object.assign({}, spec.meta, { accent: hex });
+              localStorage.setItem('pf_proposal', JSON.stringify(spec));
+            }catch(_){}
+          };
+          img.src = logoUrl;
+        }
+      }
+
       sheet.appendChild(Object.assign(document.createElement('div'),{className:'hr'}));
 
-      // Letter (cover email-style)
-      const letter = spec.letter || {};
-      const hasLetter = letter.subject || letter.greeting || safeArr(letter.body_paragraphs).length || letter.closing || letter.signature;
-      if (hasLetter){
+      // Letter (accepte letter.paragraphs ou letter.body_paragraphs)
+      const letterParas = safeArr(spec.letter?.paragraphs).length
+        ? safeArr(spec.letter.paragraphs)
+        : safeArr(spec.letter?.body_paragraphs);
+      if (letterParas.length){
         section(L.letter);
-        if (letter.subject) para(`${L.subject}: ${letter.subject}`);
-        if (letter.preheader) para(letter.preheader);
-        if (letter.greeting) para(letter.greeting);
-        safeArr(letter.body_paragraphs).forEach(p=>para(p));
-        if (letter.closing) para(letter.closing);
-        if (letter.signature) para(letter.signature);
+        letterParas.forEach(p=>para(p));
       }
 
       // Executive summary
@@ -230,31 +225,22 @@
         list(spec.objectives.bullets);
       }
 
-      // Approach (phases per schema: title, description?, activities[], outcomes[], duration?)
+      // Approach (phases) — support steps/activities/outcomes
       if (safeArr(spec.approach?.phases).length){
         section(L.approach);
         safeArr(spec.approach.phases).forEach((ph,i)=>{
           const card = document.createElement('div'); card.className='card';
-          card.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+          card.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
               <strong contenteditable="true">Phase ${i+1} — ${safeStr(ph.title,'À confirmer')}</strong>
               <span class="tag">${safeStr(ph.duration || '', '')}</span>
             </div>`;
           sheet.appendChild(card);
-          if (ph.description) { const p=document.createElement('p'); p.textContent=ph.description; p.setAttribute('contenteditable','true'); card.appendChild(p); }
-          if (safeArr(ph.activities).length){
-            const h=document.createElement('div'); h.className='muted'; h.style.marginTop='6px'; h.textContent='• Activités';
-            card.appendChild(h);
-            const ul=document.createElement('ul');
-            ph.activities.forEach(x=>{const li=document.createElement('li'); li.textContent=x; li.setAttribute('contenteditable','true'); ul.appendChild(li);});
-            card.appendChild(ul);
-          }
-          if (safeArr(ph.outcomes).length){
-            const h=document.createElement('div'); h.className='muted'; h.style.marginTop='6px'; h.textContent='• Résultats';
-            card.appendChild(h);
-            const ul=document.createElement('ul');
-            ph.outcomes.forEach(x=>{const li=document.createElement('li'); li.textContent=x; li.setAttribute('contenteditable','true'); ul.appendChild(li);});
-            card.appendChild(ul);
-          }
+          if (ph.description) para(ph.description);
+          const steps = safeArr(ph.steps).length ? safeArr(ph.steps) : [
+            ...safeArr(ph.activities||[]),
+            ...safeArr(ph.outcomes||[])
+          ];
+          if (steps.length) list(steps);
         });
       }
 
@@ -269,62 +255,38 @@
         b.innerHTML = `<div class="muted" style="margin-bottom:6px">${L.out_scope}</div>`;
         grid.appendChild(b);
         sheet.appendChild(grid);
-
         const ulA=document.createElement('ul'); safeArr(spec.deliverables.in).forEach(x=>{const li=document.createElement('li'); li.textContent=x; li.setAttribute('contenteditable','true'); ulA.appendChild(li);});
         const ulB=document.createElement('ul'); safeArr(spec.deliverables.out).forEach(x=>{const li=document.createElement('li'); li.textContent=x; li.setAttribute('contenteditable','true'); ulB.appendChild(li);});
         a.appendChild(ulA); b.appendChild(ulB);
       }
 
-      // Timeline (milestones: title, dateOrWeek, owner?)
+      // Timeline
       if (safeArr(spec.timeline?.milestones).length){
         section(L.timeline);
         const grid=document.createElement('div'); grid.className='grid2';
         safeArr(spec.timeline.milestones).forEach(ms=>{
           const c=document.createElement('div'); c.className='card';
-          const when = ms.dateOrWeek || ms.date || ms.duration || '';
+          const when = safeStr(ms.dateOrWeek || ms.date || ms.duration || '', '');
           c.innerHTML = `<div><strong contenteditable="true">${safeStr(ms.title,'Étape')}</strong></div>
-                         <div class="muted">${when}${ms.owner?` — ${L.owner}: ${ms.owner}`:''}</div>`;
+                         <div class="muted">${when}</div>`;
           if (ms.notes) { const p=document.createElement('p'); p.textContent=ms.notes; p.setAttribute('contenteditable','true'); c.appendChild(p); }
           grid.appendChild(c);
         });
         sheet.appendChild(grid);
       }
 
-      // Pricing (schema: model, currency?, total?, items[], terms[])
-      if (spec.pricing && (spec.pricing.total != null || safeStr(spec.pricing.model))){
+      // Pricing (support pricing.total ou pricing.price)
+      if (spec.pricing && (spec.pricing.total!=null || spec.pricing.price!=null || safeStr(spec.pricing.model))){
         section(L.pricing);
-
-        const currency = spec.pricing.currency || (spec.meta?.currency || '€');
-
-        if (Array.isArray(spec.pricing.items) && spec.pricing.items.length){
-          const tbl = document.createElement('table'); tbl.className='items';
-          tbl.innerHTML = `<thead><tr>
-              <th>${L.items}</th><th>Qty</th><th>Unit</th><th>PU</th><th>Subtotal</th>
-            </tr></thead><tbody></tbody>`;
-          const tb = tbl.querySelector('tbody');
-          spec.pricing.items.forEach(it=>{
-            const tr=document.createElement('tr');
-            const subtotal = (it.subtotal!=null) ? n(it.subtotal) : (n(it.qty)*n(it.unit_price));
-            tr.innerHTML = `
-              <td contenteditable="true">${safeStr(it.name,'Item')}</td>
-              <td contenteditable="true">${safeStr(it.qty,'')}</td>
-              <td contenteditable="true">${safeStr(it.unit,'')}</td>
-              <td contenteditable="true">${money(it.unit_price, currency)}</td>
-              <td>${money(subtotal, currency)}</td>
-            `;
-            tb.appendChild(tr);
-          });
-          sheet.appendChild(tbl);
-        }
-
         const priceBox=document.createElement('div'); priceBox.className='card';
-        const total = spec.pricing.total!=null ? money(spec.pricing.total, currency) : '—';
+        const priceVal = (spec.pricing.total!=null ? spec.pricing.total : spec.pricing.price);
+        const price = priceVal!=null ? String(priceVal) : '—';
+        const currency = spec.pricing.currency || (spec.meta?.currency || '€');
         priceBox.innerHTML = `
-          <div class="tfoot"><div class="total">Total: <span contenteditable="true">${total}</span></div></div>
-          <div class="muted" style="margin-top:6px">${L.price_model}: <span contenteditable="true">${safeStr(spec.pricing.model,'Forfait')}</span></div>
+          <div class="price" contenteditable="true">${price} ${currency}</div>
+          <div class="muted" style="margin-top:4px">${L.price_model}: <span contenteditable="true">${safeStr(spec.pricing.model,'Forfait')}</span></div>
         `;
         sheet.appendChild(priceBox);
-
         if (safeArr(spec.pricing.terms).length){
           const terms=document.createElement('div'); terms.className='card'; terms.style.marginTop='8px';
           terms.innerHTML = `<div class="muted" style="margin-bottom:6px">${L.terms}</div>`;
@@ -346,7 +308,7 @@
         safeArr(spec.next_steps.paragraphs).forEach(p=>para(p));
       }
 
-      statusEl.textContent = (lang==='en') ? 'Preview ready' : 'Aperçu prêt';
+      statusEl.textContent = (spec.meta?.lang==='en') ? 'Preview ready' : 'Aperçu prêt';
     }
 
     // Load spec
@@ -355,23 +317,17 @@
         const raw = localStorage.getItem('pf_proposal');
         if(raw){ spec = JSON.parse(raw); }
       } catch {}
-      if(!spec) spec = { meta:{ lang: 'fr', title:'Proposition commerciale', style:{ primary:'#3b82f6' } } };
+      if(!spec) spec = { meta:{ lang: 'fr', title:'Proposition commerciale' } };
       // init UI from spec
       langSel.value = spec.meta?.lang || 'fr';
-
-      const primary = spec.meta?.style?.primary;
-      if(primary) { document.documentElement.style.setProperty('--accent', primary); accentPick.value = primary.startsWith('#') ? primary : '#3b82f6'; }
-      const font = spec.meta?.style?.font; if (font) document.documentElement.style.setProperty('--font', font);
-
+      const acc = spec.meta?.accent || getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+      if(acc) { document.documentElement.style.setProperty('--accent', acc); try{ if(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(acc)) document.getElementById('accentPick').value = acc; }catch{} }
       render();
     })();
 
     // Controls
     $('#backBtn').onclick = ()=>{ location.href = 'index.html'; };
-    $('#pdfBtn').onclick  = ()=> {
-      statusEl.textContent = (spec.meta?.lang==='en') ? 'Preparing PDF…' : 'Préparation du PDF…';
-      setTimeout(()=>{ window.print(); statusEl.textContent = (spec.meta?.lang==='en') ? 'Preview ready' : 'Aperçu prêt'; }, 80);
-    };
+    $('#pdfBtn').onclick  = ()=> { statusEl.textContent = (spec.meta?.lang==='en') ? 'Preparing PDF…' : 'Préparation du PDF…'; setTimeout(()=>{ window.print(); statusEl.textContent = (spec.meta?.lang==='en') ? 'Preview ready' : 'Aperçu prêt'; }, 100); };
 
     langSel.onchange = (e)=>{
       const lang = e.target.value;
@@ -383,7 +339,7 @@
     accentPick.oninput = (e)=>{
       const v = e.target.value || '#3b82f6';
       document.documentElement.style.setProperty('--accent', v);
-      spec.meta = Object.assign({}, spec.meta, { style:{ ...(spec.meta?.style||{}), primary:v } });
+      spec.meta = Object.assign({}, spec.meta, { accent: v });
       localStorage.setItem('pf_proposal', JSON.stringify(spec));
     };
 
@@ -392,7 +348,66 @@
       editing = !editing;
       document.body.classList.toggle('edit-on', editing);
       editBtn.textContent = editing ? 'Terminer édition' : 'Éditer';
-      // (Persistance fine des champs édités à mettre en place plus tard si souhaité)
+    };
+
+    // === Sauvegarde simple des edits vers spec ===
+    document.getElementById('saveEditsBtn').onclick = () => {
+      try {
+        // Title
+        const titleEl = document.querySelector('.h1[contenteditable="true"]');
+        if (titleEl) {
+          spec.meta = spec.meta || {};
+          spec.meta.title = titleEl.textContent.trim() || spec.meta.title;
+        }
+
+        // Client/Company tags
+        const metaEl = document.querySelector('.meta');
+        if (metaEl) {
+          const tags = metaEl.querySelectorAll('.tag');
+          if (tags[0]) spec.meta.client  = tags[0].textContent.trim() || spec.meta.client;
+          if (tags[1]) spec.meta.company = tags[1].textContent.trim() || spec.meta.company;
+        }
+
+        // Pull letter paragraphs again
+        const sectionsH2 = Array.from(sheet.querySelectorAll('h2'));
+        const findSectionIndex = (regex) => sectionsH2.findIndex(h => regex.test(h.textContent));
+        const letterIdx = findSectionIndex(/Lettre|Cover/i);
+        if (letterIdx >= 0) {
+          const start = sectionsH2[letterIdx];
+          const nodes = [];
+          for (let n = start.nextSibling; n && !(n.tagName==='H2'); n = n.nextSibling) {
+            if (n.nodeType === 1 && n.matches('p[contenteditable="true"]')) nodes.push(n.textContent.trim());
+          }
+          if (nodes.length) {
+            spec.letter = Object.assign({}, spec.letter, { paragraphs: nodes, body_paragraphs: nodes });
+          }
+        }
+
+        // Pricing value
+        const priceEl = sheet.querySelector('.price[contenteditable="true"]');
+        if (priceEl) {
+          const m = priceEl.textContent.replace(/\s/g,'').match(/^(\d+(?:[.,]\d{1,2})?)/);
+          const val = m ? Number(String(m[1]).replace(',', '.')) : null;
+          spec.pricing = Object.assign({}, spec.pricing, { total: val, price: val });
+        }
+
+        // Terms (if present)
+        const termsCard = Array.from(sheet.querySelectorAll('.card')).find(c => /Conditions|Terms/i.test(c.textContent));
+        if (termsCard) {
+          const lis = termsCard.querySelectorAll('li[contenteditable="true"]');
+          const arr = Array.from(lis).map(li => li.textContent.trim()).filter(Boolean);
+          if (arr.length) {
+            spec.pricing = Object.assign({}, spec.pricing, { terms: arr });
+          }
+        }
+
+        localStorage.setItem('pf_proposal', JSON.stringify(spec));
+        statusEl.textContent = (spec.meta?.lang === 'en') ? 'Saved' : 'Modifications sauvegardées';
+        setTimeout(()=>{ statusEl.textContent = (spec.meta?.lang==='en') ? 'Preview ready' : 'Aperçu prêt'; }, 1200);
+      } catch(e) {
+        console.error(e);
+        alert((spec.meta?.lang==='en'?'Save error: ':'Erreur de sauvegarde : ') + e.message);
+      }
     };
   </script>
 </body>
