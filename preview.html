@@ -29,10 +29,14 @@
     .wrap{display:grid;place-items:center;padding:22px}
     .sheet{width:var(--paper-w); min-height:var(--paper-h); background:#fff; border:1px solid var(--stroke);
       box-shadow:0 20px 60px rgba(10,16,32,.12); border-radius:12px; padding:28mm 22mm;}
-    .h1{font-size:28px;line-height:1.1;margin:0 0 6px;font-weight:800;letter-spacing:-.01em}
-    .meta{color:var(--muted);font-size:14px;margin-bottom:12px}
+    .brandbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .brand-left{display:flex;align-items:center;gap:10px}
+    .brand-logo{height:28px;max-width:160px;object-fit:contain;border-radius:6px}
+    .h1{font-size:28px;line-height:1.1;margin:6px 0 6px;font-weight:800;letter-spacing:-.01em}
+    .h1 .accent{background:linear-gradient(90deg,var(--accent),#93c5fd);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .meta{color:var(--muted);font-size:14px;margin-bottom:18px}
     h2{margin:22px 0 8px;font-size:18px;letter-spacing:.2px}
-    .hr{height:1px;background:var(--stroke);margin:12px 0}
+    .hr{height:2px;background:var(--accent);opacity:.2;border-radius:2px;margin:12px 0}
     p{margin:8px 0 10px}
     ul{margin:8px 0 10px 18px}
     .tag{display:inline-block;padding:3px 8px;border-radius:999px;background:#eef4ff;border:1px solid var(--stroke);font-size:12px;color:#28436d}
@@ -50,6 +54,7 @@
       .sheet{box-shadow:none;border:none;border-radius:0;width:auto;min-height:auto;padding:18mm 16mm}
       a[href]:after{content:""}
     }
+    .hidden{display:none}
   </style>
 </head>
 <body>
@@ -68,7 +73,6 @@
       <label class="hint">Couleur</label>
       <input type="color" class="color" id="accentPick" value="#3b82f6" title="Couleur d’accent"/>
       <button class="btn" id="editBtn">Éditer</button>
-      <button class="btn" id="saveEditsBtn">Sauver</button>
       <button class="btn primary" id="pdfBtn">Exporter PDF</button>
     </div>
   </div>
@@ -131,7 +135,7 @@
     const editBtn = $('#editBtn');
 
     function safeArr(v){ return Array.isArray(v) ? v : []; }
-    function safeStr(v, fallback=''){ return (v==null?'':String(v)).trim() || fallback; }
+    function safeStr(v, fb=''){ return (v==null?'':String(v)).trim() || fb; }
     function fmtDate(d){
       try{
         const dt = d ? new Date(d) : new Date();
@@ -160,57 +164,38 @@
       const L = t[spec.meta?.lang || 'fr'] || t.fr;
       document.documentElement.lang = spec.meta?.lang || 'fr';
 
-      // Header
+      // Accent depuis meta.style.primary ou meta.accent
+      const accent = spec.meta?.style?.primary || spec.meta?.accent || getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#3b82f6';
+      document.documentElement.style.setProperty('--accent', accent);
+      if (accentPick && typeof accentPick.value === 'string') accentPick.value = accent.startsWith('#') ? accent : '#3b82f6';
+
+      // Header / Brand bar
+      const brandBar = document.createElement('div'); brandBar.className = 'brandbar';
+      const brandLeft = document.createElement('div'); brandLeft.className = 'brand-left';
+      const logoUrl = spec.meta?.style?.logoDataUrl;
+      const logo = document.createElement('img'); logo.className = 'brand-logo'; logo.alt = 'logo';
+      if (logoUrl) { logo.src = logoUrl; } else { logo.classList.add('hidden'); }
+      brandLeft.appendChild(logo);
+      brandBar.appendChild(brandLeft);
+      sheet.appendChild(brandBar);
+
+      // Title + meta
       const title = safeStr(spec.meta?.title, L.title);
       const company = safeStr(spec.meta?.company, 'Votre société');
       const client = safeStr(spec.meta?.client, 'Client');
       const date = safeStr(spec.meta?.date, fmtDate());
 
-      const headerWrap = document.createElement('div');
-      headerWrap.innerHTML = `<div class="h1" contenteditable="true">${title}</div>
+      const h1 = document.createElement('div');
+      h1.innerHTML = `<div class="h1" contenteditable="true">${title.replace(/(Proposition|Proposal)/i, '<span class="accent">$&</span>')}</div>
         <div class="meta">${L.to}: <span class="tag" contenteditable="true">${client}</span> &nbsp;•&nbsp;
         ${L.from}: <span class="tag" contenteditable="true">${company}</span> &nbsp;•&nbsp; ${L.date}: ${date}</div>`;
-      sheet.appendChild(headerWrap);
-
-      // Logo (si présent) + accent auto si non défini
-      const logoUrl = spec.meta?.style?.logoDataUrl;
-      if (logoUrl) {
-        const logo = new Image();
-        logo.src = logoUrl; logo.alt = 'Logo';
-        logo.style.cssText = 'max-height:36px; margin-left:auto; display:block;';
-        headerWrap.appendChild(logo);
-
-        if (!spec.meta?.accent) {
-          const img = new Image();
-          img.onload = () => {
-            try{
-              const c = document.createElement('canvas');
-              const x = c.getContext('2d');
-              c.width = img.naturalWidth; c.height = img.naturalHeight;
-              x.drawImage(img, 0, 0);
-              const d = x.getImageData(0, 0, c.width, c.height).data;
-              let r=0,g=0,b=0,n=0;
-              for (let i=0;i<d.length;i+=4){ r+=d[i]; g+=d[i+1]; b+=d[i+2]; n++; }
-              r=Math.round(r/n); g=Math.round(g/n); b=Math.round(b/n);
-              const hex = '#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
-              document.documentElement.style.setProperty('--accent', hex);
-              spec.meta = Object.assign({}, spec.meta, { accent: hex });
-              localStorage.setItem('pf_proposal', JSON.stringify(spec));
-            }catch(_){}
-          };
-          img.src = logoUrl;
-        }
-      }
-
+      sheet.appendChild(h1);
       sheet.appendChild(Object.assign(document.createElement('div'),{className:'hr'}));
 
-      // Letter (accepte letter.paragraphs ou letter.body_paragraphs)
-      const letterParas = safeArr(spec.letter?.paragraphs).length
-        ? safeArr(spec.letter.paragraphs)
-        : safeArr(spec.letter?.body_paragraphs);
-      if (letterParas.length){
+      // Letter
+      if (safeArr(spec.letter?.paragraphs).length){
         section(L.letter);
-        letterParas.forEach(p=>para(p));
+        safeArr(spec.letter.paragraphs).forEach(p=>para(p));
       }
 
       // Executive summary
@@ -225,7 +210,7 @@
         list(spec.objectives.bullets);
       }
 
-      // Approach (phases) — support steps/activities/outcomes
+      // Approach (phases)
       if (safeArr(spec.approach?.phases).length){
         section(L.approach);
         safeArr(spec.approach.phases).forEach((ph,i)=>{
@@ -236,11 +221,7 @@
             </div>`;
           sheet.appendChild(card);
           if (ph.description) para(ph.description);
-          const steps = safeArr(ph.steps).length ? safeArr(ph.steps) : [
-            ...safeArr(ph.activities||[]),
-            ...safeArr(ph.outcomes||[])
-          ];
-          if (steps.length) list(steps);
+          if (safeArr(ph.steps).length) list(ph.steps);
         });
       }
 
@@ -255,6 +236,7 @@
         b.innerHTML = `<div class="muted" style="margin-bottom:6px">${L.out_scope}</div>`;
         grid.appendChild(b);
         sheet.appendChild(grid);
+        // fill lists
         const ulA=document.createElement('ul'); safeArr(spec.deliverables.in).forEach(x=>{const li=document.createElement('li'); li.textContent=x; li.setAttribute('contenteditable','true'); ulA.appendChild(li);});
         const ulB=document.createElement('ul'); safeArr(spec.deliverables.out).forEach(x=>{const li=document.createElement('li'); li.textContent=x; li.setAttribute('contenteditable','true'); ulB.appendChild(li);});
         a.appendChild(ulA); b.appendChild(ulB);
@@ -266,21 +248,19 @@
         const grid=document.createElement('div'); grid.className='grid2';
         safeArr(spec.timeline.milestones).forEach(ms=>{
           const c=document.createElement('div'); c.className='card';
-          const when = safeStr(ms.dateOrWeek || ms.date || ms.duration || '', '');
           c.innerHTML = `<div><strong contenteditable="true">${safeStr(ms.title,'Étape')}</strong></div>
-                         <div class="muted">${when}</div>`;
+                         <div class="muted">${safeStr(ms.date || ms.duration || '', '')}</div>`;
           if (ms.notes) { const p=document.createElement('p'); p.textContent=ms.notes; p.setAttribute('contenteditable','true'); c.appendChild(p); }
           grid.appendChild(c);
         });
         sheet.appendChild(grid);
       }
 
-      // Pricing (support pricing.total ou pricing.price)
-      if (spec.pricing && (spec.pricing.total!=null || spec.pricing.price!=null || safeStr(spec.pricing.model))){
+      // Pricing
+      if (spec.pricing && (spec.pricing.price!=null || safeStr(spec.pricing.model))){
         section(L.pricing);
         const priceBox=document.createElement('div'); priceBox.className='card';
-        const priceVal = (spec.pricing.total!=null ? spec.pricing.total : spec.pricing.price);
-        const price = priceVal!=null ? String(priceVal) : '—';
+        const price = spec.pricing.price!=null ? String(spec.pricing.price) : '—';
         const currency = spec.pricing.currency || (spec.meta?.currency || '€');
         priceBox.innerHTML = `
           <div class="price" contenteditable="true">${price} ${currency}</div>
@@ -320,8 +300,13 @@
       if(!spec) spec = { meta:{ lang: 'fr', title:'Proposition commerciale' } };
       // init UI from spec
       langSel.value = spec.meta?.lang || 'fr';
-      const acc = spec.meta?.accent || getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
-      if(acc) { document.documentElement.style.setProperty('--accent', acc); try{ if(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(acc)) document.getElementById('accentPick').value = acc; }catch{} }
+
+      // Accent: meta.style.primary > meta.accent > défaut
+      const acc = spec.meta?.style?.primary || spec.meta?.accent || getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+      if(acc) {
+        document.documentElement.style.setProperty('--accent', acc);
+        accentPick.value = acc.startsWith('#') ? acc : '#3b82f6';
+      }
       render();
     })();
 
@@ -339,7 +324,10 @@
     accentPick.oninput = (e)=>{
       const v = e.target.value || '#3b82f6';
       document.documentElement.style.setProperty('--accent', v);
+      // sauvegarde côté spec
       spec.meta = Object.assign({}, spec.meta, { accent: v });
+      // si style existe, refléter dans style.primary (utile pour le modèle)
+      spec.meta.style = Object.assign({}, spec.meta.style||{}, { primary: v });
       localStorage.setItem('pf_proposal', JSON.stringify(spec));
     };
 
@@ -348,66 +336,6 @@
       editing = !editing;
       document.body.classList.toggle('edit-on', editing);
       editBtn.textContent = editing ? 'Terminer édition' : 'Éditer';
-    };
-
-    // === Sauvegarde simple des edits vers spec ===
-    document.getElementById('saveEditsBtn').onclick = () => {
-      try {
-        // Title
-        const titleEl = document.querySelector('.h1[contenteditable="true"]');
-        if (titleEl) {
-          spec.meta = spec.meta || {};
-          spec.meta.title = titleEl.textContent.trim() || spec.meta.title;
-        }
-
-        // Client/Company tags
-        const metaEl = document.querySelector('.meta');
-        if (metaEl) {
-          const tags = metaEl.querySelectorAll('.tag');
-          if (tags[0]) spec.meta.client  = tags[0].textContent.trim() || spec.meta.client;
-          if (tags[1]) spec.meta.company = tags[1].textContent.trim() || spec.meta.company;
-        }
-
-        // Pull letter paragraphs again
-        const sectionsH2 = Array.from(sheet.querySelectorAll('h2'));
-        const findSectionIndex = (regex) => sectionsH2.findIndex(h => regex.test(h.textContent));
-        const letterIdx = findSectionIndex(/Lettre|Cover/i);
-        if (letterIdx >= 0) {
-          const start = sectionsH2[letterIdx];
-          const nodes = [];
-          for (let n = start.nextSibling; n && !(n.tagName==='H2'); n = n.nextSibling) {
-            if (n.nodeType === 1 && n.matches('p[contenteditable="true"]')) nodes.push(n.textContent.trim());
-          }
-          if (nodes.length) {
-            spec.letter = Object.assign({}, spec.letter, { paragraphs: nodes, body_paragraphs: nodes });
-          }
-        }
-
-        // Pricing value
-        const priceEl = sheet.querySelector('.price[contenteditable="true"]');
-        if (priceEl) {
-          const m = priceEl.textContent.replace(/\s/g,'').match(/^(\d+(?:[.,]\d{1,2})?)/);
-          const val = m ? Number(String(m[1]).replace(',', '.')) : null;
-          spec.pricing = Object.assign({}, spec.pricing, { total: val, price: val });
-        }
-
-        // Terms (if present)
-        const termsCard = Array.from(sheet.querySelectorAll('.card')).find(c => /Conditions|Terms/i.test(c.textContent));
-        if (termsCard) {
-          const lis = termsCard.querySelectorAll('li[contenteditable="true"]');
-          const arr = Array.from(lis).map(li => li.textContent.trim()).filter(Boolean);
-          if (arr.length) {
-            spec.pricing = Object.assign({}, spec.pricing, { terms: arr });
-          }
-        }
-
-        localStorage.setItem('pf_proposal', JSON.stringify(spec));
-        statusEl.textContent = (spec.meta?.lang === 'en') ? 'Saved' : 'Modifications sauvegardées';
-        setTimeout(()=>{ statusEl.textContent = (spec.meta?.lang==='en') ? 'Preview ready' : 'Aperçu prêt'; }, 1200);
-      } catch(e) {
-        console.error(e);
-        alert((spec.meta?.lang==='en'?'Save error: ':'Erreur de sauvegarde : ') + e.message);
-      }
     };
   </script>
 </body>
