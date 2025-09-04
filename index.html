@@ -705,13 +705,14 @@
       const dataUrl = await fileToDataURL(file);
       const { primary, secondary } = await extractPaletteFromDataUrl(dataUrl);
 
-      // Merge spec
+      // Merge spec (+ accent pour l’aperçu)
       const lang = document.documentElement.lang || 'fr';
       const current = JSON.parse(localStorage.getItem('pf_proposal') || '{"meta":{"lang":"'+lang+'"}}');
       const next = {
         ...current,
         meta: {
           ...(current.meta||{}),
+          accent: primary, // << pour que preview.html prenne immédiatement la bonne couleur
           style: {
             ...((current.meta && current.meta.style) || {}),
             logoDataUrl: dataUrl,
