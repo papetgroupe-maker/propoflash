@@ -137,6 +137,9 @@
         </select>
         <button class="btn btn-ghost" id="authBtn">Se connecter</button>
         <button class="btn btn-accent" id="startBtn" data-i18n="cta_start">Commencer</button>
+        <!-- Logo upload -->
+        <button class="btn btn-ghost" id="logoBtn">Logo</button>
+        <input type="file" id="logoInput" accept="image/*" hidden>
       </div>
     </div>
   </div>
@@ -742,6 +745,34 @@
           console.error(e);
           alert((lang === 'fr' ? 'Erreur: ' : 'Error: ') + e.message);
         }
+      });
+    })();
+
+    /* === Upload logo → stocke dans meta.style.logoDataUrl === */
+    (() => {
+      const btn = document.getElementById('logoBtn');
+      const inp = document.getElementById('logoInput');
+      if (!btn || !inp) return;
+
+      btn.addEventListener('click', () => inp.click());
+      inp.addEventListener('change', async (e) => {
+        const f = e.target.files?.[0];
+        if (!f) return;
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+          try {
+            const url = String(ev.target.result || '');
+            const spec = JSON.parse(localStorage.getItem('pf_proposal') || '{"meta":{}}');
+            spec.meta = spec.meta || {};
+            spec.meta.style = Object.assign({}, spec.meta.style, { logoDataUrl: url });
+            localStorage.setItem('pf_proposal', JSON.stringify(spec));
+            addMsg(document.documentElement.lang === 'fr'
+              ? "Logo importé. Je peux adapter la proposition à votre identité visuelle."
+              : "Logo imported. I can adapt the proposal to your brand style.", 'ai');
+          } catch {}
+        };
+        reader.readAsDataURL(f);
+        e.target.value = ''; // reset
       });
     })();
 
