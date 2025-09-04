@@ -100,7 +100,7 @@
     .chat{display:flex;flex-direction:column;gap:12px;max-height:420px;overflow:auto}
     .msg{display:flex}
     .msg.me{justify-content:flex-end}
-    .bubble{background:#fff;border:1px solid var(--stroke);padding:12px 14px;border-radius:14px;max-width:80%;box-shadow:var(--shadow);white-space:pre-wrap}
+    .bubble{background:#fff;border:1px solid var(--stroke);padding:12px 14px;border-radius:14px;max-width:80%;box-shadow:var(--shadow)}
     .msg.me .bubble{background:#0b2446;color:#e8eefc}
     .send.loading{opacity:.6;pointer-events:none}
 
@@ -292,7 +292,7 @@
             <li>• <span data-i18n="p3_b2">Sections &amp; modèles illimités</span></li>
             <li>• <span data-i18n="p3_b3">Micro-échantillon si aucune preuve</span></li>
           </ul>
-          <a class="btn class="btn btn-ghost" href="#checkout-pro" data-i18n="cta_choose_pro">Choisir Pro</a>
+          <a class="btn btn-ghost" href="#checkout-pro" data-i18n="cta_choose_pro">Choisir Pro</a>
         </div>
       </div>
     </div>
@@ -315,9 +315,9 @@
         see_how:"Voir comment ça marche",
         chip_b2b:"Demandes de devis B2B", chip_ecom:"Ventes e-commerce", chip_marketing:"Prestation marketing", chip_website:"Refonte de site",
         why_h2:"Pourquoi PropoFlash ?",why_sub:"Notre signature : qualité éditoriale + exécution instantanée, sans vous perdre dans des outils.",
-        why3_t:"Aperçu instantané",why3_p:"Vous collez le brief, vous prévisualisez, vous peaufinez — puis PDF en 1 clic.",
         why1_t:"Rédaction premium",why1_p:"Ton professionnel, argumentation claire, structure prête à envoyer à des décideurs.",
         why2_t:"Adaptée au contexte",why2_p:"Chaque proposition s’appuie sur votre brief et vos preuves pour coller à l’objectif.",
+        why3_t:"Aperçu instantané",why3_p:"Vous collez le brief, vous prévisualisez, vous peaufinez — puis PDF en 1 clic.",
         use_h2:"Cas d’usage fréquents",use_sub:"Du devis B2B aux offres e-commerce, PropoFlash couvre les besoins essentiels.",
         use_t1:"Devis B2B",use_t2:"Services",use_t3:"E-commerce",
         use1:"Qualification, périmètre, livrables, échéancier et conditions.",
@@ -385,8 +385,7 @@
     /* Chips autofill */
     $$(".chip").forEach(c=>c.addEventListener("click",()=>{
       const v=$("#brief").value.trim();
-      const label = (document.documentElement.lang === 'fr') ? 'Contexte' : 'Context';
-      $("#brief").value=(v?v+"\n":"")+ label + " : " + c.dataset.chip; $("#brief").focus();
+      $("#brief").value=(v?v+"\n":"")+"Contexte : "+c.dataset.chip; $("#brief").focus();
     }));
 
     /* FREE PREVIEW LIMIT (front-only demo) */
@@ -460,6 +459,7 @@
     });
 
     /* ===== Supabase Auth + Cloud Chats ===== */
+    // ⚠️ REMPLACE ICI par tes valeurs de projet Supabase :
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co'; // ← à remplacer si besoin
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -688,7 +688,7 @@
       if (!briefEl || !sendBtn) return;
 
       briefEl.addEventListener('keydown', (e) => {
-        if (e.isComposing || e.keyCode === 229) return; // IME
+        if (e.isComposing || e.keyCode === 229) return;
         const isEnter = e.key === 'Enter';
         const sendCombo = (isEnter && !e.shiftKey) || (isEnter && (e.ctrlKey || e.metaKey));
         if (sendCombo) { e.preventDefault(); sendBtn.click(); }
