@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>PropoFlash — Connexion</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --ink:#0a1020; --muted:#5c667a; --stroke:#e7ecf6;
+      --accent:#3b82f6; --accent-ink:#fff; --bg:#f6f8fc;
+    }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;background:var(--bg);font-family:Inter,system-ui,sans-serif;color:var(--ink)}
+    a{color:var(--ink)}
+    .page{display:grid;grid-template-columns:1fr 1.1fr;min-height:100vh}
+    /* Left (form) */
+    .left{display:flex;align-items:center;justify-content:center;padding:32px}
+    .panel{width:100%;max-width:420px}
+    .brand{display:flex;align-items:center;gap:10px;margin-bottom:28px;font-weight:800}
+    .spark{width:24px;height:24px;border-radius:7px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd)}
+    h1{font-size:40px;line-height:1.05;letter-spacing:-.02em;margin:0 0 10px}
+    .sub{font-size:18px;color:var(--muted);margin:0 0 24px}
+    .btn{width:100%;display:inline-flex;align-items:center;justify-content:center;gap:10px;
+         padding:12px 14px;border:1px solid var(--stroke);border-radius:12px;background:#fff;
+         font-weight:700;cursor:pointer}
+    .btn:hover{box-shadow:0 6px 18px rgba(10,16,32,.08)}
+    .btn.primary{background:var(--ink);color:#fff;border-color:#0000}
+    .btn.google{background:#fff}
+    .or{display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--muted)}
+    .or:before,.or:after{content:"";flex:1;height:1px;background:var(--stroke)}
+    .fld{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+    .fld label{font-weight:600}
+    .fld input{width:100%;padding:12px 12px;border:1px solid var(--stroke);border-radius:12px;font:inherit}
+    .row{display:flex;align-items:center;justify-content:space-between}
+    .hint{color:var(--muted);font-size:12px}
+    .muted{color:var(--muted)}
+    .link{color:var(--ink);font-weight:600;text-decoration:none}
+    .error{background:#fee2e2;border:1px solid #fecaca;color:#7f1d1d;padding:10px 12px;border-radius:10px;font-size:14px;margin:10px 0;display:none}
+    .ok{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;padding:10px 12px;border-radius:10px;font-size:14px;margin:10px 0;display:none}
+    .foot{margin-top:14px;text-align:center}
+    /* Right (hero) */
+    .right{position:relative;overflow:hidden}
+    .hero{position:absolute;inset:24px;border-radius:28px;background:
+      radial-gradient(60% 60% at 70% 30%, rgba(59,130,246,.28), transparent 60%),
+      radial-gradient(50% 50% at 30% 70%, rgba(139,92,246,.22), transparent 60%),
+      #eaf2ff;
+      box-shadow:inset 0 0 0 1px #ffffff90, 0 20px 60px rgba(10,16,32,.12);
+      display:flex;align-items:center;justify-content:center}
+    .bubble{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--stroke);
+            border-radius:18px;padding:14px 16px;min-width:62%;box-shadow:0 10px 28px rgba(10,16,32,.12)}
+    .bubble input{flex:1;border:none;outline:none;font:600 18px/1.2 Inter,system-ui}
+    .up{width:28px;height:28px;border-radius:8px;background:var(--ink);color:#fff;
+        display:grid;place-items:center}
+    /* Small screens */
+    @media (max-width:980px){
+      .page{grid-template-columns:1fr}
+      .right{display:none}
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="page">
+    <!-- LEFT: form -->
+    <div class="left">
+      <div class="panel">
+        <div class="brand"><div class="spark" aria-hidden="true"></div>PropoFlash</div>
+        <h1>Bienvenue</h1>
+        <p class="sub">Connectez-vous pour retrouver vos discussions et aperçus.</p>
+
+        <button class="btn google" id="googleBtn">
+          <img alt="" src="https://www.svgrepo.com/show/475656/google-color.svg" width="18" height="18"/>
+          Se connecter avec Google
+        </button>
+
+        <div class="or"><span>ou</span></div>
+
+        <div id="msgErr" class="error"></div>
+        <div id="msgOk" class="ok"></div>
+
+        <form id="authForm" autocomplete="on">
+          <div class="fld">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" placeholder="votre@email.com" required/>
+          </div>
+          <div class="fld">
+            <div class="row">
+              <label for="password">Mot de passe</label>
+              <a href="#" id="forgot" class="hint">Mot de passe oublié ?</a>
+            </div>
+            <input id="password" name="password" type="password" placeholder="••••••••" required minlength="6"/>
+          </div>
+          <button type="submit" class="btn primary" id="submitBtn">Se connecter</button>
+        </form>
+
+        <div class="foot">
+          <span class="muted">Pas de compte ?</span>
+          <a href="#" id="toggleMode" class="link">Créer un compte</a>
+        </div>
+
+        <div style="margin-top:12px">
+          <a class="hint" href="index.html">← Retour au site</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: hero -->
+    <div class="right">
+      <div class="hero">
+        <div class="bubble">
+          <input value="Transformez vos briefs en propositions" aria-label="accroche" disabled>
+          <div class="up">↑</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // === Supabase (mêmes constantes que ton index.html) ===
+    const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    const form = document.getElementById('authForm');
+    const email = document.getElementById('email');
+    const pass = document.getElementById('password');
+    const submitBtn = document.getElementById('submitBtn');
+    const googleBtn = document.getElementById('googleBtn');
+    const msgErr = document.getElementById('msgErr');
+    const msgOk = document.getElementById('msgOk');
+    const toggle = document.getElementById('toggleMode');
+    const forgot = document.getElementById('forgot');
+
+    let mode = 'signin'; // or 'signup' or 'reset'
+
+    function showErr(txt){ msgErr.textContent = txt; msgErr.style.display='block'; msgOk.style.display='none'; }
+    function showOk(txt){ msgOk.textContent = txt; msgOk.style.display='block'; msgErr.style.display='none'; }
+    function clearMsgs(){ msgErr.style.display='none'; msgOk.style.display='none'; }
+
+    // Déjà connecté ? -> retour
+    (async ()=>{
+      const { data:{ session } } = await sb.auth.getSession();
+      if(session){ location.href='index.html'; }
+    })();
+
+    // Google OAuth
+    googleBtn.onclick = async ()=>{
+      clearMsgs();
+      const { error } = await sb.auth.signInWithOAuth({
+        provider:'google',
+        options:{ redirectTo: window.location.origin + '/index.html' }
+      });
+      if(error) showErr(error.message);
+    };
+
+    // Basculer Connexion / Inscription
+    toggle.onclick = (e)=>{
+      e.preventDefault(); clearMsgs();
+      if(mode==='signin'){
+        mode='signup';
+        submitBtn.textContent='Créer le compte';
+        toggle.textContent='J’ai déjà un compte';
+        forgot.style.visibility='hidden';
+      }else{
+        mode='signin';
+        submitBtn.textContent='Se connecter';
+        toggle.textContent='Créer un compte';
+        forgot.style.visibility='visible';
+      }
+    };
+
+    // Mot de passe oublié
+    forgot.onclick = async (e)=>{
+      e.preventDefault(); clearMsgs();
+      if(!email.value){ email.focus(); return showErr('Indique ton email pour recevoir le lien de réinitialisation.'); }
+      const { error } = await sb.auth.resetPasswordForEmail(email.value, {
+        redirectTo: window.location.origin + '/login.html'
+      });
+      if(error) return showErr(error.message);
+      showOk('Email envoyé ✅. Clique sur le lien reçu pour définir un nouveau mot de passe.');
+    };
+
+    // Submit
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault(); clearMsgs();
+      submitBtn.disabled = true; submitBtn.style.opacity=.7;
+
+      try{
+        if(mode==='signup'){
+          const { error } = await sb.auth.signUp({ email: email.value, password: pass.value });
+          if(error) return showErr(error.message);
+          showOk('Compte créé ✅. Vérifie ta boîte mail pour confirmer ton adresse.');
+        }else{
+          const { data, error } = await sb.auth.signInWithPassword({ email: email.value, password: pass.value });
+          if(error) return showErr(error.message);
+          // succès
+          showOk('Connexion réussie. Redirection…');
+          setTimeout(()=> location.href='index.html', 300);
+        }
+      }catch(err){
+        showErr(err?.message || 'Erreur inattendue');
+      }finally{
+        submitBtn.disabled = false; submitBtn.style.opacity=1;
+      }
+    });
+
+    // Enter = submit (déjà natif), Maj+Enter = n/a. Rien à changer ici.
+  </script>
+</body>
+</html>
