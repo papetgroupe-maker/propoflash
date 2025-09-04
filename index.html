@@ -241,7 +241,7 @@
   <section class="section" id="use">
     <div class="container">
       <h2 class="h2" data-i18n="use_h2">Cas d’usage fréquents</h2>
-    <p class="sub" data-i18n="use_sub">Du devis B2B aux offres e-commerce, PropoFlash couvre les besoins essentiels.</p>
+      <p class="sub" data-i18n="use_sub">Du devis B2B aux offres e-commerce, PropoFlash couvre les besoins essentiels.</p>
       <div class="grid3">
         <div class="card"><h3 data-i18n="use_t1">Devis B2B</h3><p data-i18n="use1">Qualification, périmètre, livrables, échéancier et conditions.</p></div>
         <div class="card"><h3 data-i18n="use_t2">Services</h3><p data-i18n="use2">Marketing, design, développement, conseil, formation.</p></div>
@@ -491,12 +491,8 @@
         await listChats();
       }else{
         authBtn.textContent = 'Se connecter';
-        authBtn.onclick = async ()=>{
-          const email = prompt('Votre email pour recevoir un lien magique :');
-          if(!email) return;
-          const { error } = await sb.auth.signInWithOtp({ email, options:{ emailRedirectTo: window.location.origin }});
-          if(!error) alert('Lien envoyé ✅. Ouvrez l’email pour vous connecter.');
-        };
+        // ⬇️ Redirection vers la page d’auth dédiée
+        authBtn.onclick = () => { window.location.href = 'auth.html'; };
         hide(historyCard);
       }
     }
@@ -712,7 +708,7 @@
         ...current,
         meta: {
           ...(current.meta||{}),
-          accent: primary, // << pour que preview.html prenne immédiatement la bonne couleur
+          accent: primary,
           style: {
             ...((current.meta && current.meta.style) || {}),
             logoDataUrl: dataUrl,
