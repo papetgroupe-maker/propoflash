@@ -64,17 +64,12 @@
     /* PROMPT (magnetic) */
     .prompt-wrap{margin:30px auto 16px;max-width:960px;padding:12px;border-radius:24px;
       background:linear-gradient(180deg,#ffffffcc,#ffffff80);border:1px solid var(--stroke);box-shadow:var(--shadow);transform-style:preserve-3d}
-    .prompt{background:#fff;border:1px solid var(--stroke);border-radius:18px;display:flex;align-items:center;gap:10px;padding:10px}
+    .prompt{background:#fff;border:1px solid var(--stroke);border-radius:18px;display:flex;align-items:center;gap:12px;padding:10px}
     .prompt textarea{flex:1;min-height:92px;border:none;outline:none;resize:vertical;font:500 16px/1.5 Inter,system-ui;color:var(--ink)}
     .send{width:42px;height:42px;border-radius:12px;border:1px solid var(--stroke);background:var(--ink);color:#fff;display:grid;place-items:center;cursor:pointer}
     .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
     .chip{border:1px solid var(--stroke);background:#fff;color:var(--muted);padding:8px 12px;border-radius:999px;font-size:13px;cursor:pointer}
     .chip:hover{color:var(--ink)}
-
-    /* Logo button & preview */
-    .icon-btn{width:42px;height:42px;border-radius:12px;border:1px solid var(--stroke);background:#f8f9ff;display:grid;place-items:center;cursor:pointer}
-    .icon-btn:hover{background:#eef2ff}
-    .logo-thumb{width:28px;height:28px;border-radius:6px;object-fit:contain;border:1px solid var(--stroke);background:#fff}
 
     /* SECTIONS */
     .section{padding:84px 0}
@@ -121,6 +116,7 @@
 
     /* UTIL */
     .hidden{display:none}
+    .miniLogo{width:24px;height:24px;border-radius:6px;border:1px solid var(--stroke);object-fit:cover}
     @media (max-width:980px){.grid3,.price-grid{grid-template-columns:1fr}.nav-inner{border-radius:18px}}
   </style>
   <!-- Supabase CDN -->
@@ -173,7 +169,10 @@
         <!-- barre haute -->
         <div style="display:flex;align-items:center;gap:10px;justify-content:space-between;margin:4px 4px 6px">
           <strong style="font-size:14px" data-i18n="assistant_h2">Assistant</strong>
-          <div style="display:flex;gap:8px">
+          <div style="display:flex;gap:8px;align-items:center">
+            <img id="logoMini" class="miniLogo hidden" alt="logo"/>
+            <button id="logoBtn" class="btn btn-ghost btn--xs">+ Logo</button>
+            <input id="logoInput" type="file" accept="image/*" hidden>
             <button id="openPreviewBtn" class="btn btn-ghost btn--xs hidden">Ouvrir l’aperçu</button>
             <button id="newChatBtn" class="btn btn-ghost btn--xs">Nouvelle discussion</button>
           </div>
@@ -184,15 +183,7 @@
 
         <!-- zone de saisie -->
         <div class="prompt" style="margin-top:8px">
-          <!-- Bouton logo + input caché -->
-          <button class="icon-btn" id="logoBtn" title="Importer un logo">
-            <img id="logoThumb" class="logo-thumb hidden" alt="logo"/>
-            <svg id="logoPlus" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0a1020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16v13H4z"/><path d="M2 7h20"/><path d="M12 3v4"/><path d="M9 14l2-2 2 2 3-3 3 3"/></svg>
-          </button>
-          <input type="file" id="logoInput" accept="image/*" class="hidden"/>
-
           <textarea id="brief" placeholder="Collez votre brief ici… (Entrée = envoyer • Maj+Entrée = nouvelle ligne)"></textarea>
-
           <button class="send" id="sendBrief" title="Envoyer" aria-label="Envoyer">
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
           </button>
@@ -250,7 +241,7 @@
   <section class="section" id="use">
     <div class="container">
       <h2 class="h2" data-i18n="use_h2">Cas d’usage fréquents</h2>
-      <p class="sub" data-i18n="use_sub">Du devis B2B aux offres e-commerce, PropoFlash couvre les besoins essentiels.</p>
+    <p class="sub" data-i18n="use_sub">Du devis B2B aux offres e-commerce, PropoFlash couvre les besoins essentiels.</p>
       <div class="grid3">
         <div class="card"><h3 data-i18n="use_t1">Devis B2B</h3><p data-i18n="use1">Qualification, périmètre, livrables, échéancier et conditions.</p></div>
         <div class="card"><h3 data-i18n="use_t2">Services</h3><p data-i18n="use2">Marketing, design, développement, conseil, formation.</p></div>
@@ -440,14 +431,12 @@
         const hasContent = Array.isArray(spec.sections) ? spec.sections.length>0 : Object.keys(spec).length>0;
         const btn = document.getElementById('openPreviewBtn');
         if(btn) btn.classList.toggle('hidden', !hasContent);
-        // Affiche l’aperçu du logo si présent
+        // update logo mini
         const logo = spec?.meta?.style?.logoDataUrl;
-        const logoThumb = document.getElementById('logoThumb');
-        const logoPlus = document.getElementById('logoPlus');
-        if (logo && logoThumb) {
-          logoThumb.src = logo;
-          logoThumb.classList.remove('hidden');
-          if (logoPlus) logoPlus.classList.add('hidden');
+        const mini = document.getElementById('logoMini');
+        if(mini){
+          if(logo){ mini.src = logo; mini.classList.remove('hidden'); }
+          else { mini.classList.add('hidden'); }
         }
       }catch{}
     }
@@ -481,7 +470,7 @@
     });
 
     /* ===== Supabase Auth + Cloud Chats ===== */
-    const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
+    const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co'; // ← à remplacer si besoin
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
@@ -561,7 +550,7 @@
           alert('Votre plan Free permet 1 discussion / mois. Passez à Starter pour continuer.');
           return null;
         }
-      }catch(_e){ /* RPC peut ne pas exister : on ignore. */ }
+      }catch(_e){}
 
       const title = (document.getElementById('brief').value || titleFallback).slice(0,80);
       const { data, error } = await sb.from('chats')
@@ -621,56 +610,11 @@
       return res.json();
     }
 
-    /* ==== Gestion du logo (dans la carte de chat) ==== */
-    (function(){
-      const logoBtn = document.getElementById('logoBtn');
-      const logoInput = document.getElementById('logoInput');
-      const logoThumb = document.getElementById('logoThumb');
-      const logoPlus  = document.getElementById('logoPlus');
-
-      const ensureSpec = ()=>{
-        try { return JSON.parse(localStorage.getItem('pf_proposal')||'{}'); } catch { return {}; }
-      };
-
-      const saveSpec = (s)=>{
-        localStorage.setItem('pf_proposal', JSON.stringify(s));
-        enablePreviewIfReady();
-      };
-
-      if (logoBtn && logoInput){
-        logoBtn.addEventListener('click', ()=> logoInput.click());
-        logoInput.addEventListener('change', ()=>{
-          const f = logoInput.files && logoInput.files[0];
-          if(!f) return;
-          const reader = new FileReader();
-          reader.onload = ()=>{
-            const dataUrl = reader.result;
-            const spec = ensureSpec();
-            spec.meta = spec.meta || {};
-            spec.meta.style = spec.meta.style || {};
-            spec.meta.style.logoDataUrl = dataUrl;
-            saveSpec(spec);
-            if (logoThumb){
-              logoThumb.src = dataUrl;
-              logoThumb.classList.remove('hidden');
-            }
-            if (logoPlus) logoPlus.classList.add('hidden');
-          };
-          reader.readAsDataURL(f);
-        });
-      }
-    })();
-
     /* ==== Bouton Envoyer (chat) ==== */
     $("#sendBrief").addEventListener("click",async ()=>{
       const lang=document.documentElement.lang||'fr';
-      const ta=$("#brief");
-      const v=ta.value.trim(); if(!v){ta.focus();return;}
+      const v=$("#brief").value.trim(); if(!v){$("#brief").focus();return;}
 
-      // Vide IMMÉDIATEMENT la zone de saisie (meilleure UX)
-      ta.value='';
-
-      // On laisse discuter même si la limite "free" est atteinte (on se contente de prévenir en console).
       if(PLAN==='free' && leftCount('free')<=0){
         console.warn('[FREE] Limite de prévisualisations atteinte. Le chat reste utilisable.');
       }
@@ -680,13 +624,9 @@
       showTyping();
 
       try{
-        // cloud : s'assurer d'avoir un chat si connecté
         await ensureChat('Nouvelle discussion');
-
-        // persistance du message user si cloud
         await saveMessage('user', v);
 
-        // historique local pour fournir du contexte au modèle
         const history = JSON.parse(localStorage.getItem('pf_chat')||'[]');
         const proposalSpec = JSON.parse(localStorage.getItem('pf_proposal')||'{"meta":{"lang":"'+lang+'"}}');
 
@@ -695,7 +635,7 @@
         if(data.reply){
           removeTyping();
           addMsg(data.reply,'ai');
-          await saveMessage('assistant', data.reply); // cloud only si connecté + chat_id
+          await saveMessage('assistant', data.reply);
         }else{
           removeTyping();
         }
@@ -705,16 +645,13 @@
           localStorage.setItem('pf_proposal', JSON.stringify(merged));
           enablePreviewIfReady();
 
-          /* ⬇️ Sauvegarde cloud de l’aperçu (si connecté) */
+          // Sauvegarde cloud de l’aperçu (si connecté)
           try {
             const { data:{ user } } = await sb.auth.getUser();
             if (user && currentChatId) {
               await sb.from('proposals').upsert(
-                {
-                  user_id: user.id,
-                  chat_id: currentChatId,
-                  spec: JSON.parse(localStorage.getItem('pf_proposal') || '{}'),
-                },
+                { user_id: user.id, chat_id: currentChatId,
+                  spec: JSON.parse(localStorage.getItem('pf_proposal') || '{}'), },
                 { onConflict: 'chat_id' }
               );
             }
@@ -729,9 +666,7 @@
         if(!user){ incCount('free'); updateFreeBadge(); }
 
         const wantPreview = Array.isArray(data.actions) && data.actions.some(a => a.type === 'preview');
-        if (wantPreview) {
-          setTimeout(()=>{ window.location.href='preview.html?t=modern'; }, 150);
-        }
+        if (wantPreview) setTimeout(()=>{ window.location.href='preview.html?t=modern'; }, 150);
 
         const ask = Array.isArray(data.actions) && data.actions.find(a=>a.type==='ask');
         if(ask){ $("#brief").value += `\n${ask.field}: `; $("#brief").focus(); }
@@ -742,25 +677,108 @@
       }finally{
         removeTyping();
         btn.classList.remove('loading'); btn.disabled=false;
+        $("#brief").value=''; // ← vide le textarea à l’envoi
       }
     });
 
-    /* ==== ENTRÉE = envoyer | Maj+Entrée = nouvelle ligne | Ctrl/Cmd+Entrée = envoyer ==== */
+    /* ==== ENTRÉE = envoyer | Maj+Entrée = NL | Ctrl/Cmd+Entrée = envoyer ==== */
     (function () {
       const briefEl = document.getElementById('brief');
       const sendBtn = document.getElementById('sendBrief');
       if (!briefEl || !sendBtn) return;
-
       briefEl.addEventListener('keydown', (e) => {
         if (e.isComposing || e.keyCode === 229) return;
         const isEnter = e.key === 'Enter';
         const sendCombo = (isEnter && !e.shiftKey) || (isEnter && (e.ctrlKey || e.metaKey));
-        if (sendCombo) {
-          e.preventDefault();
-          sendBtn.click();
-        }
+        if (sendCombo) { e.preventDefault(); sendBtn.click(); }
       });
     })();
+
+    /* ==== Logo uploader + auto-branding ==== */
+    const logoBtn = document.getElementById('logoBtn');
+    const logoInput = document.getElementById('logoInput');
+
+    logoBtn?.addEventListener('click', ()=> logoInput?.click());
+    logoInput?.addEventListener('change', async (e)=>{
+      const file = e.target.files?.[0];
+      if(!file) return;
+      const dataUrl = await fileToDataURL(file);
+      const { primary, secondary } = await extractPaletteFromDataUrl(dataUrl);
+
+      // Merge spec
+      const lang = document.documentElement.lang || 'fr';
+      const current = JSON.parse(localStorage.getItem('pf_proposal') || '{"meta":{"lang":"'+lang+'"}}');
+      const next = {
+        ...current,
+        meta: {
+          ...(current.meta||{}),
+          style: {
+            ...((current.meta && current.meta.style) || {}),
+            logoDataUrl: dataUrl,
+            primary, secondary
+          }
+        }
+      };
+      localStorage.setItem('pf_proposal', JSON.stringify(next));
+      enablePreviewIfReady();
+      addMsg(`Logo importé. Couleurs détectées : ${primary} & ${secondary}. L’aperçu s’adaptera au branding.`, 'ai');
+    });
+
+    async function fileToDataURL(file){
+      return new Promise((resolve,reject)=>{
+        const fr=new FileReader();
+        fr.onload=()=>resolve(fr.result);
+        fr.onerror=reject;
+        fr.readAsDataURL(file);
+      });
+    }
+
+    async function extractPaletteFromDataUrl(dataUrl){
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = dataUrl;
+      await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; });
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d',{ willReadFrequently:true });
+      // downscale to speed up
+      const W = 180, H = Math.max(90, Math.round(img.height * (W / img.width)));
+      canvas.width = W; canvas.height = H;
+      ctx.drawImage(img, 0, 0, W, H);
+      const { data } = ctx.getImageData(0,0,W,H);
+
+      const map = new Map();
+      for (let i=0;i<data.length;i+=4*10){ // sample 1 every 10 pixels
+        const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3]/255;
+        if (a < 0.6) continue;
+        const lum = (0.2126*r + 0.7152*g + 0.0722*b)/255;
+        if (lum < 0.12 || lum > 0.98) continue; // ignore near-black/near-white
+        // reduce color space
+        const key = ((r&0xF0)<<16) | ((g&0xF0)<<8) | (b&0xF0);
+        map.set(key, (map.get(key)||0)+1);
+      }
+      const sorted = [...map.entries()].sort((a,b)=>b[1]-a[1]).slice(0,8).map(([k])=>{
+        const r=(k>>16)&0xF0, g=(k>>8)&0xF0, b=k&0xF0;
+        return `#${(r|0x0F).toString(16).padStart(2,'0')}${(g|0x0F).toString(16).padStart(2,'0')}${(b|0x0F).toString(16).padStart(2,'0')}`.toUpperCase();
+      });
+      const primary = sorted[0] || '#3B82F6';
+      // pick secondary sufficiently different
+      let secondary = '#8B5CF6';
+      for (let i=1;i<sorted.length;i++){
+        if (colorDistance(sorted[0], sorted[i]) > 80){ secondary = sorted[i]; break; }
+      }
+      return { primary, secondary };
+    }
+
+    function colorDistance(hex1, hex2){
+      const a = hexToRGB(hex1), b = hexToRGB(hex2);
+      const dr=a.r-b.r, dg=a.g-b.g, db=a.b-b.b;
+      return Math.sqrt(dr*dr+dg*dg+db*db);
+    }
+    function hexToRGB(hex){
+      const s=hex.replace('#','');
+      return { r:parseInt(s.slice(0,2),16), g:parseInt(s.slice(2,4),16), b:parseInt(s.slice(4,6),16) };
+    }
 
     /* ==== Bouton Commencer (génère et ouvre l’aperçu) ==== */
     (function(){
@@ -786,18 +804,14 @@
           localStorage.setItem('pf_proposal', JSON.stringify(merged));
           localStorage.setItem('pf_chat_ts', String(Date.now()));
 
-          /* ⬇️ Sauvegarde cloud de l’aperçu (si connecté) */
           try {
             const { data:{ user } } = await sb.auth.getUser();
             if (user) {
               if (!currentChatId) { await ensureChat('Aperçu'); }
               if (currentChatId) {
                 await sb.from('proposals').upsert(
-                  {
-                    user_id: user.id,
-                    chat_id: currentChatId,
-                    spec: JSON.parse(localStorage.getItem('pf_proposal') || '{}'),
-                  },
+                  { user_id: user.id, chat_id: currentChatId,
+                    spec: JSON.parse(localStorage.getItem('pf_proposal') || '{}'), },
                   { onConflict: 'chat_id' }
                 );
               }
