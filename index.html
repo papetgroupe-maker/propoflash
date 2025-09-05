@@ -490,7 +490,7 @@
         show(historyCard);
         await listChats();
 
-        // 🔁 Si une spec existe déjà, bascule directement en "studio"
+        // ➜ Si une proposition existe déjà localement, on bascule vers le studio
         try{
           const spec = JSON.parse(localStorage.getItem('pf_proposal') || '{}');
           const has = Array.isArray(spec.sections) ? spec.sections.length>0 : Object.keys(spec).length>0;
@@ -500,7 +500,7 @@
         }catch{}
       }else{
         authBtn.textContent = 'Se connecter';
-        // ⬇️ Redirection vers la page d’auth dédiée en conservant la page actuelle
+        // ➜ Redirection vers la page d’auth dédiée avec "next" pour revenir ici
         authBtn.onclick = () => {
           const next = encodeURIComponent(location.pathname + location.search + location.hash);
           window.location.href = `auth.html?next=${next}`;
@@ -628,4 +628,229 @@
       }
 
       addMsg(v,'me');
-      const btn=$("#sendBrief"); btn.classList.add('loading
+      const btn=$("#sendBrief"); btn.classList.add('loading'); btn.disabled=true;
+      showTyping();
+
+      try{
+        await ensureChat('Nouvelle discussion');
+        await saveMessage('user', v);
+
+        const history = JSON.parse(localStorage.getItem('pf_chat')||'[]');
+        const proposalSpec = JSON.parse(localStorage.getItem('pf_proposal')||'{"meta":{"lang":"'+lang+'"}}');
+
+        const data = await callChatAPI(v, proposalSpec, history);
+
+        if(data.reply){
+          removeTyping();
+          addMsg(data.reply,'ai');
+          await saveMessage('assistant', data.reply);
+        }else{
+          removeTyping();
+        }
+
+        if(data.proposalSpec){
+          const merged = { ...proposalSpec, ...data.proposalSpec, meta:{ ...(proposalSpec.meta||{}), ...(data.proposalSpec.meta||{}) } };
+          localStorage.setItem('pf_proposal', JSON.stringify(merged));
+          enablePreviewIfReady();
+
+          // Sauvegarde cloud de l’aperçu (si connecté)
+          try {
+            const { data:{ user } } = await sb.auth.getUser();
+            if (user && currentChatId) {
+              await sb.from('proposals').upsert(
+                { user_id: user.id, chat_id: currentChatId,
+                  spec: JSON.parse(localStorage.getItem('pf_proposal') || '{}'), },
+                { onConflict: 'chat_id' }
+              );
+            }
+          } catch(_) {}
+
+          // 🚀 Première fois → bascule en studio
+          if (!localStorage.getItem('pf_first_created')) {
+            localStorage.setItem('pf_first_created', '1');
+            window.location.href = 'preview.html?t=modern#studio';
+            return;
+          }
+        }
+
+        const newHist = [...history, {role:'user',content:v}, {role:'assistant',content:(data.reply||'')}].slice(-20);
+        localStorage.setItem('pf_chat', JSON.stringify(newHist));
+        localStorage.setItem('pf_chat_ts', String(Date.now()));
+
+        const { data:{ user } } = await sb.auth.getUser();
+        if(!user){ incCount('free'); updateFreeBadge(); }
+
+        const wantPreview = Array.isArray(data.actions) && data.actions.some(a => a.type === 'preview');
+        if (wantPreview) setTimeout(()=>{ window.location.href='preview.html?t=modern'; }, 150);
+
+        const ask = Array.isArray(data.actions) && data.actions.find(a=>a.type==='ask');
+        if(ask){ $("#brief").value += `\n${ask.field}: `; $("#brief").focus(); }
+      }catch(e){
+        console.error(e);
+        removeTyping();
+        addMsg(lang==='fr'?'Erreur serveur. Réessayez.':'Server error. Please retry.','ai');
+      }finally{
+        removeTyping();
+        btn.classList.remove('loading'); btn.disabled=false;
+        $("#brief").value=''; // ← vide le textarea à l’envoi
+      }
+    });
+
+    /* ==== ENTRÉE = envoyer | Maj+Entrée = NL | Ctrl/Cmd+Entrée = envoyer ==== */
+    (function () {
+      const briefEl = document.getElementById('brief');
+      const sendBtn = document.getElementById('sendBrief');
+      if (!briefEl || !sendBtn) return;
+      briefEl.addEventListener('keydown', (e) => {
+        if (e.isComposing || e.keyCode === 229) return;
+        const isEnter = e.key === 'Enter';
+        const sendCombo = (isEnter && !e.shiftKey) || (isEnter && (e.ctrlKey || e.metaKey));
+        if (sendCombo) { e.preventDefault(); sendBtn.click(); }
+      });
+    })();
+
+    /* ==== Logo uploader + auto-branding ==== */
+    const logoBtn = document.getElementById('logoBtn');
+    const logoInput = document.getElementById('logoInput');
+
+    logoBtn?.addEventListener('click', ()=> logoInput?.click());
+    logoInput?.addEventListener('change', async (e)=>{
+      const file = e.target.files?.[0];
+      if(!file) return;
+      const dataUrl = await fileToDataURL(file);
+      const { primary, secondary } = await extractPaletteFromDataUrl(dataUrl);
+
+      // Merge spec (+ accent pour l’aperçu)
+      const lang = document.documentElement.lang || 'fr';
+      const current = JSON.parse(localStorage.getItem('pf_proposal') || '{"meta":{"lang":"'+lang+'"}}');
+      const next = {
+        ...current,
+        meta: {
+          ...(current.meta||{}),
+          accent: primary,
+          style: {
+            ...((current.meta && current.meta.style) || {}),
+            logoDataUrl: dataUrl,
+            primary, secondary
+          }
+        }
+      };
+      localStorage.setItem('pf_proposal', JSON.stringify(next));
+      enablePreviewIfReady();
+      addMsg(`Logo importé. Couleurs détectées : ${primary} & ${secondary}. L’aperçu s’adaptera au branding.`, 'ai');
+    });
+
+    async function fileToDataURL(file){
+      return new Promise((resolve,reject)=>{
+        const fr=new FileReader();
+        fr.onload=()=>resolve(fr.result);
+        fr.onerror=reject;
+        fr.readAsDataURL(file);
+      });
+    }
+
+    async function extractPaletteFromDataUrl(dataUrl){
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = dataUrl;
+      await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; });
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d',{ willReadFrequently:true });
+      // downscale to speed up
+      const W = 180, H = Math.max(90, Math.round(img.height * (W / img.width)));
+      canvas.width = W; canvas.height = H;
+      ctx.drawImage(img, 0, 0, W, H);
+      const { data } = ctx.getImageData(0,0,W,H);
+
+      const map = new Map();
+      for (let i=0;i<data.length;i+=4*10){ // sample 1 every 10 pixels
+        const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3]/255;
+        if (a < 0.6) continue;
+        const lum = (0.2126*r + 0.7152*g + 0.0722*b)/255;
+        if (lum < 0.12 || lum > 0.98) continue; // ignore near-black/near-white
+        // reduce color space
+        const key = ((r&0xF0)<<16) | ((g&0xF0)<<8) | (b&0xF0);
+        map.set(key, (map.get(key)||0)+1);
+      }
+      const sorted = [...map.entries()].sort((a,b)=>b[1]-a[1]).slice(0,8).map(([k])=>{
+        const r=(k>>16)&0xF0, g=(k>>8)&0xF0, b=k&0xF0;
+        return `#${(r|0x0F).toString(16).padStart(2,'0')}${(g|0x0F).toString(16).padStart(2,'0')}${(b|0x0F).toString(16).padStart(2,'0')}`.toUpperCase();
+      });
+      const primary = sorted[0] || '#3B82F6';
+      // pick secondary sufficiently different
+      let secondary = '#8B5CF6';
+      for (let i=1;i<sorted.length;i++){
+        if (colorDistance(sorted[0], sorted[i]) > 80){ secondary = sorted[i]; break; }
+      }
+      return { primary, secondary };
+    }
+
+    function colorDistance(hex1, hex2){
+      const a = hexToRGB(hex1), b = hexToRGB(hex2);
+      const dr=a.r-b.r, dg=a.g-b.g, db=a.b-b.b;
+      return Math.sqrt(dr*dr+dg*dg+db*db);
+    }
+    function hexToRGB(hex){
+      const s=hex.replace('#','');
+      return { r:parseInt(s.slice(0,2),16), g:parseInt(s.slice(2,4),16), b:parseInt(s.slice(4,6),16) };
+    }
+
+    /* ==== Bouton Commencer (génère et ouvre l’aperçu) ==== */
+    (function(){
+      const startBtn = document.getElementById('startBtn');
+      if(!startBtn) return;
+
+      startBtn.addEventListener('click', async () => {
+        const lang = document.documentElement.lang || 'fr';
+        const briefEl = document.getElementById('brief');
+        let msg = '';
+        if (briefEl && briefEl.value) msg = briefEl.value.trim();
+        if (!msg) {
+          msg = (lang === 'fr')
+            ? "Crée une proposition commerciale complète à partir d'un brief vide (exemple)."
+            : "Create a complete business proposal from an empty brief (sample).";
+        }
+
+        try {
+          const baseSpec = JSON.parse(localStorage.getItem('pf_proposal') || '{"meta":{"lang":"'+lang+'"},"sections":[]}');
+          const data = await callChatAPI(msg, baseSpec, []);
+          const nextSpec = data && data.proposalSpec ? data.proposalSpec : baseSpec;
+          const merged = { ...baseSpec, ...nextSpec, meta:{ ...(baseSpec.meta||{}), ...((nextSpec&&nextSpec.meta)||{}) } };
+          localStorage.setItem('pf_proposal', JSON.stringify(merged));
+          localStorage.setItem('pf_chat_ts', String(Date.now()));
+
+          try {
+            const { data:{ user } } = await sb.auth.getUser();
+            if (user) {
+              if (!currentChatId) { await ensureChat('Aperçu'); }
+              if (currentChatId) {
+                await sb.from('proposals').upsert(
+                  { user_id: user.id, chat_id: currentChatId,
+                    spec: JSON.parse(localStorage.getItem('pf_proposal') || '{}'), },
+                  { onConflict: 'chat_id' }
+                );
+              }
+            }
+          } catch(_) {}
+
+          window.location.href = 'preview.html?t=modern#studio';
+        } catch (e) {
+          console.error(e);
+          alert((lang === 'fr' ? 'Erreur: ' : 'Error: ') + e.message);
+        }
+      });
+    })();
+
+    /* 3D tilt + parallax */
+    (()=>{const el=$("#tilt");const rect=()=>el.getBoundingClientRect();
+      const on=e=>{const r=rect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+        el.style.transform=`rotateX(${(-y*3).toFixed(2)}deg) rotateY(${(x*3).toFixed(2)}deg)`};
+      const off=()=>{el.style.transform="rotateX(0) rotateY(0)"}; el.addEventListener("mousemove",on); el.addEventListener("mouseleave",off);
+    })();
+    (()=>{const orb=$("#orb");window.addEventListener("mousemove",(e)=>{
+      const x=(e.clientX/window.innerWidth-.5)*14,y=(e.clientY/window.innerHeight-.5)*14;
+      orb.style.transform=`translate(${x}px, ${y}px)`;});})();
+  </script>
+</body>
+</html>
