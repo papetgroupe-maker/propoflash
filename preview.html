@@ -66,6 +66,9 @@
     /* Editable mode */
     .edit-on [contenteditable="true"]{outline:2px solid #e0ecff;border-radius:6px;padding:2px 4px}
 
+    /* Studio mode */
+    .studio #backBtn{ display:none; } /* cache le bouton retour en mode studio */
+
     /* Print */
     @media print{
       .bar{display:none}
@@ -75,8 +78,6 @@
       a[href]:after{content:""}
     }
   </style>
-  <!-- Supabase CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <!-- Top bar -->
@@ -118,24 +119,53 @@
   </div>
 
   <script>
-    /* ===== Supabase ===== */
-    const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
-    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-
     const $ = (q,ctx=document)=>ctx.querySelector(q);
     const t = {
-      fr: { title:"Proposition commerciale", to:"Pour", from:"Émis par", date:"Date", letter:"Lettre d’introduction",
-        executive:"Résumé exécutif", objectives:"Objectifs", approach:"Approche & phasage", deliverables:"Livrables",
-        in_scope:"Inclus", out_scope:"Hors-périmètre", timeline:"Planning", pricing:"Tarification",
-        assumptions:"Hypothèses / Risques", next:"Prochaines étapes", price_model:"Modèle", terms:"Conditions",
-        toc:"Sommaire", email_subject:"Objet", email_preheader:"Pré-en-tête", email_copy_ok:"Copié dans le presse-papiers",
+      fr: {
+        title:"Proposition commerciale",
+        to:"Pour",
+        from:"Émis par",
+        date:"Date",
+        letter:"Lettre d’introduction",
+        executive:"Résumé exécutif",
+        objectives:"Objectifs",
+        approach:"Approche & phasage",
+        deliverables:"Livrables",
+        in_scope:"Inclus",
+        out_scope:"Hors-périmètre",
+        timeline:"Planning",
+        pricing:"Tarification",
+        assumptions:"Hypothèses / Risques",
+        next:"Prochaines étapes",
+        price_model:"Modèle",
+        terms:"Conditions",
+        toc:"Sommaire",
+        email_subject:"Objet",
+        email_preheader:"Pré-en-tête",
+        email_copy_ok:"Copié dans le presse-papiers",
       },
-      en: { title:"Business Proposal", to:"To", from:"Issued by", date:"Date", letter:"Cover Letter",
-        executive:"Executive Summary", objectives:"Objectives", approach:"Approach & Phasing", deliverables:"Deliverables",
-        in_scope:"In scope", out_scope:"Out of scope", timeline:"Timeline", pricing:"Pricing",
-        assumptions:"Assumptions / Risks", next:"Next Steps", price_model:"Model", terms:"Terms",
-        toc:"Table of Contents", email_subject:"Subject", email_preheader:"Preheader", email_copy_ok:"Copied to clipboard",
+      en: {
+        title:"Business Proposal",
+        to:"To",
+        from:"Issued by",
+        date:"Date",
+        letter:"Cover Letter",
+        executive:"Executive Summary",
+        objectives:"Objectives",
+        approach:"Approach & Phasing",
+        deliverables:"Deliverables",
+        in_scope:"In scope",
+        out_scope:"Out of scope",
+        timeline:"Timeline",
+        pricing:"Pricing",
+        assumptions:"Assumptions / Risks",
+        next:"Next Steps",
+        price_model:"Model",
+        terms:"Terms",
+        toc:"Table of Contents",
+        email_subject:"Subject",
+        email_preheader:"Preheader",
+        email_copy_ok:"Copied to clipboard",
       }
     };
 
@@ -149,45 +179,69 @@
     const modelSel = $('#modelSel');
     const emailModeBtn = $('#emailModeBtn');
     const copyEmailBtn = $('#copyEmailBtn');
-    const pdfBtn = $('#pdfBtn');
     let emailMode = false;
 
     function safeArr(v){ return Array.isArray(v) ? v : []; }
-    function safeStr(v, fb=''){ return (v==null?'':String(v)).trim() || fb; }
+    function safeStr(v, fallback=''){ return (v==null?'':String(v)).trim() || fallback; }
     function fmtDate(d){
-      try{ const dt = d ? new Date(d) : new Date();
-        return dt.toLocaleDateString(document.documentElement.lang||'fr',{year:'numeric',month:'short',day:'2-digit'}); }
-      catch{ return '' }
+      try{
+        const dt = d ? new Date(d) : new Date();
+        return dt.toLocaleDateString(document.documentElement.lang||'fr', { year:'numeric', month:'short', day:'2-digit' });
+      }catch{ return '' }
     }
-    function money(n,c){ try{ return new Intl.NumberFormat(document.documentElement.lang||'fr',{style:'currency',currency:c||'EUR'}).format(Number(n||0)); }catch{ return String(n||0)+' '+(c||'€') } }
+    function money(n, c){ try{ return new Intl.NumberFormat(document.documentElement.lang||'fr',{style:'currency',currency:c||'EUR'}).format(Number(n||0)); }catch{ return String(n||0)+' '+(c||'€') } }
 
-    function section(titleHTML, id){ const h=document.createElement('h2'); h.innerHTML=titleHTML; if(id) h.id=id; sheet.appendChild(h); }
-    function para(text){ const p=document.createElement('p'); p.textContent=text; p.setAttribute('contenteditable','true'); p.classList.add('editable'); sheet.appendChild(p); }
-    function list(items){ if(!items||!items.length) return; const ul=document.createElement('ul'); items.forEach(it=>{ const li=document.createElement('li'); li.textContent=String(it); li.setAttribute('contenteditable','true'); li.classList.add('editable'); ul.appendChild(li); }); sheet.appendChild(ul); }
+    function section(titleHTML, id){
+      const h = document.createElement('h2'); h.innerHTML = titleHTML; if(id) h.id=id;
+      sheet.appendChild(h);
+    }
+    function para(text){
+      const p = document.createElement('p'); p.textContent = text; p.setAttribute('contenteditable','true'); p.classList.add('editable');
+      sheet.appendChild(p);
+    }
+    function list(items){
+      if(!items || !items.length) return;
+      const ul = document.createElement('ul');
+      items.forEach(it=>{ const li=document.createElement('li'); li.textContent=String(it); li.setAttribute('contenteditable','true'); li.classList.add('editable'); ul.appendChild(li); });
+      sheet.appendChild(ul);
+    }
 
     function buildTOC(sections){
       const L = t[spec.meta?.lang || 'fr'] || t.fr;
       const box = document.createElement('div'); box.className='toc hide-when-email';
       box.innerHTML = `<b>${L.toc}</b>`;
-      sections.forEach(s=>{ if(s.present){ const a=document.createElement('a'); a.href='#'+s.id; a.textContent=s.title; box.appendChild(a);} });
+      sections.forEach(s=>{
+        if(s.present){
+          const a = document.createElement('a');
+          a.href = '#'+s.id;
+          a.textContent = s.title;
+          box.appendChild(a);
+        }
+      });
       sheet.appendChild(box);
     }
 
     function renderEmailOnly(){
       const L = t[spec.meta?.lang || 'fr'] || t.fr;
       sheet.innerHTML = '';
+
+      // Header minimal (logo + société)
       const header = document.createElement('div'); header.className='doc-header';
       const logoBox = document.createElement('div'); logoBox.className='logo-box';
-      if(spec.meta?.style?.logoDataUrl){ const im=new Image(); im.src=spec.meta.style.logoDataUrl; logoBox.appendChild(im); }
-      else { logoBox.textContent='LOGO'; logoBox.style.color='#9aa6bf'; }
-      const bi=document.createElement('div'); bi.className='brand-info';
+      if(spec.meta?.style?.logoDataUrl){
+        const im = new Image(); im.src = spec.meta.style.logoDataUrl; logoBox.appendChild(im);
+      } else { logoBox.textContent='LOGO'; logoBox.style.color='#9aa6bf'; }
+      const bi = document.createElement('div'); bi.className='brand-info';
       const company = safeStr(spec.meta?.company || spec.meta?.brand?.company, 'Votre société');
       const website = safeStr(spec.meta?.brand?.website,'');
       const email = safeStr(spec.meta?.brand?.email,'');
       const phone = safeStr(spec.meta?.brand?.phone,'');
-      bi.innerHTML = `<div class="company">${company}</div><div class="muted">${[website,email,phone].filter(Boolean).join(' • ')}</div>`;
-      header.appendChild(logoBox); header.appendChild(bi); sheet.appendChild(header);
+      bi.innerHTML = `<div class="company">${company}</div>
+      <div class="muted">${[website,email,phone].filter(Boolean).join(' • ')}</div>`;
+      header.appendChild(logoBox); header.appendChild(bi);
+      sheet.appendChild(header);
 
+      // Letter content
       const letter = spec.letter || {};
       const subject = safeStr(letter.subject, L.title);
       const preheader = safeStr(letter.preheader,'');
@@ -210,7 +264,7 @@
     function computeTotals(){
       const pr = spec.pricing || {};
       const items = safeArr(pr.items);
-      let subtotal=0;
+      let subtotal = 0;
       items.forEach(it=>{
         const s = it.subtotal!=null ? Number(it.subtotal) : (Number(it.qty||1)*Number(it.unit_price||0));
         subtotal += (isFinite(s)?s:0);
@@ -224,6 +278,7 @@
     function render(){
       document.body.classList.toggle('email-only', emailMode);
 
+      // Apply brand colors
       const primary = spec?.meta?.style?.primary || spec?.meta?.accent || '#3b82f6';
       const secondary = spec?.meta?.style?.secondary || '#8b5cf6';
       document.documentElement.style.setProperty('--accent', primary);
@@ -238,19 +293,22 @@
 
       if(emailMode){ renderEmailOnly(); statusEl.textContent = (spec.meta?.lang==='en') ? 'Email view' : 'Mode email'; return; }
 
-      // Header
+      // Header (logo + brand info)
       const header = document.createElement('div'); header.className='doc-header hide-when-email';
       const logoBox = document.createElement('div'); logoBox.className='logo-box';
-      if(spec.meta?.style?.logoDataUrl){ const im=new Image(); im.src=spec.meta.style.logoDataUrl; logoBox.appendChild(im); }
-      else { logoBox.textContent='LOGO'; logoBox.style.color='#9aa6bf'; }
-      const bi=document.createElement('div'); bi.className='brand-info';
+      if(spec.meta?.style?.logoDataUrl){
+        const im = new Image(); im.src = spec.meta.style.logoDataUrl; logoBox.appendChild(im);
+      } else { logoBox.textContent='LOGO'; logoBox.style.color='#9aa6bf'; }
+      const bi = document.createElement('div'); bi.className='brand-info';
       const company = safeStr(spec.meta?.company || spec.meta?.brand?.company, 'Votre société');
       const contact = safeStr(spec.meta?.brand?.contact_name,'');
       const website = safeStr(spec.meta?.brand?.website,'');
       const email = safeStr(spec.meta?.brand?.email,'');
       const phone = safeStr(spec.meta?.brand?.phone,'');
-      bi.innerHTML = `<div class="company">${company}</div><div class="muted">${[contact,website,email,phone].filter(Boolean).join(' • ')}</div>`;
-      header.appendChild(logoBox); header.appendChild(bi); sheet.appendChild(header);
+      bi.innerHTML = `<div class="company">${company}</div>
+      <div class="muted">${[contact, website, email, phone].filter(Boolean).join(' • ')}</div>`;
+      header.appendChild(logoBox); header.appendChild(bi);
+      sheet.appendChild(header);
 
       // Title line
       const title = safeStr(spec.meta?.title, L.title);
@@ -300,7 +358,7 @@
         list(spec.objectives.bullets);
       }
 
-      // Approach
+      // Approach (phases)
       if (tocSections[3].present){
         section(L.approach,'s_approach');
         safeArr(spec.approach.phases).forEach((ph,i)=>{
@@ -353,7 +411,8 @@
         section(L.pricing,'s_pricing');
         const pr = spec.pricing || {};
         const currency = pr.currency || spec.meta?.currency || 'EUR';
-        const m = document.createElement('div'); m.className='muted hide-when-email'; m.style.margin='-6px 0 8px';
+        // Model pill
+        const m = document.createElement('div'); m.className='muted hide-when-email'; m.style.margin = '-6px 0 8px';
         m.innerHTML = `${L.price_model}: <span class="pill">${safeStr(pr.model,'forfait')}</span>`;
         sheet.appendChild(m);
 
@@ -398,6 +457,7 @@
             terms.appendChild(ul); sheet.appendChild(terms);
           }
         } else {
+          // simple price fallback
           const priceBox=document.createElement('div'); priceBox.className='card';
           const price = pr.price!=null ? String(pr.price) : '—';
           priceBox.innerHTML = `
@@ -434,6 +494,7 @@
       try{
         const s = String(c||'').trim();
         if(/^#([0-9a-f]{3}){1,2}$/i.test(s)) return s.toUpperCase();
+        // convert rgb(...) to hex if needed
         if(s.startsWith('rgb')){
           const m = s.match(/\d+/g)||[0,0,0];
           return '#'+m.slice(0,3).map(x=>Number(x).toString(16).padStart(2,'0')).join('').toUpperCase();
@@ -444,8 +505,12 @@
 
     // Load spec
     (function init(){
-      try{ const raw=localStorage.getItem('pf_proposal'); if(raw){ spec=JSON.parse(raw); } }catch{}
-      if(!spec) spec = { meta:{ lang:'fr', title:'Proposition commerciale' } };
+      try {
+        const raw = localStorage.getItem('pf_proposal');
+        if(raw){ spec = JSON.parse(raw); }
+      } catch {}
+      if(!spec) spec = { meta:{ lang: 'fr', title:'Proposition commerciale' } };
+      // init UI from spec
       langSel.value = spec.meta?.lang || 'fr';
       const primary = spec.meta?.style?.primary || spec.meta?.accent || '#3b82f6';
       const secondary = spec.meta?.style?.secondary || '#8b5cf6';
@@ -454,18 +519,18 @@
       accentPick.value = toHex(primary);
       accentPick2.value = toHex(secondary);
       modelSel.value = (spec.pricing?.model || 'forfait').toLowerCase();
+
+      // ➜ Active "studio" si hash présent
+      if (location.hash.includes('studio')) {
+        document.body.classList.add('studio');
+      }
+
       render();
     })();
 
-    /* ===== Navigation & controls ===== */
+    // Controls
     $('#backBtn').onclick = ()=>{ location.href = 'index.html'; };
-
-    // Impression – branchée dynamiquement suivant l'état d'auth (voir setupAuthPlusBas)
-    function doPrint(){
-      const L = t[spec.meta?.lang || 'fr'] || t.fr;
-      statusEl.textContent = (spec.meta?.lang==='en') ? 'Preparing PDF…' : 'Préparation du PDF…';
-      setTimeout(()=>{ window.print(); statusEl.textContent = (spec.meta?.lang==='en') ? 'Preview ready' : 'Aperçu prêt'; }, 100);
-    }
+    $('#pdfBtn').onclick  = ()=> { statusEl.textContent = (spec.meta?.lang==='en') ? 'Preparing PDF…' : 'Préparation du PDF…'; setTimeout(()=>{ window.print(); statusEl.textContent = (spec.meta?.lang==='en') ? 'Preview ready' : 'Aperçu prêt'; }, 100); };
 
     langSel.onchange = (e)=>{
       const lang = e.target.value;
@@ -532,33 +597,6 @@
         setTimeout(()=>statusEl.textContent = (spec.meta?.lang==='en') ? 'Email view' : 'Mode email', 1200);
       });
     };
-
-    /* ===== Auth gating sur le bouton PDF ===== */
-    async function setupAuth(){
-      try{
-        const { data:{ session } } = await sb.auth.getSession();
-        if(session){
-          // Connecté → impression active
-          pdfBtn.textContent = 'Exporter PDF';
-          pdfBtn.classList.add('primary');
-          pdfBtn.onclick = doPrint;
-        }else{
-          // Non connecté → redirection vers auth.html avec next= cette page
-          pdfBtn.textContent = 'Se connecter pour exporter';
-          pdfBtn.classList.add('primary');
-          pdfBtn.onclick = ()=>{
-            const next = encodeURIComponent(location.pathname + location.search + location.hash);
-            location.href = `auth.html?next=${next}`;
-          };
-        }
-      }catch(e){
-        console.error(e);
-        // fallback: autoriser l'impression si jamais l'état n'est pas lisible
-        pdfBtn.onclick = doPrint;
-      }
-    }
-    sb.auth.onAuthStateChange(()=>setupAuth());
-    document.addEventListener('DOMContentLoaded', setupAuth);
   </script>
 </body>
 </html>
