@@ -241,7 +241,7 @@
   <section class="section" id="use">
     <div class="container">
       <h2 class="h2" data-i18n="use_h2">Cas d’usage fréquents</h2>
-      <p class="sub" data-i18n="use_sub">Du devis B2B aux offres e-commerce, PropoFlash couvre les besoins essentiels.</p>
+    <p class="sub" data-i18n="use_sub">Du devis B2B aux offres e-commerce, PropoFlash couvre les besoins essentiels.</p>
       <div class="grid3">
         <div class="card"><h3 data-i18n="use_t1">Devis B2B</h3><p data-i18n="use1">Qualification, périmètre, livrables, échéancier et conditions.</p></div>
         <div class="card"><h3 data-i18n="use_t2">Services</h3><p data-i18n="use2">Marketing, design, développement, conseil, formation.</p></div>
@@ -312,7 +312,7 @@
 
   <script>
     /* ===== i18n FR/EN ===== */
-    const I18N={
+    const I18N={ /* ...identique à ta version, inchangé... */ 
       fr:{nav_why:"Pourquoi nous",nav_use:"Cas d’usage",nav_pricing:"Tarifs",cta_start:"Commencer",
         headline:"Donnez vie à vos propositions. <span class='accent-word'>Maintenant.</span>",
         subhead:"Générez des offres et propositions professionnelles en minutes, à partir d’un simple brief. Zéro complexité.",
@@ -372,12 +372,11 @@
       $$("[data-i18n]").forEach(el=>{ const k=el.dataset.i18n; if(k && t[k]!=null) el.textContent=t[k]; });
       $$("[data-i18n-html]").forEach(el=>{ const k=el.dataset.i18nHtml; if(k && t[k]!=null) el.innerHTML=t[k]; });
       const brief=$("#brief"); if(brief) brief.placeholder=t.placeholder;
-      const chipsMap = [["chip1","chip_b2b"],["chip2","chip_ecom"],["chip3","chip_marketing"],["chip4","chip_website"]];
-      chipsMap.forEach(([id,key])=>{ const el=$("#"+id); if(el && t[key]){ el.textContent=t[key]; el.dataset.chip=t[key]; }});
+      [["chip1","chip_b2b"],["chip2","chip_ecom"],["chip3","chip_marketing"],["chip4","chip_website"]]
+        .forEach(([id,key])=>{ const el=$("#"+id); if(el && t[key]){ el.textContent=t[key]; el.dataset.chip=t[key]; }});
       updateFreeBadge();
     }
 
-    /* initial language */
     document.addEventListener("DOMContentLoaded", ()=>{
       const navLang=(navigator.language||"fr").slice(0,2);
       const sel=$("#lang"); sel.value=(["fr","en"].includes(navLang)?navLang:"en");
@@ -414,8 +413,6 @@
       const b=document.createElement('div'); b.className='bubble'; b.textContent=String(text||'');
       row.appendChild(b); thread.appendChild(row); thread.scrollTop=thread.scrollHeight;
     }
-
-    // Typing indicator
     function showTyping(){
       removeTyping();
       const row=document.createElement('div'); row.className='msg'; row.id='typingRow';
@@ -431,13 +428,9 @@
         const hasContent = Array.isArray(spec.sections) ? spec.sections.length>0 : Object.keys(spec).length>0;
         const btn = document.getElementById('openPreviewBtn');
         if(btn) btn.classList.toggle('hidden', !hasContent);
-        // update logo mini
         const logo = spec?.meta?.style?.logoDataUrl;
         const mini = document.getElementById('logoMini');
-        if(mini){
-          if(logo){ mini.src = logo; mini.classList.remove('hidden'); }
-          else { mini.classList.add('hidden'); }
-        }
+        if(mini){ if(logo){ mini.src = logo; mini.classList.remove('hidden'); } else { mini.classList.add('hidden'); } }
       }catch{}
     }
 
@@ -448,16 +441,13 @@
       if(thread) thread.innerHTML='';
       enablePreviewIfReady();
     }
-    const CHAT_TTL_MS = 6*60*60*1000; // 6 heures
+    const CHAT_TTL_MS = 6*60*60*1000;
     function maybeExpireChat(){
       const ts = Number(localStorage.getItem('pf_chat_ts')||0);
-      if(ts && (Date.now() - ts > CHAT_TTL_MS)){
-        resetDiscussion();
-      }
+      if(ts && (Date.now() - ts > CHAT_TTL_MS)) resetDiscussion();
     }
     if(new URLSearchParams(location.search).has('new')) resetDiscussion();
 
-    /* Rendu de l'historique local au chargement */
     document.addEventListener('DOMContentLoaded', () => {
       maybeExpireChat();
       const hist = JSON.parse(localStorage.getItem('pf_chat') || '[]');
@@ -470,7 +460,7 @@
     });
 
     /* ===== Supabase Auth + Cloud Chats ===== */
-    const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co'; // ← à remplacer si besoin
+    const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
@@ -481,23 +471,6 @@
 
     function show(el){ el && el.classList.remove('hidden'); }
     function hide(el){ el && el.classList.add('hidden'); }
-
-    async function refreshAuthUI(){
-      const { data:{ session } } = await sb.auth.getSession();
-      if(session){
-        authBtn.textContent = 'Se déconnecter';
-        authBtn.onclick = async ()=>{ await sb.auth.signOut(); localStorage.removeItem('pf_chat_id'); location.reload(); };
-        show(historyCard);
-        await listChats();
-      }else{
-        authBtn.textContent = 'Se connecter';
-        // ⬇️ Redirection vers la page d’auth dédiée
-        authBtn.onclick = () => { window.location.href = 'auth.html'; };
-        hide(historyCard);
-      }
-    }
-    sb.auth.onAuthStateChange(()=>refreshAuthUI());
-    document.addEventListener('DOMContentLoaded', refreshAuthUI);
 
     async function listChats(){
       const { data:{ user } } = await sb.auth.getUser();
@@ -537,22 +510,13 @@
     async function ensureChat(titleFallback='Sans titre'){
       if(currentChatId) return currentChatId;
       const { data:{ user } } = await sb.auth.getUser();
-      if(!user) return null; // non connecté → local only
-
-      // (Option) limite plan Free via RPC can_create_chat
+      if(!user) return null;
       try{
         const { data:can } = await sb.rpc('can_create_chat', { uid: user.id });
-        if(can === false){
-          alert('Votre plan Free permet 1 discussion / mois. Passez à Starter pour continuer.');
-          return null;
-        }
+        if(can === false){ alert('Votre plan Free permet 1 discussion / mois. Passez à Starter pour continuer.'); return null; }
       }catch(_e){}
-
       const title = (document.getElementById('brief').value || titleFallback).slice(0,80);
-      const { data, error } = await sb.from('chats')
-        .insert({ user_id:user.id, title })
-        .select()
-        .single();
+      const { data, error } = await sb.from('chats').insert({ user_id:user.id, title }).select().single();
       if(error){ console.error(error); return null; }
       currentChatId = data.id;
       localStorage.setItem('pf_chat_id', data.id);
@@ -565,6 +529,26 @@
       if(!user || !currentChatId) return;
       await sb.from('messages').insert({ chat_id: currentChatId, user_id: user.id, role, content });
     }
+
+    async function refreshAuthUI(){
+      const { data:{ session } } = await sb.auth.getSession();
+      if(session){
+        authBtn.textContent = 'Se déconnecter';
+        authBtn.onclick = async ()=>{ await sb.auth.signOut(); localStorage.removeItem('pf_chat_id'); location.reload(); };
+        show(historyCard);
+        await listChats();
+      }else{
+        authBtn.textContent = 'Se connecter';
+        // ✅ Redirection vers auth.html avec retour automatique à l’URL actuelle
+        authBtn.onclick = () => {
+          const next = encodeURIComponent(location.pathname + location.search + location.hash);
+          window.location.href = `auth.html?next=${next}`;
+        };
+        hide(historyCard);
+      }
+    }
+    sb.auth.onAuthStateChange(()=>refreshAuthUI());
+    document.addEventListener('DOMContentLoaded', refreshAuthUI);
 
     // Bouton "Nouvelle discussion"
     const newChatBtn = document.getElementById('newChatBtn');
@@ -580,7 +564,6 @@
           enablePreviewIfReady();
           return;
         }
-        // local : 1 discussion max
         const used = parseInt(localStorage.getItem('pf_local_chats')||'0',10);
         if(used >= 1){
           alert("Vous avez déjà utilisé la discussion gratuite.\nConnectez-vous pour sauvegarder l’historique et créer d’autres discussions.");
@@ -597,11 +580,7 @@
       const { data:{ session } } = await sb.auth.getSession();
       const headers = {'Content-Type':'application/json'};
       if(session?.access_token){ headers.Authorization = `Bearer ${session.access_token}`; }
-      const res = await fetch('/api/chat',{
-        method:'POST',
-        headers,
-        body: JSON.stringify({ message, proposalSpec, history })
-      });
+      const res = await fetch('/api/chat',{ method:'POST', headers, body: JSON.stringify({ message, proposalSpec, history }) });
       if(!res.ok) throw new Error('HTTP '+res.status);
       return res.json();
     }
@@ -611,9 +590,7 @@
       const lang=document.documentElement.lang||'fr';
       const v=$("#brief").value.trim(); if(!v){$("#brief").focus();return;}
 
-      if(PLAN==='free' && leftCount('free')<=0){
-        console.warn('[FREE] Limite de prévisualisations atteinte. Le chat reste utilisable.');
-      }
+      if(PLAN==='free' && leftCount('free')<=0){ console.warn('[FREE] Limite de prévisualisations atteinte.'); }
 
       addMsg(v,'me');
       const btn=$("#sendBrief"); btn.classList.add('loading'); btn.disabled=true;
@@ -625,29 +602,20 @@
 
         const history = JSON.parse(localStorage.getItem('pf_chat')||'[]');
         const proposalSpec = JSON.parse(localStorage.getItem('pf_proposal')||'{"meta":{"lang":"'+lang+'"}}');
-
         const data = await callChatAPI(v, proposalSpec, history);
 
-        if(data.reply){
-          removeTyping();
-          addMsg(data.reply,'ai');
-          await saveMessage('assistant', data.reply);
-        }else{
-          removeTyping();
-        }
+        if(data.reply){ removeTyping(); addMsg(data.reply,'ai'); await saveMessage('assistant', data.reply); }
+        else { removeTyping(); }
 
         if(data.proposalSpec){
           const merged = { ...proposalSpec, ...data.proposalSpec, meta:{ ...(proposalSpec.meta||{}), ...(data.proposalSpec.meta||{}) } };
           localStorage.setItem('pf_proposal', JSON.stringify(merged));
           enablePreviewIfReady();
-
-          // Sauvegarde cloud de l’aperçu (si connecté)
           try {
             const { data:{ user } } = await sb.auth.getUser();
             if (user && currentChatId) {
               await sb.from('proposals').upsert(
-                { user_id: user.id, chat_id: currentChatId,
-                  spec: JSON.parse(localStorage.getItem('pf_proposal') || '{}'), },
+                { user_id: user.id, chat_id: currentChatId, spec: JSON.parse(localStorage.getItem('pf_proposal') || '{}') },
                 { onConflict: 'chat_id' }
               );
             }
@@ -673,11 +641,11 @@
       }finally{
         removeTyping();
         btn.classList.remove('loading'); btn.disabled=false;
-        $("#brief").value=''; // ← vide le textarea à l’envoi
+        $("#brief").value='';
       }
     });
 
-    /* ==== ENTRÉE = envoyer | Maj+Entrée = NL | Ctrl/Cmd+Entrée = envoyer ==== */
+    /* ENTRÉE = envoyer | Maj+Entrée = NL | Ctrl/Cmd+Entrée = envoyer */
     (function () {
       const briefEl = document.getElementById('brief');
       const sendBtn = document.getElementById('sendBrief');
@@ -690,109 +658,56 @@
       });
     })();
 
-    /* ==== Logo uploader + auto-branding ==== */
+    /* Logo uploader + auto-branding */
     const logoBtn = document.getElementById('logoBtn');
     const logoInput = document.getElementById('logoInput');
-
     logoBtn?.addEventListener('click', ()=> logoInput?.click());
     logoInput?.addEventListener('change', async (e)=>{
       const file = e.target.files?.[0];
       if(!file) return;
-      const dataUrl = await fileToDataURL(file);
-      const { primary, secondary } = await extractPaletteFromDataUrl(dataUrl);
-
-      // Merge spec (+ accent pour l’aperçu)
-      const lang = document.documentElement.lang || 'fr';
-      const current = JSON.parse(localStorage.getItem('pf_proposal') || '{"meta":{"lang":"'+lang+'"}}');
-      const next = {
-        ...current,
-        meta: {
-          ...(current.meta||{}),
-          accent: primary,
-          style: {
-            ...((current.meta && current.meta.style) || {}),
-            logoDataUrl: dataUrl,
-            primary, secondary
-          }
+      const dataUrl = await new Promise((resolve,reject)=>{ const fr=new FileReader(); fr.onload=()=>resolve(fr.result); fr.onerror=reject; fr.readAsDataURL(file); });
+      const { primary, secondary } = await (async function extractPalette(dataUrl){
+        const img = new Image(); img.crossOrigin='anonymous'; img.src=dataUrl;
+        await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; });
+        const canvas=document.createElement('canvas'); const ctx=canvas.getContext('2d',{ willReadFrequently:true });
+        const W=180,H=Math.max(90,Math.round(img.height*(W/img.width))); canvas.width=W; canvas.height=H;
+        ctx.drawImage(img,0,0,W,H); const { data }=ctx.getImageData(0,0,W,H);
+        const map=new Map();
+        for(let i=0;i<data.length;i+=40){
+          const r=data[i],g=data[i+1],b=data[i+2],a=data[i+3]/255; if(a<0.6) continue;
+          const lum=(0.2126*r+0.7152*g+0.0722*b)/255; if(lum<0.12||lum>0.98) continue;
+          const key=((r&0xF0)<<16)|((g&0xF0)<<8)|(b&0xF0); map.set(key,(map.get(key)||0)+1);
         }
-      };
+        const sorted=[...map.entries()].sort((a,b)=>b[1]-a[1]).slice(0,8).map(([k])=>{
+          const r=(k>>16)&0xF0,g=(k>>8)&0xF0,b=k&0xF0;
+          return `#${(r|0x0F).toString(16).padStart(2,'0')}${(g|0x0F).toString(16).padStart(2,'0')}${(b|0x0F).toString(16).padStart(2,'0')}`.toUpperCase();
+        });
+        const primary=sorted[0]||'#3B82F6';
+        let secondary='#8B5CF6';
+        function hexToRGB(h){const s=h.replace('#','');return{r:parseInt(s.slice(0,2),16),g:parseInt(s.slice(2,4),16),b:parseInt(s.slice(4,6),16)}}
+        function dist(a,b){const A=hexToRGB(a),B=hexToRGB(b);const dr=A.r-B.r,dg=A.g-B.g,db=A.b-B.b;return Math.sqrt(dr*dr+dg*dg+db*db)}
+        for(let i=1;i<sorted.length;i++){ if(dist(sorted[0],sorted[i])>80){ secondary=sorted[i]; break; } }
+        return { primary, secondary };
+      })(dataUrl);
+
+      const lang=document.documentElement.lang||'fr';
+      const current=JSON.parse(localStorage.getItem('pf_proposal') || '{"meta":{"lang":"'+lang+'"}}');
+      const next={ ...current, meta:{ ...(current.meta||{}), accent:primary, style:{ ...((current.meta&&current.meta.style)||{}), logoDataUrl:dataUrl, primary, secondary } } };
       localStorage.setItem('pf_proposal', JSON.stringify(next));
       enablePreviewIfReady();
       addMsg(`Logo importé. Couleurs détectées : ${primary} & ${secondary}. L’aperçu s’adaptera au branding.`, 'ai');
     });
 
-    async function fileToDataURL(file){
-      return new Promise((resolve,reject)=>{
-        const fr=new FileReader();
-        fr.onload=()=>resolve(fr.result);
-        fr.onerror=reject;
-        fr.readAsDataURL(file);
-      });
-    }
-
-    async function extractPaletteFromDataUrl(dataUrl){
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.src = dataUrl;
-      await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; });
-
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d',{ willReadFrequently:true });
-      // downscale to speed up
-      const W = 180, H = Math.max(90, Math.round(img.height * (W / img.width)));
-      canvas.width = W; canvas.height = H;
-      ctx.drawImage(img, 0, 0, W, H);
-      const { data } = ctx.getImageData(0,0,W,H);
-
-      const map = new Map();
-      for (let i=0;i<data.length;i+=4*10){ // sample 1 every 10 pixels
-        const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3]/255;
-        if (a < 0.6) continue;
-        const lum = (0.2126*r + 0.7152*g + 0.0722*b)/255;
-        if (lum < 0.12 || lum > 0.98) continue; // ignore near-black/near-white
-        // reduce color space
-        const key = ((r&0xF0)<<16) | ((g&0xF0)<<8) | (b&0xF0);
-        map.set(key, (map.get(key)||0)+1);
-      }
-      const sorted = [...map.entries()].sort((a,b)=>b[1]-a[1]).slice(0,8).map(([k])=>{
-        const r=(k>>16)&0xF0, g=(k>>8)&0xF0, b=k&0xF0;
-        return `#${(r|0x0F).toString(16).padStart(2,'0')}${(g|0x0F).toString(16).padStart(2,'0')}${(b|0x0F).toString(16).padStart(2,'0')}`.toUpperCase();
-      });
-      const primary = sorted[0] || '#3B82F6';
-      // pick secondary sufficiently different
-      let secondary = '#8B5CF6';
-      for (let i=1;i<sorted.length;i++){
-        if (colorDistance(sorted[0], sorted[i]) > 80){ secondary = sorted[i]; break; }
-      }
-      return { primary, secondary };
-    }
-
-    function colorDistance(hex1, hex2){
-      const a = hexToRGB(hex1), b = hexToRGB(hex2);
-      const dr=a.r-b.r, dg=a.g-b.g, db=a.b-b.b;
-      return Math.sqrt(dr*dr+dg*dg+db*db);
-    }
-    function hexToRGB(hex){
-      const s=hex.replace('#','');
-      return { r:parseInt(s.slice(0,2),16), g:parseInt(s.slice(2,4),16), b:parseInt(s.slice(4,6),16) };
-    }
-
-    /* ==== Bouton Commencer (génère et ouvre l’aperçu) ==== */
+    /* Bouton Commencer */
     (function(){
       const startBtn = document.getElementById('startBtn');
       if(!startBtn) return;
-
       startBtn.addEventListener('click', async () => {
         const lang = document.documentElement.lang || 'fr';
         const briefEl = document.getElementById('brief');
-        let msg = '';
-        if (briefEl && briefEl.value) msg = briefEl.value.trim();
-        if (!msg) {
-          msg = (lang === 'fr')
-            ? "Crée une proposition commerciale complète à partir d'un brief vide (exemple)."
-            : "Create a complete business proposal from an empty brief (sample).";
-        }
-
+        let msg = briefEl && briefEl.value ? briefEl.value.trim() :
+          (lang==='fr' ? "Crée une proposition commerciale complète à partir d'un brief vide (exemple)." :
+                          "Create a complete business proposal from an empty brief (sample).");
         try {
           const baseSpec = JSON.parse(localStorage.getItem('pf_proposal') || '{"meta":{"lang":"'+lang+'"},"sections":[]}');
           const data = await callChatAPI(msg, baseSpec, []);
@@ -800,26 +715,14 @@
           const merged = { ...baseSpec, ...nextSpec, meta:{ ...(baseSpec.meta||{}), ...((nextSpec&&nextSpec.meta)||{}) } };
           localStorage.setItem('pf_proposal', JSON.stringify(merged));
           localStorage.setItem('pf_chat_ts', String(Date.now()));
-
-          try {
+          try{
             const { data:{ user } } = await sb.auth.getUser();
-            if (user) {
-              if (!currentChatId) { await ensureChat('Aperçu'); }
-              if (currentChatId) {
-                await sb.from('proposals').upsert(
-                  { user_id: user.id, chat_id: currentChatId,
-                    spec: JSON.parse(localStorage.getItem('pf_proposal') || '{}'), },
-                  { onConflict: 'chat_id' }
-                );
-              }
+            if(user){ if(!currentChatId) await ensureChat('Aperçu');
+              if(currentChatId){ await sb.from('proposals').upsert({ user_id:user.id, chat_id:currentChatId, spec: JSON.parse(localStorage.getItem('pf_proposal')||'{}') }, { onConflict:'chat_id' }); }
             }
-          } catch(_) {}
-
-          window.location.href = 'preview.html?t=modern';
-        } catch (e) {
-          console.error(e);
-          alert((lang === 'fr' ? 'Erreur: ' : 'Error: ') + e.message);
-        }
+          }catch(_){}
+          window.location.href='preview.html?t=modern';
+        } catch (e) { console.error(e); alert((lang==='fr'?'Erreur: ':'Error: ')+e.message); }
       });
     })();
 
