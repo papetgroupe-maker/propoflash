@@ -46,7 +46,7 @@
       filter:blur(40px)}
     .search{
       position:absolute;left:50%;top:50%;
-      transform: translate(-50%,-50%); /* ✅ Fix: centré, plus de rognage */
+      transform: translate(-50%,-50%); /* ✅ centré, plus de rognage */
       width:min(700px,70%);height:74px;border-radius:999px;
       background:linear-gradient(180deg,#ffffffcc,#ffffff80);
       border:1px solid #e7edf9; box-shadow:0 12px 36px rgba(11,25,70,.12);
@@ -82,7 +82,7 @@
         <div id="msgErr" class="err"></div>
         <div id="msgOk"  class="ok"></div>
 
-        <button id="googleBtn" class="btn">
+        <button id="googleBtn" class="btn" type="button">
           <span style="display:inline-flex;align-items:center;gap:10px;justify-content:center">
             <img alt="" src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" height="18">
             Log in with Google
@@ -104,7 +104,7 @@
         </div>
 
         <div class="space"></div>
-        <button id="submitBtn" class="btn black">Log In</button>
+        <button id="submitBtn" class="btn black" type="button">Log In</button>
 
         <div class="space"></div>
         <p class="hint" id="footHint">
@@ -132,6 +132,10 @@
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
+    // ===== Helpers =====
+    const qs   = new URLSearchParams(location.search);
+    const NEXT = qs.get('next') || 'index.html'; // page de retour après login
+
     const emailEl = document.getElementById('email');
     const passEl  = document.getElementById('password');
     const submit  = document.getElementById('submitBtn');
@@ -149,16 +153,22 @@
     // Redirige si déjà loggé
     (async ()=>{
       const { data:{ session } } = await sb.auth.getSession();
-      if(session){ showOk('Vous êtes déjà connecté·e. Redirection…'); setTimeout(()=>location.href='index.html', 600); }
+      if(session){
+        showOk('Vous êtes déjà connecté·e. Redirection…');
+        setTimeout(()=>location.href = NEXT, 600);
+      }
     })();
 
-    // Google OAuth
+    // Google OAuth (revient d'abord sur auth.html, puis redirige vers NEXT)
     google.onclick = async ()=>{
       clearMsgs();
       try{
         const { error } = await sb.auth.signInWithOAuth({
           provider:'google',
-          options:{ redirectTo: window.location.origin + '/index.html' }
+          options:{
+            redirectTo: `${window.location.origin}/auth.html?next=${encodeURIComponent(NEXT)}`,
+            scopes: 'openid email profile'
+          }
         });
         if(error) showErr(error.message);
       }catch(e){ showErr(String(e.message||e)); }
@@ -168,8 +178,11 @@
     toggle.onclick = (e)=>{
       e.preventDefault();
       clearMsgs();
-      if(mode==='login'){ mode='signup'; submit.textContent='Create account'; toggle.textContent='Log in'; forgot.style.visibility='hidden'; }
-      else { mode='login'; submit.textContent='Log In'; toggle.textContent='Sign up'; forgot.style.visibility='visible'; }
+      if(mode==='login'){
+        mode='signup'; submit.textContent='Create account'; toggle.textContent='Log in'; forgot.style.visibility='hidden';
+      }else{
+        mode='login';  submit.textContent='Log In';        toggle.textContent='Sign up'; forgot.style.visibility='visible';
+      }
     };
 
     // Submit (login or signup)
@@ -186,13 +199,20 @@
           if(error) showErr(error.message);
           else showOk('Compte créé. Vérifiez votre email si la confirmation est requise.');
         }else{ // login
-          const { data, error } = await sb.auth.signInWithPassword({ email, password });
+          const { error } = await sb.auth.signInWithPassword({ email, password });
           if(error) showErr(error.message);
-          else { showOk('Connexion réussie.'); setTimeout(()=>location.href='index.html', 400); }
+          else { showOk('Connexion réussie.'); setTimeout(()=>location.href = NEXT, 400); }
         }
       }catch(e){ showErr(String(e.message||e)); }
       finally{ submit.disabled=false; }
     };
+
+    // Enter = soumettre (coté email/password)
+    [emailEl, passEl].forEach(el=>{
+      el.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter'){ e.preventDefault(); submit.click(); }
+      });
+    });
 
     // Forgot password (envoie un lien)
     forgot.onclick = async (e)=>{
@@ -202,7 +222,8 @@
       if(!email) return;
       try{
         const { error } = await sb.auth.resetPasswordForEmail(email, {
-          redirectTo: window.location.origin + '/auth.html#reset'
+          // on revient sur auth.html avec le même NEXT + hash #reset
+          redirectTo: `${window.location.origin}/auth.html?next=${encodeURIComponent(NEXT)}#reset`
         });
         if(error) showErr(error.message);
         else showOk('Lien de réinitialisation envoyé. Consultez votre boîte mail.');
