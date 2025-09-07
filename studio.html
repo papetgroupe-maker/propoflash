@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>PropoFlash — Studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--ink:#0a1020;--muted:#667085;--stroke:#e6e9f3;--bg:#f6f8fc;--accent:#3b82f6;--accent2:#8b5cf6}
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,#f6f8fc,#eef3ff);font-family:Inter,system-ui,sans-serif;color:var(--ink)}
+    .top{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--stroke);display:flex;align-items:center;justify-content:space-between;padding:10px 14px}
+    .brand{display:flex;gap:10px;align-items:center;font-weight:800}
+    .brand a{color:inherit;text-decoration:none}
+    .spark{width:22px;height:22px;border-radius:6px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd)}
+    .btn{border:1px solid var(--stroke);background:#fff;border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer}
+    .btn.primary{background:var(--accent);color:#fff;border-color:#0000}
+    .layout{display:grid;grid-template-columns:420px 1fr;gap:12px;height:calc(100vh - 56px)}
+    .col{padding:12px;overflow:auto}
+    .card{background:#fff;border:1px solid var(--stroke);border-radius:14px;box-shadow:0 6px 20px rgba(10,16,32,.08)}
+    /* Chat */
+    .chat{display:flex;flex-direction:column;height:100%}
+    .chat-body{flex:1;overflow:auto;padding:12px}
+    .msg{display:flex;margin:8px 0}
+    .msg.me{justify-content:flex-end}
+    .bubble{max-width:80%;border:1px solid var(--stroke);padding:10px 12px;border-radius:12px;background:#fff}
+    .msg.me .bubble{background:#0b2446;color:#e8eefc}
+    .chat-input{display:flex;gap:8px;border-top:1px solid var(--stroke);padding:10px}
+    textarea{flex:1;resize:vertical;min-height:68px;border:1px solid var(--stroke);border-radius:10px;padding:10px}
+    /* Aperçu */
+    .panel{padding:14px}
+    .sheet{background:#fff;border:1px solid var(--stroke);border-radius:12px;box-shadow:0 12px 36px rgba(10,16,32,.10);padding:24px}
+    .h1{font-weight:800;font-size:24px;margin:0 0 6px}
+    .meta{color:var(--muted);font-size:14px;margin-bottom:14px}
+    .hr{height:1px;background:var(--stroke);margin:12px 0}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .cardBox{border:1px solid var(--stroke);border-radius:12px;padding:12px}
+    .pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--stroke);font-size:12px;background:#fff}
+    table{border-collapse:collapse;width:100%;font-size:14px}
+    th,td{border-bottom:1px solid var(--stroke);padding:6px;text-align:left}
+    @media (max-width:1100px){.layout{grid-template-columns:1fr}.chat{height:auto}}
+    @media print{.top,.layout>.col:first-child{display:none} .layout{grid-template-columns:1fr} .panel{padding:0} .sheet{box-shadow:none;border:none}}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="top">
+    <div class="brand"><div class="spark"></div><a href="index.html">PropoFlash</a></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button id="historyBtn" class="btn">Historique</button>
+      <label class="btn"><input type="color" id="c1" style="vertical-align:middle;margin-right:6px">Couleur 1</label>
+      <label class="btn"><input type="color" id="c2" style="vertical-align:middle;margin-right:6px">Couleur 2</label>
+      <button id="pdfBtn" class="btn">Export PDF</button>
+      <button id="logoutBtn" class="btn">Déconnexion</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- Colonne gauche : Chat -->
+    <div class="col">
+      <div class="card chat">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px;border-bottom:1px solid var(--stroke)">
+          <strong>Assistant</strong>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="logoFile" type="file" accept="image/*" hidden>
+            <button class="btn" id="logoBtn">+ Logo</button>
+          </div>
+        </div>
+
+        <div id="chatBody" class="chat-body"></div>
+
+        <div class="chat-input">
+          <textarea id="prompt" placeholder="Décrivez votre besoin…"></textarea>
+          <button id="send" class="btn primary">Envoyer</button>
+        </div>
+      </div>
+
+      <div id="historyPanel" class="card" style="margin-top:12px;display:none;padding:10px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <strong>Mes discussions</strong>
+          <button class="btn" id="closeHistory">Fermer</button>
+        </div>
+        <div id="historyList" style="padding:8px 4px;display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+    </div>
+
+    <!-- Colonne droite : Aperçu -->
+    <div class="col">
+      <div class="panel card">
+        <div class="sheet" id="sheet"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== Boot Supabase =====
+    const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    const chatBody = document.getElementById('chatBody');
+    const promptEl = document.getElementById('prompt');
+    const sheet = document.getElementById('sheet');
+    let currentChatId = localStorage.getItem('pf_chat_id') || null;
+    let spec = null;
+
+    // ===== Helpers =====
+    function addMsg(text, who='ai'){
+      const row=document.createElement('div'); row.className='msg'+(who==='me'?' me':'');
+      const b=document.createElement('div'); b.className='bubble'; b.textContent=String(text||'');
+      row.appendChild(b); chatBody.appendChild(row); chatBody.scrollTop=chatBody.scrollHeight;
+    }
+    const safeArr = v => Array.isArray(v) ? v : [];
+    const safeStr = (v,f='') => (v==null?'':String(v)).trim()||f;
+    const money = (n,c)=>{try{return new Intl.NumberFormat('fr-FR',{style:'currency',currency:c||'EUR'}).format(Number(n||0));}catch{return String(n||0)+' '+(c||'€')}};
+    const toHex = (c)=>{const s=String(c||'').trim(); if(/^#([0-9a-f]{3}){1,2}$/i.test(s)) return s.toUpperCase(); if(s.startsWith('rgb')){const m=s.match(/\d+/g)||[0,0,0]; return '#'+m.slice(0,3).map(x=>Number(x).toString(16).padStart(2,'0')).join('').toUpperCase();} return '#3B82F6';};
+    function showHistory(v=true){ document.getElementById('historyPanel').style.display = v?'block':'none'; }
+
+    // ===== Rendu live =====
+    function render(){
+      sheet.innerHTML = '';
+      if(!spec){ sheet.innerHTML='<p style="color:var(--muted)">Aucune donnée. Envoyez un brief dans le chat.</p>'; return; }
+
+      // Couleurs
+      const primary = spec?.meta?.style?.primary || spec?.meta?.accent || '#3b82f6';
+      const secondary = spec?.meta?.style?.secondary || '#8b5cf6';
+      document.documentElement.style.setProperty('--accent', primary);
+      document.documentElement.style.setProperty('--accent2', secondary);
+      document.getElementById('c1').value = toHex(primary);
+      document.getElementById('c2').value = toHex(secondary);
+
+      // Header minimal
+      const company = safeStr(spec.meta?.company || spec.meta?.brand?.company, 'Votre société');
+      const client  = safeStr(spec.meta?.client, 'Client');
+      const title   = safeStr(spec.meta?.title, 'Proposition commerciale');
+
+      const header = document.createElement('div');
+      header.innerHTML = `
+        <div class="h1" contenteditable="true">${title}</div>
+        <div class="meta">Pour <span class="pill" contenteditable="true">${client}</span> • Émis par <span class="pill" contenteditable="true">${company}</span></div>
+      `;
+      sheet.appendChild(header);
+      sheet.appendChild(Object.assign(document.createElement('div'),{className:'hr'}));
+
+      // Executive
+      if (safeArr(spec.executive_summary?.paragraphs).length){
+        const box=document.createElement('div'); box.className='cardBox';
+        box.innerHTML='<strong>Résumé exécutif</strong>';
+        spec.executive_summary.paragraphs.forEach(p=>{const el=document.createElement('p'); el.textContent=p; el.contentEditable='true'; box.appendChild(el);});
+        sheet.appendChild(box);
+      }
+
+      // Objectifs
+      if (safeArr(spec.objectives?.bullets).length){
+        const box=document.createElement('div'); box.className='cardBox'; box.style.marginTop='8px';
+        box.innerHTML='<strong>Objectifs</strong>';
+        const ul=document.createElement('ul');
+        spec.objectives.bullets.forEach(b=>{const li=document.createElement('li'); li.textContent=b; li.contentEditable='true'; ul.appendChild(li);});
+        box.appendChild(ul); sheet.appendChild(box);
+      }
+
+      // Approche
+      if (safeArr(spec.approach?.phases).length){
+        const title=document.createElement('div'); title.className='cardBox'; title.style.marginTop='8px'; title.innerHTML='<strong>Approche & phasage</strong>'; sheet.appendChild(title);
+        spec.approach.phases.forEach((ph,i)=>{
+          const c=document.createElement('div'); c.className='cardBox'; c.style.marginTop='8px';
+          c.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+              <strong contenteditable="true">Phase ${i+1} — ${safeStr(ph.title,'À confirmer')}</strong>
+              <span class="pill">${safeStr(ph.duration||'', '')}</span>
+            </div>`;
+          if (ph.description){ const p=document.createElement('p'); p.textContent=ph.description; p.contentEditable='true'; c.appendChild(p); }
+          const acts=safeArr(ph.activities?.length?ph.activities:ph.steps);
+          if (acts.length){ const ul=document.createElement('ul'); acts.forEach(a=>{const li=document.createElement('li'); li.textContent=a; li.contentEditable='true'; ul.appendChild(li);}); c.appendChild(ul); }
+          sheet.appendChild(c);
+        });
+      }
+
+      // Livrables
+      if (spec.deliverables && (safeArr(spec.deliverables.in).length || safeArr(spec.deliverables.out).length)){
+        const grid=document.createElement('div'); grid.className='grid2'; grid.style.marginTop='8px';
+        const a=document.createElement('div'); a.className='cardBox'; a.innerHTML='<div style="color:var(--muted);margin-bottom:6px">Inclus</div>';
+        const b=document.createElement('div'); b.className='cardBox'; b.innerHTML='<div style="color:var(--muted);margin-bottom:6px">Hors périmètre</div>';
+        const ulA=document.createElement('ul'); safeArr(spec.deliverables.in).forEach(x=>{const li=document.createElement('li'); li.textContent=x; li.contentEditable='true'; ulA.appendChild(li);});
+        const ulB=document.createElement('ul'); safeArr(spec.deliverables.out).forEach(x=>{const li=document.createElement('li'); li.textContent=x; li.contentEditable='true'; ulB.appendChild(li);});
+        a.appendChild(ulA); b.appendChild(ulB); grid.appendChild(a); grid.appendChild(b); sheet.appendChild(grid);
+      }
+
+      // Planning
+      if (safeArr(spec.timeline?.milestones).length){
+        const t=document.createElement('div'); t.className='cardBox'; t.style.marginTop='8px'; t.innerHTML='<strong>Planning</strong>'; sheet.appendChild(t);
+        const grid=document.createElement('div'); grid.className='grid2';
+        spec.timeline.milestones.forEach(ms=>{
+          const c=document.createElement('div'); c.className='cardBox';
+          c.innerHTML = `<div><strong contenteditable="true">${safeStr(ms.title,'Étape')}</strong></div>
+            <div class="meta">${safeStr(ms.dateOrWeek || ms.date || ms.duration || '', '')}</div>`;
+          if (ms.notes){ const p=document.createElement('p'); p.textContent=ms.notes; p.contentEditable='true'; c.appendChild(p); }
+          grid.appendChild(c);
+        });
+        sheet.appendChild(grid);
+      }
+
+      // Pricing
+      if (spec.pricing){
+        const pr = spec.pricing, currency = pr.currency || 'EUR';
+        const box=document.createElement('div'); box.className='cardBox'; box.style.marginTop='8px';
+        box.innerHTML='<strong>Tarification</strong>';
+        if (Array.isArray(pr.items) && pr.items.length){
+          const table=document.createElement('table');
+          table.innerHTML=`<thead><tr><th>Item</th><th>Qté</th><th>PU</th><th>Sous-total</th></tr></thead><tbody></tbody>`;
+          const tb=table.querySelector('tbody');
+          pr.items.forEach(it=>{
+            const qty=Number(it.qty||1), up=Number(it.unit_price||0), st=(it.subtotal!=null)?Number(it.subtotal):qty*up;
+            const tr=document.createElement('tr');
+            tr.innerHTML = `<td contenteditable="true">${safeStr(it.name,'—')}</td>
+                            <td contenteditable="true">${qty}</td>
+                            <td contenteditable="true">${money(up,currency)}</td>
+                            <td contenteditable="true">${money(st,currency)}</td>`;
+            tb.appendChild(tr);
+          });
+          box.appendChild(table);
+        }else{
+          const p=document.createElement('div'); p.style.marginTop='6px';
+          p.innerHTML = `<span class="pill" contenteditable="true">${money(pr.price||0,currency)}</span> &nbsp; <span style="color:var(--muted)">(${safeStr(pr.model||'forfait')})</span>`;
+          box.appendChild(p);
+        }
+        sheet.appendChild(box);
+      }
+
+      // Hypothèses
+      if (safeArr(spec.assumptions?.paragraphs).length){
+        const box=document.createElement('div'); box.className='cardBox'; box.style.marginTop='8px'; box.innerHTML='<strong>Hypothèses / Risques</strong>';
+        spec.assumptions.paragraphs.forEach(p=>{const el=document.createElement('p'); el.textContent=p; el.contentEditable='true'; box.appendChild(el);});
+        sheet.appendChild(box);
+      }
+
+      // Next steps
+      if (safeArr(spec.next_steps?.paragraphs).length){
+        const box=document.createElement('div'); box.className='cardBox'; box.style.marginTop='8px'; box.innerHTML='<strong>Prochaines étapes</strong>';
+        spec.next_steps.paragraphs.forEach(p=>{const el=document.createElement('p'); el.textContent=p; el.contentEditable='true'; box.appendChild(el);});
+        sheet.appendChild(box);
+      }
+    }
+
+    // ===== Chat & API =====
+    async function ensureChat(title='Nouvelle discussion'){
+      if(currentChatId) return currentChatId;
+      const { data:{ user } } = await sb.auth.getUser();
+      if(!user) return null;
+      const { data, error } = await sb.from('chats').insert({ user_id:user.id, title }).select().single();
+      if(error){ console.error(error); return null; }
+      currentChatId = data.id; localStorage.setItem('pf_chat_id', data.id);
+      return data.id;
+    }
+    async function saveMessage(role, content){
+      const { data:{ user } } = await sb.auth.getUser();
+      if(!user || !currentChatId) return;
+      await sb.from('messages').insert({ chat_id: currentChatId, user_id: user.id, role, content });
+    }
+    async function callChatAPI(message, proposalSpec, history){
+      const { data:{ session } } = await sb.auth.getSession();
+      const headers={'Content-Type':'application/json'};
+      if(session?.access_token) headers.Authorization = `Bearer ${session.access_token}`;
+      const res = await fetch('/api/chat',{ method:'POST', headers, body: JSON.stringify({ message, proposalSpec, history }) });
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      return res.json();
+    }
+
+    document.getElementById('send').onclick = async ()=>{
+      const msg=(promptEl.value||'').trim(); if(!msg) return;
+      addMsg(msg,'me'); promptEl.value='';
+      const history = JSON.parse(localStorage.getItem('pf_chat')||'[]');
+      const base = spec || JSON.parse(localStorage.getItem('pf_proposal')||'{"meta":{"lang":"fr"},"sections":[]}');
+      try{
+        await ensureChat(msg.slice(0,80));
+        await saveMessage('user', msg);
+        const data = await callChatAPI(msg, base, history);
+        if(data.reply){ addMsg(data.reply,'ai'); await saveMessage('assistant', data.reply); }
+        if(data.proposalSpec){
+          spec = { ...base, ...data.proposalSpec, meta:{ ...(base.meta||{}), ...(data.proposalSpec.meta||{}) } };
+          localStorage.setItem('pf_proposal', JSON.stringify(spec));
+          render();
+          try{
+            const { data:{ user } } = await sb.auth.getUser();
+            if(user && currentChatId){
+              await sb.from('proposals').upsert(
+                { user_id:user.id, chat_id:currentChatId, spec },
+                { onConflict:'chat_id' }
+              );
+            }
+          }catch(_){}
+        }
+        const newHist=[...history,{role:'user',content:msg},{role:'assistant',content:data.reply||''}].slice(-20);
+        localStorage.setItem('pf_chat', JSON.stringify(newHist));
+      }catch(e){ console.error(e); addMsg('Erreur serveur. Réessayez.','ai'); }
+    };
+
+    // ===== Historique =====
+    document.getElementById('historyBtn').onclick = async ()=>{
+      const { data:{ user } } = await sb.auth.getUser();
+      if(!user){ alert("Connectez-vous pour voir l’historique."); return; }
+      const { data, error } = await sb.from('chats').select('id,title,created_at').order('created_at',{ascending:false}).limit(30);
+      if(error){ console.error(error); return; }
+      const list=document.getElementById('historyList'); list.innerHTML='';
+      data.forEach(c=>{
+        const b=document.createElement('button'); b.className='btn'; b.style.justifyContent='space-between'; b.style.display='flex';
+        b.innerHTML = `<span>${c.title||'Sans titre'}</span><span style="color:var(--muted);font-size:12px">${new Date(c.created_at).toLocaleString()}</span>`;
+        b.onclick = ()=> openChat(c.id);
+        list.appendChild(b);
+      });
+      showHistory(true);
+    };
+    document.getElementById('closeHistory').onclick = ()=> showHistory(false);
+
+    async function openChat(id){
+      currentChatId=id; localStorage.setItem('pf_chat_id', id);
+      showHistory(false); chatBody.innerHTML='';
+      const { data:msgs } = await sb.from('messages').select('role,content,created_at').eq('chat_id', id).order('created_at',{ascending:true});
+      msgs?.forEach(m=>addMsg(m.content, m.role==='user'?'me':'ai'));
+      const { data:prop } = await sb.from('proposals').select('spec').eq('chat_id', id).single();
+      if(prop?.spec){ spec=prop.spec; localStorage.setItem('pf_proposal', JSON.stringify(spec)); render(); }
+    }
+
+    // ===== Couleurs / Logo / PDF / Logout =====
+    document.getElementById('c1').oninput = (e)=>{
+      const v=e.target.value||'#3b82f6';
+      spec = spec || { meta:{} }; spec.meta.style = {...(spec.meta.style||{}), primary:v}; spec.meta.accent=v;
+      localStorage.setItem('pf_proposal', JSON.stringify(spec)); render();
+    };
+    document.getElementById('c2').oninput = (e)=>{
+      const v=e.target.value||'#8b5cf6';
+      spec = spec || { meta:{} }; spec.meta.style = {...(spec.meta.style||{}), secondary:v};
+      localStorage.setItem('pf_proposal', JSON.stringify(spec)); render();
+    };
+
+    document.getElementById('logoBtn').onclick = ()=> document.getElementById('logoFile').click();
+    document.getElementById('logoFile').onchange = async (ev)=>{
+      const f=ev.target.files?.[0]; if(!f) return;
+      const fr=new FileReader(); fr.onload=()=>{ 
+        spec = spec || { meta:{} }; 
+        spec.meta.style = {...(spec.meta.style||{}), logoDataUrl: fr.result };
+        localStorage.setItem('pf_proposal', JSON.stringify(spec)); render();
+        addMsg('Logo importé. Le style s’adaptera lors de la génération.','ai');
+      };
+      fr.readAsDataURL(f);
+    };
+
+    document.getElementById('pdfBtn').onclick = ()=> window.print();
+    document.getElementById('logoutBtn').onclick = async ()=>{ await sb.auth.signOut(); location.href='index.html'; };
+
+    // ===== Init =====
+    (async ()=>{
+      const warm = localStorage.getItem('pf_welcome_msg');
+      if(warm){ addMsg(warm,'me'); localStorage.removeItem('pf_welcome_msg'); }
+      try{ spec = JSON.parse(localStorage.getItem('pf_proposal')||'null'); }catch{ spec=null; }
+      if(!spec) spec = { meta:{ lang:'fr', title:'Proposition commerciale' }, sections:[] };
+      render();
+      const { data:{ session } } = await sb.auth.getSession();
+      console.log('[studio] session', !!session, session?.user?.email);
+    })();
+  </script>
+</body>
+</html>
