@@ -86,14 +86,11 @@
           const { data, error } = await sb.auth.exchangeCodeForSession(window.location.href);
           if (error) { console.error('[auth] exchange error', error); showErr('Connexion impossible : '+error.message); return; }
           console.log('[auth] session created', data?.session?.user?.email);
-          // Nettoie l’URL
           history.replaceState({}, document.title, location.pathname);
-          // Redirige
           location.href = (returnTo==='studio' ? 'studio.html' : 'index.html');
         }catch(e){ console.error(e); showErr(String(e.message||e)); }
         return;
       }
-      // Si déjà connecté, envoie au studio directement
       const { data:{ session } } = await sb.auth.getSession();
       if (session) {
         console.log('[auth] already logged in as', session.user.email);
@@ -103,7 +100,7 @@
       }
     })();
 
-    // 2) Démarre le flux OAuth → retour sur auth.html (même page)
+    // 2) Démarre le flux OAuth
     document.getElementById('googleBtn').onclick = async ()=>{
       try{
         const redirectTo = new URL(location.href);
@@ -117,14 +114,13 @@
       }catch(e){ console.error(e); showErr(String(e.message||e)); }
     };
 
-    // 3) Déconnexion (utile si une mauvaise session traine)
+    // 3) Déconnexion
     document.getElementById('logoutBtn').onclick = async ()=>{
       await sb.auth.signOut();
       showOk('Déconnecté. Vous pouvez vous reconnecter.');
       document.getElementById('logoutBtn').style.display = 'none';
     };
 
-    // 4) Debug: affiche les changements d’état
     sb.auth.onAuthStateChange((event, session)=>{
       console.log('[auth] onAuthStateChange', event, session?.user?.email);
     });
