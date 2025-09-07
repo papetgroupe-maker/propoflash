@@ -3,600 +3,76 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>PropoFlash — Aperçu</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>PropoFlash — Aperçu (impression)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --paper-w:210mm; --paper-h:297mm;
-      --bg:#f3f6fb; --ink:#0a1020; --muted:#5c667a; --stroke:#e7ecf6;
-      --accent:#3b82f6; --accent2:#8b5cf6; --accent-ink:#fff;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;background:linear-gradient(180deg,#f6f8fc,#eef3ff);font-family:Inter,system-ui,sans-serif;color:var(--ink)}
-    /* Top bar */
-    .bar{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--stroke);
-      display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px}
-    .left,.right{display:flex;gap:8px;align-items:center}
-    .brand{display:flex;gap:10px;align-items:center;font-weight:800}
-    .spark{width:22px;height:22px;border-radius:6px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd)}
-    .btn{border:1px solid var(--stroke);background:#fff;border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer}
-    .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:#0000}
-    .btn:disabled{opacity:.6;cursor:not-allowed}
-    .sel,.color{border:1px solid var(--stroke);border-radius:10px;padding:7px 10px;background:#fff}
-    .hint{color:var(--muted);font-size:12px}
-
-    /* Sheet */
+    :root{--paper-w:210mm;--paper-h:297mm;--stroke:#e7ecf6;--ink:#0a1020;--muted:#5c667a}
+    *{box-sizing:border-box} html,body{height:100%} body{margin:0;background:#f3f6fb;font-family:Inter,system-ui,sans-serif;color:var(--ink)}
+    .bar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--stroke);display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px}
     .wrap{display:grid;place-items:center;padding:22px}
-    .sheet{width:var(--paper-w); min-height:var(--paper-h); background:#fff; border:1px solid var(--stroke);
-      box-shadow:0 20px 60px rgba(10,16,32,.12); border-radius:12px; padding:28mm 22mm;}
-    .doc-header{display:grid;grid-template-columns:100px 1fr;gap:16px;align-items:center;margin-bottom:16px}
-    .logo-box{width:100px;height:100px;border:1px solid var(--stroke);border-radius:12px;display:grid;place-items:center;overflow:hidden;background:#fff}
-    .logo-box img{width:100%;height:100%;object-fit:contain}
-    .brand-info .company{font-weight:800;font-size:18px}
-    .brand-info .muted{color:var(--muted);font-size:12px}
-    .toc{border:1px solid var(--stroke);border-radius:12px;padding:10px 12px;background:#f8faff;margin:10px 0 14px}
-    .toc b{display:block;margin-bottom:6px}
-    .toc a{display:block;text-decoration:none;color:#28436d;font-size:13px;margin:4px 0}
-    .toc a:hover{text-decoration:underline}
-
-    .h1{font-size:28px;line-height:1.1;margin:0 0 6px;font-weight:800;letter-spacing:-.01em}
+    .sheet{width:var(--paper-w);min-height:var(--paper-h);background:#fff;border:1px solid var(--stroke);border-radius:12px;box-shadow:0 20px 60px rgba(10,16,32,.12);padding:24mm 20mm}
+    .h1{font-weight:800;font-size:28px;margin:0 0 6px}
     .meta{color:var(--muted);font-size:14px;margin-bottom:18px}
-    h2{margin:22px 0 8px;font-size:18px;letter-spacing:.2px}
     .hr{height:1px;background:var(--stroke);margin:12px 0}
-    p{margin:8px 0 10px}
-    ul{margin:8px 0 10px 18px}
-    .tag{display:inline-block;padding:3px 8px;border-radius:999px;background:#eef4ff;border:1px solid var(--stroke);font-size:12px;color:#28436d}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .card{border:1px solid var(--stroke);border-radius:12px;padding:12px}
-    .price{font-weight:800;font-size:18px}
-    .muted{color:var(--muted)}
+    .card{border:1px solid var(--stroke);border-radius:12px;padding:12px;margin-top:8px}
     .pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--stroke);font-size:12px;background:#fff}
-
-    /* Pricing table */
-    table{border-collapse:collapse;width:100%;font-size:14px}
-    th,td{border:1px solid var(--stroke);padding:8px;text-align:left}
-    th{background:#f8faff}
-    tfoot td{font-weight:800}
-
-    /* Email mode */
-    .email-only .hide-when-email{display:none}
-    .email-only .sheet{padding-top:18mm}
-
-    /* Editable mode */
-    .edit-on [contenteditable="true"]{outline:2px solid #e0ecff;border-radius:6px;padding:2px 4px}
-
-    /* Studio mode */
-    .studio #backBtn{ display:none; } /* cache le bouton retour en mode studio */
-
-    /* Print */
-    @media print{
-      .bar{display:none}
-      body{background:#fff}
-      .wrap{padding:0}
-      .sheet{box-shadow:none;border:none;border-radius:0;width:auto;min-height:auto;padding:18mm 16mm}
-      a[href]:after{content:""}
-    }
+    table{border-collapse:collapse;width:100%;font-size:14px} th,td{border-bottom:1px solid var(--stroke);padding:6px;text-align:left}
+    @media print{.bar{display:none} body{background:#fff} .wrap{padding:0} .sheet{box-shadow:none;border:none;border-radius:0;width:auto;min-height:auto;padding:18mm 16mm}}
   </style>
 </head>
 <body>
-  <!-- Top bar -->
-  <div class="bar" id="bar">
-    <div class="left">
-      <div class="brand"><div class="spark" aria-hidden="true"></div>PropoFlash</div>
-      <button class="btn" id="backBtn">← Retour au chat</button>
-      <span class="hint" id="status">Chargement de l’aperçu…</span>
-    </div>
-    <div class="right">
-      <label class="hint">Langue</label>
-      <select class="sel" id="langSel">
-        <option value="fr">FR</option><option value="en">EN</option>
-      </select>
-
-      <label class="hint hide-when-email">Modèle</label>
-      <select class="sel hide-when-email" id="modelSel">
-        <option value="forfait">Forfait</option>
-        <option value="regie">Régie</option>
-      </select>
-
-      <label class="hint">Couleurs</label>
-      <input type="color" class="color" id="accentPick" value="#3b82f6" title="Couleur 1"/>
-      <input type="color" class="color" id="accentPick2" value="#8b5cf6" title="Couleur 2"/>
-
-      <button class="btn" id="emailModeBtn">Mode Email</button>
-      <button class="btn hidden" id="copyEmailBtn">Copier l’e-mail</button>
-
-      <button class="btn" id="editBtn">Éditer</button>
-      <button class="btn primary" id="pdfBtn">Exporter PDF</button>
-    </div>
+  <div class="bar">
+    <div><strong>Aperçu</strong></div>
+    <div><button onclick="window.print()">Exporter PDF</button> <a href="studio.html" style="margin-left:8px">← Retour au studio</a></div>
   </div>
-
-  <!-- Page -->
-  <div class="wrap">
-    <div class="sheet" id="sheet" aria-live="polite">
-      <!-- contenu injecté par JS -->
-    </div>
-  </div>
+  <div class="wrap"><div id="sheet" class="sheet"></div></div>
 
   <script>
-    const $ = (q,ctx=document)=>ctx.querySelector(q);
-    const t = {
-      fr: {
-        title:"Proposition commerciale",
-        to:"Pour",
-        from:"Émis par",
-        date:"Date",
-        letter:"Lettre d’introduction",
-        executive:"Résumé exécutif",
-        objectives:"Objectifs",
-        approach:"Approche & phasage",
-        deliverables:"Livrables",
-        in_scope:"Inclus",
-        out_scope:"Hors-périmètre",
-        timeline:"Planning",
-        pricing:"Tarification",
-        assumptions:"Hypothèses / Risques",
-        next:"Prochaines étapes",
-        price_model:"Modèle",
-        terms:"Conditions",
-        toc:"Sommaire",
-        email_subject:"Objet",
-        email_preheader:"Pré-en-tête",
-        email_copy_ok:"Copié dans le presse-papiers",
-      },
-      en: {
-        title:"Business Proposal",
-        to:"To",
-        from:"Issued by",
-        date:"Date",
-        letter:"Cover Letter",
-        executive:"Executive Summary",
-        objectives:"Objectives",
-        approach:"Approach & Phasing",
-        deliverables:"Deliverables",
-        in_scope:"In scope",
-        out_scope:"Out of scope",
-        timeline:"Timeline",
-        pricing:"Pricing",
-        assumptions:"Assumptions / Risks",
-        next:"Next Steps",
-        price_model:"Model",
-        terms:"Terms",
-        toc:"Table of Contents",
-        email_subject:"Subject",
-        email_preheader:"Preheader",
-        email_copy_ok:"Copied to clipboard",
+    const sheet=document.getElementById('sheet');
+    const safeArr=v=>Array.isArray(v)?v:[];
+    const safeStr=(v,f='')=>(v==null?'':String(v)).trim()||f;
+    const money=(n,c)=>{try{return new Intl.NumberFormat('fr-FR',{style:'currency',currency:c||'EUR'}).format(Number(n||0));}catch{return String(n||0)+' '+(c||'€')}};
+
+    function render(spec){
+      sheet.innerHTML='';
+      const company=safeStr(spec.meta?.company||spec.meta?.brand?.company,'Votre société');
+      const client=safeStr(spec.meta?.client,'Client');
+      const title=safeStr(spec.meta?.title,'Proposition commerciale');
+
+      const h=document.createElement('div'); h.innerHTML=`<div class="h1">${title}</div>
+        <div class="meta">Pour <span class="pill">${client}</span> • Émis par <span class="pill">${company}</span></div>`;
+      sheet.appendChild(h); sheet.appendChild(Object.assign(document.createElement('div'),{className:'hr'}));
+
+      if (safeArr(spec.executive_summary?.paragraphs).length){
+        const c=document.createElement('div'); c.className='card'; c.innerHTML='<strong>Résumé exécutif</strong>';
+        spec.executive_summary.paragraphs.forEach(p=>{const el=document.createElement('p'); el.textContent=p; c.appendChild(el);});
+        sheet.appendChild(c);
       }
-    };
-
-    let spec = null;
-    const sheet = $('#sheet');
-    const statusEl = $('#status');
-    const langSel = $('#langSel');
-    const accentPick = $('#accentPick');
-    const accentPick2 = $('#accentPick2');
-    const editBtn = $('#editBtn');
-    const modelSel = $('#modelSel');
-    const emailModeBtn = $('#emailModeBtn');
-    const copyEmailBtn = $('#copyEmailBtn');
-    let emailMode = false;
-
-    function safeArr(v){ return Array.isArray(v) ? v : []; }
-    function safeStr(v, fallback=''){ return (v==null?'':String(v)).trim() || fallback; }
-    function fmtDate(d){
-      try{
-        const dt = d ? new Date(d) : new Date();
-        return dt.toLocaleDateString(document.documentElement.lang||'fr', { year:'numeric', month:'short', day:'2-digit' });
-      }catch{ return '' }
-    }
-    function money(n, c){ try{ return new Intl.NumberFormat(document.documentElement.lang||'fr',{style:'currency',currency:c||'EUR'}).format(Number(n||0)); }catch{ return String(n||0)+' '+(c||'€') } }
-
-    function section(titleHTML, id){
-      const h = document.createElement('h2'); h.innerHTML = titleHTML; if(id) h.id=id;
-      sheet.appendChild(h);
-    }
-    function para(text){
-      const p = document.createElement('p'); p.textContent = text; p.setAttribute('contenteditable','true'); p.classList.add('editable');
-      sheet.appendChild(p);
-    }
-    function list(items){
-      if(!items || !items.length) return;
-      const ul = document.createElement('ul');
-      items.forEach(it=>{ const li=document.createElement('li'); li.textContent=String(it); li.setAttribute('contenteditable','true'); li.classList.add('editable'); ul.appendChild(li); });
-      sheet.appendChild(ul);
-    }
-
-    function buildTOC(sections){
-      const L = t[spec.meta?.lang || 'fr'] || t.fr;
-      const box = document.createElement('div'); box.className='toc hide-when-email';
-      box.innerHTML = `<b>${L.toc}</b>`;
-      sections.forEach(s=>{
-        if(s.present){
-          const a = document.createElement('a');
-          a.href = '#'+s.id;
-          a.textContent = s.title;
-          box.appendChild(a);
-        }
-      });
-      sheet.appendChild(box);
-    }
-
-    function renderEmailOnly(){
-      const L = t[spec.meta?.lang || 'fr'] || t.fr;
-      sheet.innerHTML = '';
-
-      // Header minimal (logo + société)
-      const header = document.createElement('div'); header.className='doc-header';
-      const logoBox = document.createElement('div'); logoBox.className='logo-box';
-      if(spec.meta?.style?.logoDataUrl){
-        const im = new Image(); im.src = spec.meta.style.logoDataUrl; logoBox.appendChild(im);
-      } else { logoBox.textContent='LOGO'; logoBox.style.color='#9aa6bf'; }
-      const bi = document.createElement('div'); bi.className='brand-info';
-      const company = safeStr(spec.meta?.company || spec.meta?.brand?.company, 'Votre société');
-      const website = safeStr(spec.meta?.brand?.website,'');
-      const email = safeStr(spec.meta?.brand?.email,'');
-      const phone = safeStr(spec.meta?.brand?.phone,'');
-      bi.innerHTML = `<div class="company">${company}</div>
-      <div class="muted">${[website,email,phone].filter(Boolean).join(' • ')}</div>`;
-      header.appendChild(logoBox); header.appendChild(bi);
-      sheet.appendChild(header);
-
-      // Letter content
-      const letter = spec.letter || {};
-      const subject = safeStr(letter.subject, L.title);
-      const preheader = safeStr(letter.preheader,'');
-      const greeting = safeStr(letter.greeting, '');
-      const bodies = safeArr(letter.body_paragraphs?.length ? letter.body_paragraphs : letter.paragraphs);
-      const closing = safeStr(letter.closing, '');
-      const signature = safeStr(letter.signature, '');
-
-      const meta = document.createElement('div'); meta.className='meta';
-      meta.innerHTML = `<strong>${L.email_subject}:</strong> <span contenteditable="true">${subject}</span><br/>
-                        <strong>${L.email_preheader}:</strong> <span contenteditable="true">${preheader}</span>`;
-      sheet.appendChild(meta);
-
-      if(greeting) para(greeting);
-      bodies.forEach(p=>para(p));
-      if(closing) para(closing);
-      if(signature) para(signature);
-    }
-
-    function computeTotals(){
-      const pr = spec.pricing || {};
-      const items = safeArr(pr.items);
-      let subtotal = 0;
-      items.forEach(it=>{
-        const s = it.subtotal!=null ? Number(it.subtotal) : (Number(it.qty||1)*Number(it.unit_price||0));
-        subtotal += (isFinite(s)?s:0);
-      });
-      const taxRate = Number(pr.tax_rate||0);
-      const taxes = subtotal*(taxRate/100);
-      const total = subtotal + taxes;
-      return { subtotal, taxes, total, taxRate };
-    }
-
-    function render(){
-      document.body.classList.toggle('email-only', emailMode);
-
-      // Apply brand colors
-      const primary = spec?.meta?.style?.primary || spec?.meta?.accent || '#3b82f6';
-      const secondary = spec?.meta?.style?.secondary || '#8b5cf6';
-      document.documentElement.style.setProperty('--accent', primary);
-      document.documentElement.style.setProperty('--accent2', secondary);
-      accentPick.value = toHex(primary);
-      accentPick2.value = toHex(secondary);
-
-      sheet.innerHTML = '';
-      if(!spec){ sheet.innerHTML='<p class="muted">Aucune donnée. Revenez au chat pour générer un aperçu.</p>'; return; }
-      const L = t[spec.meta?.lang || 'fr'] || t.fr;
-      document.documentElement.lang = spec.meta?.lang || 'fr';
-
-      if(emailMode){ renderEmailOnly(); statusEl.textContent = (spec.meta?.lang==='en') ? 'Email view' : 'Mode email'; return; }
-
-      // Header (logo + brand info)
-      const header = document.createElement('div'); header.className='doc-header hide-when-email';
-      const logoBox = document.createElement('div'); logoBox.className='logo-box';
-      if(spec.meta?.style?.logoDataUrl){
-        const im = new Image(); im.src = spec.meta.style.logoDataUrl; logoBox.appendChild(im);
-      } else { logoBox.textContent='LOGO'; logoBox.style.color='#9aa6bf'; }
-      const bi = document.createElement('div'); bi.className='brand-info';
-      const company = safeStr(spec.meta?.company || spec.meta?.brand?.company, 'Votre société');
-      const contact = safeStr(spec.meta?.brand?.contact_name,'');
-      const website = safeStr(spec.meta?.brand?.website,'');
-      const email = safeStr(spec.meta?.brand?.email,'');
-      const phone = safeStr(spec.meta?.brand?.phone,'');
-      bi.innerHTML = `<div class="company">${company}</div>
-      <div class="muted">${[contact, website, email, phone].filter(Boolean).join(' • ')}</div>`;
-      header.appendChild(logoBox); header.appendChild(bi);
-      sheet.appendChild(header);
-
-      // Title line
-      const title = safeStr(spec.meta?.title, L.title);
-      const client = safeStr(spec.meta?.client, 'Client');
-      const date = safeStr(spec.meta?.date, fmtDate());
-      const h1 = document.createElement('div');
-      h1.innerHTML = `<div class="h1" contenteditable="true">${title}</div>
-        <div class="meta">${L.to}: <span class="tag" contenteditable="true">${client}</span> &nbsp;•&nbsp;
-        ${L.from}: <span class="tag" contenteditable="true">${company}</span> &nbsp;•&nbsp; ${L.date}: ${date}</div>`;
-      sheet.appendChild(h1);
-      sheet.appendChild(Object.assign(document.createElement('div'),{className:'hr'}));
-
-      // TOC
-      const tocSections = [
-        { id:'s_letter', title:L.letter, present:safeArr(spec.letter?.body_paragraphs||spec.letter?.paragraphs).length || spec.letter?.greeting||spec.letter?.closing||spec.letter?.signature },
-        { id:'s_executive', title:L.executive, present:safeArr(spec.executive_summary?.paragraphs).length },
-        { id:'s_objectives', title:L.objectives, present:safeArr(spec.objectives?.bullets).length },
-        { id:'s_approach', title:L.approach, present:safeArr(spec.approach?.phases).length },
-        { id:'s_deliverables', title:L.deliverables, present:(spec.deliverables && (safeArr(spec.deliverables.in).length || safeArr(spec.deliverables.out).length)) },
-        { id:'s_timeline', title:L.timeline, present:safeArr(spec.timeline?.milestones).length },
-        { id:'s_pricing', title:L.pricing, present:(spec.pricing && (spec.pricing.items?.length || spec.pricing.price!=null)) },
-        { id:'s_assumptions', title:L.assumptions, present:safeArr(spec.assumptions?.paragraphs).length },
-        { id:'s_next', title:L.next, present:safeArr(spec.next_steps?.paragraphs).length },
-      ];
-      buildTOC(tocSections);
-
-      // Letter
-      if (tocSections[0].present){
-        section(L.letter,'s_letter');
-        const letter = spec.letter||{};
-        if(letter.greeting) para(letter.greeting);
-        const bodies = safeArr(letter.body_paragraphs?.length ? letter.body_paragraphs : letter.paragraphs);
-        bodies.forEach(p=>para(p));
-        if(letter.closing) para(letter.closing);
-        if(letter.signature) para(letter.signature);
-      }
-
-      // Executive summary
-      if (tocSections[1].present){
-        section(L.executive,'s_executive');
-        safeArr(spec.executive_summary.paragraphs).forEach(p=>para(p));
-      }
-
-      // Objectives
-      if (tocSections[2].present){
-        section(L.objectives,'s_objectives');
-        list(spec.objectives.bullets);
-      }
-
-      // Approach (phases)
-      if (tocSections[3].present){
-        section(L.approach,'s_approach');
-        safeArr(spec.approach.phases).forEach((ph,i)=>{
-          const card = document.createElement('div'); card.className='card';
-          card.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
-              <strong contenteditable="true">Phase ${i+1} — ${safeStr(ph.title,'À confirmer')}</strong>
-              <span class="pill">${safeStr(ph.duration || '', '')}</span>
-            </div>`;
-          sheet.appendChild(card);
-          if (ph.description) para(ph.description);
-          const acts = safeArr(ph.activities?.length ? ph.activities : ph.steps);
-          if (acts.length) list(acts);
-          const outs = safeArr(ph.outcomes);
-          if (outs.length){ const p=document.createElement('p'); p.innerHTML='<em>Résultats attendus :</em>'; sheet.appendChild(p); list(outs); }
-        });
-      }
-
-      // Deliverables
-      if (tocSections[4].present){
-        section(L.deliverables,'s_deliverables');
-        const grid = document.createElement('div'); grid.className='grid2';
-        const a=document.createElement('div'); a.className='card';
-        a.innerHTML = `<div class="muted" style="margin-bottom:6px">${L.in_scope}</div>`;
-        grid.appendChild(a);
-        const b=document.createElement('div'); b.className='card';
-        b.innerHTML = `<div class="muted" style="margin-bottom:6px">${L.out_scope}</div>`;
-        grid.appendChild(b);
-        sheet.appendChild(grid);
-        const ulA=document.createElement('ul'); safeArr(spec.deliverables.in).forEach(x=>{const li=document.createElement('li'); li.textContent=x; li.setAttribute('contenteditable','true'); ulA.appendChild(li);});
-        const ulB=document.createElement('ul'); safeArr(spec.deliverables.out).forEach(x=>{const li=document.createElement('li'); li.textContent=x; li.setAttribute('contenteditable','true'); ulB.appendChild(li);});
-        a.appendChild(ulA); b.appendChild(ulB);
-      }
-
-      // Timeline
-      if (tocSections[5].present){
-        section(L.timeline,'s_timeline');
-        const grid=document.createElement('div'); grid.className='grid2';
-        safeArr(spec.timeline.milestones).forEach(ms=>{
-          const c=document.createElement('div'); c.className='card';
-          c.innerHTML = `<div><strong contenteditable="true">${safeStr(ms.title,'Étape')}</strong></div>
-                         <div class="muted">${safeStr(ms.dateOrWeek || ms.date || ms.duration || '', '')}</div>`;
-          if (ms.notes) { const p=document.createElement('p'); p.textContent=ms.notes; p.setAttribute('contenteditable','true'); c.appendChild(p); }
-          grid.appendChild(c);
-        });
-        sheet.appendChild(grid);
-      }
-
-      // Pricing
-      if (tocSections[6].present){
-        section(L.pricing,'s_pricing');
-        const pr = spec.pricing || {};
-        const currency = pr.currency || spec.meta?.currency || 'EUR';
-        // Model pill
-        const m = document.createElement('div'); m.className='muted hide-when-email'; m.style.margin = '-6px 0 8px';
-        m.innerHTML = `${L.price_model}: <span class="pill">${safeStr(pr.model,'forfait')}</span>`;
-        sheet.appendChild(m);
-
+      if (spec.pricing){
+        const pr=spec.pricing, currency=pr.currency||'EUR';
+        const c=document.createElement('div'); c.className='card'; c.innerHTML='<strong>Tarification</strong>';
         if (Array.isArray(pr.items) && pr.items.length){
-          const table = document.createElement('table');
-          table.innerHTML = `
-            <thead><tr>
-              <th>Item</th><th>Qté</th><th>Unité</th><th>PU</th><th>Sous-total</th>
-            </tr></thead>
-            <tbody></tbody>
-            <tfoot>
-              <tr><td colspan="4" style="text-align:right">Sous-total</td><td id="ft_subtotal"></td></tr>
-              <tr><td colspan="4" style="text-align:right">Taxes</td><td id="ft_tax"></td></tr>
-              <tr><td colspan="4" style="text-align:right">Total</td><td id="ft_total"></td></tr>
-            </tfoot>`;
-          const tb = table.querySelector('tbody');
-
+          const t=document.createElement('table'); t.innerHTML='<thead><tr><th>Item</th><th>Qté</th><th>PU</th><th>Sous-total</th></tr></thead><tbody></tbody>';
+          const tb=t.querySelector('tbody');
           pr.items.forEach(it=>{
-            const tr = document.createElement('tr');
-            const qty = Number(it.qty||1), up = Number(it.unit_price||0);
-            const st = (it.subtotal!=null) ? Number(it.subtotal) : qty*up;
-            tr.innerHTML = `
-              <td contenteditable="true">${safeStr(it.name,'—')}</td>
-              <td contenteditable="true" style="width:70px">${Number.isFinite(qty)?qty:1}</td>
-              <td contenteditable="true" style="width:120px">${safeStr(it.unit||'—')}</td>
-              <td contenteditable="true" style="width:140px">${money(up, currency)}</td>
-              <td contenteditable="true" style="width:160px">${money(st, currency)}</td>`;
+            const qty=Number(it.qty||1), up=Number(it.unit_price||0), st=(it.subtotal!=null)?Number(it.subtotal):qty*up;
+            const tr=document.createElement('tr'); tr.innerHTML=`<td>${safeStr(it.name,'—')}</td><td>${qty}</td><td>${money(up,currency)}</td><td>${money(st,currency)}</td>`;
             tb.appendChild(tr);
           });
-          sheet.appendChild(table);
-
-          const { subtotal, taxes, total, taxRate } = computeTotals();
-          $('#ft_subtotal',table).textContent = money(subtotal, currency);
-          $('#ft_tax',table).textContent = `${money(taxes, currency)} ${taxRate?`(${taxRate}%)`:''}`;
-          $('#ft_total',table).textContent = money(total, currency);
-
-          if (safeArr(pr.terms).length){
-            const terms=document.createElement('div'); terms.className='card'; terms.style.marginTop='8px';
-            terms.innerHTML = `<div class="muted" style="margin-bottom:6px">${L.terms}</div>`;
-            const ul=document.createElement('ul');
-            pr.terms.forEach(x=>{const li=document.createElement('li'); li.textContent=x; li.setAttribute('contenteditable','true'); ul.appendChild(li);});
-            terms.appendChild(ul); sheet.appendChild(terms);
-          }
-        } else {
-          // simple price fallback
-          const priceBox=document.createElement('div'); priceBox.className='card';
-          const price = pr.price!=null ? String(pr.price) : '—';
-          priceBox.innerHTML = `
-            <div class="price" contenteditable="true">${money(price, currency)}</div>
-            <div class="muted" style="margin-top:4px">${L.price_model}: <span contenteditable="true">${safeStr(pr.model,'forfait')}</span></div>
-          `;
-          sheet.appendChild(priceBox);
-          if (safeArr(pr.terms).length){
-            const terms=document.createElement('div'); terms.className='card'; terms.style.marginTop='8px';
-            terms.innerHTML = `<div class="muted" style="margin-bottom:6px">${L.terms}</div>`;
-            const ul=document.createElement('ul');
-            pr.terms.forEach(x=>{const li=document.createElement('li'); li.textContent=x; li.setAttribute('contenteditable','true'); ul.appendChild(li);});
-            terms.appendChild(ul); sheet.appendChild(terms);
-          }
+          c.appendChild(t);
+        }else{
+          const p=document.createElement('div'); p.style.marginTop='6px'; p.innerHTML=`<span class="pill">${money(pr.price||0,currency)}</span> &nbsp; <span style="color:#5c667a">(${safeStr(pr.model||'forfait')})</span>`;
+          c.appendChild(p);
         }
+        sheet.appendChild(c);
       }
-
-      // Assumptions
-      if (tocSections[7].present){
-        section(L.assumptions,'s_assumptions');
-        safeArr(spec.assumptions.paragraphs).forEach(p=>para(p));
-      }
-
-      // Next steps
-      if (tocSections[8].present){
-        section(L.next,'s_next');
-        safeArr(spec.next_steps.paragraphs).forEach(p=>para(p));
-      }
-
-      statusEl.textContent = (spec.meta?.lang==='en') ? 'Preview ready' : 'Aperçu prêt';
     }
 
-    function toHex(c){
-      try{
-        const s = String(c||'').trim();
-        if(/^#([0-9a-f]{3}){1,2}$/i.test(s)) return s.toUpperCase();
-        // convert rgb(...) to hex if needed
-        if(s.startsWith('rgb')){
-          const m = s.match(/\d+/g)||[0,0,0];
-          return '#'+m.slice(0,3).map(x=>Number(x).toString(16).padStart(2,'0')).join('').toUpperCase();
-        }
-      }catch{}
-      return '#3B82F6';
-    }
-
-    // Load spec
     (function init(){
-      try {
-        const raw = localStorage.getItem('pf_proposal');
-        if(raw){ spec = JSON.parse(raw); }
-      } catch {}
-      if(!spec) spec = { meta:{ lang: 'fr', title:'Proposition commerciale' } };
-      // init UI from spec
-      langSel.value = spec.meta?.lang || 'fr';
-      const primary = spec.meta?.style?.primary || spec.meta?.accent || '#3b82f6';
-      const secondary = spec.meta?.style?.secondary || '#8b5cf6';
-      document.documentElement.style.setProperty('--accent', primary);
-      document.documentElement.style.setProperty('--accent2', secondary);
-      accentPick.value = toHex(primary);
-      accentPick2.value = toHex(secondary);
-      modelSel.value = (spec.pricing?.model || 'forfait').toLowerCase();
-
-      // ➜ Active "studio" si hash présent
-      if (location.hash.includes('studio')) {
-        document.body.classList.add('studio');
-      }
-
-      render();
+      let spec=null; try{ spec = JSON.parse(localStorage.getItem('pf_proposal')||'null'); }catch{}
+      if(!spec) spec={ meta:{ title:'Proposition commerciale' } };
+      render(spec);
     })();
-
-    // Controls
-    $('#backBtn').onclick = ()=>{ location.href = 'index.html'; };
-    $('#pdfBtn').onclick  = ()=> { statusEl.textContent = (spec.meta?.lang==='en') ? 'Preparing PDF…' : 'Préparation du PDF…'; setTimeout(()=>{ window.print(); statusEl.textContent = (spec.meta?.lang==='en') ? 'Preview ready' : 'Aperçu prêt'; }, 100); };
-
-    langSel.onchange = (e)=>{
-      const lang = e.target.value;
-      spec.meta = Object.assign({}, spec.meta, { lang });
-      localStorage.setItem('pf_proposal', JSON.stringify(spec));
-      render();
-    };
-
-    modelSel.onchange = (e)=>{
-      const model = e.target.value;
-      spec.pricing = Object.assign({}, spec.pricing, { model });
-      localStorage.setItem('pf_proposal', JSON.stringify(spec));
-      render();
-    };
-
-    accentPick.oninput = (e)=>{
-      const v = e.target.value || '#3b82f6';
-      document.documentElement.style.setProperty('--accent', v);
-      spec.meta = Object.assign({}, spec.meta, { style: { ...(spec.meta?.style||{}), primary: v } });
-      localStorage.setItem('pf_proposal', JSON.stringify(spec));
-    };
-    accentPick2.oninput = (e)=>{
-      const v = e.target.value || '#8b5cf6';
-      document.documentElement.style.setProperty('--accent2', v);
-      spec.meta = Object.assign({}, spec.meta, { style: { ...(spec.meta?.style||{}), secondary: v } });
-      localStorage.setItem('pf_proposal', JSON.stringify(spec));
-    };
-
-    let editing = false;
-    editBtn.onclick = ()=>{
-      editing = !editing;
-      document.body.classList.toggle('edit-on', editing);
-      editBtn.textContent = editing ? 'Terminer édition' : 'Éditer';
-    };
-
-    emailModeBtn.onclick = ()=>{
-      emailMode = !emailMode;
-      document.body.classList.toggle('email-only', emailMode);
-      emailModeBtn.textContent = emailMode ? 'Vue complète' : 'Mode Email';
-      copyEmailBtn.classList.toggle('hidden', !emailMode);
-      render();
-    };
-
-    copyEmailBtn.onclick = ()=>{
-      const L = t[spec.meta?.lang || 'fr'] || t.fr;
-      const letter = spec.letter || {};
-      const subject = safeStr(letter.subject, L.title);
-      const preheader = safeStr(letter.preheader,'');
-      const greeting = safeStr(letter.greeting,'');
-      const bodies = safeArr(letter.body_paragraphs?.length ? letter.body_paragraphs : letter.paragraphs);
-      const closing = safeStr(letter.closing,'');
-      const signature = safeStr(letter.signature,'');
-      const text = [
-        (subject?`[${L.email_subject}] ${subject}`:''),
-        (preheader?`[${L.email_preheader}] ${preheader}`:''),
-        '',
-        greeting,
-        ...bodies,
-        closing,
-        signature
-      ].filter(Boolean).join('\n\n');
-      navigator.clipboard.writeText(text).then(()=>{
-        statusEl.textContent = L.email_copy_ok;
-        setTimeout(()=>statusEl.textContent = (spec.meta?.lang==='en') ? 'Email view' : 'Mode email', 1200);
-      });
-    };
   </script>
 </body>
 </html>
