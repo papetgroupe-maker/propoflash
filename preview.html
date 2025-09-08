@@ -3,76 +3,215 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>PropoFlash — Aperçu (impression)</title>
+  <title>PropoFlash — Aperçu</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
-    :root{--paper-w:210mm;--paper-h:297mm;--stroke:#e7ecf6;--ink:#0a1020;--muted:#5c667a}
-    *{box-sizing:border-box} html,body{height:100%} body{margin:0;background:#f3f6fb;font-family:Inter,system-ui,sans-serif;color:var(--ink)}
-    .bar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--stroke);display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px}
+    :root{
+      --paper-w:210mm; --paper-h:297mm;
+      --bg:#f3f6fb; --ink:#0a1020; --muted:#5c667a; --stroke:#e7ecf6;
+      --accent:#3b82f6; --accent2:#8b5cf6; --accent-ink:#fff;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,#f6f8fc,#eef3ff);font-family:Inter,system-ui,sans-serif;color:var(--ink)}
+    .bar{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--stroke);
+      display:flex;gap:10px;align-items:center;justify-content:space-between;padding:8px 12px}
     .wrap{display:grid;place-items:center;padding:22px}
-    .sheet{width:var(--paper-w);min-height:var(--paper-h);background:#fff;border:1px solid var(--stroke);border-radius:12px;box-shadow:0 20px 60px rgba(10,16,32,.12);padding:24mm 20mm}
-    .h1{font-weight:800;font-size:28px;margin:0 0 6px}
+    .sheet{width:var(--paper-w); min-height:var(--paper-h); background:#fff; border:1px solid var(--stroke);
+      box-shadow:0 20px 60px rgba(10,16,32,.12); border-radius:12px; padding:28mm 22mm;}
+    .doc-header{display:grid;grid-template-columns:100px 1fr;gap:16px;align-items:center;margin-bottom:16px}
+    .logo-box{width:100px;height:100px;border:1px solid var(--stroke);border-radius:12px;display:grid;place-items:center;overflow:hidden;background:#fff}
+    .logo-box img{width:100%;height:100%;object-fit:contain}
+    .brand-info .company{font-weight:800;font-size:18px}
+    .brand-info .muted{color:var(--muted);font-size:12px}
+    .h1{font-size:28px;line-height:1.1;margin:0 0 6px;font-weight:800;letter-spacing:-.01em}
     .meta{color:var(--muted);font-size:14px;margin-bottom:18px}
     .hr{height:1px;background:var(--stroke);margin:12px 0}
-    .card{border:1px solid var(--stroke);border-radius:12px;padding:12px;margin-top:8px}
+    h2{margin:22px 0 8px;font-size:18px;letter-spacing:.2px}
+    p{margin:8px 0 10px}
+    ul{margin:8px 0 10px 18px}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .card{border:1px solid var(--stroke);border-radius:12px;padding:12px}
     .pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--stroke);font-size:12px;background:#fff}
-    table{border-collapse:collapse;width:100%;font-size:14px} th,td{border-bottom:1px solid var(--stroke);padding:6px;text-align:left}
-    @media print{.bar{display:none} body{background:#fff} .wrap{padding:0} .sheet{box-shadow:none;border:none;border-radius:0;width:auto;min-height:auto;padding:18mm 16mm}}
+    table{border-collapse:collapse;width:100%;font-size:14px}
+    th,td{border:1px solid var(--stroke);padding:8px;text-align:left}
+    th{background:#f8faff}
+    tfoot td{font-weight:800}
+    @media print{
+      .bar{display:none}
+      body{background:#fff}
+      .wrap{padding:0}
+      .sheet{box-shadow:none;border:none;border-radius:0;width:auto;min-height:auto;padding:18mm 16mm}
+      a[href]:after{content:""}
+    }
   </style>
 </head>
 <body>
   <div class="bar">
-    <div><strong>Aperçu</strong></div>
-    <div><button onclick="window.print()">Exporter PDF</button> <a href="studio.html" style="margin-left:8px">← Retour au studio</a></div>
+    <div style="color:#667085;font-size:12px" id="status">Aperçu</div>
+    <div>
+      <button id="printBtn" style="border:1px solid var(--stroke);background:#fff;border-radius:10px;padding:6px 10px;font-weight:700;cursor:pointer">PDF</button>
+    </div>
   </div>
-  <div class="wrap"><div id="sheet" class="sheet"></div></div>
+
+  <div class="wrap">
+    <div class="sheet" id="sheet" aria-live="polite"></div>
+  </div>
 
   <script>
-    const sheet=document.getElementById('sheet');
-    const safeArr=v=>Array.isArray(v)?v:[];
-    const safeStr=(v,f='')=>(v==null?'':String(v)).trim()||f;
-    const money=(n,c)=>{try{return new Intl.NumberFormat('fr-FR',{style:'currency',currency:c||'EUR'}).format(Number(n||0));}catch{return String(n||0)+' '+(c||'€')}};
+  (function(){
+    const $=(q,ctx=document)=>ctx.querySelector(q);
+    let spec = null;
 
-    function render(spec){
-      sheet.innerHTML='';
-      const company=safeStr(spec.meta?.company||spec.meta?.brand?.company,'Votre société');
-      const client=safeStr(spec.meta?.client,'Client');
-      const title=safeStr(spec.meta?.title,'Proposition commerciale');
+    const t = {
+      fr:{ title:"Proposition commerciale", to:"Pour", from:"Émis par", date:"Date",
+          executive:"Résumé exécutif", objectives:"Objectifs", approach:"Approche & phasage",
+          deliverables:"Livrables", in_scope:"Inclus", out_scope:"Hors-périmètre",
+          timeline:"Planning", pricing:"Tarification", terms:"Conditions" },
+      en:{ title:"Business Proposal", to:"To", from:"Issued by", date:"Date",
+          executive:"Executive Summary", objectives:"Objectives", approach:"Approach & Phasing",
+          deliverables:"Deliverables", in_scope:"In scope", out_scope:"Out of scope",
+          timeline:"Timeline", pricing:"Pricing", terms:"Terms" }
+    };
 
-      const h=document.createElement('div'); h.innerHTML=`<div class="h1">${title}</div>
-        <div class="meta">Pour <span class="pill">${client}</span> • Émis par <span class="pill">${company}</span></div>`;
-      sheet.appendChild(h); sheet.appendChild(Object.assign(document.createElement('div'),{className:'hr'}));
+    function safeArr(v){ return Array.isArray(v) ? v : []; }
+    function safeStr(v, fb=''){ return (v==null?'':String(v)).trim() || fb; }
+    function fmtDate(d){
+      try{ const dt=d?new Date(d):new Date(); return dt.toLocaleDateString(document.documentElement.lang||'fr',{year:'numeric',month:'short',day:'2-digit'}); }
+      catch{ return '' }
+    }
+    function money(n,c){ try{ return new Intl.NumberFormat(document.documentElement.lang||'fr',{style:'currency',currency:c||'EUR'}).format(Number(n||0)); }catch{ return String(n||0)+' '+(c||'€') } }
 
-      if (safeArr(spec.executive_summary?.paragraphs).length){
-        const c=document.createElement('div'); c.className='card'; c.innerHTML='<strong>Résumé exécutif</strong>';
-        spec.executive_summary.paragraphs.forEach(p=>{const el=document.createElement('p'); el.textContent=p; c.appendChild(el);});
-        sheet.appendChild(c);
+    function render(){
+      const sheet=$("#sheet"); sheet.innerHTML = '';
+      if(!spec){ sheet.innerHTML='<p style="color:#667085">Aucune donnée.</p>'; return; }
+      const L = t[spec.meta?.lang||'fr'] || t.fr;
+      document.documentElement.lang = spec.meta?.lang||'fr';
+      const primary = spec?.meta?.style?.primary || spec?.meta?.accent || '#3b82f6';
+      document.documentElement.style.setProperty('--accent', primary);
+
+      // header
+      const header=document.createElement('div'); header.className='doc-header';
+      const lb=document.createElement('div'); lb.className='logo-box';
+      if(spec.meta?.style?.logoDataUrl){ const im=new Image(); im.src=spec.meta.style.logoDataUrl; lb.appendChild(im); } else { lb.textContent='LOGO'; lb.style.color='#9aa6bf'; }
+      const bi=document.createElement('div'); bi.className='brand-info';
+      const company = safeStr(spec.meta?.company || spec.meta?.brand?.company, 'Votre société');
+      bi.innerHTML = `<div class="company">${company}</div>
+                      <div class="muted">${[spec.meta?.brand?.website,spec.meta?.brand?.email,spec.meta?.brand?.phone].filter(Boolean).join(' • ')}</div>`;
+      header.appendChild(lb); header.appendChild(bi); sheet.appendChild(header);
+
+      const title = safeStr(spec.meta?.title, L.title);
+      const client = safeStr(spec.meta?.client, 'Client');
+      const date = safeStr(spec.meta?.date, fmtDate());
+      const h1 = document.createElement('div');
+      h1.innerHTML = `<div class="h1">${title}</div>
+        <div class="meta">${L.to}: <span class="pill">${client}</span> • ${L.from}: <span class="pill">${company}</span> • ${L.date}: ${date}</div>`;
+      sheet.appendChild(h1);
+      sheet.appendChild(Object.assign(document.createElement('div'),{className:'hr'}));
+
+      // executive
+      if(safeArr(spec.executive_summary?.paragraphs).length){
+        const h2=document.createElement('h2'); h2.textContent=L.executive; sheet.appendChild(h2);
+        spec.executive_summary.paragraphs.forEach(p=>{const el=document.createElement('p'); el.textContent=p; sheet.appendChild(el);});
       }
-      if (spec.pricing){
-        const pr=spec.pricing, currency=pr.currency||'EUR';
-        const c=document.createElement('div'); c.className='card'; c.innerHTML='<strong>Tarification</strong>';
-        if (Array.isArray(pr.items) && pr.items.length){
-          const t=document.createElement('table'); t.innerHTML='<thead><tr><th>Item</th><th>Qté</th><th>PU</th><th>Sous-total</th></tr></thead><tbody></tbody>';
-          const tb=t.querySelector('tbody');
+
+      // objectives
+      if(safeArr(spec.objectives?.bullets).length){
+        const h2=document.createElement('h2'); h2.textContent=L.objectives; sheet.appendChild(h2);
+        const ul=document.createElement('ul'); spec.objectives.bullets.forEach(x=>{const li=document.createElement('li'); li.textContent=x; ul.appendChild(li);}); sheet.appendChild(ul);
+      }
+
+      // approach
+      if(safeArr(spec.approach?.phases).length){
+        const h2=document.createElement('h2'); h2.textContent=L.approach; sheet.appendChild(h2);
+        const grid=document.createElement('div'); grid.className='grid2';
+        spec.approach.phases.forEach((ph,i)=>{const c=document.createElement('div'); c.className='card';
+          c.innerHTML=`<div style="display:flex;justify-content:space-between"><strong>Phase ${i+1} — ${safeStr(ph.title,'À confirmer')}</strong><span class="pill">${safeStr(ph.duration,'')}</span></div>`;
+          if(ph.description){ const p=document.createElement('p'); p.textContent=ph.description; c.appendChild(p); }
+          if(safeArr(ph.activities).length){ const ul=document.createElement('ul'); ph.activities.forEach(a=>{const li=document.createElement('li'); li.textContent=a; ul.appendChild(li);}); c.appendChild(ul); }
+          grid.appendChild(c);
+        }); sheet.appendChild(grid);
+      }
+
+      // deliverables
+      if(spec.deliverables && (safeArr(spec.deliverables.in).length || safeArr(spec.deliverables.out).length)){
+        const h2=document.createElement('h2'); h2.textContent=L.deliverables; sheet.appendChild(h2);
+        const grid=document.createElement('div'); grid.className='grid2';
+        const a=document.createElement('div'); a.className='card'; a.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.in_scope}</div>`;
+        const b=document.createElement('div'); b.className='card'; b.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.out_scope}</div>`;
+        const ulA=document.createElement('ul'); safeArr(spec.deliverables.in).forEach(x=>{const li=document.createElement('li'); li.textContent=x; ulA.appendChild(li);});
+        const ulB=document.createElement('ul'); safeArr(spec.deliverables.out).forEach(x=>{const li=document.createElement('li'); li.textContent=x; ulB.appendChild(li);});
+        a.appendChild(ulA); b.appendChild(ulB); grid.appendChild(a); grid.appendChild(b); sheet.appendChild(grid);
+      }
+
+      // timeline
+      if(safeArr(spec.timeline?.milestones).length){
+        const h2=document.createElement('h2'); h2.textContent=L.timeline; sheet.appendChild(h2);
+        const grid=document.createElement('div'); grid.className='grid2';
+        spec.timeline.milestones.forEach(ms=>{ const c=document.createElement('div'); c.className='card';
+          c.innerHTML = `<div><strong>${safeStr(ms.title,'Étape')}</strong></div><div class="muted">${safeStr(ms.dateOrWeek||ms.date||ms.duration||'','')}</div>`;
+          if(ms.notes){ const p=document.createElement('p'); p.textContent=ms.notes; c.appendChild(p); }
+          grid.appendChild(c);
+        }); sheet.appendChild(grid);
+      }
+
+      // pricing
+      if(spec.pricing && (Array.isArray(spec.pricing.items) ? spec.pricing.items.length : spec.pricing.price!=null)){
+        const h2=document.createElement('h2'); h2.textContent=L.pricing; sheet.appendChild(h2);
+        const pr = spec.pricing; const currency = pr.currency || spec.meta?.currency || 'EUR';
+        if(Array.isArray(pr.items) && pr.items.length){
+          const table=document.createElement('table');
+          table.innerHTML = `<thead><tr><th>Item</th><th>Qté</th><th>Unité</th><th>PU</th><th>Sous-total</th></tr></thead><tbody></tbody><tfoot>
+            <tr><td colspan="4" style="text-align:right">Total</td><td id="ft_total"></td></tr></tfoot>`;
+          const tb = table.querySelector('tbody');
+          let total=0;
           pr.items.forEach(it=>{
-            const qty=Number(it.qty||1), up=Number(it.unit_price||0), st=(it.subtotal!=null)?Number(it.subtotal):qty*up;
-            const tr=document.createElement('tr'); tr.innerHTML=`<td>${safeStr(it.name,'—')}</td><td>${qty}</td><td>${money(up,currency)}</td><td>${money(st,currency)}</td>`;
+            const qty = Number(it.qty||1), up=Number(it.unit_price||0), st = (it.subtotal!=null)?Number(it.subtotal):qty*up;
+            total += (isFinite(st)?st:0);
+            const tr=document.createElement('tr');
+            tr.innerHTML = `<td>${safeStr(it.name,'—')}</td><td>${isFinite(qty)?qty:1}</td><td>${safeStr(it.unit,'—')}</td><td>${money(up,currency)}</td><td>${money(st,currency)}</td>`;
             tb.appendChild(tr);
           });
-          c.appendChild(t);
+          table.querySelector('#ft_total').textContent = money(total,currency);
+          sheet.appendChild(table);
         }else{
-          const p=document.createElement('div'); p.style.marginTop='6px'; p.innerHTML=`<span class="pill">${money(pr.price||0,currency)}</span> &nbsp; <span style="color:#5c667a">(${safeStr(pr.model||'forfait')})</span>`;
-          c.appendChild(p);
+          const box=document.createElement('div'); box.className='card';
+          box.innerHTML = `<div style="font-size:18px;font-weight:800">${money(pr.price,currency)}</div>`;
+          sheet.appendChild(box);
         }
-        sheet.appendChild(c);
+
+        if(Array.isArray(pr.terms) && pr.terms.length){
+          const terms=document.createElement('div'); terms.className='card'; terms.style.marginTop='8px';
+          terms.innerHTML = `<div class="muted" style="margin-bottom:6px">${L.terms}</div>`;
+          const ul=document.createElement('ul'); pr.terms.forEach(x=>{const li=document.createElement('li'); li.textContent=x; ul.appendChild(li);});
+          terms.appendChild(ul); sheet.appendChild(terms);
+        }
       }
+
+      $("#status").textContent = (spec.meta?.lang==='en') ? 'Preview ready' : 'Aperçu prêt';
     }
 
-    (function init(){
-      let spec=null; try{ spec = JSON.parse(localStorage.getItem('pf_proposal')||'null'); }catch{}
-      if(!spec) spec={ meta:{ title:'Proposition commerciale' } };
-      render(spec);
-    })();
+    function load(){
+      try{ spec = JSON.parse(localStorage.getItem('pf_proposal')||'null'); }catch{ spec=null; }
+      if(!spec) spec = { meta:{ lang: localStorage.getItem('pf_lang')||'fr', title:"Proposition commerciale" } };
+      render();
+    }
+
+    window.addEventListener('DOMContentLoaded', ()=>{
+      load();
+      $("#printBtn").addEventListener('click', ()=>window.print());
+      // messages du Studio
+      window.addEventListener('message', (e)=>{
+        const d=e.data||{};
+        if(d.type==='pf_spec' && d.payload){
+          spec = d.payload;
+          localStorage.setItem('pf_proposal', JSON.stringify(spec));
+          render();
+        }
+        if(d.type==='pf_cmd' && d.payload==='print'){ window.print(); }
+      });
+    });
+  })();
   </script>
 </body>
 </html>
