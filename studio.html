@@ -13,7 +13,7 @@
     *{box-sizing:border-box}
     html,body{height:100%}
     body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-    a{color:inherit}
+    a{color:inherit;text-decoration:none}
     .top{position:sticky;top:0;z-index:10;background:linear-gradient(180deg, #0f1629ee, #0f1629f5);backdrop-filter:saturate(130%) blur(6px);
       border-bottom:1px solid var(--stroke);display:flex;align-items:center;justify-content:space-between;padding:10px 14px}
     .brand{display:flex;align-items:center;gap:10px;cursor:pointer}
@@ -21,6 +21,7 @@
     .rightBtns{display:flex;gap:8px;align-items:center}
     .btn{border:1px solid var(--stroke);background:#101a33;border-radius:10px;padding:8px 12px;font-weight:700;color:#cfe1ff;cursor:pointer}
     .btn:hover{background:#132044}
+    .btn[disabled]{opacity:.6;cursor:not-allowed}
     .layout{height:calc(100% - 58px);display:grid;grid-template-columns:420px 1fr}
     .left{border-right:1px solid var(--stroke);background:var(--panel);display:flex;flex-direction:column}
     .head{padding:10px 12px;border-bottom:1px solid var(--stroke);display:flex;align-items:center;gap:8px;justify-content:space-between}
@@ -55,12 +56,12 @@
 </head>
 <body>
   <div class="top">
-    <div class="brand" onclick="location.href='index.html'">
+    <a class="brand" href="index.html" title="Retour à l’accueil">
       <div class="spark" aria-hidden="true"></div><strong>PropoFlash Studio</strong>
-    </div>
+    </a>
     <div class="rightBtns">
       <button id="historyBtn" class="btn">Historique</button>
-      <button id="logoutBtn" class="btn">Se déconnecter</button>
+      <button id="authBtn" class="btn">Se connecter</button>
     </div>
   </div>
 
@@ -103,18 +104,60 @@
   </div>
 
   <script>
-    /* ================= Supabase ================= */
+    /* ============== Supabase ============== */
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-    // check auth → sinon auth.html
+    /* ============== Mode invité / connecté + limite d’essai ============== */
+    const GUEST_LIMIT = 1; // 1 proposition en mode invité
+    function monthKeyGuest(){
+      const d=new Date(); return `pf_guest_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`;
+    }
+    function getGuestCount(){ return parseInt(localStorage.getItem(monthKeyGuest())||'0',10); }
+    function incGuestCount(){ localStorage.setItem(monthKeyGuest(), String(getGuestCount()+1)); }
+
+    let IS_GUEST = true;
+    let CURRENT_SESSION = null;
+
     (async ()=>{
       const { data:{ session } } = await sb.auth.getSession();
-      if(!session){ location.href='auth.html'; return; }
+      CURRENT_SESSION = session;
+      IS_GUEST = !session;
+      setupAuthUI();
+      enforceGuestLimitUI();
     })();
 
-    /* ================= UI helpers ================= */
+    function setupAuthUI(){
+      const authBtn = document.getElementById('authBtn');
+      if(IS_GUEST){
+        authBtn.textContent = 'Se connecter';
+        authBtn.onclick = ()=>{ location.href = 'auth.html?from=studio'; };
+      }else{
+        authBtn.textContent = 'Se déconnecter';
+        authBtn.onclick = async ()=>{ await sb.auth.signOut(); localStorage.removeItem('pf_chat_id'); location.reload(); };
+      }
+    }
+
+    function enforceGuestLimitUI(){
+      const count = getGuestCount();
+      const sendBtn = document.getElementById('send');
+      const promptEl = document.getElementById('prompt');
+      const statusEl = document.getElementById('status');
+
+      if(IS_GUEST && count >= GUEST_LIMIT){
+        sendBtn.disabled = true;
+        promptEl.disabled = true;
+        promptEl.placeholder = 'Connectez-vous pour continuer — essai gratuit utilisé.';
+        statusEl.textContent = 'Essai gratuit utilisé';
+      }else{
+        sendBtn.disabled = false;
+        promptEl.disabled = false;
+        statusEl.textContent = 'Aperçu';
+      }
+    }
+
+    /* ============== UI helpers ============== */
     const $ = (q,ctx=document)=>ctx.querySelector(q);
     const thread = $('#thread');
     const statusEl = $('#status');
@@ -135,7 +178,7 @@
     }
     function setStatus(t){ statusEl.textContent = t; }
 
-    /* ================= State ================= */
+    /* ============== State ============== */
     let currentChatId = localStorage.getItem('pf_chat_id') || null;
     let spec = null;
     function loadSpec(){
@@ -143,14 +186,12 @@
       catch{ spec = { meta:{ lang:'fr' } }; }
       renderPreview();
     }
-    function saveSpec(){
-      localStorage.setItem('pf_proposal', JSON.stringify(spec||{}));
-    }
+    function saveSpec(){ localStorage.setItem('pf_proposal', JSON.stringify(spec||{})); }
 
-    /* ================= History drawer ================= */
+    /* ============== Historique ============== */
     $('#historyBtn').onclick = async ()=>{
-      drawer.classList.remove('hidden');
-      await listChats();
+      if(IS_GUEST){ alert("Connectez-vous pour accéder à l’historique."); return; }
+      drawer.classList.remove('hidden'); await listChats();
     };
     $('#closeDrawer').onclick = ()=> drawer.classList.add('hidden');
 
@@ -178,12 +219,9 @@
       thread.innerHTML = '';
       chatTitle.textContent = 'Discussion';
       const { data, error } = await sb.from('messages').select('role,content,created_at').eq('chat_id', chatId).order('created_at',{ascending:true});
-      if(!error && data){
-        data.forEach(m => addMsg(m.content, m.role==='user'?'me':'ai'));
-      }
+      if(!error && data){ data.forEach(m => addMsg(m.content, m.role==='user'?'me':'ai')); }
       drawer.classList.add('hidden');
       promptEl.focus();
-      // charger spec cloud si existe
       try{
         const { data: p } = await sb.from('proposals').select('spec').eq('chat_id', chatId).maybeSingle();
         if(p?.spec){ spec = p.spec; saveSpec(); renderPreview(); }
@@ -191,6 +229,7 @@
     }
 
     async function ensureChat(titleFallback='Nouvelle discussion'){
+      if(IS_GUEST) return null;
       if(currentChatId) return currentChatId;
       const { data:{ user } } = await sb.auth.getUser();
       if(!user) return null;
@@ -203,12 +242,13 @@
     }
 
     async function saveMessage(role, content){
+      if(IS_GUEST || !currentChatId) return;
       const { data:{ user } } = await sb.auth.getUser();
-      if(!user || !currentChatId) return;
+      if(!user) return;
       await sb.from('messages').insert({ chat_id: currentChatId, user_id: user.id, role, content });
     }
 
-    /* ================= Chat send ================= */
+    /* ============== API Chat ============== */
     async function callChatAPI(message, proposalSpec, history){
       const { data:{ session } } = await sb.auth.getSession();
       const headers = {'Content-Type':'application/json'};
@@ -218,35 +258,58 @@
       return res.json();
     }
 
+    /* ============== Envoi ============== */
     sendBtn.onclick = async ()=>{
+      // Si mode invité et essai déjà utilisé → forcer la connexion
+      if(IS_GUEST && getGuestCount() >= GUEST_LIMIT){
+        alert("Essai gratuit déjà utilisé. Connectez-vous pour continuer.");
+        location.href = 'auth.html?from=studio';
+        return;
+      }
+
       const v = (promptEl.value||'').trim(); if(!v) return;
       addMsg(v,'me'); promptEl.value=''; promptEl.focus();
+      const beforeCount = getGuestCount();
+
       sendBtn.classList.add('loading'); sendBtn.disabled=true; setStatus('Génération…');
       try{
         await ensureChat('Nouvelle discussion');
         await saveMessage('user', v);
+
         const history = JSON.parse(localStorage.getItem('pf_chat')||'[]');
         const data = await callChatAPI(v, spec, history);
+
         if(data.reply){ addMsg(data.reply,'ai'); await saveMessage('assistant',data.reply); }
+
         if(data.proposalSpec){
-          // merge minimal (meta + sections/fields)
           spec = { ...(spec||{}), ...(data.proposalSpec||{}) , meta:{ ...(spec?.meta||{}), ...(data.proposalSpec.meta||{}) } };
           saveSpec(); renderPreview();
-          // upsert cloud
-          try{
-            const { data:{ user } } = await sb.auth.getUser();
-            if(user && currentChatId){
-              await sb.from('proposals').upsert({ user_id:user.id, chat_id:currentChatId, spec }, { onConflict:'chat_id' });
-            }
-          }catch{}
+          if(!IS_GUEST && currentChatId){
+            try{
+              const { data:{ user } } = await sb.auth.getUser();
+              if(user){
+                await sb.from('proposals').upsert({ user_id:user.id, chat_id:currentChatId, spec }, { onConflict:'chat_id' });
+              }
+            }catch{}
+          }
         }
+
         const newHist = [...history, {role:'user',content:v},{role:'assistant',content:(data.reply||'')}].slice(-30);
         localStorage.setItem('pf_chat', JSON.stringify(newHist));
         setStatus('Aperçu mis à jour');
+
+        // Comptabiliser l’essai gratuit dès le premier aller-retour réussi
+        if(IS_GUEST && beforeCount < GUEST_LIMIT){
+          incGuestCount();
+          enforceGuestLimitUI();
+          setTimeout(()=>alert('Votre essai gratuit a été utilisé. Connectez-vous pour continuer.'), 50);
+        }
       }catch(e){
         console.error(e); addMsg('Erreur serveur. Réessayez.','ai'); setStatus('Erreur');
       }finally{
-        sendBtn.classList.remove('loading'); sendBtn.disabled=false;
+        sendBtn.classList.remove('loading');
+        // Si l’essai vient d’être consommé, send reste désactivé par enforceGuestLimitUI()
+        if(!(IS_GUEST && getGuestCount() >= GUEST_LIMIT)) sendBtn.disabled=false;
       }
     };
 
@@ -257,7 +320,7 @@
       if(e.key===' ' && e.altKey){ e.preventDefault(); if(hasText) sendBtn.click(); }
     });
 
-    /* ================= Logo upload + palette ================= */
+    /* ============== Logo upload + palette ============== */
     logoBtn.onclick = ()=> logoInput.click();
     logoInput.onchange = async (e)=>{
       const file = e.target.files?.[0]; if(!file) return;
@@ -300,7 +363,7 @@
     }
     function hexToRGB(h){ const s=h.replace('#',''); return { r:parseInt(s.slice(0,2),16), g:parseInt(s.slice(2,4),16), b:parseInt(s.slice(4,6),16) }; }
 
-    /* ================= Preview rendering ================= */
+    /* ============== Preview ============== */
     const previewEl = $('#preview');
     const emailModeBtn = $('#emailModeBtn');
     let emailMode = false;
@@ -314,7 +377,6 @@
 
     function renderPreview(){
       if(!spec){ previewEl.innerHTML='<div class="muted">Aucune donnée.</div>'; return; }
-      // couleurs
       const primary = spec?.meta?.style?.primary || spec?.meta?.accent || '#3b82f6';
       const secondary = spec?.meta?.style?.secondary || '#8b5cf6';
       document.documentElement.style.setProperty('--accent', primary);
@@ -338,7 +400,6 @@
       const title   = safeStr(spec.meta?.title, L.title);
       const date    = safeStr(spec.meta?.date, fmtDate());
 
-      // header
       const h1 = document.createElement('div');
       h1.innerHTML = `<div class="h1">${title}</div>
                       <div class="meta">${L.to}: <span class="tag">${client}</span> • ${L.from}: <span class="tag">${company}</span> • ${L.date}: ${date}</div>`;
@@ -353,7 +414,6 @@
         return;
       }
 
-      // letter
       if(spec.letter && (spec.letter.greeting || (safeArr(spec.letter.body_paragraphs).length||safeArr(spec.letter.paragraphs).length) || spec.letter.closing || spec.letter.signature)){
         h2(L.letter);
         const letter = spec.letter;
@@ -422,7 +482,7 @@
           previewEl.appendChild(c);
         }
         if(safeArr(spec.pricing?.terms).length){
-          const c = card(`<div class="muted">${L.terms}</div>`); ulInto(c, safeArr(spec.pricing.terms)); previewEl.appendChild(c);
+          const c = card(`<div class="muted">Conditions</div>`); ulInto(c, safeArr(spec.pricing.terms)); previewEl.appendChild(c);
         }
       }
 
@@ -436,10 +496,10 @@
       function card(html){ const c=document.createElement('div'); c.className='card'; c.innerHTML=html; return c; }
     }
 
-    /* ================= Logout ================= */
-    $('#logoutBtn').onclick = async ()=>{ await sb.auth.signOut(); localStorage.removeItem('pf_chat_id'); location.href='index.html'; };
+    /* ============== Divers ============== */
+    document.getElementById('openFull').onclick = ()=>{ window.location.href='preview.html'; };
 
-    // boot
+    // Boot
     loadSpec();
   </script>
 </body>
