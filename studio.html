@@ -184,7 +184,6 @@
     }
 
     async function callChatAPI(message, proposalSpec, history){
-      // Essaie l’API, sinon fallback côté front pour la démo
       try{
         const { data:{ session } } = await sb.auth.getSession();
         const headers = {'Content-Type':'application/json'};
@@ -193,7 +192,7 @@
         if(!res.ok) throw new Error('HTTP '+res.status);
         return await res.json();
       }catch{
-        // Fallback simple : ajoute une section et une ligne pricing
+        // Fallback démo : injecte un petit contenu
         const reply = (document.documentElement.lang==='en')
           ? "Draft updated. I added an executive summary and a pricing line."
           : "Brouillon mis à jour. J’ai ajouté un résumé exécutif et une ligne de tarification.";
@@ -274,10 +273,8 @@
         }catch(_){}
       });
 
-      // Load local history
+      // Load local history + first msg from home
       loadLocal(); updateLeft();
-
-      // Pré-remplir 1er message (depuis la home)
       const first = localStorage.getItem('pf_first_msg');
       if(first){ localStorage.removeItem('pf_first_msg'); $("#message").value = first; $("#message").focus(); }
 
@@ -287,7 +284,7 @@
         if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendBtn.click(); }
       });
 
-      // Logo
+      // Logo bouton (dans l’entrée, comme demandé)
       $("#logoBtn").addEventListener('click', ()=>$("#logoInput").click());
       $("#logoInput").addEventListener('change', async (e)=>{
         const file = e.target.files?.[0]; if(!file) return;
@@ -331,7 +328,7 @@
           try{
             const { data:{ user } } = await sb.auth.getUser();
             if(user && currentChatId){
-              await sb.from('proposals').upsert({ user_id:user.id, chat_id: currentChatId, spec: JSON.parse(localStorage.getItem('pf_proposal')||'{}') }, { onConflict:'chat_id' });
+              await sb.from('proposals').upsert({ user_id: user.id, chat_id: currentChatId, spec: JSON.parse(localStorage.getItem('pf_proposal')||'{}') }, { onConflict:'chat_id' });
             }
           }catch(_){}
 
@@ -342,7 +339,7 @@
         }
       });
 
-      // iframe ready hint hide after first load
+      // iframe ready hint
       pv.addEventListener('load', ()=>{ setTimeout(()=>$("#pvHint").style.display='none', 800); });
 
       // Ensure chat exists when logged-in
