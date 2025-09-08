@@ -128,7 +128,7 @@
         spec.approach.phases.forEach((ph,i)=>{const c=document.createElement('div'); c.className='card';
           c.innerHTML=`<div style="display:flex;justify-content:space-between"><strong>Phase ${i+1} — ${safeStr(ph.title,'À confirmer')}</strong><span class="pill">${safeStr(ph.duration,'')}</span></div>`;
           if(ph.description){ const p=document.createElement('p'); p.textContent=ph.description; c.appendChild(p); }
-          if(safeArr(ph.activities).length){ const ul=document.createElement('ul'); ph.activities.forEach(a=>{const li=document.createElement('li'); li.textContent=a; ul.appendChild(li);}); c.appendChild(ul); }
+          if(safeArr(ph.activities).length){ const ul=document.createElement('ul'); ph.activities.forEach(a=>{const li=document.createElement('li'); li.textContent=a; ul.appendChild(li); }); c.appendChild(ul); }
           grid.appendChild(c);
         }); sheet.appendChild(grid);
       }
