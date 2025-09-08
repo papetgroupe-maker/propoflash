@@ -2,246 +2,365 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>PropoFlash — Studio</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
-    :root{--ink:#0a1020;--muted:#667085;--stroke:#e6e9f3;--bg:#f6f8fc;--accent:#3b82f6;--accent2:#8b5cf6}
-    *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0;background:linear-gradient(180deg,#f6f8fc,#eef3ff);font-family:Inter,system-ui,sans-serif;color:var(--ink)}
-    .top{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--stroke);display:flex;align-items:center;justify-content:space-between;padding:10px 14px}
-    .brand{display:flex;gap:10px;align-items:center;font-weight:800}
+    :root{
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --card: #ffffff;
+      --ink: #0a1020;
+      --muted:#657086;
+      --stroke:#e6ebf3;
+      --accent:#3b82f6;
+      --accent2:#8b5cf6;
+      --pill:#eef5ff;
+      --shadow-sm: 0 6px 18px rgba(10,16,32,.06);
+      --shadow-md: 0 12px 30px rgba(10,16,32,.10);
+      --radius: 14px;
+    }
+    .dark{
+      --bg: #0d121a;
+      --panel: #0f1520;
+      --card: #121a27;
+      --ink: #e9eefb;
+      --muted:#9aa6bf;
+      --stroke:#1e2a3d;
+      --pill:#101826;
+      --shadow-sm: 0 6px 18px rgba(0,0,0,.35);
+      --shadow-md: 0 12px 30px rgba(0,0,0,.5);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:linear-gradient(180deg,var(--bg),color-mix(in oklab, var(--bg) 60%, #dde7ff 40%));
+      color:var(--ink);
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    }
+
+    /* Top bar */
+    .top{
+      position:sticky;top:0;z-index:20;background:var(--panel);
+      border-bottom:1px solid var(--stroke);
+      display:flex;align-items:center;justify-content:space-between;
+      padding:10px 14px;
+    }
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800}
     .brand a{color:inherit;text-decoration:none}
-    .spark{width:22px;height:22px;border-radius:6px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd)}
-    .btn{border:1px solid var(--stroke);background:#fff;border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer}
-    .btn.primary{background:var(--accent);color:#fff;border-color:#0000}
+    .spark{width:22px;height:22px;border-radius:6px;
+      background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd)}
+    .title{display:flex;align-items:center;gap:10px;font-weight:700}
+    .chip{display:inline-flex;gap:6px;align-items:center;padding:6px 10px;border:1px solid var(--stroke);border-radius:999px;background:var(--pill);color:var(--muted);font-size:12px}
+    .toolbar{display:flex;gap:8px;align-items:center}
+    .btn{
+      border:1px solid var(--stroke);background:var(--panel);color:var(--ink);
+      border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer;
+      box-shadow:var(--shadow-sm)
+    }
+    .btn.primary{background:var(--accent);color:#fff;border-color:#0000;box-shadow:0 10px 24px color-mix(in oklab, var(--accent) 25%, transparent)}
+    .btn.ghost{background:var(--card)}
+    .icon-btn{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:10px}
+
+    /* Layout */
     .layout{display:grid;grid-template-columns:420px 1fr;gap:12px;height:calc(100vh - 56px)}
     .col{padding:12px;overflow:auto}
-    .card{background:#fff;border:1px solid var(--stroke);border-radius:14px;box-shadow:0 6px 20px rgba(10,16,32,.08)}
-    /* Chat */
+
+    /* Left / Chat */
+    .panel{background:var(--panel);border:1px solid var(--stroke);border-radius:var(--radius);box-shadow:var(--shadow-md)}
     .chat{display:flex;flex-direction:column;height:100%}
+    .chat-head{display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--stroke)}
     .chat-body{flex:1;overflow:auto;padding:12px}
     .msg{display:flex;margin:8px 0}
     .msg.me{justify-content:flex-end}
-    .bubble{max-width:80%;border:1px solid var(--stroke);padding:10px 12px;border-radius:12px;background:#fff}
-    .msg.me .bubble{background:#0b2446;color:#e8eefc}
+    .bubble{
+      max-width:80%;border:1px solid var(--stroke);padding:10px 12px;border-radius:12px;background:var(--card);
+      color:var(--ink)
+    }
+    .msg.me .bubble{background:#0b2446;color:#e8eefc;border-color:#0000}
+    .chat-actions{display:flex;gap:8px;align-items:center}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;padding:10px;border-top:1px solid var(--stroke)}
+    .quick{border:1px solid var(--stroke);background:var(--card);color:var(--muted);padding:6px 10px;border-radius:999px;cursor:pointer}
     .chat-input{display:flex;gap:8px;border-top:1px solid var(--stroke);padding:10px}
-    textarea{flex:1;resize:vertical;min-height:68px;border:1px solid var(--stroke);border-radius:10px;padding:10px}
-    /* Aperçu */
-    .panel{padding:14px}
-    .sheet{background:#fff;border:1px solid var(--stroke);border-radius:12px;box-shadow:0 12px 36px rgba(10,16,32,.10);padding:24px}
-    .h1{font-weight:800;font-size:24px;margin:0 0 6px}
-    .meta{color:var(--muted);font-size:14px;margin-bottom:14px}
-    .hr{height:1px;background:var(--stroke);margin:12px 0}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .cardBox{border:1px solid var(--stroke);border-radius:12px;padding:12px}
-    .pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--stroke);font-size:12px;background:#fff}
-    table{border-collapse:collapse;width:100%;font-size:14px}
-    th,td{border-bottom:1px solid var(--stroke);padding:6px;text-align:left}
-    @media (max-width:1100px){.layout{grid-template-columns:1fr}.chat{height:auto}}
-    @media print{.top,.layout>.col:first-child{display:none} .layout{grid-template-columns:1fr} .panel{padding:0} .sheet{box-shadow:none;border:none}}
+    textarea{flex:1;resize:vertical;min-height:72px;border:1px solid var(--stroke);border-radius:10px;padding:10px;background:var(--card);color:var(--ink)}
+    .typing{display:inline-flex;gap:6px}
+    .dot{width:6px;height:6px;border-radius:50%;background:var(--muted);opacity:.35;animation:blink 1s infinite}
+    .dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+    @keyframes blink{0%,80%,100%{opacity:.3}40%{opacity:1}}
+
+    /* Right / Preview canvas */
+    .canvas{padding:14px}
+    .sheet{background:var(--card);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--shadow-md)}
+    .hero{padding:22px;border-bottom:1px solid var(--stroke);position:relative;overflow:hidden;border-top-left-radius:16px;border-top-right-radius:16px}
+    .hero::after{
+      content:"";position:absolute;right:-80px;top:-60px;width:260px;height:200px;border-radius:20px;
+      background:linear-gradient(135deg, color-mix(in oklab, var(--accent) 15%, transparent), color-mix(in oklab, var(--accent2) 15%, transparent));
+      filter:blur(8px)
+    }
+    .hero .badge{display:inline-flex;gap:6px;align-items:center;padding:6px 10px;border:1px solid var(--stroke);border-radius:999px;background:var(--pill);color:var(--muted);font-size:12px}
+    .hero h1{font-size:clamp(28px,4.5vw,46px);line-height:1.1;margin:10px 0 8px;font-weight:800;letter-spacing:-.01em}
+    .hero p{margin:0;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px}
+    .card{
+      background:var(--panel);border:1px solid var(--stroke);border-radius:16px;padding:16px;box-shadow:var(--shadow-sm)
+    }
+    .card h3{margin:0 0 4px}
+    .subline{color:var(--muted);font-size:13px;margin-bottom:8px}
+    .actions{display:flex;gap:10px;margin-top:10px}
+    .mini{border:1px solid var(--stroke);background:var(--card);border-radius:10px;padding:6px 10px;color:var(--ink);font-weight:600;font-size:13px}
+    .metric{font-weight:900;font-size:28px}
+    .muted{color:var(--muted)}
+    .sec-title{padding:8px 14px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+
+    /* Side drawer (History) */
+    .drawer{position:fixed;top:0;right:0;bottom:0;width:min(440px,90vw);background:var(--panel);border-left:1px solid var(--stroke);box-shadow:var(--shadow-md);transform:translateX(100%);transition:transform .2s ease;z-index:30}
+    .drawer.open{transform:translateX(0)}
+    .drawer-head{display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--stroke)}
+    .drawer-body{padding:12px;overflow:auto;height:calc(100% - 52px)}
+    .link-btn{display:flex;justify-content:space-between;gap:12px;width:100%;text-align:left}
+
+    @media (max-width:1200px){
+      .layout{grid-template-columns:1fr}
+      .hero::after{display:none}
+    }
+    @media print{
+      .top,.layout>.col:first-child,.drawer{display:none}
+      .layout{grid-template-columns:1fr}
+      .sheet{box-shadow:none;border:none}
+      body{background:#fff}
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+  <!-- TOP BAR -->
   <div class="top">
-    <div class="brand"><div class="spark"></div><a href="index.html">PropoFlash</a></div>
-    <div style="display:flex;gap:8px;align-items:center">
+    <div class="title">
+      <div class="brand"><div class="spark"></div><a href="index.html">PropoFlash</a></div>
+      <span class="chip">Prototype interactif (web)</span>
+    </div>
+    <div class="toolbar">
       <button id="historyBtn" class="btn">Historique</button>
-      <label class="btn"><input type="color" id="c1" style="vertical-align:middle;margin-right:6px">Couleur 1</label>
-      <label class="btn"><input type="color" id="c2" style="vertical-align:middle;margin-right:6px">Couleur 2</label>
-      <button id="pdfBtn" class="btn">Export PDF</button>
+      <button id="themeBtn" class="btn icon-btn" title="Mode sombre/clair" aria-label="Toggle theme">
+        <svg id="sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l-1.5-1.5M20.5 20.5L19 19M19 5l1.5-1.5M4.5 20.5L6 19"/></svg>
+      </button>
+      <button id="pdfBtn" class="btn">Exporter PDF</button>
       <button id="logoutBtn" class="btn">Déconnexion</button>
     </div>
   </div>
 
+  <!-- LAYOUT -->
   <div class="layout">
-    <!-- Colonne gauche : Chat -->
+    <!-- LEFT / CHAT -->
     <div class="col">
-      <div class="card chat">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px;border-bottom:1px solid var(--stroke)">
+      <div class="panel chat">
+        <div class="chat-head">
           <strong>Assistant</strong>
-          <div style="display:flex;gap:8px;align-items:center">
+          <div class="chat-actions">
             <input id="logoFile" type="file" accept="image/*" hidden>
-            <button class="btn" id="logoBtn">+ Logo</button>
+            <button class="btn ghost" id="logoBtn">+ Logo</button>
           </div>
         </div>
-
         <div id="chatBody" class="chat-body"></div>
-
+        <div class="chips">
+          <div class="quick" data-q="Structure de la proposition">Structure</div>
+          <div class="quick" data-q="Budget et tarification">Budget</div>
+          <div class="quick" data-q="Planning et jalons">Planning</div>
+          <div class="quick" data-q="Livrables détaillés">Livrables</div>
+        </div>
         <div class="chat-input">
-          <textarea id="prompt" placeholder="Décrivez votre besoin…"></textarea>
+          <textarea id="prompt" placeholder="Décrivez votre besoin… (Entrée = envoyer • Maj+Entrée = nouvelle ligne)"></textarea>
           <button id="send" class="btn primary">Envoyer</button>
         </div>
       </div>
-
-      <div id="historyPanel" class="card" style="margin-top:12px;display:none;padding:10px">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <strong>Mes discussions</strong>
-          <button class="btn" id="closeHistory">Fermer</button>
-        </div>
-        <div id="historyList" style="padding:8px 4px;display:flex;flex-direction:column;gap:8px"></div>
-      </div>
     </div>
 
-    <!-- Colonne droite : Aperçu -->
+    <!-- RIGHT / PREVIEW -->
     <div class="col">
-      <div class="panel card">
-        <div class="sheet" id="sheet"></div>
+      <div class="canvas panel">
+        <div class="sheet" id="sheet">
+          <!-- Injecté par JS -->
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- Drawer Historique -->
+  <div id="drawer" class="drawer" aria-hidden="true">
+    <div class="drawer-head">
+      <strong>Mes discussions</strong>
+      <button id="closeDrawer" class="btn icon-btn" aria-label="Fermer">✕</button>
+    </div>
+    <div id="historyList" class="drawer-body"></div>
+  </div>
+
   <script>
-    // ===== Boot Supabase =====
+    /* ========= Supabase ========= */
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
+    /* ========= State ========= */
     const chatBody = document.getElementById('chatBody');
     const promptEl = document.getElementById('prompt');
     const sheet = document.getElementById('sheet');
-    let currentChatId = localStorage.getItem('pf_chat_id') || null;
     let spec = null;
+    let currentChatId = localStorage.getItem('pf_chat_id') || null;
 
-    // ===== Helpers =====
+    /* ========= Small utils ========= */
+    const safeArr = v => Array.isArray(v) ? v : [];
+    const safeStr = (v,f='') => (v==null?'':String(v)).trim()||f;
+    const money = (n,c)=>{try{return new Intl.NumberFormat('fr-FR',{style:'currency',currency:c||'EUR'}).format(Number(n||0));}catch{return String(n||0)+' '+(c||'€')}};
+    const toHex = (c)=>{const s=String(c||'').trim(); if(/^#([0-9a-f]{3}){1,2}$/i.test(s)) return s.toUpperCase(); if(s.startsWith('rgb')){const m=s.match(/\d+/g)||[0,0,0]; return '#'+m.slice(0,3).map(x=>Number(x).toString(16).padStart(2,'0')).join('').toUpperCase();} return '#3B82F6';};
+
     function addMsg(text, who='ai'){
       const row=document.createElement('div'); row.className='msg'+(who==='me'?' me':'');
       const b=document.createElement('div'); b.className='bubble'; b.textContent=String(text||'');
       row.appendChild(b); chatBody.appendChild(row); chatBody.scrollTop=chatBody.scrollHeight;
     }
-    const safeArr = v => Array.isArray(v) ? v : [];
-    const safeStr = (v,f='') => (v==null?'':String(v)).trim()||f;
-    const money = (n,c)=>{try{return new Intl.NumberFormat('fr-FR',{style:'currency',currency:c||'EUR'}).format(Number(n||0));}catch{return String(n||0)+' '+(c||'€')}};
-    const toHex = (c)=>{const s=String(c||'').trim(); if(/^#([0-9a-f]{3}){1,2}$/i.test(s)) return s.toUpperCase(); if(s.startsWith('rgb')){const m=s.match(/\d+/g)||[0,0,0]; return '#'+m.slice(0,3).map(x=>Number(x).toString(16).padStart(2,'0')).join('').toUpperCase();} return '#3B82F6';};
-    function showHistory(v=true){ document.getElementById('historyPanel').style.display = v?'block':'none'; }
+    function showTyping(){
+      removeTyping();
+      const row=document.createElement('div'); row.className='msg'; row.id='typingRow';
+      const b=document.createElement('div'); b.className='bubble'; b.innerHTML='<span class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>';
+      row.appendChild(b); chatBody.appendChild(row); chatBody.scrollTop=chatBody.scrollHeight;
+    }
+    function removeTyping(){ const t=document.getElementById('typingRow'); if(t) t.remove(); }
 
-    // ===== Rendu live =====
+    /* ========= Preview (inspired layout) ========= */
     function render(){
       sheet.innerHTML = '';
-      if(!spec){ sheet.innerHTML='<p style="color:var(--muted)">Aucune donnée. Envoyez un brief dans le chat.</p>'; return; }
 
-      // Couleurs
+      // couleurs
       const primary = spec?.meta?.style?.primary || spec?.meta?.accent || '#3b82f6';
       const secondary = spec?.meta?.style?.secondary || '#8b5cf6';
       document.documentElement.style.setProperty('--accent', primary);
       document.documentElement.style.setProperty('--accent2', secondary);
-      document.getElementById('c1').value = toHex(primary);
-      document.getElementById('c2').value = toHex(secondary);
 
-      // Header minimal
-      const company = safeStr(spec.meta?.company || spec.meta?.brand?.company, 'Votre société');
-      const client  = safeStr(spec.meta?.client, 'Client');
-      const title   = safeStr(spec.meta?.title, 'Proposition commerciale');
+      // HERO
+      const hero = document.createElement('div'); hero.className='hero';
+      const kicker = safeStr(spec.meta?.kicker, 'Inside Marchés – Trimestriel');
+      const title  = safeStr(spec.meta?.title, 'Proposition commerciale');
+      const subtitle = safeStr(spec.meta?.subtitle, "Actualité, synthèse et proposition de valeur adaptées à votre contexte.");
+      hero.innerHTML = `
+        <span class="badge">📎 ${kicker}</span>
+        <h1 contenteditable="true" data-bind="meta.title">${title}</h1>
+        <p contenteditable="true" data-bind="meta.subtitle">${subtitle}</p>`;
+      sheet.appendChild(hero);
 
-      const header = document.createElement('div');
-      header.innerHTML = `
-        <div class="h1" contenteditable="true">${title}</div>
-        <div class="meta">Pour <span class="pill" contenteditable="true">${client}</span> • Émis par <span class="pill" contenteditable="true">${company}</span></div>
-      `;
-      sheet.appendChild(header);
-      sheet.appendChild(Object.assign(document.createElement('div'),{className:'hr'}));
+      // GRID (2 cartes phares)
+      const grid = document.createElement('div'); grid.className='grid';
 
-      // Executive
-      if (safeArr(spec.executive_summary?.paragraphs).length){
-        const box=document.createElement('div'); box.className='cardBox';
-        box.innerHTML='<strong>Résumé exécutif</strong>';
-        spec.executive_summary.paragraphs.forEach(p=>{const el=document.createElement('p'); el.textContent=p; el.contentEditable='true'; box.appendChild(el);});
-        sheet.appendChild(box);
-      }
+      // CARD A — Résumé/Lettre (ou Executive)
+      const c1 = document.createElement('div'); c1.className='card';
+      const execText = safeArr(spec.executive_summary?.paragraphs).join(' ') || safeStr(spec.letter?.greeting,'') || '« Résumé de la proposition, bénéfices clés, preuve de compréhension du contexte. »';
+      c1.innerHTML = `
+        <div class="subline">Vision & priorités</div>
+        <h3 contenteditable="true" data-bind="blocks.card1.title">Mot de la direction</h3>
+        <p contenteditable="true" data-bind="blocks.card1.body">${execText}</p>
+        <div class="actions">
+          <button class="mini">💬 Commenter</button>
+          <button class="mini">↗️ Partager</button>
+        </div>`;
+      grid.appendChild(c1);
 
-      // Objectifs
-      if (safeArr(spec.objectives?.bullets).length){
-        const box=document.createElement('div'); box.className='cardBox'; box.style.marginTop='8px';
-        box.innerHTML='<strong>Objectifs</strong>';
-        const ul=document.createElement('ul');
-        spec.objectives.bullets.forEach(b=>{const li=document.createElement('li'); li.textContent=b; li.contentEditable='true'; ul.appendChild(li);});
-        box.appendChild(ul); sheet.appendChild(box);
-      }
+      // CARD B — Chiffre clef / Prix
+      const c2 = document.createElement('div'); c2.className='card';
+      const pr = spec.pricing || {};
+      const currency = pr.currency || spec.meta?.currency || 'EUR';
+      const metric = (Array.isArray(pr.items)&&pr.items.length)
+        ? pr.items.map(it=>(it.subtotal!=null?Number(it.subtotal):Number(it.qty||1)*Number(it.unit_price||0))).reduce((a,b)=>a+b,0)
+        : (pr.price!=null?Number(pr.price):1240000);
+      c2.innerHTML = `
+        <div class="subline">Indicateur simple et mémorisable</div>
+        <h3>Chiffre du projet</h3>
+        <div class="metric" contenteditable="true" data-bind="blocks.metric">${money(metric,currency)}</div>
+        <div class="muted" style="font-size:12px">*Exemple — adaptez selon votre modèle (forfait / régie)</div>
+        <div class="actions">
+          <button class="mini">💬 Commenter</button>
+          <button class="mini">↗️ Partager</button>
+        </div>`;
+      grid.appendChild(c2);
 
-      // Approche
+      sheet.appendChild(grid);
+
+      // SECTION: Phases / Approche (cartes empilées)
       if (safeArr(spec.approach?.phases).length){
-        const title=document.createElement('div'); title.className='cardBox'; title.style.marginTop='8px'; title.innerHTML='<strong>Approche & phasage</strong>'; sheet.appendChild(title);
+        const sec = document.createElement('div'); sec.innerHTML = `<div class="sec-title">Approche & phasage</div>`;
+        const stack = document.createElement('div'); stack.style.padding="0 14px 14px 14px"; stack.style.display="grid"; stack.style.gap="12px";
         spec.approach.phases.forEach((ph,i)=>{
-          const c=document.createElement('div'); c.className='cardBox'; c.style.marginTop='8px';
-          c.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
-              <strong contenteditable="true">Phase ${i+1} — ${safeStr(ph.title,'À confirmer')}</strong>
-              <span class="pill">${safeStr(ph.duration||'', '')}</span>
-            </div>`;
-          if (ph.description){ const p=document.createElement('p'); p.textContent=ph.description; p.contentEditable='true'; c.appendChild(p); }
+          const k=document.createElement('div'); k.className='card';
+          k.innerHTML = `
+            <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+              <strong contenteditable="true" data-bind="approach.phases.${i}.title">Phase ${i+1} — ${safeStr(ph.title,'À confirmer')}</strong>
+              <span class="chip">${safeStr(ph.duration||'', 'à définir')}</span>
+            </div>
+            ${ph.description ? `<p contenteditable="true" data-bind="approach.phases.${i}.description">${ph.description}</p>`:''}
+          `;
           const acts=safeArr(ph.activities?.length?ph.activities:ph.steps);
-          if (acts.length){ const ul=document.createElement('ul'); acts.forEach(a=>{const li=document.createElement('li'); li.textContent=a; li.contentEditable='true'; ul.appendChild(li);}); c.appendChild(ul); }
-          sheet.appendChild(c);
+          if(acts.length){
+            const ul=document.createElement('ul'); ul.style.margin='6px 0 0 18px';
+            acts.forEach((a,j)=>{const li=document.createElement('li'); li.textContent=a; li.contentEditable='true'; li.dataset.bind=`approach.phases.${i}.activities.${j}`; ul.appendChild(li);});
+            k.appendChild(ul);
+          }
+          stack.appendChild(k);
         });
+        sec.appendChild(stack); sheet.appendChild(sec);
       }
 
-      // Livrables
+      // SECTION: Livrables
       if (spec.deliverables && (safeArr(spec.deliverables.in).length || safeArr(spec.deliverables.out).length)){
-        const grid=document.createElement('div'); grid.className='grid2'; grid.style.marginTop='8px';
-        const a=document.createElement('div'); a.className='cardBox'; a.innerHTML='<div style="color:var(--muted);margin-bottom:6px">Inclus</div>';
-        const b=document.createElement('div'); b.className='cardBox'; b.innerHTML='<div style="color:var(--muted);margin-bottom:6px">Hors périmètre</div>';
-        const ulA=document.createElement('ul'); safeArr(spec.deliverables.in).forEach(x=>{const li=document.createElement('li'); li.textContent=x; li.contentEditable='true'; ulA.appendChild(li);});
-        const ulB=document.createElement('ul'); safeArr(spec.deliverables.out).forEach(x=>{const li=document.createElement('li'); li.textContent=x; li.contentEditable='true'; ulB.appendChild(li);});
-        a.appendChild(ulA); b.appendChild(ulB); grid.appendChild(a); grid.appendChild(b); sheet.appendChild(grid);
+        const sec = document.createElement('div'); sec.innerHTML = `<div class="sec-title">Périmètre</div>`;
+        const row=document.createElement('div'); row.className='grid'; row.style.gridTemplateColumns='1fr 1fr'; row.style.paddingTop='0';
+        const a=document.createElement('div'); a.className='card'; a.innerHTML='<div class="subline">Inclus</div>';
+        const b=document.createElement('div'); b.className='card'; b.innerHTML='<div class="subline">Hors périmètre</div>';
+        const ulA=document.createElement('ul'); safeArr(spec.deliverables.in).forEach((x,i)=>{const li=document.createElement('li'); li.textContent=x; li.contentEditable='true'; li.dataset.bind=`deliverables.in.${i}`; ulA.appendChild(li);});
+        const ulB=document.createElement('ul'); safeArr(spec.deliverables.out).forEach((x,i)=>{const li=document.createElement('li'); li.textContent=x; li.contentEditable='true'; li.dataset.bind=`deliverables.out.${i}`; ulB.appendChild(li);});
+        a.appendChild(ulA); b.appendChild(ulB); row.appendChild(a); row.appendChild(b);
+        sec.appendChild(row); sheet.appendChild(sec);
       }
 
-      // Planning
-      if (safeArr(spec.timeline?.milestones).length){
-        const t=document.createElement('div'); t.className='cardBox'; t.style.marginTop='8px'; t.innerHTML='<strong>Planning</strong>'; sheet.appendChild(t);
-        const grid=document.createElement('div'); grid.className='grid2';
-        spec.timeline.milestones.forEach(ms=>{
-          const c=document.createElement('div'); c.className='cardBox';
-          c.innerHTML = `<div><strong contenteditable="true">${safeStr(ms.title,'Étape')}</strong></div>
-            <div class="meta">${safeStr(ms.dateOrWeek || ms.date || ms.duration || '', '')}</div>`;
-          if (ms.notes){ const p=document.createElement('p'); p.textContent=ms.notes; p.contentEditable='true'; c.appendChild(p); }
-          grid.appendChild(c);
+      // Save when editing inline
+      sheet.querySelectorAll('[contenteditable="true"]').forEach(el=>{
+        el.addEventListener('input', (e)=>{
+          const path = el.dataset.bind;
+          if(!path) return;
+          setDeep(spec, path, el.textContent.trim());
+          persistSpec();
         });
-        sheet.appendChild(grid);
-      }
-
-      // Pricing
-      if (spec.pricing){
-        const pr = spec.pricing, currency = pr.currency || 'EUR';
-        const box=document.createElement('div'); box.className='cardBox'; box.style.marginTop='8px';
-        box.innerHTML='<strong>Tarification</strong>';
-        if (Array.isArray(pr.items) && pr.items.length){
-          const table=document.createElement('table');
-          table.innerHTML=`<thead><tr><th>Item</th><th>Qté</th><th>PU</th><th>Sous-total</th></tr></thead><tbody></tbody>`;
-          const tb=table.querySelector('tbody');
-          pr.items.forEach(it=>{
-            const qty=Number(it.qty||1), up=Number(it.unit_price||0), st=(it.subtotal!=null)?Number(it.subtotal):qty*up;
-            const tr=document.createElement('tr');
-            tr.innerHTML = `<td contenteditable="true">${safeStr(it.name,'—')}</td>
-                            <td contenteditable="true">${qty}</td>
-                            <td contenteditable="true">${money(up,currency)}</td>
-                            <td contenteditable="true">${money(st,currency)}</td>`;
-            tb.appendChild(tr);
-          });
-          box.appendChild(table);
-        }else{
-          const p=document.createElement('div'); p.style.marginTop='6px';
-          p.innerHTML = `<span class="pill" contenteditable="true">${money(pr.price||0,currency)}</span> &nbsp; <span style="color:var(--muted)">(${safeStr(pr.model||'forfait')})</span>`;
-          box.appendChild(p);
-        }
-        sheet.appendChild(box);
-      }
-
-      // Hypothèses
-      if (safeArr(spec.assumptions?.paragraphs).length){
-        const box=document.createElement('div'); box.className='cardBox'; box.style.marginTop='8px'; box.innerHTML='<strong>Hypothèses / Risques</strong>';
-        spec.assumptions.paragraphs.forEach(p=>{const el=document.createElement('p'); el.textContent=p; el.contentEditable='true'; box.appendChild(el);});
-        sheet.appendChild(box);
-      }
-
-      // Next steps
-      if (safeArr(spec.next_steps?.paragraphs).length){
-        const box=document.createElement('div'); box.className='cardBox'; box.style.marginTop='8px'; box.innerHTML='<strong>Prochaines étapes</strong>';
-        spec.next_steps.paragraphs.forEach(p=>{const el=document.createElement('p'); el.textContent=p; el.contentEditable='true'; box.appendChild(el);});
-        sheet.appendChild(box);
-      }
+      });
     }
 
-    // ===== Chat & API =====
+    // deep set helper "a.b.0.c"
+    function setDeep(obj, path, val){
+      const keys = path.split('.');
+      let cur = obj;
+      for(let i=0;i<keys.length-1;i++){
+        const k = keys[i];
+        const idx = String(Number(k))===k ? Number(k) : k;
+        if(cur[idx]==null) cur[idx] = (String(Number(keys[i+1]))===keys[i+1]) ? [] : {};
+        cur = cur[idx];
+      }
+      const last = keys.at(-1);
+      const lastIdx = String(Number(last))===last ? Number(last) : last;
+      cur[lastIdx]=val;
+    }
+
+    function persistSpec(){
+      localStorage.setItem('pf_proposal', JSON.stringify(spec));
+      // (optionnel) push cloud si connecté & chat ouvert
+      saveProposalCloud().catch(()=>{});
+    }
+
+    async function saveProposalCloud(){
+      const { data:{ user } } = await sb.auth.getUser();
+      if(!user || !currentChatId) return;
+      await sb.from('proposals').upsert({ user_id:user.id, chat_id:currentChatId, spec }, { onConflict:'chat_id' });
+    }
+
+    /* ========= Chat & API ========= */
     async function ensureChat(title='Nouvelle discussion'){
       if(currentChatId) return currentChatId;
       const { data:{ user } } = await sb.auth.getUser();
@@ -268,94 +387,121 @@
     document.getElementById('send').onclick = async ()=>{
       const msg=(promptEl.value||'').trim(); if(!msg) return;
       addMsg(msg,'me'); promptEl.value='';
+      showTyping();
+
       const history = JSON.parse(localStorage.getItem('pf_chat')||'[]');
       const base = spec || JSON.parse(localStorage.getItem('pf_proposal')||'{"meta":{"lang":"fr"},"sections":[]}');
+
       try{
         await ensureChat(msg.slice(0,80));
         await saveMessage('user', msg);
         const data = await callChatAPI(msg, base, history);
+        removeTyping();
+
         if(data.reply){ addMsg(data.reply,'ai'); await saveMessage('assistant', data.reply); }
+
         if(data.proposalSpec){
           spec = { ...base, ...data.proposalSpec, meta:{ ...(base.meta||{}), ...(data.proposalSpec.meta||{}) } };
-          localStorage.setItem('pf_proposal', JSON.stringify(spec));
-          render();
-          try{
-            const { data:{ user } } = await sb.auth.getUser();
-            if(user && currentChatId){
-              await sb.from('proposals').upsert(
-                { user_id:user.id, chat_id:currentChatId, spec },
-                { onConflict:'chat_id' }
-              );
-            }
-          }catch(_){}
+          persistSpec(); render();
         }
+
         const newHist=[...history,{role:'user',content:msg},{role:'assistant',content:data.reply||''}].slice(-20);
         localStorage.setItem('pf_chat', JSON.stringify(newHist));
-      }catch(e){ console.error(e); addMsg('Erreur serveur. Réessayez.','ai'); }
+      }catch(e){ console.error(e); removeTyping(); addMsg('Erreur serveur. Réessayez.','ai'); }
     };
 
-    // ===== Historique =====
+    // quick chips
+    document.querySelectorAll('.quick').forEach(el=>{
+      el.addEventListener('click',()=>{
+        const v = el.dataset.q || el.textContent;
+        promptEl.value = (promptEl.value ? promptEl.value+'\n' : '') + v + ' : ';
+        promptEl.focus();
+      });
+    });
+
+    // textarea: Enter to send (Shift+Enter for newline)
+    promptEl.addEventListener('keydown', (e)=>{
+      if(e.isComposing) return;
+      if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); document.getElementById('send').click(); }
+    });
+
+    /* ========= Historique (drawer) ========= */
+    const drawer = document.getElementById('drawer');
     document.getElementById('historyBtn').onclick = async ()=>{
       const { data:{ user } } = await sb.auth.getUser();
-      if(!user){ alert("Connectez-vous pour voir l’historique."); return; }
-      const { data, error } = await sb.from('chats').select('id,title,created_at').order('created_at',{ascending:false}).limit(30);
+      if(!user){ alert('Connectez-vous pour accéder à votre historique.'); return; }
+      const { data, error } = await sb.from('chats').select('id,title,created_at').order('created_at',{ascending:false}).limit(50);
       if(error){ console.error(error); return; }
-      const list=document.getElementById('historyList'); list.innerHTML='';
+      const list = document.getElementById('historyList'); list.innerHTML='';
       data.forEach(c=>{
-        const b=document.createElement('button'); b.className='btn'; b.style.justifyContent='space-between'; b.style.display='flex';
-        b.innerHTML = `<span>${c.title||'Sans titre'}</span><span style="color:var(--muted);font-size:12px">${new Date(c.created_at).toLocaleString()}</span>`;
+        const b = document.createElement('button'); b.className='btn link-btn';
+        b.innerHTML = `<span>${c.title || 'Sans titre'}</span>
+                       <span class="muted" style="font-size:12px">${new Date(c.created_at).toLocaleString()}</span>`;
         b.onclick = ()=> openChat(c.id);
         list.appendChild(b);
       });
-      showHistory(true);
+      drawer.classList.add('open'); drawer.setAttribute('aria-hidden','false');
     };
-    document.getElementById('closeHistory').onclick = ()=> showHistory(false);
-
+    document.getElementById('closeDrawer').onclick = ()=>{ drawer.classList.remove('open'); drawer.setAttribute('aria-hidden','true'); };
     async function openChat(id){
       currentChatId=id; localStorage.setItem('pf_chat_id', id);
-      showHistory(false); chatBody.innerHTML='';
+      drawer.classList.remove('open');
+      chatBody.innerHTML='';
       const { data:msgs } = await sb.from('messages').select('role,content,created_at').eq('chat_id', id).order('created_at',{ascending:true});
       msgs?.forEach(m=>addMsg(m.content, m.role==='user'?'me':'ai'));
       const { data:prop } = await sb.from('proposals').select('spec').eq('chat_id', id).single();
-      if(prop?.spec){ spec=prop.spec; localStorage.setItem('pf_proposal', JSON.stringify(spec)); render(); }
+      if(prop?.spec){ spec=prop.spec; persistSpec(); render(); }
     }
 
-    // ===== Couleurs / Logo / PDF / Logout =====
-    document.getElementById('c1').oninput = (e)=>{
-      const v=e.target.value||'#3b82f6';
-      spec = spec || { meta:{} }; spec.meta.style = {...(spec.meta.style||{}), primary:v}; spec.meta.accent=v;
-      localStorage.setItem('pf_proposal', JSON.stringify(spec)); render();
+    /* ========= Theme, Logo, PDF, Logout ========= */
+    const themeBtn = document.getElementById('themeBtn');
+    (function initTheme(){
+      const saved = localStorage.getItem('pf_theme') || 'light';
+      if(saved==='dark') document.body.classList.add('dark');
+    })();
+    themeBtn.onclick = ()=>{
+      document.body.classList.toggle('dark');
+      localStorage.setItem('pf_theme', document.body.classList.contains('dark')?'dark':'light');
     };
-    document.getElementById('c2').oninput = (e)=>{
-      const v=e.target.value||'#8b5cf6';
-      spec = spec || { meta:{} }; spec.meta.style = {...(spec.meta.style||{}), secondary:v};
-      localStorage.setItem('pf_proposal', JSON.stringify(spec)); render();
+
+    document.getElementById('pdfBtn').onclick = ()=> window.print();
+
+    document.getElementById('logoutBtn').onclick = async ()=>{
+      await sb.auth.signOut(); localStorage.removeItem('pf_chat_id'); location.href='index.html';
     };
 
     document.getElementById('logoBtn').onclick = ()=> document.getElementById('logoFile').click();
     document.getElementById('logoFile').onchange = async (ev)=>{
       const f=ev.target.files?.[0]; if(!f) return;
-      const fr=new FileReader(); fr.onload=()=>{ 
-        spec = spec || { meta:{} }; 
+      const fr=new FileReader(); fr.onload=()=>{
+        spec = spec || { meta:{} };
         spec.meta.style = {...(spec.meta.style||{}), logoDataUrl: fr.result };
-        localStorage.setItem('pf_proposal', JSON.stringify(spec)); render();
-        addMsg('Logo importé. Le style s’adaptera lors de la génération.','ai');
-      };
-      fr.readAsDataURL(f);
+        persistSpec(); render();
+        addMsg('Logo importé. Le style s’adaptera au branding.','ai');
+      }; fr.readAsDataURL(f);
     };
 
-    document.getElementById('pdfBtn').onclick = ()=> window.print();
-    document.getElementById('logoutBtn').onclick = async ()=>{ await sb.auth.signOut(); location.href='index.html'; };
-
-    // ===== Init =====
+    /* ========= Boot ========= */
     (async ()=>{
+      try{ spec = JSON.parse(localStorage.getItem('pf_proposal')||'null'); }catch{ spec=null; }
+      if(!spec){ spec = {
+        meta:{ lang:'fr', title:'Newsletter Interne — Marchés & Collectivités', subtitle:'Synthèse et proposition de valeur', kicker:'Inside Marchés – Trimestriel' },
+        executive_summary:{ paragraphs:['Positionnement, bénéfices, compréhension du contexte client.']},
+        approach:{ phases:[ {title:'Cadrage', duration:'1 semaine', description:'Clarifier objectifs et périmètre', activities:['Ateliers de cadrage','Cartographie parties prenantes']},
+                            {title:'Conception', duration:'2 semaines', description:'Produit/Offre & chiffrage', activities:['Specs fonctionnelles','Architecture','Maquettes']}]},
+        deliverables:{ in:['Document de proposition','Planning macro','Chiffrage'], out:['Déploiement','Run/MCO']},
+        pricing:{ model:'forfait', price:124000, currency:'EUR' },
+        next_steps:{ paragraphs:['Validation périmètre','Kick-off projet'] }
+      }; }
+      render();
+
+      // message d'accueil depuis l'index (optionnel)
       const warm = localStorage.getItem('pf_welcome_msg');
       if(warm){ addMsg(warm,'me'); localStorage.removeItem('pf_welcome_msg'); }
-      try{ spec = JSON.parse(localStorage.getItem('pf_proposal')||'null'); }catch{ spec=null; }
-      if(!spec) spec = { meta:{ lang:'fr', title:'Proposition commerciale' }, sections:[] };
-      render();
+
+      // Affiche l’état de session en console (utile debug)
       const { data:{ session } } = await sb.auth.getSession();
-      console.log('[studio] session', !!session, session?.user?.email);
+      console.log('[studio] session:', !!session, session?.user?.email);
     })();
   </script>
 </body>
