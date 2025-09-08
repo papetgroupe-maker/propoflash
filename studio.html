@@ -120,14 +120,12 @@
       <div class="panel chat">
         <div class="chat-head">
           <strong>Assistant</strong>
-          <!-- (plus de bouton ici) -->
         </div>
         <div id="chatBody" class="chat-body"></div>
         <div class="chat-input">
           <div class="input-actions">
             <input id="logoFile" type="file" accept="image/*" hidden>
             <button id="logoAttachBtn" class="btn icon-btn" title="Ajouter un logo" aria-label="Ajouter un logo">
-              <!-- icône image -->
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="3" y="3" width="18" height="18" rx="3"></rect>
                 <circle cx="8.5" cy="8.5" r="1.5"></circle>
@@ -202,7 +200,7 @@
       if(secondary) document.documentElement.style.setProperty('--accent2', toHex(secondary));
 
       if(!spec){
-        // Squelette (vide tant que l'utilisateur n’a rien envoyé)
+        // Skeleton tant qu'on n'a rien
         const hero=document.createElement('div'); hero.className='hero skeleton shimmer';
         const grid=document.createElement('div'); grid.className='grid';
         const a=document.createElement('div'); a.className='card sk-box shimmer';
@@ -258,7 +256,25 @@
       const last=keys.at(-1); cur[(String(+last)===last)?+last:last]=val;
     }
 
-    /* ===== Chat & API ===== */
+    /* ===== Robust loaders (LOCAL + CLOUD) ===== */
+    function mergeAnySpec(data, base){
+      const candidate = data?.proposalSpec || data?.proposal || data?.spec || data?.preview?.spec || data?.result?.proposalSpec || null;
+      if(!candidate) return null;
+      return { ...(base||{}), ...candidate, meta:{ ...((base&&base.meta)||{}), ...(candidate.meta||{}) } };
+    }
+
+    async function loadSpecFromCloud(chatId, tries=5, delayMs=600){
+      if(!chatId) return null;
+      for(let i=0;i<tries;i++){
+        try{
+          const { data, error } = await sb.from('proposals').select('spec').eq('chat_id', chatId).single();
+          if(!error && data?.spec){ return data.spec; }
+        }catch{}
+        await new Promise(r=>setTimeout(r, delayMs));
+      }
+      return null;
+    }
+
     async function ensureChat(title='Nouvelle discussion'){
       if(currentChatId) return currentChatId;
       const { data:{ user } } = await sb.auth.getUser(); if(!user) return null;
@@ -277,26 +293,46 @@
       if(!res.ok) throw new Error('HTTP '+res.status); return res.json();
     }
 
+    /* ===== Send ===== */
     document.getElementById('send').onclick = async ()=>{
       const msg=(promptEl.value||'').trim(); if(!msg) return;
       addMsg(msg,'me'); promptEl.value=''; showTyping();
+
       const history = JSON.parse(localStorage.getItem('pf_chat')||'[]');
-      const base = spec || JSON.parse(localStorage.getItem('pf_proposal')||'null') || null;
+      const baseLocal = spec || JSON.parse(localStorage.getItem('pf_proposal')||'null') || null;
 
       try{
-        await ensureChat(msg.slice(0,80)); await saveMessage('user', msg);
-        const data = await callChatAPI(msg, base, history);
+        await ensureChat(msg.slice(0,80));
+        await saveMessage('user', msg);
+
+        const data = await callChatAPI(msg, baseLocal, history);
         removeTyping();
+
         if(data.reply){ addMsg(data.reply,'ai'); await saveMessage('assistant', data.reply); }
-        if(data.proposalSpec){
-          spec = { ...(base||{}), ...data.proposalSpec, meta:{ ...((base&&base.meta)||{}), ...(data.proposalSpec.meta||{}) } };
-          persistSpec(); render();
+
+        // 1) Essayer de fusionner une spec directement renvoyée
+        let merged = mergeAnySpec(data, baseLocal);
+
+        // 2) Sinon, recharger depuis la base (serveur a peut-être écrit la spec en DB)
+        if(!merged){
+          const cloud = await loadSpecFromCloud(currentChatId, 6, 500);
+          if(cloud){ merged = { ...(baseLocal||{}), ...cloud, meta:{ ...((baseLocal&&baseLocal.meta)||{}), ...(cloud.meta||{}) } }; }
         }
+
+        if(merged){
+          spec = merged;
+          persistSpec();
+          render();
+        }
+
         const newHist=[...history,{role:'user',content:msg},{role:'assistant',content:data.reply||''}].slice(-20);
         localStorage.setItem('pf_chat', JSON.stringify(newHist));
-      }catch(e){ console.error(e); removeTyping(); addMsg('Erreur serveur. Réessayez.','ai'); }
+      }catch(e){
+        console.error(e);
+        removeTyping();
+        addMsg('Erreur serveur. Réessayez.','ai');
+      }
     };
-    promptEl.addEventListener('keydown',(e)=>{ if(e.isComposing) return; if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); document.getElementById('send').click(); }});
 
     /* ===== Historique ===== */
     const drawer=document.getElementById('drawer');
@@ -316,8 +352,10 @@
       currentChatId=id; localStorage.setItem('pf_chat_id', id); drawer.classList.remove('open'); chatBody.innerHTML='';
       const { data:msgs } = await sb.from('messages').select('role,content,created_at').eq('chat_id', id).order('created_at',{ascending:true});
       msgs?.forEach(m=>addMsg(m.content, m.role==='user'?'me':'ai'));
-      const { data:prop } = await sb.from('proposals').select('spec').eq('chat_id', id).single();
-      spec = prop?.spec || null; persistSpec(); render();
+      const cloud = await loadSpecFromCloud(id, 1, 0);
+      spec = cloud || null;
+      if(spec){ persistSpec(); }
+      render();
     }
 
     /* ===== Theme / PDF / Logout / Logo ===== */
@@ -327,7 +365,6 @@
     document.getElementById('pdfBtn').onclick=()=>window.print();
     document.getElementById('logoutBtn').onclick=async ()=>{ await sb.auth.signOut(); localStorage.removeItem('pf_chat_id'); location.href='index.html'; };
 
-    // Nouveau bouton logo (dans la zone d’écriture)
     const logoAttachBtn = document.getElementById('logoAttachBtn');
     const logoFile = document.getElementById('logoFile');
     logoAttachBtn.onclick=()=>logoFile.click();
@@ -343,8 +380,14 @@
     };
 
     /* ===== Boot ===== */
-    (function init(){
+    (async function init(){
       try{ spec = JSON.parse(localStorage.getItem('pf_proposal')||'null'); }catch{ spec=null; }
+
+      // Si pas de spec locale mais chat courant → tenter cloud
+      if(!spec && currentChatId){
+        const cloud = await loadSpecFromCloud(currentChatId, 1, 0);
+        if(cloud){ spec = cloud; persistSpec(); }
+      }
       render();
     })();
   </script>
