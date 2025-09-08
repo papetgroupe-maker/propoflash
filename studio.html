@@ -31,122 +31,83 @@
       --shadow-sm: 0 6px 18px rgba(0,0,0,.35);
       --shadow-md: 0 12px 30px rgba(0,0,0,.5);
     }
-
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0;
-      background:linear-gradient(180deg,var(--bg),color-mix(in oklab, var(--bg) 60%, #dde7ff 40%));
-      color:var(--ink);
-      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      margin:0;background:linear-gradient(180deg,var(--bg),color-mix(in oklab, var(--bg) 60%, #dde7ff 40%));
+      color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
       -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
     }
 
     /* Top bar */
-    .top{
-      position:sticky;top:0;z-index:20;background:var(--panel);
-      border-bottom:1px solid var(--stroke);
-      display:flex;align-items:center;justify-content:space-between;
-      padding:10px 14px;
-    }
+    .top{position:sticky;top:0;z-index:20;background:var(--panel);
+      border-bottom:1px solid var(--stroke);display:flex;align-items:center;justify-content:space-between;padding:10px 14px}
     .brand{display:flex;align-items:center;gap:10px;font-weight:800}
     .brand a{color:inherit;text-decoration:none}
-    .spark{width:22px;height:22px;border-radius:6px;
-      background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd)}
-    .title{display:flex;align-items:center;gap:10px;font-weight:700}
-    .chip{display:inline-flex;gap:6px;align-items:center;padding:6px 10px;border:1px solid var(--stroke);border-radius:999px;background:var(--pill);color:var(--muted);font-size:12px}
+    .spark{width:22px;height:22px;border-radius:6px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd)}
     .toolbar{display:flex;gap:8px;align-items:center}
-    .btn{
-      border:1px solid var(--stroke);background:var(--panel);color:var(--ink);
-      border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer;
-      box-shadow:var(--shadow-sm)
-    }
+    .btn{border:1px solid var(--stroke);background:var(--panel);color:var(--ink);
+      border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow:var(--shadow-sm)}
     .btn.primary{background:var(--accent);color:#fff;border-color:#0000;box-shadow:0 10px 24px color-mix(in oklab, var(--accent) 25%, transparent)}
-    .btn.ghost{background:var(--card)}
     .icon-btn{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:10px}
 
     /* Layout */
     .layout{display:grid;grid-template-columns:420px 1fr;gap:12px;height:calc(100vh - 56px)}
     .col{padding:12px;overflow:auto}
 
-    /* Left / Chat */
+    /* Chat */
     .panel{background:var(--panel);border:1px solid var(--stroke);border-radius:var(--radius);box-shadow:var(--shadow-md)}
     .chat{display:flex;flex-direction:column;height:100%}
     .chat-head{display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--stroke)}
     .chat-body{flex:1;overflow:auto;padding:12px}
     .msg{display:flex;margin:8px 0}
     .msg.me{justify-content:flex-end}
-    .bubble{
-      max-width:80%;border:1px solid var(--stroke);padding:10px 12px;border-radius:12px;background:var(--card);
-      color:var(--ink)
-    }
+    .bubble{max-width:80%;border:1px solid var(--stroke);padding:10px 12px;border-radius:12px;background:var(--card);color:var(--ink)}
     .msg.me .bubble{background:#0b2446;color:#e8eefc;border-color:#0000}
-    .chat-actions{display:flex;gap:8px;align-items:center}
-    .chips{display:flex;flex-wrap:wrap;gap:8px;padding:10px;border-top:1px solid var(--stroke)}
-    .quick{border:1px solid var(--stroke);background:var(--card);color:var(--muted);padding:6px 10px;border-radius:999px;cursor:pointer}
-    .chat-input{display:flex;gap:8px;border-top:1px solid var(--stroke);padding:10px}
-    textarea{flex:1;resize:vertical;min-height:72px;border:1px solid var(--stroke);border-radius:10px;padding:10px;background:var(--card);color:var(--ink)}
-    .typing{display:inline-flex;gap:6px}
-    .dot{width:6px;height:6px;border-radius:50%;background:var(--muted);opacity:.35;animation:blink 1s infinite}
-    .dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
-    @keyframes blink{0%,80%,100%{opacity:.3}40%{opacity:1}}
+    .chat-input{display:grid;grid-template-columns:auto 1fr auto;gap:8px;border-top:1px solid var(--stroke);padding:10px}
+    .input-actions{display:flex;align-items:center;gap:8px}
+    textarea{width:100%;resize:vertical;min-height:72px;border:1px solid var(--stroke);border-radius:10px;padding:10px;background:var(--card);color:var(--ink)}
 
-    /* Right / Preview canvas */
+    /* Canvas */
     .canvas{padding:14px}
-    .sheet{background:var(--card);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--shadow-md)}
+    .sheet{background:var(--card);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--shadow-md);min-height:60vh}
     .hero{padding:22px;border-bottom:1px solid var(--stroke);position:relative;overflow:hidden;border-top-left-radius:16px;border-top-right-radius:16px}
-    .hero::after{
-      content:"";position:absolute;right:-80px;top:-60px;width:260px;height:200px;border-radius:20px;
-      background:linear-gradient(135deg, color-mix(in oklab, var(--accent) 15%, transparent), color-mix(in oklab, var(--accent2) 15%, transparent));
-      filter:blur(8px)
-    }
-    .hero .badge{display:inline-flex;gap:6px;align-items:center;padding:6px 10px;border:1px solid var(--stroke);border-radius:999px;background:var(--pill);color:var(--muted);font-size:12px}
-    .hero h1{font-size:clamp(28px,4.5vw,46px);line-height:1.1;margin:10px 0 8px;font-weight:800;letter-spacing:-.01em}
-    .hero p{margin:0;color:var(--muted)}
+    .hero::after{content:"";position:absolute;right:-80px;top:-60px;width:260px;height:200px;border-radius:20px;
+      background:linear-gradient(135deg, color-mix(in oklab, var(--accent) 15%, transparent), color-mix(in oklab, var(--accent2) 15%, transparent));filter:blur(8px)}
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px}
-    .card{
-      background:var(--panel);border:1px solid var(--stroke);border-radius:16px;padding:16px;box-shadow:var(--shadow-sm)
-    }
-    .card h3{margin:0 0 4px}
-    .subline{color:var(--muted);font-size:13px;margin-bottom:8px}
-    .actions{display:flex;gap:10px;margin-top:10px}
-    .mini{border:1px solid var(--stroke);background:var(--card);border-radius:10px;padding:6px 10px;color:var(--ink);font-weight:600;font-size:13px}
-    .metric{font-weight:900;font-size:28px}
-    .muted{color:var(--muted)}
+    .card{background:var(--panel);border:1px solid var(--stroke);border-radius:16px;padding:16px;box-shadow:var(--shadow-sm)}
     .sec-title{padding:8px 14px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
 
-    /* Side drawer (History) */
+    /* Skeleton (aperçu vide) */
+    .skeleton{position:relative;overflow:hidden;background:var(--panel)}
+    .sk-line{height:14px;border-radius:8px;background:color-mix(in oklab, var(--muted) 20%, transparent)}
+    .sk-box{height:120px;border-radius:12px;background:color-mix(in oklab, var(--muted) 12%, transparent);border:1px solid var(--stroke)}
+    .shimmer::before{
+      content:"";position:absolute;inset:0;transform:translateX(-100%);
+      background:linear-gradient(90deg, transparent, color-mix(in oklab, #fff 60%, transparent), transparent);
+      animation:sh 1.4s infinite;
+    }
+    @keyframes sh{100%{transform:translateX(100%)}}
+
+    /* Drawer */
     .drawer{position:fixed;top:0;right:0;bottom:0;width:min(440px,90vw);background:var(--panel);border-left:1px solid var(--stroke);box-shadow:var(--shadow-md);transform:translateX(100%);transition:transform .2s ease;z-index:30}
     .drawer.open{transform:translateX(0)}
     .drawer-head{display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--stroke)}
     .drawer-body{padding:12px;overflow:auto;height:calc(100% - 52px)}
     .link-btn{display:flex;justify-content:space-between;gap:12px;width:100%;text-align:left}
 
-    @media (max-width:1200px){
-      .layout{grid-template-columns:1fr}
-      .hero::after{display:none}
-    }
-    @media print{
-      .top,.layout>.col:first-child,.drawer{display:none}
-      .layout{grid-template-columns:1fr}
-      .sheet{box-shadow:none;border:none}
-      body{background:#fff}
-    }
+    @media (max-width:1200px){.layout{grid-template-columns:1fr}.hero::after{display:none}}
+    @media print{.top,.layout>.col:first-child,.drawer{display:none}.layout{grid-template-columns:1fr}.sheet{box-shadow:none;border:none}body{background:#fff}}
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <!-- TOP BAR -->
+  <!-- TOP -->
   <div class="top">
-    <div class="title">
-      <div class="brand"><div class="spark"></div><a href="index.html">PropoFlash</a></div>
-      <span class="chip">Prototype interactif (web)</span>
-    </div>
+    <div class="brand"><div class="spark"></div><a href="index.html" title="Retour à l’accueil">PropoFlash</a></div>
     <div class="toolbar">
       <button id="historyBtn" class="btn">Historique</button>
-      <button id="themeBtn" class="btn icon-btn" title="Mode sombre/clair" aria-label="Toggle theme">
-        <svg id="sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l-1.5-1.5M20.5 20.5L19 19M19 5l1.5-1.5M4.5 20.5L6 19"/></svg>
-      </button>
+      <button id="themeBtn" class="btn icon-btn" aria-label="Mode sombre/clair">☼</button>
       <button id="pdfBtn" class="btn">Exporter PDF</button>
       <button id="logoutBtn" class="btn">Déconnexion</button>
     </div>
@@ -159,20 +120,22 @@
       <div class="panel chat">
         <div class="chat-head">
           <strong>Assistant</strong>
-          <div class="chat-actions">
-            <input id="logoFile" type="file" accept="image/*" hidden>
-            <button class="btn ghost" id="logoBtn">+ Logo</button>
-          </div>
+          <!-- (plus de bouton ici) -->
         </div>
         <div id="chatBody" class="chat-body"></div>
-        <div class="chips">
-          <div class="quick" data-q="Structure de la proposition">Structure</div>
-          <div class="quick" data-q="Budget et tarification">Budget</div>
-          <div class="quick" data-q="Planning et jalons">Planning</div>
-          <div class="quick" data-q="Livrables détaillés">Livrables</div>
-        </div>
         <div class="chat-input">
-          <textarea id="prompt" placeholder="Décrivez votre besoin… (Entrée = envoyer • Maj+Entrée = nouvelle ligne)"></textarea>
+          <div class="input-actions">
+            <input id="logoFile" type="file" accept="image/*" hidden>
+            <button id="logoAttachBtn" class="btn icon-btn" title="Ajouter un logo" aria-label="Ajouter un logo">
+              <!-- icône image -->
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="3"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <path d="M21 15l-4.5-4.5L9 18"></path>
+              </svg>
+            </button>
+          </div>
+          <textarea id="prompt" placeholder="Écrivez votre message…"></textarea>
           <button id="send" class="btn primary">Envoyer</button>
         </div>
       </div>
@@ -181,9 +144,7 @@
     <!-- RIGHT / PREVIEW -->
     <div class="col">
       <div class="canvas panel">
-        <div class="sheet" id="sheet">
-          <!-- Injecté par JS -->
-        </div>
+        <div class="sheet" id="sheet"><!-- contenu injecté --></div>
       </div>
     </div>
   </div>
@@ -198,24 +159,20 @@
   </div>
 
   <script>
-    /* ========= Supabase ========= */
+    /* ===== Supabase ===== */
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-    /* ========= State ========= */
+    /* ===== State ===== */
     const chatBody = document.getElementById('chatBody');
     const promptEl = document.getElementById('prompt');
     const sheet = document.getElementById('sheet');
     let spec = null;
     let currentChatId = localStorage.getItem('pf_chat_id') || null;
 
-    /* ========= Small utils ========= */
-    const safeArr = v => Array.isArray(v) ? v : [];
-    const safeStr = (v,f='') => (v==null?'':String(v)).trim()||f;
-    const money = (n,c)=>{try{return new Intl.NumberFormat('fr-FR',{style:'currency',currency:c||'EUR'}).format(Number(n||0));}catch{return String(n||0)+' '+(c||'€')}};
-    const toHex = (c)=>{const s=String(c||'').trim(); if(/^#([0-9a-f]{3}){1,2}$/i.test(s)) return s.toUpperCase(); if(s.startsWith('rgb')){const m=s.match(/\d+/g)||[0,0,0]; return '#'+m.slice(0,3).map(x=>Number(x).toString(16).padStart(2,'0')).join('').toUpperCase();} return '#3B82F6';};
-
+    /* ===== Utils ===== */
+    const toHex=(c)=>{const s=String(c||'').trim();if(/^#([0-9a-f]{3}){1,2}$/i.test(s))return s.toUpperCase();if(s.startsWith('rgb')){const m=s.match(/\d+/g)||[0,0,0];return '#'+m.slice(0,3).map(x=>Number(x).toString(16).padStart(2,'0')).join('').toUpperCase();}return '#3B82F6';};
     function addMsg(text, who='ai'){
       const row=document.createElement('div'); row.className='msg'+(who==='me'?' me':'');
       const b=document.createElement('div'); b.className='bubble'; b.textContent=String(text||'');
@@ -224,284 +181,171 @@
     function showTyping(){
       removeTyping();
       const row=document.createElement('div'); row.className='msg'; row.id='typingRow';
-      const b=document.createElement('div'); b.className='bubble'; b.innerHTML='<span class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>';
+      const b=document.createElement('div'); b.className='bubble'; b.textContent='…';
       row.appendChild(b); chatBody.appendChild(row); chatBody.scrollTop=chatBody.scrollHeight;
     }
     function removeTyping(){ const t=document.getElementById('typingRow'); if(t) t.remove(); }
 
-    /* ========= Preview (inspired layout) ========= */
+    function persistSpec(){ if(!spec) return; localStorage.setItem('pf_proposal', JSON.stringify(spec)); saveProposalCloud().catch(()=>{}); }
+    async function saveProposalCloud(){
+      const { data:{ user } } = await sb.auth.getUser();
+      if(!user || !currentChatId || !spec) return;
+      await sb.from('proposals').upsert({ user_id:user.id, chat_id:currentChatId, spec }, { onConflict:'chat_id' });
+    }
+
+    /* ===== Render ===== */
     function render(){
-      sheet.innerHTML = '';
+      sheet.innerHTML='';
+      const primary = spec?.meta?.style?.primary || spec?.meta?.accent;
+      const secondary = spec?.meta?.style?.secondary;
+      if(primary) document.documentElement.style.setProperty('--accent', toHex(primary));
+      if(secondary) document.documentElement.style.setProperty('--accent2', toHex(secondary));
 
-      // couleurs
-      const primary = spec?.meta?.style?.primary || spec?.meta?.accent || '#3b82f6';
-      const secondary = spec?.meta?.style?.secondary || '#8b5cf6';
-      document.documentElement.style.setProperty('--accent', primary);
-      document.documentElement.style.setProperty('--accent2', secondary);
+      if(!spec){
+        // Squelette (vide tant que l'utilisateur n’a rien envoyé)
+        const hero=document.createElement('div'); hero.className='hero skeleton shimmer';
+        const grid=document.createElement('div'); grid.className='grid';
+        const a=document.createElement('div'); a.className='card sk-box shimmer';
+        const b=document.createElement('div'); b.className='card sk-box shimmer';
+        grid.appendChild(a); grid.appendChild(b);
+        sheet.appendChild(hero); sheet.appendChild(grid);
+        return;
+      }
 
-      // HERO
       const hero = document.createElement('div'); hero.className='hero';
-      const kicker = safeStr(spec.meta?.kicker, 'Inside Marchés – Trimestriel');
-      const title  = safeStr(spec.meta?.title, 'Proposition commerciale');
-      const subtitle = safeStr(spec.meta?.subtitle, "Actualité, synthèse et proposition de valeur adaptées à votre contexte.");
-      hero.innerHTML = `
-        <span class="badge">📎 ${kicker}</span>
-        <h1 contenteditable="true" data-bind="meta.title">${title}</h1>
-        <p contenteditable="true" data-bind="meta.subtitle">${subtitle}</p>`;
+      const title  = spec.meta?.title ? `<h1 contenteditable="true" data-bind="meta.title">${spec.meta.title}</h1>` : '';
+      const subtitle = spec.meta?.subtitle ? `<p contenteditable="true" data-bind="meta.subtitle">${spec.meta.subtitle}</p>` : '';
+      hero.innerHTML = `${title}${subtitle}`;
       sheet.appendChild(hero);
 
-      // GRID (2 cartes phares)
       const grid = document.createElement('div'); grid.className='grid';
+      if(spec.executive_summary?.paragraphs?.length){
+        const c1=document.createElement('div'); c1.className='card';
+        c1.innerHTML = `<div class="sec-title">Résumé</div><p contenteditable="true" data-bind="executive_summary.paragraphs.0">${spec.executive_summary.paragraphs[0]}</p>`;
+        grid.appendChild(c1);
+      }
+      if(spec.pricing){
+        const cur=spec.pricing.currency||spec.meta?.currency||'EUR';
+        const total = Array.isArray(spec.pricing.items)? spec.pricing.items.reduce((s,it)=>s+Number(it.subtotal ?? (Number(it.qty||1)*Number(it.unit_price||0))),0)
+                    : (spec.pricing.price ?? null);
+        if(total!=null){
+          const c2=document.createElement('div'); c2.className='card';
+          c2.innerHTML = `<div class="sec-title">Chiffre</div><div style="font-weight:900;font-size:28px" contenteditable="true" data-bind="pricing.price">${new Intl.NumberFormat('fr-FR',{style:'currency',currency:cur}).format(Number(total)||0)}</div>`;
+          grid.appendChild(c2);
+        }
+      }
+      if(grid.children.length) sheet.appendChild(grid);
 
-      // CARD A — Résumé/Lettre (ou Executive)
-      const c1 = document.createElement('div'); c1.className='card';
-      const execText = safeArr(spec.executive_summary?.paragraphs).join(' ') || safeStr(spec.letter?.greeting,'') || '« Résumé de la proposition, bénéfices clés, preuve de compréhension du contexte. »';
-      c1.innerHTML = `
-        <div class="subline">Vision & priorités</div>
-        <h3 contenteditable="true" data-bind="blocks.card1.title">Mot de la direction</h3>
-        <p contenteditable="true" data-bind="blocks.card1.body">${execText}</p>
-        <div class="actions">
-          <button class="mini">💬 Commenter</button>
-          <button class="mini">↗️ Partager</button>
-        </div>`;
-      grid.appendChild(c1);
-
-      // CARD B — Chiffre clef / Prix
-      const c2 = document.createElement('div'); c2.className='card';
-      const pr = spec.pricing || {};
-      const currency = pr.currency || spec.meta?.currency || 'EUR';
-      const metric = (Array.isArray(pr.items)&&pr.items.length)
-        ? pr.items.map(it=>(it.subtotal!=null?Number(it.subtotal):Number(it.qty||1)*Number(it.unit_price||0))).reduce((a,b)=>a+b,0)
-        : (pr.price!=null?Number(pr.price):1240000);
-      c2.innerHTML = `
-        <div class="subline">Indicateur simple et mémorisable</div>
-        <h3>Chiffre du projet</h3>
-        <div class="metric" contenteditable="true" data-bind="blocks.metric">${money(metric,currency)}</div>
-        <div class="muted" style="font-size:12px">*Exemple — adaptez selon votre modèle (forfait / régie)</div>
-        <div class="actions">
-          <button class="mini">💬 Commenter</button>
-          <button class="mini">↗️ Partager</button>
-        </div>`;
-      grid.appendChild(c2);
-
-      sheet.appendChild(grid);
-
-      // SECTION: Phases / Approche (cartes empilées)
-      if (safeArr(spec.approach?.phases).length){
-        const sec = document.createElement('div'); sec.innerHTML = `<div class="sec-title">Approche & phasage</div>`;
-        const stack = document.createElement('div'); stack.style.padding="0 14px 14px 14px"; stack.style.display="grid"; stack.style.gap="12px";
+      if(Array.isArray(spec.approach?.phases) && spec.approach.phases.length){
+        const sec=document.createElement('div'); sec.innerHTML='<div class="sec-title">Approche</div>';
+        const stack=document.createElement('div'); stack.style.padding='0 14px 14px 14px'; stack.style.display='grid'; stack.style.gap='12px';
         spec.approach.phases.forEach((ph,i)=>{
           const k=document.createElement('div'); k.className='card';
-          k.innerHTML = `
-            <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
-              <strong contenteditable="true" data-bind="approach.phases.${i}.title">Phase ${i+1} — ${safeStr(ph.title,'À confirmer')}</strong>
-              <span class="chip">${safeStr(ph.duration||'', 'à définir')}</span>
-            </div>
-            ${ph.description ? `<p contenteditable="true" data-bind="approach.phases.${i}.description">${ph.description}</p>`:''}
-          `;
-          const acts=safeArr(ph.activities?.length?ph.activities:ph.steps);
-          if(acts.length){
-            const ul=document.createElement('ul'); ul.style.margin='6px 0 0 18px';
-            acts.forEach((a,j)=>{const li=document.createElement('li'); li.textContent=a; li.contentEditable='true'; li.dataset.bind=`approach.phases.${i}.activities.${j}`; ul.appendChild(li);});
-            k.appendChild(ul);
-          }
+          k.innerHTML = `<strong contenteditable="true" data-bind="approach.phases.${i}.title">${ph.title||('Phase '+(i+1))}</strong>`;
           stack.appendChild(k);
         });
         sec.appendChild(stack); sheet.appendChild(sec);
       }
 
-      // SECTION: Livrables
-      if (spec.deliverables && (safeArr(spec.deliverables.in).length || safeArr(spec.deliverables.out).length)){
-        const sec = document.createElement('div'); sec.innerHTML = `<div class="sec-title">Périmètre</div>`;
-        const row=document.createElement('div'); row.className='grid'; row.style.gridTemplateColumns='1fr 1fr'; row.style.paddingTop='0';
-        const a=document.createElement('div'); a.className='card'; a.innerHTML='<div class="subline">Inclus</div>';
-        const b=document.createElement('div'); b.className='card'; b.innerHTML='<div class="subline">Hors périmètre</div>';
-        const ulA=document.createElement('ul'); safeArr(spec.deliverables.in).forEach((x,i)=>{const li=document.createElement('li'); li.textContent=x; li.contentEditable='true'; li.dataset.bind=`deliverables.in.${i}`; ulA.appendChild(li);});
-        const ulB=document.createElement('ul'); safeArr(spec.deliverables.out).forEach((x,i)=>{const li=document.createElement('li'); li.textContent=x; li.contentEditable='true'; li.dataset.bind=`deliverables.out.${i}`; ulB.appendChild(li);});
-        a.appendChild(ulA); b.appendChild(ulB); row.appendChild(a); row.appendChild(b);
-        sec.appendChild(row); sheet.appendChild(sec);
-      }
-
-      // Save when editing inline
       sheet.querySelectorAll('[contenteditable="true"]').forEach(el=>{
-        el.addEventListener('input', (e)=>{
-          const path = el.dataset.bind;
-          if(!path) return;
-          setDeep(spec, path, el.textContent.trim());
-          persistSpec();
-        });
+        el.addEventListener('input', ()=>{ const path=el.dataset.bind; if(!path) return; setDeep(spec,path,el.textContent.trim()); persistSpec(); });
       });
     }
 
-    // deep set helper "a.b.0.c"
     function setDeep(obj, path, val){
-      const keys = path.split('.');
-      let cur = obj;
-      for(let i=0;i<keys.length-1;i++){
-        const k = keys[i];
-        const idx = String(Number(k))===k ? Number(k) : k;
-        if(cur[idx]==null) cur[idx] = (String(Number(keys[i+1]))===keys[i+1]) ? [] : {};
-        cur = cur[idx];
-      }
-      const last = keys.at(-1);
-      const lastIdx = String(Number(last))===last ? Number(last) : last;
-      cur[lastIdx]=val;
+      const keys=path.split('.'); let cur=obj;
+      for(let i=0;i<keys.length-1;i++){ const k=keys[i]; const idx=(String(+k)===k)?+k:k; if(cur[idx]==null) cur[idx]=(String(+keys[i+1])===keys[i+1])?[]:{}; cur=cur[idx]; }
+      const last=keys.at(-1); cur[(String(+last)===last)?+last:last]=val;
     }
 
-    function persistSpec(){
-      localStorage.setItem('pf_proposal', JSON.stringify(spec));
-      // (optionnel) push cloud si connecté & chat ouvert
-      saveProposalCloud().catch(()=>{});
-    }
-
-    async function saveProposalCloud(){
-      const { data:{ user } } = await sb.auth.getUser();
-      if(!user || !currentChatId) return;
-      await sb.from('proposals').upsert({ user_id:user.id, chat_id:currentChatId, spec }, { onConflict:'chat_id' });
-    }
-
-    /* ========= Chat & API ========= */
+    /* ===== Chat & API ===== */
     async function ensureChat(title='Nouvelle discussion'){
       if(currentChatId) return currentChatId;
-      const { data:{ user } } = await sb.auth.getUser();
-      if(!user) return null;
+      const { data:{ user } } = await sb.auth.getUser(); if(!user) return null;
       const { data, error } = await sb.from('chats').insert({ user_id:user.id, title }).select().single();
       if(error){ console.error(error); return null; }
-      currentChatId = data.id; localStorage.setItem('pf_chat_id', data.id);
-      return data.id;
+      currentChatId=data.id; localStorage.setItem('pf_chat_id', data.id); return data.id;
     }
     async function saveMessage(role, content){
-      const { data:{ user } } = await sb.auth.getUser();
-      if(!user || !currentChatId) return;
-      await sb.from('messages').insert({ chat_id: currentChatId, user_id: user.id, role, content });
+      const { data:{ user } } = await sb.auth.getUser(); if(!user || !currentChatId) return;
+      await sb.from('messages').insert({ chat_id:currentChatId, user_id:user.id, role, content });
     }
     async function callChatAPI(message, proposalSpec, history){
       const { data:{ session } } = await sb.auth.getSession();
-      const headers={'Content-Type':'application/json'};
-      if(session?.access_token) headers.Authorization = `Bearer ${session.access_token}`;
-      const res = await fetch('/api/chat',{ method:'POST', headers, body: JSON.stringify({ message, proposalSpec, history }) });
-      if(!res.ok) throw new Error('HTTP '+res.status);
-      return res.json();
+      const headers={'Content-Type':'application/json'}; if(session?.access_token) headers.Authorization=`Bearer ${session.access_token}`;
+      const res=await fetch('/api/chat',{method:'POST',headers,body:JSON.stringify({message,proposalSpec,history})});
+      if(!res.ok) throw new Error('HTTP '+res.status); return res.json();
     }
 
     document.getElementById('send').onclick = async ()=>{
       const msg=(promptEl.value||'').trim(); if(!msg) return;
-      addMsg(msg,'me'); promptEl.value='';
-      showTyping();
-
+      addMsg(msg,'me'); promptEl.value=''; showTyping();
       const history = JSON.parse(localStorage.getItem('pf_chat')||'[]');
-      const base = spec || JSON.parse(localStorage.getItem('pf_proposal')||'{"meta":{"lang":"fr"},"sections":[]}');
+      const base = spec || JSON.parse(localStorage.getItem('pf_proposal')||'null') || null;
 
       try{
-        await ensureChat(msg.slice(0,80));
-        await saveMessage('user', msg);
+        await ensureChat(msg.slice(0,80)); await saveMessage('user', msg);
         const data = await callChatAPI(msg, base, history);
         removeTyping();
-
         if(data.reply){ addMsg(data.reply,'ai'); await saveMessage('assistant', data.reply); }
-
         if(data.proposalSpec){
-          spec = { ...base, ...data.proposalSpec, meta:{ ...(base.meta||{}), ...(data.proposalSpec.meta||{}) } };
+          spec = { ...(base||{}), ...data.proposalSpec, meta:{ ...((base&&base.meta)||{}), ...(data.proposalSpec.meta||{}) } };
           persistSpec(); render();
         }
-
         const newHist=[...history,{role:'user',content:msg},{role:'assistant',content:data.reply||''}].slice(-20);
         localStorage.setItem('pf_chat', JSON.stringify(newHist));
       }catch(e){ console.error(e); removeTyping(); addMsg('Erreur serveur. Réessayez.','ai'); }
     };
+    promptEl.addEventListener('keydown',(e)=>{ if(e.isComposing) return; if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); document.getElementById('send').click(); }});
 
-    // quick chips
-    document.querySelectorAll('.quick').forEach(el=>{
-      el.addEventListener('click',()=>{
-        const v = el.dataset.q || el.textContent;
-        promptEl.value = (promptEl.value ? promptEl.value+'\n' : '') + v + ' : ';
-        promptEl.focus();
-      });
-    });
-
-    // textarea: Enter to send (Shift+Enter for newline)
-    promptEl.addEventListener('keydown', (e)=>{
-      if(e.isComposing) return;
-      if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); document.getElementById('send').click(); }
-    });
-
-    /* ========= Historique (drawer) ========= */
-    const drawer = document.getElementById('drawer');
-    document.getElementById('historyBtn').onclick = async ()=>{
-      const { data:{ user } } = await sb.auth.getUser();
-      if(!user){ alert('Connectez-vous pour accéder à votre historique.'); return; }
+    /* ===== Historique ===== */
+    const drawer=document.getElementById('drawer');
+    document.getElementById('historyBtn').onclick=async ()=>{
+      const { data:{ user } } = await sb.auth.getUser(); if(!user){ alert('Connectez-vous pour accéder à votre historique.'); return; }
       const { data, error } = await sb.from('chats').select('id,title,created_at').order('created_at',{ascending:false}).limit(50);
       if(error){ console.error(error); return; }
-      const list = document.getElementById('historyList'); list.innerHTML='';
-      data.forEach(c=>{
-        const b = document.createElement('button'); b.className='btn link-btn';
-        b.innerHTML = `<span>${c.title || 'Sans titre'}</span>
-                       <span class="muted" style="font-size:12px">${new Date(c.created_at).toLocaleString()}</span>`;
-        b.onclick = ()=> openChat(c.id);
-        list.appendChild(b);
+      const list=document.getElementById('historyList'); list.innerHTML='';
+      data.forEach(c=>{ const b=document.createElement('button'); b.className='btn link-btn';
+        b.innerHTML=`<span>${c.title||'Sans titre'}</span><span class="muted" style="font-size:12px">${new Date(c.created_at).toLocaleString()}</span>`;
+        b.onclick=()=>openChat(c.id); list.appendChild(b);
       });
       drawer.classList.add('open'); drawer.setAttribute('aria-hidden','false');
     };
-    document.getElementById('closeDrawer').onclick = ()=>{ drawer.classList.remove('open'); drawer.setAttribute('aria-hidden','true'); };
+    document.getElementById('closeDrawer').onclick=()=>{ drawer.classList.remove('open'); drawer.setAttribute('aria-hidden','true'); };
     async function openChat(id){
-      currentChatId=id; localStorage.setItem('pf_chat_id', id);
-      drawer.classList.remove('open');
-      chatBody.innerHTML='';
+      currentChatId=id; localStorage.setItem('pf_chat_id', id); drawer.classList.remove('open'); chatBody.innerHTML='';
       const { data:msgs } = await sb.from('messages').select('role,content,created_at').eq('chat_id', id).order('created_at',{ascending:true});
       msgs?.forEach(m=>addMsg(m.content, m.role==='user'?'me':'ai'));
       const { data:prop } = await sb.from('proposals').select('spec').eq('chat_id', id).single();
-      if(prop?.spec){ spec=prop.spec; persistSpec(); render(); }
+      spec = prop?.spec || null; persistSpec(); render();
     }
 
-    /* ========= Theme, Logo, PDF, Logout ========= */
-    const themeBtn = document.getElementById('themeBtn');
-    (function initTheme(){
-      const saved = localStorage.getItem('pf_theme') || 'light';
-      if(saved==='dark') document.body.classList.add('dark');
-    })();
-    themeBtn.onclick = ()=>{
-      document.body.classList.toggle('dark');
-      localStorage.setItem('pf_theme', document.body.classList.contains('dark')?'dark':'light');
-    };
+    /* ===== Theme / PDF / Logout / Logo ===== */
+    const themeBtn=document.getElementById('themeBtn');
+    (function(){ const saved=localStorage.getItem('pf_theme')||'light'; if(saved==='dark') document.body.classList.add('dark'); })();
+    themeBtn.onclick=()=>{ document.body.classList.toggle('dark'); localStorage.setItem('pf_theme', document.body.classList.contains('dark')?'dark':'light'); };
+    document.getElementById('pdfBtn').onclick=()=>window.print();
+    document.getElementById('logoutBtn').onclick=async ()=>{ await sb.auth.signOut(); localStorage.removeItem('pf_chat_id'); location.href='index.html'; };
 
-    document.getElementById('pdfBtn').onclick = ()=> window.print();
-
-    document.getElementById('logoutBtn').onclick = async ()=>{
-      await sb.auth.signOut(); localStorage.removeItem('pf_chat_id'); location.href='index.html';
-    };
-
-    document.getElementById('logoBtn').onclick = ()=> document.getElementById('logoFile').click();
-    document.getElementById('logoFile').onchange = async (ev)=>{
+    // Nouveau bouton logo (dans la zone d’écriture)
+    const logoAttachBtn = document.getElementById('logoAttachBtn');
+    const logoFile = document.getElementById('logoFile');
+    logoAttachBtn.onclick=()=>logoFile.click();
+    logoFile.onchange=(ev)=>{
       const f=ev.target.files?.[0]; if(!f) return;
-      const fr=new FileReader(); fr.onload=()=>{
+      const fr=new FileReader();
+      fr.onload=()=>{
         spec = spec || { meta:{} };
-        spec.meta.style = {...(spec.meta.style||{}), logoDataUrl: fr.result };
+        spec.meta.style = { ...(spec.meta.style||{}), logoDataUrl: fr.result };
         persistSpec(); render();
-        addMsg('Logo importé. Le style s’adaptera au branding.','ai');
-      }; fr.readAsDataURL(f);
+      };
+      fr.readAsDataURL(f);
     };
 
-    /* ========= Boot ========= */
-    (async ()=>{
+    /* ===== Boot ===== */
+    (function init(){
       try{ spec = JSON.parse(localStorage.getItem('pf_proposal')||'null'); }catch{ spec=null; }
-      if(!spec){ spec = {
-        meta:{ lang:'fr', title:'Newsletter Interne — Marchés & Collectivités', subtitle:'Synthèse et proposition de valeur', kicker:'Inside Marchés – Trimestriel' },
-        executive_summary:{ paragraphs:['Positionnement, bénéfices, compréhension du contexte client.']},
-        approach:{ phases:[ {title:'Cadrage', duration:'1 semaine', description:'Clarifier objectifs et périmètre', activities:['Ateliers de cadrage','Cartographie parties prenantes']},
-                            {title:'Conception', duration:'2 semaines', description:'Produit/Offre & chiffrage', activities:['Specs fonctionnelles','Architecture','Maquettes']}]},
-        deliverables:{ in:['Document de proposition','Planning macro','Chiffrage'], out:['Déploiement','Run/MCO']},
-        pricing:{ model:'forfait', price:124000, currency:'EUR' },
-        next_steps:{ paragraphs:['Validation périmètre','Kick-off projet'] }
-      }; }
       render();
-
-      // message d'accueil depuis l'index (optionnel)
-      const warm = localStorage.getItem('pf_welcome_msg');
-      if(warm){ addMsg(warm,'me'); localStorage.removeItem('pf_welcome_msg'); }
-
-      // Affiche l’état de session en console (utile debug)
-      const { data:{ session } } = await sb.auth.getSession();
-      console.log('[studio] session:', !!session, session?.user?.email);
     })();
   </script>
 </body>
