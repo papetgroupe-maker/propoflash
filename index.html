@@ -10,13 +10,14 @@
       --bg-start:#f3f6fb; --bg-end:#eaf2ff;
       --ink:#0a1020; --muted:#5c667a; --stroke:#dfe6f4;
       --accent:#3b82f6; --accent2:#8b5cf6; --accent-ink:#fff;
-      --card:#ffffffee; --shadow:0 12px 36px rgba(10,16,32,.10); --r:16px;
+      --card:#ffffffee; --shadow:0 12px 36px rgba(10,16,32,.10);
     }
     *{box-sizing:border-box} html,body{height:100%}
     body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);
       background:linear-gradient(180deg,var(--bg-start),var(--bg-end));-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
     .container{max-width:1200px;margin:0 auto;padding:0 24px}
 
+    /* NAV */
     .nav{position:fixed;top:12px;left:0;right:0;z-index:50;backdrop-filter:saturate(140%) blur(8px)}
     .nav-inner{border:1px solid var(--stroke);background:#fff7;box-shadow:var(--shadow);
       border-radius:999px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
@@ -28,219 +29,106 @@
     .menu a{color:var(--muted);text-decoration:none;font-weight:600;font-size:14px;padding:8px 10px;border-radius:10px}
     .menu a:hover{color:var(--ink);background:#ffffffa6}
     .right{display:flex;align-items:center;gap:10px}
-    select.lang{appearance:none;border:1px solid var(--stroke);background:#fff;color:var(--ink);
-      border-radius:12px;padding:8px 26px 8px 12px;font-weight:700;font-size:14px;
-      background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="%230a1020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');
-      background-repeat:no-repeat;background-position:right 8px center}
-    .btn{display:inline-grid;place-items:center;gap:8px;padding:10px 16px;border-radius:999px;border:1px solid #0000;
-      font-weight:800;cursor:pointer;transition:transform .12s ease, box-shadow .12s ease;font-family:inherit}
+    select.lang, .theme{
+      appearance:none;border:1px solid var(--stroke);background:#fff;color:var(--ink);
+      border-radius:12px;padding:8px 12px;font-weight:700;font-size:14px;cursor:pointer
+    }
+    .btn{display:inline-grid;place-items:center;padding:10px 16px;border-radius:999px;border:1px solid #0000;font-weight:800;cursor:pointer}
     .btn-accent{background:var(--accent);color:var(--accent-ink);box-shadow:0 10px 28px rgba(59,130,246,.35)}
-    .btn-accent:hover{transform:translateY(-1px)}
     .btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--stroke)}
-    .btn-ghost:hover{box-shadow:var(--shadow)}
-    .btn--xs{padding:6px 10px;font-size:12px;font-weight:700}
+    .avatar{width:32px;height:32px;border-radius:50%;background:#0b2446;color:#e8eefc;font-weight:800;display:grid;place-items:center}
+    .menu-drop{position:relative}
+    .dropdown{position:absolute;right:0;top:calc(100% + 8px);background:#fff;border:1px solid var(--stroke);border-radius:12px;box-shadow:var(--shadow);padding:8px;display:none;min-width:220px}
+    .dropdown a,.dropdown button{display:block;width:100%;text-align:left;background:#fff;border:1px solid transparent;border-radius:8px;padding:8px 10px;font-weight:600;color:var(--ink);cursor:pointer}
+    .dropdown a:hover,.dropdown button:hover{background:#f6f8ff}
+    .show{display:block}
 
-    .hero{position:relative;overflow:hidden;padding-top:120px;padding-bottom:80px;isolation:isolate}
-    .hero .orb{position:absolute;inset:-25% -10% auto -10%;height:120%;
-      background:radial-gradient(45% 45% at 70% 30%, rgba(59,130,246,.35), transparent 60%), radial-gradient(45% 45% at 30% 70%, rgba(139,92,246,.28), transparent 60%);
-      filter:blur(40px);will-change:transform;pointer-events:none;z-index:-1}
-    .ribbon{position:absolute;left:-10%;right:-10%;top:58%;height:120px;transform:rotate(-6deg);
-      background:linear-gradient(90deg, #ffffff90, #ffffff40);border:1px solid #ffffff80;border-left:none;border-right:none;z-index:-1}
-    .grid-overlay{position:absolute;inset:0;pointer-events:none;opacity:.35;mix-blend:overlay}
+    /* HERO + PROMPT (raccourci) */
+    .hero{position:relative;overflow:hidden;padding-top:120px;padding-bottom:80px}
     .lead{text-align:center;max-width:1000px;margin:0 auto 18px auto;letter-spacing:-.02em}
     .lead h1{font-weight:900;line-height:1.02;margin:0;font-size:clamp(40px,7vw,72px)}
     .accent-word{background:linear-gradient(90deg,#60a5fa,#93c5fd);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
     .lead p{margin:14px auto 0;color:var(--muted);font-size:18px;max-width:720px}
 
-    .prompt-wrap{margin:30px auto 16px;max-width:960px;padding:12px;border-radius:24px;
-      background:linear-gradient(180deg,#ffffffcc,#ffffff80);border:1px solid var(--stroke);box-shadow:var(--shadow);transform-style:preserve-3d}
-    .prompt{background:#fff;border:1px solid var(--stroke);border-radius:18px;display:flex;align-items:center;gap:12px;padding:10px}
-    .prompt textarea{flex:1;min-height:92px;border:none;outline:none;resize:vertical;font:500 16px/1.5 Inter,system-ui;color:var(--ink)}
+    .prompt-wrap{margin:30px auto 16px;max-width:820px;padding:12px;border-radius:24px;
+      background:linear-gradient(180deg,#ffffffcc,#ffffff80);border:1px solid var(--stroke);box-shadow:var(--shadow)}
+    .prompt{background:#fff;border:1px solid var(--stroke);border-radius:18px;display:flex;align-items:center;gap:8px;padding:8px}
+    .prompt textarea{flex:1;min-height:72px;border:none;outline:none;resize:vertical;font:500 16px/1.5 Inter;color:var(--ink)}
     .send{width:42px;height:42px;border-radius:12px;border:1px solid var(--stroke);background:var(--ink);color:#fff;display:grid;place-items:center;cursor:pointer}
-    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-    .chip{border:1px solid var(--stroke);background:#fff;color:var(--muted);padding:8px 12px;border-radius:999px;font-size:13px;cursor:pointer}
-    .chip:hover{color:var(--ink)}
-
-    .section{padding:84px 0}
-    .sep{height:56px;background:linear-gradient(180deg, #0000, #00000006, #0000)}
-    .h2{font-size:34px;line-height:1.1;margin:0 0 12px;font-weight:900;letter-spacing:-.01em}
-    .sub{color:var(--muted);margin:0 0 26px}
-    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-    .card{background:var(--card);border:1px solid var(--stroke);border-radius:20px;padding:20px;box-shadow:var(--shadow)}
-    .card h3{margin:2px 0 6px;font-size:18px}.card p{margin:0;color:var(--muted);font-size:14px}
-    .icon{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#93c5fd,#c4b5fd);display:grid;place-items:center;color:#fff;margin-bottom:8px}
-
-    .pricing{background:#061830;color:#e8eefc}
-    .pricing .h2{color:#fff}.pricing .sub{color:#9fb0d0}
-    .price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-    .pcard{background:#0b2446;border:1px solid #1e3358;border-radius:20px;padding:20px;box-shadow:0 14px 34px rgba(0,0,0,.25)}
-    .pcard .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-    .tier{font-weight:800}.price{font-weight:900;font-size:28px}
-    .bullets{margin:10px 0 16px 0;padding:0;list-style:none;color:#c8d6f2}
-    .bullets li{margin:8px 0;display:flex;gap:8px;align-items:flex-start}
-    .badge{display:inline-block;font-size:11px;background:#ffffff14;border:1px solid #ffffff22;padding:4px 8px;border-radius:999px}
 
     .footer{padding:36px 0;color:var(--muted);font-size:14px}
     .footer a{color:inherit}
-
-    .chat{display:flex;flex-direction:column;gap:12px;max-height:420px;overflow:auto}
-    .msg{display:flex}
-    .msg.me{justify-content:flex-end}
-    .bubble{background:#fff;border:1px solid var(--stroke);padding:12px 14px;border-radius:14px;max-width:80%;box-shadow:var(--shadow)}
-    .msg.me .bubble{background:#0b2446;color:#e8eefc}
-    .send.loading{opacity:.6;pointer-events:none}
-    .prompt-wrap .chat{max-height:260px;margin-top:12px;overflow:auto}
-
-    .bubble.typing{display:flex;gap:6px;align-items:center}
-    .dot{width:6px;height:6px;border-radius:50%;background:#9aa6bf;opacity:.3;animation:blink 1s infinite}
-    .dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
-    @keyframes blink{0%,80%,100%{opacity:.3}40%{opacity:1}}
-
-    .hidden{display:none}
-    .miniLogo{width:24px;height:24px;border-radius:6px;border:1px solid var(--stroke);object-fit:cover}
-    @media (max-width:980px){.grid3,.price-grid{grid-template-columns:1fr}.nav-inner{border-radius:18px}}
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="site-lang.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 </head>
 <body>
+  <!-- NAV -->
   <div class="nav">
     <div class="container nav-inner">
-      <div class="brand" onclick="location.href='index.html'"><div class="spark" aria-hidden="true"></div><div>PropoFlash</div></div>
+      <div id="brandHome" class="brand" title="Accueil">
+        <div class="spark" aria-hidden="true"></div><div>PropoFlash</div>
+      </div>
       <nav class="menu" aria-label="Primary">
         <a href="#why" data-i18n="nav_why">Pourquoi nous</a>
         <a href="#use" data-i18n="nav_use">Cas d’usage</a>
         <a href="#pricing" data-i18n="nav_pricing">Tarifs</a>
       </nav>
       <div class="right">
-        <!-- Sélecteur global -->
-        <select class="lang" data-lang-picker aria-label="Language">
+        <select class="lang" id="langSel" aria-label="Langue">
           <option value="fr">FR</option><option value="en">EN</option>
         </select>
+        <button class="theme" id="themeBtn" title="Thème">☀︎/☾</button>
         <button class="btn btn-ghost" id="authBtn">Se connecter</button>
+
+        <div class="menu-drop" id="userMenu" style="display:none">
+          <button class="avatar" id="avatarBtn">U</button>
+          <div class="dropdown" id="dropdown">
+            <div style="padding:6px 8px;color:#667085;font-size:12px" id="userEmail">—</div>
+            <a href="studio.html">Studio</a>
+            <button id="signOutBtn">Se déconnecter</button>
+          </div>
+        </div>
         <button class="btn btn-accent" id="startBtn" data-i18n="cta_start">Commencer</button>
       </div>
     </div>
   </div>
 
+  <!-- HERO -->
   <section class="hero" id="hero">
-    <div class="orb" id="orb"></div><div class="ribbon"></div>
-    <svg class="grid-overlay" viewBox="0 0 100 100" preserveAspectRatio="none">
-      <defs><pattern id="g" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M10 0 L0 0 0 10" fill="none" stroke="#cfd8ee" stroke-width=".25"/></pattern></defs>
-      <rect width="100%" height="100%" fill="url(#g)"/>
-    </svg>
-
     <div class="container">
       <div class="lead">
-        <h1 id="headline" data-i18n-html="headline">Donnez vie à vos propositions. <span class="accent-word">Maintenant.</span></h1>
+        <h1 data-i18n-html="headline">Donnez vie à vos propositions. <span class="accent-word">Maintenant.</span></h1>
         <p data-i18n="subhead">Générez des offres et propositions professionnelles en minutes, à partir d’un simple brief. Zéro complexité.</p>
       </div>
 
-      <div class="prompt-wrap" id="tilt">
-        <div style="display:flex;align-items:center;gap:10px;justify-content:space-between;margin:4px 4px 6px">
-          <strong style="font-size:14px" data-i18n="assistant_h2">Assistant</strong>
-          <div style="display:flex;gap:8px;align-items:center">
-            <img id="logoMini" class="miniLogo hidden" alt="logo"/>
-            <button id="logoBtn" class="btn btn-ghost btn--xs">+ Logo</button>
-            <input id="logoInput" type="file" accept="image/*" hidden>
-            <button id="openPreviewBtn" class="btn btn-ghost btn--xs hidden">Ouvrir l’aperçu</button>
-            <button id="newChatBtn" class="btn btn-ghost btn--xs">Nouvelle discussion</button>
-          </div>
-        </div>
-
-        <div id="threadHero" class="chat" aria-live="polite"></div>
-
-        <div class="prompt" style="margin-top:8px">
-          <textarea id="brief" placeholder=""></textarea>
-          <button class="send" id="sendBrief" title="Envoyer" aria-label="Envoyer">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
+      <div class="prompt-wrap">
+        <div class="prompt">
+          <textarea id="brief" placeholder="Écrivez votre message"></textarea>
+          <button class="send" id="quickSend" title="Vers le Studio">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
           </button>
         </div>
-
-        <div class="chips">
-          <div class="chip" id="chip1" data-i18n="chip_b2b" data-chip="B2B quotes">Demandes de devis B2B</div>
-          <div class="chip" id="chip2" data-i18n="chip_ecom" data-chip="E-commerce sales">Ventes e-commerce</div>
-          <div class="chip" id="chip3" data-i18n="chip_marketing" data-chip="Marketing services">Prestation marketing</div>
-          <div class="chip" id="chip4" data-i18n="chip_website" data-chip="Website redesign">Refonte de site</div>
-        </div>
-      </div>
-
-      <div id="historyCard" class="card hidden" style="margin-top:12px">
-        <div class="h2" style="font-size:20px;margin:0 0 8px">Mes discussions</div>
-        <div id="chatList" style="display:flex;flex-direction:column;gap:8px"></div>
-      </div>
-
-      <div style="text-align:center;margin-top:14px">
-        <button class="btn btn-ghost" onclick="document.querySelector('#why').scrollIntoView({behavior:'smooth'})" data-i18n="see_how">Voir comment ça marche</button>
+        <p style="text-align:center;color:#667085;margin:8px 0 0;font-size:13px">Astuce : appuyez sur « Commencer » pour ouvrir le Studio.</p>
       </div>
     </div>
   </section>
 
-  <div class="sep"></div>
-
-  <section class="section" id="why">
-    <div class="container">
+  <div class="container">
+    <section id="why" style="padding:60px 0 20px">
       <h2 class="h2" data-i18n="why_h2">Pourquoi PropoFlash ?</h2>
       <p class="sub" data-i18n="why_sub">Notre signature : qualité éditoriale + exécution instantanée, sans vous perdre dans des outils.</p>
-      <div class="grid3">
-        <div class="card"><div class="icon">✍️</div><h3 data-i18n="why1_t">Rédaction premium</h3><p data-i18n="why1_p">Ton professionnel, argumentation claire, structure prête à envoyer à des décideurs.</p></div>
-        <div class="card"><div class="icon">🎯</div><h3 data-i18n="why2_t">Adaptée au contexte</h3><p data-i18n="why2_p">Chaque proposition s’appuie sur votre brief et vos preuves pour coller à l’objectif.</p></div>
-        <div class="card"><div class="icon">⚡</div><h3 data-i18n="why3_t">Aperçu instantané</h3><p data-i18n="why3_p">Vous collez le brief, vous prévisualisez, vous peaufinez — puis PDF en 1 clic.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section" id="use">
-    <div class="container">
+    </section>
+    <section id="use" style="padding:20px 0">
       <h2 class="h2" data-i18n="use_h2">Cas d’usage fréquents</h2>
       <p class="sub" data-i18n="use_sub">Du devis B2B aux offres e-commerce, PropoFlash couvre les besoins essentiels.</p>
-      <div class="grid3">
-        <div class="card"><h3 data-i18n="use_t1">Devis B2B</h3><p data-i18n="use1">Qualification, périmètre, livrables, échéancier et conditions.</p></div>
-        <div class="card"><h3 data-i18n="use_t2">Services</h3><p data-i18n="use2">Marketing, design, développement, conseil, formation.</p></div>
-        <div class="card"><h3 data-i18n="use_t3">E-commerce</h3><p data-i18n="use3">Fiches produits, packs et offres saisonnières structurées.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section pricing" id="pricing">
-    <div class="container">
+    </section>
+    <section id="pricing" class="pricing" style="padding:40px;border-radius:20px;margin:30px 0">
       <h2 class="h2" data-i18n="price_h2">Des plans clairs pour chaque besoin</h2>
       <p class="sub" data-i18n="price_sub">Commencez gratuitement, évoluez quand vous êtes prêt.</p>
-      <div class="price-grid">
-        <div class="pcard" data-plan="free">
-          <div class="head"><span class="tier" data-i18n="p1_t">Gratuit</span><span class="badge" id="freeBadge">3/mois</span></div>
-          <div class="price">€0</div>
-          <ul class="bullets">
-            <li>• <span data-i18n="p1_b1">3 aperçus par mois</span></li>
-            <li>• <span data-i18n="p1_b2">Chat IA guidé</span></li>
-            <li>• <span data-i18n="p1_b3">Export PDF verrouillé</span></li>
-          </ul>
-          <a class="btn btn-ghost" href="#hero" aria-disabled="true" title="L’export est réservé aux offres payantes" data-i18n="cta_try">Essayer</a>
-        </div>
-        <div class="pcard" style="border-color:#2a4c8c" data-plan="starter">
-          <div class="head"><span class="tier" data-i18n="p2_t">Starter</span><span class="badge" data-i18n="badge_popular">Populaire</span></div>
-          <div class="price">€19<span style="font-weight:700;font-size:14px">/mo</span></div>
-          <ul class="bullets">
-            <li>• <span data-i18n="p2_b1">PDF sans filigrane</span></li>
-            <li>• <span data-i18n="p2_b2">50 aperçus / mois</span></li>
-            <li>• <span data-i18n="p2_b3">Jusqu’à 3 preuves intégrées</span></li>
-          </ul>
-          <a class="btn btn-accent" href="#checkout-starter" data-i18n="cta_choose">Choisir Starter</a>
-        </div>
-        <div class="pcard" data-plan="pro">
-          <div class="head"><span class="tier" data-i18n="p3_t">Pro</span><span class="badge" data-i18n="badge_teams">Équipes</span></div>
-          <div class="price">€49<span style="font-weight:700;font-size:14px">/mo</span></div>
-          <ul class="bullets">
-            <li>• <span data-i18n="p3_b1">Aperçus illimités</span></li>
-            <li>• <span data-i18n="p3_b2">Sections &amp; modèles illimités</span></li>
-            <li>• <span data-i18n="p3_b3">Micro-échantillon si aucune preuve</span></li>
-          </ul>
-          <a class="btn btn-ghost" href="#checkout-pro" data-i18n="cta_choose_pro">Choisir Pro</a>
-        </div>
-      </div>
-    </div>
-  </section>
+    </section>
+  </div>
 
+  <!-- FOOTER -->
   <footer class="footer">
     <div class="container" style="display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap">
       <div>© <span id="y"></span> PropoFlash. <span data-i18n="rights">Tous droits réservés.</span></div>
@@ -249,93 +137,113 @@
   </footer>
 
   <script>
+  (function(){
+    // ---- i18n ----
     const I18N={
       fr:{nav_why:"Pourquoi nous",nav_use:"Cas d’usage",nav_pricing:"Tarifs",cta_start:"Commencer",
         headline:"Donnez vie à vos propositions. <span class='accent-word'>Maintenant.</span>",
         subhead:"Générez des offres et propositions professionnelles en minutes, à partir d’un simple brief. Zéro complexité.",
-        see_how:"Voir comment ça marche",
-        chip_b2b:"Demandes de devis B2B", chip_ecom:"Ventes e-commerce", chip_marketing:"Prestation marketing", chip_website:"Refonte de site",
-        why_h2:"Pourquoi PropoFlash ?",why_sub:"Notre signature : qualité éditoriale + exécution instantanée, sans vous perdre dans des outils.",
-        why1_t:"Rédaction premium",why1_p:"Ton professionnel, argumentation claire, structure prête à envoyer à des décideurs.",
-        why2_t:"Adaptée au contexte",why2_p:"Chaque proposition s’appuie sur votre brief et vos preuves pour coller à l’objectif.",
-        why3_t:"Aperçu instantané",why3_p:"Vous collez le brief, vous prévisualisez, vous peaufinez — puis PDF en 1 clic.",
-        use_h2:"Cas d’usage fréquents",use_sub:"Du devis B2B aux offres e-commerce, PropoFlash couvre les besoins essentiels.",
-        use_t1:"Devis B2B",use_t2:"Services",use_t3:"E-commerce",
-        use1:"Qualification, périmètre, livrables, échéancier et conditions.",
-        use2:"Marketing, design, développement, conseil, formation.",
-        use3:"Fiches produits, packs et offres saisonnières structurées.",
-        price_h2:"Des plans clairs pour chaque besoin",price_sub:"Commencez gratuitement, évoluez quand vous êtes prêt.",
-        p1_t:"Gratuit",p1_b1:"3 aperçus par mois",p1_b2:"Chat IA guidé",p1_b3:"Export PDF verrouillé",
-        p2_t:"Starter",p2_b1:"PDF sans filigrane",p2_b2:"50 aperçus / mois",p2_b3:"Jusqu’à 3 preuves intégrées",
-        p3_t:"Pro",p3_b1:"Aperçus illimités",p3_b2:"Sections & modèles illimités",p3_b3:"Micro-échantillon si aucune preuve",
-        badge_popular:"Populaire",badge_teams:"Équipes",
-        cta_try:"Essayer",cta_choose:"Choisir Starter",cta_choose_pro:"Choisir Pro",
-        rights:"Tous droits réservés.",legal:"Mentions légales",privacy:"Confidentialité",
-        placeholder:"Collez votre brief ici… (Entrée = envoyer • Maj+Entrée = nouvelle ligne)",
-        assistant_h2:"Assistant"
+        rights:"Tous droits réservés.",legal:"Mentions légales",privacy:"Confidentialité"
       },
       en:{nav_why:"Why us",nav_use:"Use cases",nav_pricing:"Pricing",cta_start:"Start",
         headline:"Make your proposal a <span class='accent-word'>reality</span>. Right now.",
         subhead:"Generate professional proposals in minutes from a simple brief. Zero complexity.",
-        see_how:"See how it works",
-        chip_b2b:"B2B quotes", chip_ecom:"E-commerce sales", chip_marketing:"Marketing services", chip_website:"Website redesign",
-        why_h2:"Why PropoFlash?",why_sub:"Our signature: editorial excellence + instant execution, without tool overload.",
-        why1_t:"Premium writing",why1_p:"Executive tone, clear argumentation, structure ready to send to decision-makers.",
-        why2_t:"Context-aware",why2_p:"Every proposal adapts to your brief and evidence to match the goal.",
-        why3_t:"Instant preview",why3_p:"Paste brief, preview, refine — then 1-click PDF.",
-        use_h2:"Popular use cases",use_sub:"From B2B quotes to e-commerce offers, we cover the essentials.",
-        use_t1:"B2B quotes",use_t2:"Services",use_t3:"E-commerce",
-        use1:"Scoping, deliverables, timeline, terms.",
-        use2:"Marketing, design, engineering, consulting, training.",
-        use3:"Product pages, bundles and seasonal offers.",
-        price_h2:"Clear plans for every need",price_sub:"Start free and scale when ready.",
-        p1_t:"Free",p1_b1:"3 previews per month",p1_b2:"Guided AI chat",p1_b3:"Locked PDF export",
-        p2_t:"Starter",p2_b1:"No-watermark PDF",p2_b2:"50 previews / month",p2_b3:"Up to 3 embedded proofs",
-        p3_t:"Pro",p3_b1:"Unlimited previews",p3_b2:"Unlimited sections & templates",p3_b3:"Micro-sample when no proof",
-        badge_popular:"Most popular",badge_teams:"Teams",
-        cta_try:"Try it",cta_choose:"Choose Starter",cta_choose_pro:"Choose Pro",
-        rights:"All rights reserved.",legal:"Legal",privacy:"Privacy",
-        placeholder:"Paste your brief here… (Enter = send • Shift+Enter = new line)",
-        assistant_h2:"Assistant"
+        rights:"All rights reserved.",legal:"Legal",privacy:"Privacy"
       }
     };
+    const $=q=>document.querySelector(q);
+    const $$=q=>Array.from(document.querySelectorAll(q));
 
-    const $=(q,ctx=document)=>ctx.querySelector(q); const $$=(q,ctx=document)=>Array.from(ctx.querySelectorAll(q));
-
-    function applyI18N(){
-      const lang = getLang();
-      const t = I18N[lang]||I18N.en;
-      $$("[data-i18n]").forEach(el=>{ const k=el.dataset.i18n; if(k && t[k]!=null) el.textContent=t[k]; });
-      $$("[data-i18n-html]").forEach(el=>{ const k=el.dataset.i18nHtml; if(k && t[k]!=null) el.innerHTML=t[k]; });
-      const brief=$("#brief"); if(brief) brief.placeholder=t.placeholder;
-      // chips
-      const map=[["chip1","chip_b2b"],["chip2","chip_ecom"],["chip3","chip_marketing"],["chip4","chip_website"]];
-      map.forEach(([id,key])=>{ const el=$("#"+id); if(el && t[key]){ el.textContent=t[key]; el.dataset.chip=t[key]; }});
+    function setLang(lang){
+      const t=I18N[lang]||I18N.fr; document.documentElement.lang=lang;
+      $$("[data-i18n]").forEach(el=>{ const k=el.dataset.i18n; if(k in t) el.textContent=t[k]; });
+      $$("[data-i18n-html]").forEach(el=>{ const k=el.dataset.i18nHtml; if(k in t) el.innerHTML=t[k]; });
+      const start=$("#startBtn"); if(start) start.textContent=t.cta_start;
     }
 
-    window.addEventListener('langchange', applyI18N);
-    document.addEventListener("DOMContentLoaded", ()=>{
-      document.getElementById('y').textContent=new Date().getFullYear();
-      applyI18N();
+    // ---- Theme ----
+    function applyTheme(theme){
+      document.documentElement.dataset.theme = theme;
+      if(theme==='dark'){
+        document.body.style.background="linear-gradient(180deg,#0b1220,#0f1730)";
+        document.body.style.color="#e8eefc";
+      }else{
+        document.body.style.background="";
+        document.body.style.color="";
+      }
+    }
+
+    // ---- Supabase ----
+    const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
+    let sb;
+
+    window.addEventListener('DOMContentLoaded', async ()=>{
+      // Year
+      const y=$("#y"); if(y) y.textContent=new Date().getFullYear();
+
+      // Lang load/apply
+      const langSel=$("#langSel");
+      const lang = localStorage.getItem('pf_lang') || (navigator.language||'fr').slice(0,2);
+      langSel.value = ['fr','en'].includes(lang)?lang:'en';
+      setLang(langSel.value);
+      langSel.addEventListener('change', e=>{ localStorage.setItem('pf_lang', e.target.value); setLang(e.target.value); });
+
+      // Theme
+      applyTheme(localStorage.getItem('pf_theme')||'light');
+      $("#themeBtn").addEventListener('click', ()=>{
+        const next = (localStorage.getItem('pf_theme')==='dark') ? 'light' : 'dark';
+        localStorage.setItem('pf_theme', next); applyTheme(next);
+      });
+
+      // Brand click -> home
+      $("#brandHome").addEventListener('click', ()=>location.href='index.html');
+
+      // Init Supabase (safe)
+      try{
+        sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+      }catch(e){ console.error(e); }
+
+      const authBtn=$("#authBtn");
+      const userMenu=$("#userMenu");
+      const avatarBtn=$("#avatarBtn");
+      const dropdown=$("#dropdown");
+      const signOutBtn=$("#signOutBtn");
+      const userEmail=$("#userEmail");
+
+      async function refreshAuth(){
+        try{
+          const { data:{ session } } = await sb.auth.getSession();
+          if(session?.user){
+            authBtn.style.display='none';
+            userMenu.style.display='block';
+            const email = session.user.email || '';
+            userEmail.textContent = email;
+            avatarBtn.textContent = (email[0]||'U').toUpperCase();
+          }else{
+            authBtn.style.display='inline-grid';
+            userMenu.style.display='none';
+          }
+        }catch(_){}
+      }
+
+      authBtn.addEventListener('click', ()=>location.href='auth.html');
+      avatarBtn.addEventListener('click', ()=>dropdown.classList.toggle('show'));
+      document.addEventListener('click', (e)=>{ if(!userMenu.contains(e.target)) dropdown.classList.remove('show'); });
+      signOutBtn.addEventListener('click', async ()=>{ try{ await sb.auth.signOut(); }catch(_){ } location.reload(); });
+
+      await refreshAuth();
+      sb?.auth.onAuthStateChange(refreshAuth);
+
+      // Start → Studio (pré-remplit le premier message si besoin)
+      $("#startBtn").addEventListener('click', ()=>{
+        const v = ($("#brief")?.value||'').trim();
+        if(v) localStorage.setItem('pf_first_msg', v);
+        location.href='studio.html';
+      });
+      $("#quickSend").addEventListener('click', ()=>$("#startBtn").click());
     });
-
-    // ====== (Optionnel) Auth bouton vers page login ======
-    const authBtn = document.getElementById('authBtn');
-    authBtn.onclick = ()=> location.href='auth.html';
-
-    // ====== Bouton Commencer => Studio ======
-    document.getElementById('startBtn').onclick = ()=> location.href='studio.html';
-
-    // Petit confort visuel : orb parallaxe
-    (()=>{const orb=$("#orb");window.addEventListener("mousemove",(e)=>{
-      const x=(e.clientX/window.innerWidth-.5)*14,y=(e.clientY/window.innerHeight-.5)*14;
-      orb.style.transform=`translate(${x}px, ${y}px)`;});})();
-
-    // chips → remplit le textarea
-    $$(".chip").forEach(c=>c.addEventListener("click",()=>{
-      const v=$("#brief").value.trim();
-      $("#brief").value=(v?v+"\n":"")+"Contexte : "+c.dataset.chip; $("#brief").focus();
-    }));
+  })();
   </script>
 </body>
 </html>
