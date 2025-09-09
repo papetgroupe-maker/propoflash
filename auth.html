@@ -9,7 +9,6 @@
     :root{
       --ink:#0a1020; --muted:#667085; --stroke:#e6e9f3;
       --accent:#111827; --accent-ink:#fff;
-      --pill:#f6f9ff;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -17,7 +16,7 @@
     .page{min-height:100%;display:grid;grid-template-columns:520px 1fr}
     .left{display:flex;align-items:center;justify-content:center;padding:24px}
     .left-inner{width:100%;max-width:420px}
-    .brand{display:flex;align-items:center;gap:8px;margin-bottom:28px}
+    .brand{display:flex;align-items:center;gap:8px;margin-bottom:28px;cursor:pointer}
     .logo{width:24px;height:24px;border-radius:6px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd)}
     h1{font-size:44px;line-height:1.05;margin:0 0 6px;font-weight:900;letter-spacing:-.02em}
     .subtitle{font-size:18px;color:var(--muted);margin:0 0 18px}
@@ -25,7 +24,6 @@
          font-weight:700;cursor:pointer;text-align:center}
     .btn.black{background:var(--accent);color:var(--accent-ink);border-color:#0000}
     .btn:disabled{opacity:.6;cursor:not-allowed}
-    .row{display:flex;gap:10px}
     .field{width:100%}
     label{display:block;font-size:13px;color:#475569;margin:10px 0 6px}
     input{width:100%;border:1px solid var(--stroke);border-radius:10px;padding:12px 12px;font:500 14px/1.2 Inter}
@@ -36,44 +34,28 @@
     .space{height:10px}
     .err{background:#fff2f2;border:1px solid #ffd7d7;color:#b42318;border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:10px;display:none}
     .ok{background:#f1fff3;border:1px solid #c9f1cf;color:#067647;border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:10px;display:none}
-
-    /* Right hero */
     .right{position:relative;overflow:hidden;background:radial-gradient(1200px 600px at 60% 30%, #eaf2ff, #f7f9ff 60%, #ffffff 100%)}
     .blob{position:absolute;inset:-20% -10% auto -10%;height:120%;
       background:
         radial-gradient(40% 40% at 70% 30%, rgba(59,130,246,.35), transparent 60%),
         radial-gradient(40% 40% at 30% 70%, rgba(139,92,246,.25), transparent 60%);
       filter:blur(40px)}
-    .search{
-      position:absolute;left:50%;top:50%;
-      transform: translate(-50%,-50%); /* ✅ Fix: centré, plus de rognage */
-      width:min(700px,70%);height:74px;border-radius:999px;
-      background:linear-gradient(180deg,#ffffffcc,#ffffff80);
-      border:1px solid #e7edf9; box-shadow:0 12px 36px rgba(11,25,70,.12);
-      display:flex;align-items:center;padding:0 8px 0 24px;backdrop-filter:blur(8px)
-    }
+    .search{position:absolute;left:50%;top:50%;transform: translate(-50%,-50%);width:min(700px,70%);height:74px;border-radius:999px;
+      background:linear-gradient(180deg,#ffffffcc,#ffffff80);border:1px solid #e7edf9; box-shadow:0 12px 36px rgba(11,25,70,.12);
+      display:flex;align-items:center;padding:0 8px 0 24px;backdrop-filter:blur(8px)}
     .search span{color:#616c80;font-weight:600;font-size:26px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .go{margin-left:auto;width:54px;height:54px;border-radius:16px;background:#fff;border:1px solid #e6ebf7;
-        display:grid;place-items:center;box-shadow:0 10px 24px rgba(0,0,0,.06)}
+    .go{margin-left:auto;width:54px;height:54px;border-radius:16px;background:#fff;border:1px solid #e6ebf7;display:grid;place-items:center;box-shadow:0 10px 24px rgba(0,0,0,.06)}
     .go svg{width:22px;height:22px;stroke:#6b7280}
-
-    @media (max-width:980px){
-      .page{grid-template-columns:1fr}
-      .right{display:none}
-      .left{padding:18px}
-      h1{font-size:36px}
-    }
+    @media (max-width:980px){.page{grid-template-columns:1fr}.right{display:none}.left{padding:18px}h1{font-size:36px}}
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <div class="page">
-    <!-- LEFT -->
     <div class="left">
       <div class="left-inner">
-        <div class="brand">
-          <div class="logo" aria-hidden="true"></div>
-          <strong>PropoFlash</strong>
+        <div class="brand" onclick="location.href='index.html'">
+          <div class="logo" aria-hidden="true"></div><strong>PropoFlash</strong>
         </div>
 
         <h1>Welcome to<br/>PropoFlash</h1>
@@ -114,7 +96,6 @@
       </div>
     </div>
 
-    <!-- RIGHT -->
     <div class="right" aria-hidden="true">
       <div class="blob"></div>
       <div class="search">
@@ -127,7 +108,6 @@
   </div>
 
   <script>
-    // ===== Supabase (mêmes clés que index.html) =====
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -140,64 +120,56 @@
     const toggle  = document.getElementById('toggle');
     const msgErr  = document.getElementById('msgErr');
     const msgOk   = document.getElementById('msgOk');
-    let mode = 'login'; // or 'signup' or 'reset'
+    let mode = 'login';
 
     function showErr(t){ msgErr.textContent=t; msgErr.style.display='block'; msgOk.style.display='none'; }
     function showOk(t){ msgOk.textContent=t; msgOk.style.display='block'; msgErr.style.display='none'; }
     function clearMsgs(){ msgErr.style.display='none'; msgOk.style.display='none'; }
 
-    // Redirige si déjà loggé
     (async ()=>{
       const { data:{ session } } = await sb.auth.getSession();
-      if(session){ showOk('Vous êtes déjà connecté·e. Redirection…'); setTimeout(()=>location.href='index.html', 600); }
+      if(session){ location.href = 'studio.html'; }
     })();
 
-    // Google OAuth
     google.onclick = async ()=>{
       clearMsgs();
       try{
         const { error } = await sb.auth.signInWithOAuth({
           provider:'google',
-          options:{ redirectTo: window.location.origin + '/index.html' }
+          options:{ redirectTo: window.location.origin + '/studio.html' } // ✅ vers studio
         });
         if(error) showErr(error.message);
       }catch(e){ showErr(String(e.message||e)); }
     };
 
-    // Toggle login/signup
     toggle.onclick = (e)=>{
-      e.preventDefault();
-      clearMsgs();
+      e.preventDefault(); clearMsgs();
       if(mode==='login'){ mode='signup'; submit.textContent='Create account'; toggle.textContent='Log in'; forgot.style.visibility='hidden'; }
       else { mode='login'; submit.textContent='Log In'; toggle.textContent='Sign up'; forgot.style.visibility='visible'; }
     };
 
-    // Submit (login or signup)
     submit.onclick = async ()=>{
       clearMsgs();
       const email = (emailEl.value||'').trim();
       const password = passEl.value||'';
       if(!email || !password){ showErr('Email et mot de passe requis.'); return; }
-
       submit.disabled=true;
       try{
         if(mode==='signup'){
           const { error } = await sb.auth.signUp({ email, password });
           if(error) showErr(error.message);
           else showOk('Compte créé. Vérifiez votre email si la confirmation est requise.');
-        }else{ // login
-          const { data, error } = await sb.auth.signInWithPassword({ email, password });
+        }else{
+          const { error } = await sb.auth.signInWithPassword({ email, password });
           if(error) showErr(error.message);
-          else { showOk('Connexion réussie.'); setTimeout(()=>location.href='index.html', 400); }
+          else location.href='studio.html';
         }
       }catch(e){ showErr(String(e.message||e)); }
       finally{ submit.disabled=false; }
     };
 
-    // Forgot password
     forgot.onclick = async (e)=>{
-      e.preventDefault();
-      clearMsgs();
+      e.preventDefault(); clearMsgs();
       const email = (emailEl.value||'').trim() || prompt('Votre email pour réinitialiser le mot de passe :');
       if(!email) return;
       try{
@@ -209,9 +181,7 @@
       }catch(err){ showErr(String(err.message||err)); }
     };
 
-    if(location.hash === '#reset'){
-      showOk('Définissez un nouveau mot de passe puis reconnectez-vous.');
-    }
+    if(location.hash === '#reset'){ showOk('Définissez un nouveau mot de passe puis reconnectez-vous.'); }
   </script>
 </body>
 </html>
