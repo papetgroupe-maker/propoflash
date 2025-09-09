@@ -7,8 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root{
-      --ink:#0a1020; --muted:#667085; --stroke:#e6e9f3;
-      --accent:#111827; --accent-ink:#fff;
+      --ink:#0a1020; --muted:#667085; --stroke:#e6e9f3; --accent:#111827; --accent-ink:#fff;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -16,12 +15,13 @@
     .page{min-height:100%;display:grid;grid-template-columns:520px 1fr}
     .left{display:flex;align-items:center;justify-content:center;padding:24px}
     .left-inner{width:100%;max-width:420px}
-    .brand{display:flex;align-items:center;gap:8px;margin-bottom:28px;cursor:pointer}
+    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+    .brand{display:flex;align-items:center;gap:8px;cursor:pointer}
     .logo{width:24px;height:24px;border-radius:6px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd)}
+    .lang{border:1px solid var(--stroke);border-radius:10px;padding:6px 10px;background:#fff}
     h1{font-size:44px;line-height:1.05;margin:0 0 6px;font-weight:900;letter-spacing:-.02em}
     .subtitle{font-size:18px;color:var(--muted);margin:0 0 18px}
-    .btn{width:100%;border:1px solid var(--stroke);background:#fff;border-radius:10px;padding:12px 14px;
-         font-weight:700;cursor:pointer;text-align:center}
+    .btn{width:100%;border:1px solid var(--stroke);background:#fff;border-radius:10px;padding:12px 14px;font-weight:700;cursor:pointer;text-align:center}
     .btn.black{background:var(--accent);color:var(--accent-ink);border-color:#0000}
     .btn:disabled{opacity:.6;cursor:not-allowed}
     .field{width:100%}
@@ -52,14 +52,20 @@
 </head>
 <body>
   <div class="page">
+    <!-- LEFT -->
     <div class="left">
       <div class="left-inner">
-        <div class="brand" onclick="location.href='index.html'">
-          <div class="logo" aria-hidden="true"></div><strong>PropoFlash</strong>
+        <div class="topbar">
+          <div class="brand" onclick="location.href='index.html'">
+            <div class="logo" aria-hidden="true"></div><strong>PropoFlash</strong>
+          </div>
+          <select class="lang" id="langSel" data-lang-picker>
+            <option value="fr">FR</option><option value="en">EN</option>
+          </select>
         </div>
 
-        <h1>Welcome to<br/>PropoFlash</h1>
-        <p class="subtitle">Connectez-vous pour créer et envoyer vos propositions.</p>
+        <h1 data-i18n="title">Welcome to<br/>PropoFlash</h1>
+        <p class="subtitle" data-i18n="subtitle">Connectez-vous pour créer et envoyer vos propositions.</p>
 
         <div id="msgErr" class="err"></div>
         <div id="msgOk"  class="ok"></div>
@@ -67,39 +73,40 @@
         <button id="googleBtn" class="btn">
           <span style="display:inline-flex;align-items:center;gap:10px;justify-content:center">
             <img alt="" src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" height="18">
-            Log in with Google
+            <span data-i18n="google">Log in with Google</span>
           </span>
         </button>
 
         <div class="or">OR</div>
 
         <div class="field">
-          <label>Email</label>
+          <label data-i18n="label_email">Email</label>
           <input id="email" type="email" placeholder="Enter your email address" autocomplete="email">
         </div>
         <div class="field">
           <div style="display:flex;justify-content:space-between;align-items:center">
-            <label>Password</label>
-            <a href="#" id="forgot" class="link" style="font-size:12px">Forgot password?</a>
+            <label data-i18n="label_password">Password</label>
+            <a href="#" id="forgot" class="link" style="font-size:12px" data-i18n="forgot">Forgot password?</a>
           </div>
           <input id="password" type="password" placeholder="Enter your password" autocomplete="current-password">
         </div>
 
         <div class="space"></div>
-        <button id="submitBtn" class="btn black">Log In</button>
+        <button id="submitBtn" class="btn black" data-i18n="login_btn">Log In</button>
 
         <div class="space"></div>
         <p class="hint" id="footHint">
-          Don't have an account? <a href="#" id="toggle" class="link">Sign up</a>
-          &nbsp;&nbsp;·&nbsp; <a href="index.html" class="link">← Back to home</a>
+          <span data-i18n="no_account">Don't have an account?</span> <a href="#" id="toggle" class="link" data-i18n="signup_link">Sign up</a>
+          &nbsp;&nbsp;·&nbsp; <a href="index.html" class="link" data-i18n="back_home">← Back to home</a>
         </p>
       </div>
     </div>
 
+    <!-- RIGHT -->
     <div class="right" aria-hidden="true">
       <div class="blob"></div>
       <div class="search">
-        <span>Transformez vos idées en propositions</span>
+        <span data-i18n="right_text">Transformez vos idées en propositions</span>
         <div class="go">
           <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path></svg>
         </div>
@@ -108,10 +115,46 @@
   </div>
 
   <script>
+    /* Supabase */
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
+    /* Lang handler (inline) */
+    (function(){
+      const KEY='pf_lang', FALLBACK='en', SUP=['fr','en'];
+      function norm(l){const s=String(l||'').slice(0,2).toLowerCase(); return SUP.includes(s)?s:FALLBACK;}
+      window.getLang = ()=> norm(localStorage.getItem(KEY) || (navigator.language||'en'));
+      window.setLang = (l)=>{ const lang=norm(l); localStorage.setItem(KEY,lang); document.documentElement.lang=lang; window.dispatchEvent(new CustomEvent('langchange',{detail:lang})); };
+      document.addEventListener('DOMContentLoaded', ()=>{
+        const lang = getLang(); document.documentElement.lang=lang;
+        document.querySelectorAll('select[data-lang-picker]').forEach(sel=>{ sel.value=lang; sel.addEventListener('change',e=>setLang(e.target.value)); });
+      });
+    })();
+
+    /* i18n dictionnaire */
+    const I18N={
+      fr:{title:"Bienvenue sur<br/>PropoFlash",subtitle:"Connectez-vous pour créer et envoyer vos propositions.",
+          google:"Se connecter avec Google",label_email:"Email",label_password:"Mot de passe",
+          forgot:"Mot de passe oublié ?",login_btn:"Se connecter",no_account:"Pas encore de compte ?",signup_link:"Créer un compte",back_home:"← Retour à l’accueil",
+          right_text:"Transformez vos idées en propositions"},
+      en:{title:"Welcome to<br/>PropoFlash",subtitle:"Sign in to create and send your proposals.",
+          google:"Log in with Google",label_email:"Email",label_password:"Password",
+          forgot:"Forgot password?",login_btn:"Log In",no_account:"Don't have an account?",signup_link:"Sign up",back_home:"← Back to home",
+          right_text:"Turn ideas into proposals"}
+    };
+    function applyI18N(){
+      const L = I18N[getLang()] || I18N.en;
+      document.querySelectorAll('[data-i18n]').forEach(el=>{ const k=el.dataset.i18n; if(L[k]!=null) el.innerHTML=L[k]; });
+      document.title = (getLang()==='en'?'PropoFlash — Sign in':'PropoFlash — Connexion');
+      // placeholders
+      document.getElementById('email').placeholder = (getLang()==='en')?'Enter your email address':'Entrez votre adresse e-mail';
+      document.getElementById('password').placeholder = (getLang()==='en')?'Enter your password':'Entrez votre mot de passe';
+    }
+    window.addEventListener('langchange', applyI18N);
+    document.addEventListener('DOMContentLoaded', applyI18N);
+
+    /* UI refs */
     const emailEl = document.getElementById('email');
     const passEl  = document.getElementById('password');
     const submit  = document.getElementById('submitBtn');
@@ -126,39 +169,41 @@
     function showOk(t){ msgOk.textContent=t; msgOk.style.display='block'; msgErr.style.display='none'; }
     function clearMsgs(){ msgErr.style.display='none'; msgOk.style.display='none'; }
 
-    (async ()=>{
-      const { data:{ session } } = await sb.auth.getSession();
-      if(session){ location.href = 'studio.html'; }
-    })();
+    // Déjà loggé → studio
+    (async ()=>{ const { data:{ session } } = await sb.auth.getSession(); if(session){ location.href='studio.html'; } })();
 
+    // Google OAuth (redirige directement vers studio)
     google.onclick = async ()=>{
       clearMsgs();
       try{
         const { error } = await sb.auth.signInWithOAuth({
           provider:'google',
-          options:{ redirectTo: window.location.origin + '/studio.html' } // ✅ vers studio
+          options:{ redirectTo: window.location.origin + '/studio.html' }
         });
         if(error) showErr(error.message);
       }catch(e){ showErr(String(e.message||e)); }
     };
 
+    // Toggle login/signup
     toggle.onclick = (e)=>{
       e.preventDefault(); clearMsgs();
-      if(mode==='login'){ mode='signup'; submit.textContent='Create account'; toggle.textContent='Log in'; forgot.style.visibility='hidden'; }
-      else { mode='login'; submit.textContent='Log In'; toggle.textContent='Sign up'; forgot.style.visibility='visible'; }
+      const L = I18N[getLang()] || I18N.en;
+      if(mode==='login'){ mode='signup'; submit.textContent = (getLang()==='en')?'Create account':'Créer le compte'; toggle.textContent = L.login_btn; forgot.style.visibility='hidden'; }
+      else { mode='login'; submit.textContent = L.login_btn; toggle.textContent = L.signup_link; forgot.style.visibility='visible'; }
     };
 
+    // Submit
     submit.onclick = async ()=>{
       clearMsgs();
       const email = (emailEl.value||'').trim();
       const password = passEl.value||'';
-      if(!email || !password){ showErr('Email et mot de passe requis.'); return; }
+      if(!email || !password){ showErr((getLang()==='en')?'Email and password required.':'Email et mot de passe requis.'); return; }
       submit.disabled=true;
       try{
         if(mode==='signup'){
           const { error } = await sb.auth.signUp({ email, password });
           if(error) showErr(error.message);
-          else showOk('Compte créé. Vérifiez votre email si la confirmation est requise.');
+          else showOk((getLang()==='en')?'Account created. Check your email if confirmation is required.':'Compte créé. Vérifiez votre email si la confirmation est requise.');
         }else{
           const { error } = await sb.auth.signInWithPassword({ email, password });
           if(error) showErr(error.message);
@@ -168,20 +213,19 @@
       finally{ submit.disabled=false; }
     };
 
+    // Forgot password
     forgot.onclick = async (e)=>{
       e.preventDefault(); clearMsgs();
-      const email = (emailEl.value||'').trim() || prompt('Votre email pour réinitialiser le mot de passe :');
+      const email = (emailEl.value||'').trim() || prompt((getLang()==='en')?'Your email to reset your password:':'Votre email pour réinitialiser le mot de passe :');
       if(!email) return;
       try{
-        const { error } = await sb.auth.resetPasswordForEmail(email, {
-          redirectTo: window.location.origin + '/auth.html#reset'
-        });
+        const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/auth.html#reset' });
         if(error) showErr(error.message);
-        else showOk('Lien de réinitialisation envoyé. Consultez votre boîte mail.');
+        else showOk((getLang()==='en')?'Reset link sent. Check your inbox.':'Lien de réinitialisation envoyé. Consultez votre boîte mail.');
       }catch(err){ showErr(String(err.message||err)); }
     };
 
-    if(location.hash === '#reset'){ showOk('Définissez un nouveau mot de passe puis reconnectez-vous.'); }
+    if(location.hash === '#reset'){ showOk((getLang()==='en')?'Set a new password then log in again.':'Définissez un nouveau mot de passe puis reconnectez-vous.'); }
   </script>
 </body>
 </html>
