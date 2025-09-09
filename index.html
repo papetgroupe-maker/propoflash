@@ -7,11 +7,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root{
-      /* PALETTE CORPORATE BLEU */
       --bg-start:#f3f6fb; --bg-end:#eaf2ff;
       --ink:#0a1020; --muted:#5c667a; --stroke:#dfe6f4;
       --accent:#3b82f6; --accent2:#8b5cf6; --accent-ink:#fff;
-      --card:#ffffffee; --shadow:0 12px 36px rgba(10,16,32,.10); --r:16px;
+      --card:#ffffffee; --shadow:0 12px 36px rgba(10,16,32,.10);
     }
     *{box-sizing:border-box} html,body{height:100%}
     body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);
@@ -22,7 +21,8 @@
     .nav{position:fixed;top:12px;left:0;right:0;z-index:50;backdrop-filter:saturate(140%) blur(8px)}
     .nav-inner{border:1px solid var(--stroke);background:#fff7;box-shadow:var(--shadow);
       border-radius:999px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
-    .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800}
+    .brand a{color:inherit;text-decoration:none}
     .spark{width:26px;height:26px;border-radius:8px;
       background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd);
       box-shadow:inset 0 0 0 2px #0001, 0 1px 2px #0001}
@@ -30,50 +30,26 @@
     .menu a{color:var(--muted);text-decoration:none;font-weight:600;font-size:14px;padding:8px 10px;border-radius:10px}
     .menu a:hover{color:var(--ink);background:#ffffffa6}
     .right{display:flex;align-items:center;gap:10px}
-    select.lang{appearance:none;border:1px solid var(--stroke);background:#fff;color:var(--ink);
-      border-radius:12px;padding:8px 26px 8px 12px;font-weight:700;font-size:14px;
-      background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="%230a1020" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');
-      background-repeat:no-repeat;background-position:right 8px center}
-    .btn{
-      display:inline-grid;place-items:center;gap:8px;
-      padding:10px 16px;border-radius:999px;border:1px solid #0000;
-      font-weight:800;cursor:pointer;transition:transform .12s ease, box-shadow .12s ease;
-      font-family:inherit;
-    }
+    .btn{display:inline-grid;place-items:center;gap:8px;padding:10px 16px;border-radius:999px;border:1px solid #0000;font-weight:800;cursor:pointer;font-family:inherit}
     .btn-accent{background:var(--accent);color:var(--accent-ink);box-shadow:0 10px 28px rgba(59,130,246,.35)}
-    .btn-accent:hover{transform:translateY(-1px)}
     .btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--stroke)}
-    .btn-ghost:hover{box-shadow:var(--shadow)}
-    .btn--xs{padding:6px 10px;font-size:12px;font-weight:700}
 
-    /* HERO + SIGNATURE */
-    .hero{position:relative;overflow:hidden;padding-top:120px;padding-bottom:80px;isolation:isolate}
-    .hero .orb{position:absolute;inset:-25% -10% auto -10%;height:120%;
-      background:
-        radial-gradient(45% 45% at 70% 30%, rgba(59,130,246,.35), transparent 60%),
-        radial-gradient(45% 45% at 30% 70%, rgba(139,92,246,.28), transparent 60%);
-      filter:blur(40px);will-change:transform;pointer-events:none;z-index:-1}
-    .ribbon{position:absolute;left:-10%;right:-10%;top:58%;height:120px;transform:rotate(-6deg);
-      background:linear-gradient(90deg, #ffffff90, #ffffff40);border:1px solid #ffffff80;border-left:none;border-right:none;z-index:-1}
+    /* HERO */
+    .hero{position:relative;overflow:hidden;padding-top:120px;padding-bottom:80px}
     .grid-overlay{position:absolute;inset:0;pointer-events:none;opacity:.35;mix-blend:overlay}
     .lead{text-align:center;max-width:1000px;margin:0 auto 18px auto;letter-spacing:-.02em}
     .lead h1{font-weight:900;line-height:1.02;margin:0;font-size:clamp(40px,7vw,72px)}
     .accent-word{background:linear-gradient(90deg,#60a5fa,#93c5fd);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
     .lead p{margin:14px auto 0;color:var(--muted);font-size:18px;max-width:720px}
 
-    /* PROMPT (magnetic) */
-    .prompt-wrap{margin:30px auto 16px;max-width:960px;padding:12px;border-radius:24px;
-      background:linear-gradient(180deg,#ffffffcc,#ffffff80);border:1px solid var(--stroke);box-shadow:var(--shadow);transform-style:preserve-3d}
+    /* Prompt */
+    .prompt-wrap{margin:30px auto 16px;max-width:960px;padding:12px;border-radius:24px;background:linear-gradient(180deg,#ffffffcc,#ffffff80);border:1px solid var(--stroke);box-shadow:var(--shadow)}
     .prompt{background:#fff;border:1px solid var(--stroke);border-radius:18px;display:flex;align-items:center;gap:12px;padding:10px}
     .prompt textarea{flex:1;min-height:92px;border:none;outline:none;resize:vertical;font:500 16px/1.5 Inter,system-ui;color:var(--ink)}
     .send{width:42px;height:42px;border-radius:12px;border:1px solid var(--stroke);background:var(--ink);color:#fff;display:grid;place-items:center;cursor:pointer}
-    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-    .chip{border:1px solid var(--stroke);background:#fff;color:var(--muted);padding:8px 12px;border-radius:999px;font-size:13px;cursor:pointer}
-    .chip:hover{color:var(--ink)}
 
-    /* SECTIONS */
+    /* Sections */
     .section{padding:84px 0}
-    .sep{height:56px;background:linear-gradient(180deg, #0000, #00000006, #0000)}
     .h2{font-size:34px;line-height:1.1;margin:0 0 12px;font-weight:900;letter-spacing:-.01em}
     .sub{color:var(--muted);margin:0 0 26px}
     .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
@@ -81,7 +57,7 @@
     .card h3{margin:2px 0 6px;font-size:18px}.card p{margin:0;color:var(--muted);font-size:14px}
     .icon{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#93c5fd,#c4b5fd);display:grid;place-items:center;color:#fff;margin-bottom:8px}
 
-    /* PRICING */
+    /* Pricing */
     .pricing{background:#061830;color:#e8eefc}
     .pricing .h2{color:#fff}.pricing .sub{color:#9fb0d0}
     .price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
@@ -92,61 +68,30 @@
     .bullets li{margin:8px 0;display:flex;gap:8px;align-items:flex-start}
     .badge{display:inline-block;font-size:11px;background:#ffffff14;border:1px solid #ffffff22;padding:4px 8px;border-radius:999px}
 
-    /* FOOTER */
+    /* Footer */
     .footer{padding:36px 0;color:var(--muted);font-size:14px}
     .footer a{color:inherit}
-
-    /* Chat UI */
-    .chat{display:flex;flex-direction:column;gap:12px;max-height:420px;overflow:auto}
-    .msg{display:flex}
-    .msg.me{justify-content:flex-end}
-    .bubble{background:#fff;border:1px solid var(--stroke);padding:12px 14px;border-radius:14px;max-width:80%;box-shadow:var(--shadow)}
-    .msg.me .bubble{background:#0b2446;color:#e8eefc}
-    .send.loading{opacity:.6;pointer-events:none}
-
-    /* Fil dans la carte HERO */
-    .prompt-wrap .chat{max-height:260px;margin-top:12px;overflow:auto}
-
-    /* Typing indicator */
-    .bubble.typing{display:flex;gap:6px;align-items:center}
-    .dot{width:6px;height:6px;border-radius:50%;background:#9aa6bf;opacity:.3;animation:blink 1s infinite}
-    .dot:nth-child(2){animation-delay:.2s}
-    .dot:nth-child(3){animation-delay:.4s}
-    @keyframes blink{0%,80%,100%{opacity:.3}40%{opacity:1}}
-
-    /* UTIL */
-    .hidden{display:none}
-    .miniLogo{width:24px;height:24px;border-radius:6px;border:1px solid var(--stroke);object-fit:cover}
-    @media (max-width:980px){.grid3,.price-grid{grid-template-columns:1fr}.nav-inner{border-radius:18px}}
+    @media (max-width:980px){.grid3,.price-grid{grid-template-columns:1fr}}
   </style>
-  <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <!-- NAV -->
   <div class="nav">
     <div class="container nav-inner">
-      <div class="brand"><div class="spark" aria-hidden="true"></div><div>PropoFlash</div></div>
+      <div class="brand"><div class="spark" aria-hidden="true"></div><a href="index.html">PropoFlash</a></div>
       <nav class="menu" aria-label="Primary">
-        <a href="#why" data-i18n="nav_why">Pourquoi nous</a>
-        <a href="#use" data-i18n="nav_use">Cas d’usage</a>
-        <a href="#pricing" data-i18n="nav_pricing">Tarifs</a>
+        <a href="#why">Pourquoi nous</a>
+        <a href="#use">Cas d’usage</a>
+        <a href="#pricing">Tarifs</a>
       </nav>
       <div class="right">
-        <select class="lang" id="lang" aria-label="Language">
-          <option value="fr">FR</option><option value="en">EN</option>
-        </select>
         <button class="btn btn-ghost" id="authBtn">Se connecter</button>
-        <button class="btn btn-accent" id="startBtn" data-i18n="cta_start">Commencer</button>
+        <button class="btn btn-accent" id="startBtn">Commencer</button>
       </div>
     </div>
   </div>
 
-  <!-- HERO -->
   <section class="hero" id="hero">
-    <div class="orb" id="orb"></div>
-    <div class="ribbon"></div>
-    <!-- subtle grid -->
     <svg class="grid-overlay" viewBox="0 0 100 100" preserveAspectRatio="none">
       <defs><pattern id="g" width="10" height="10" patternUnits="userSpaceOnUse">
         <path d="M10 0 L0 0 0 10" fill="none" stroke="#cfd8ee" stroke-width=".25"/>
@@ -156,680 +101,144 @@
 
     <div class="container">
       <div class="lead">
-        <h1 id="headline" data-i18n-html="headline">
-          Donnez vie à vos propositions. <span class="accent-word">Maintenant.</span>
-        </h1>
-        <p data-i18n="subhead">
-          Générez des offres et propositions professionnelles en minutes, à partir d’un simple brief. Zéro complexité.
-        </p>
+        <h1>Donnez vie à vos propositions. <span class="accent-word">Maintenant.</span></h1>
+        <p>Générez des offres et propositions professionnelles en minutes, à partir d’un simple brief. Zéro complexité.</p>
       </div>
 
-      <!-- CARTE CHAT -->
-      <div class="prompt-wrap" id="tilt">
-        <!-- barre haute -->
-        <div style="display:flex;align-items:center;gap:10px;justify-content:space-between;margin:4px 4px 6px">
-          <strong style="font-size:14px" data-i18n="assistant_h2">Assistant</strong>
-          <div style="display:flex;gap:8px;align-items:center">
-            <img id="logoMini" class="miniLogo hidden" alt="logo"/>
-            <button id="logoBtn" class="btn btn-ghost btn--xs">+ Logo</button>
-            <input id="logoInput" type="file" accept="image/*" hidden>
-            <button id="openPreviewBtn" class="btn btn-ghost btn--xs hidden">Ouvrir l’aperçu</button>
-            <button id="newChatBtn" class="btn btn-ghost btn--xs">Nouvelle discussion</button>
-          </div>
-        </div>
-
-        <!-- fil de conversation intégré -->
-        <div id="threadHero" class="chat" aria-live="polite"></div>
-
-        <!-- zone de saisie -->
-        <div class="prompt" style="margin-top:8px">
+      <div class="prompt-wrap">
+        <div class="prompt">
           <textarea id="brief" placeholder="Collez votre brief ici… (Entrée = envoyer • Maj+Entrée = nouvelle ligne)"></textarea>
           <button class="send" id="sendBrief" title="Envoyer" aria-label="Envoyer">
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
           </button>
         </div>
-
-        <!-- raccourcis -->
-        <div class="chips">
-          <div class="chip" id="chip1" data-i18n="chip_b2b" data-chip="B2B quotes">Demandes de devis B2B</div>
-          <div class="chip" id="chip2" data-i18n="chip_ecom" data-chip="E-commerce sales">Ventes e-commerce</div>
-          <div class="chip" id="chip3" data-i18n="chip_marketing" data-chip="Marketing services">Prestation marketing</div>
-          <div class="chip" id="chip4" data-i18n="chip_website" data-chip="Website redesign">Refonte de site</div>
-        </div>
-      </div>
-
-      <!-- Historique (connecté) -->
-      <div id="historyCard" class="card hidden" style="margin-top:12px">
-        <div class="h2" style="font-size:20px;margin:0 0 8px">Mes discussions</div>
-        <div id="chatList" style="display:flex;flex-direction:column;gap:8px"></div>
-      </div>
-
-      <div style="text-align:center;margin-top:14px">
-        <button class="btn btn-ghost" onclick="document.querySelector('#why').scrollIntoView({behavior:'smooth'})" data-i18n="see_how">Voir comment ça marche</button>
       </div>
     </div>
   </section>
 
-  <div class="sep"></div>
-
-  <!-- WHY -->
   <section class="section" id="why">
     <div class="container">
-      <h2 class="h2" data-i18n="why_h2">Pourquoi PropoFlash ?</h2>
-      <p class="sub" data-i18n="why_sub">Notre signature : qualité éditoriale + exécution instantanée, sans vous perdre dans des outils.</p>
+      <h2 class="h2">Pourquoi PropoFlash ?</h2>
+      <p class="sub">Notre signature : qualité éditoriale + exécution instantanée, sans vous perdre dans des outils.</p>
       <div class="grid3">
         <div class="card">
           <div class="icon">✍️</div>
-          <h3 data-i18n="why1_t">Rédaction premium</h3>
-          <p data-i18n="why1_p">Ton professionnel, argumentation claire, structure prête à envoyer à des décideurs.</p>
+          <h3>Rédaction premium</h3>
+          <p>Ton professionnel, argumentation claire, structure prête à envoyer à des décideurs.</p>
         </div>
         <div class="card">
           <div class="icon">🎯</div>
-          <h3 data-i18n="why2_t">Adaptée au contexte</h3>
-          <p data-i18n="why2_p">Chaque proposition s’appuie sur votre brief et vos preuves pour coller à l’objectif.</p>
+          <h3>Adaptée au contexte</h3>
+          <p>Chaque proposition s’appuie sur votre brief et vos preuves pour coller à l’objectif.</p>
         </div>
         <div class="card">
           <div class="icon">⚡</div>
-          <h3 data-i18n="why3_t">Aperçu instantané</h3>
-          <p data-i18n="why3_p">Vous collez le brief, vous prévisualisez, vous peaufinez — puis PDF en 1 clic.</p>
+          <h3>Aperçu instantané</h3>
+          <p>Vous collez le brief, vous prévisualisez, vous peaufinez — puis PDF en 1 clic.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- USE CASES -->
   <section class="section" id="use">
     <div class="container">
-      <h2 class="h2" data-i18n="use_h2">Cas d’usage fréquents</h2>
-      <p class="sub" data-i18n="use_sub">Du devis B2B aux offres e-commerce, PropoFlash couvre les besoins essentiels.</p>
+      <h2 class="h2">Cas d’usage fréquents</h2>
+      <p class="sub">Du devis B2B aux offres e-commerce, PropoFlash couvre les besoins essentiels.</p>
       <div class="grid3">
-        <div class="card"><h3 data-i18n="use_t1">Devis B2B</h3><p data-i18n="use1">Qualification, périmètre, livrables, échéancier et conditions.</p></div>
-        <div class="card"><h3 data-i18n="use_t2">Services</h3><p data-i18n="use2">Marketing, design, développement, conseil, formation.</p></div>
-        <div class="card"><h3 data-i18n="use_t3">E-commerce</h3><p data-i18n="use3">Fiches produits, packs et offres saisonnières structurées.</p></div>
+        <div class="card"><h3>Devis B2B</h3><p>Qualification, périmètre, livrables, échéancier et conditions.</p></div>
+        <div class="card"><h3>Services</h3><p>Marketing, design, développement, conseil, formation.</p></div>
+        <div class="card"><h3>E-commerce</h3><p>Fiches produits, bundles et offres saisonnières structurées.</p></div>
       </div>
     </div>
   </section>
 
-  <!-- PRICING -->
   <section class="section pricing" id="pricing">
     <div class="container">
-      <h2 class="h2" data-i18n="price_h2">Des plans clairs pour chaque besoin</h2>
-      <p class="sub" data-i18n="price_sub">Commencez gratuitement, évoluez quand vous êtes prêt.</p>
+      <h2 class="h2">Des plans clairs pour chaque besoin</h2>
+      <p class="sub">Commencez gratuitement, évoluez quand vous êtes prêt.</p>
       <div class="price-grid">
-        <div class="pcard" data-plan="free">
-          <div class="head">
-            <span class="tier" data-i18n="p1_t">Gratuit</span>
-            <span class="badge" id="freeBadge">3/mois</span>
-          </div>
+        <div class="pcard">
+          <div class="head"><span class="tier">Gratuit</span><span class="badge">3/mois</span></div>
           <div class="price">€0</div>
           <ul class="bullets">
-            <li>• <span data-i18n="p1_b1">3 aperçus par mois</span></li>
-            <li>• <span data-i18n="p1_b2">Chat IA guidé</span></li>
-            <li>• <span data-i18n="p1_b3">Export PDF verrouillé</span></li>
+            <li>• 3 aperçus par mois</li>
+            <li>• Chat IA guidé</li>
+            <li>• Export PDF verrouillé</li>
           </ul>
-          <a class="btn btn-ghost" href="#hero" aria-disabled="true"
-             title="L’export est réservé aux offres payantes" data-i18n="cta_try">Essayer</a>
+          <a class="btn btn-ghost" href="#hero" aria-disabled="true" title="L’export est réservé aux offres payantes">Essayer</a>
         </div>
-
-        <div class="pcard" style="border-color:#2a4c8c" data-plan="starter">
-          <div class="head">
-            <span class="tier" data-i18n="p2_t">Starter</span>
-            <span class="badge" data-i18n="badge_popular">Populaire</span>
-          </div>
+        <div class="pcard" style="border-color:#2a4c8c">
+          <div class="head"><span class="tier">Starter</span><span class="badge">Populaire</span></div>
           <div class="price">€19<span style="font-weight:700;font-size:14px">/mo</span></div>
           <ul class="bullets">
-            <li>• <span data-i18n="p2_b1">PDF sans filigrane</span></li>
-            <li>• <span data-i18n="p2_b2">50 aperçus / mois</span></li>
-            <li>• <span data-i18n="p2_b3">Jusqu’à 3 preuves intégrées</span></li>
+            <li>• PDF sans filigrane</li>
+            <li>• 50 aperçus / mois</li>
+            <li>• Jusqu’à 3 preuves intégrées</li>
           </ul>
-          <a class="btn btn-accent" href="#checkout-starter" data-i18n="cta_choose">Choisir Starter</a>
+          <a class="btn btn-accent" href="auth.html?return=studio">Choisir Starter</a>
         </div>
-
-        <div class="pcard" data-plan="pro">
-          <div class="head">
-            <span class="tier" data-i18n="p3_t">Pro</span>
-            <span class="badge" data-i18n="badge_teams">Équipes</span>
-          </div>
+        <div class="pcard">
+          <div class="head"><span class="tier">Pro</span><span class="badge">Équipes</span></div>
           <div class="price">€49<span style="font-weight:700;font-size:14px">/mo</span></div>
           <ul class="bullets">
-            <li>• <span data-i18n="p3_b1">Aperçus illimités</span></li>
-            <li>• <span data-i18n="p3_b2">Sections &amp; modèles illimités</span></li>
-            <li>• <span data-i18n="p3_b3">Micro-échantillon si aucune preuve</span></li>
+            <li>• Aperçus illimités</li>
+            <li>• Sections & modèles illimités</li>
+            <li>• Micro-échantillon si aucune preuve</li>
           </ul>
-          <a class="btn btn-ghost" href="#checkout-pro" data-i18n="cta_choose_pro">Choisir Pro</a>
+          <a class="btn btn-ghost" href="auth.html?return=studio">Choisir Pro</a>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- FOOTER -->
   <footer class="footer">
     <div class="container" style="display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap">
-      <div>© <span id="y"></span> PropoFlash. <span data-i18n="rights">Tous droits réservés.</span></div>
-      <div><a href="#" data-i18n="legal">Mentions légales</a> · <a href="#" data-i18n="privacy">Confidentialité</a></div>
+      <div>© <span id="y"></span> PropoFlash. Tous droits réservés.</div>
+      <div><a href="#">Mentions légales</a> · <a href="#">Confidentialité</a></div>
     </div>
   </footer>
 
   <script>
-    /* ===== i18n FR/EN ===== */
-    const I18N={
-      fr:{nav_why:"Pourquoi nous",nav_use:"Cas d’usage",nav_pricing:"Tarifs",cta_start:"Commencer",
-        headline:"Donnez vie à vos propositions. <span class='accent-word'>Maintenant.</span>",
-        subhead:"Générez des offres et propositions professionnelles en minutes, à partir d’un simple brief. Zéro complexité.",
-        see_how:"Voir comment ça marche",
-        chip_b2b:"Demandes de devis B2B", chip_ecom:"Ventes e-commerce", chip_marketing:"Prestation marketing", chip_website:"Refonte de site",
-        why_h2:"Pourquoi PropoFlash ?",why_sub:"Notre signature : qualité éditoriale + exécution instantanée, sans vous perdre dans des outils.",
-        why1_t:"Rédaction premium",why1_p:"Ton professionnel, argumentation claire, structure prête à envoyer à des décideurs.",
-        why2_t:"Adaptée au contexte",why2_p:"Chaque proposition s’appuie sur votre brief et vos preuves pour coller à l’objectif.",
-        why3_t:"Aperçu instantané",why3_p:"Vous collez le brief, vous prévisualisez, vous peaufinez — puis PDF en 1 clic.",
-        use_h2:"Cas d’usage fréquents",use_sub:"Du devis B2B aux offres e-commerce, PropoFlash couvre les besoins essentiels.",
-        use_t1:"Devis B2B",use_t2:"Services",use_t3:"E-commerce",
-        use1:"Qualification, périmètre, livrables, échéancier et conditions.",
-        use2:"Marketing, design, développement, conseil, formation.",
-        use3:"Fiches produits, packs et offres saisonnières structurées.",
-        price_h2:"Des plans clairs pour chaque besoin",price_sub:"Commencez gratuitement, évoluez quand vous êtes prêt.",
-        p1_t:"Gratuit",p1_b1:"3 aperçus par mois",p1_b2:"Chat IA guidé",p1_b3:"Export PDF verrouillé",
-        p2_t:"Starter",p2_b1:"PDF sans filigrane",p2_b2:"50 aperçus / mois",p2_b3:"Jusqu’à 3 preuves intégrées",
-        p3_t:"Pro",p3_b1:"Aperçus illimités",p3_b2:"Sections & modèles illimités",p3_b3:"Micro-échantillon si aucune preuve",
-        badge_popular:"Populaire",badge_teams:"Équipes",
-        cta_try:"Essayer",cta_choose:"Choisir Starter",cta_choose_pro:"Choisir Pro",
-        rights:"Tous droits réservés.",legal:"Mentions légales",privacy:"Confidentialité",
-        placeholder:"Collez votre brief ici… (Entrée = envoyer • Maj+Entrée = nouvelle ligne)",
-        free_limit_reached:"Limite atteinte : 3 aperçus gratuits/mois. Passez au plan Starter pour davantage d’aperçus et l’export PDF.",
-        left_label:"Aperçus restants ce mois",
-        assistant_h2:"Assistant"
-      },
-      en:{nav_why:"Why us",nav_use:"Use cases",nav_pricing:"Pricing",cta_start:"Start",
-        headline:"Make your proposal a <span class='accent-word'>reality</span>. Right now.",
-        subhead:"Generate professional proposals in minutes from a simple brief. Zero complexity.",
-        see_how:"See how it works",
-        chip_b2b:"B2B quotes", chip_ecom:"E-commerce sales", chip_marketing:"Marketing services", chip_website:"Website redesign",
-        why_h2:"Why PropoFlash?",why_sub:"Our signature: editorial excellence + instant execution, without tool overload.",
-        why3_t:"Instant preview",why3_p:"Paste brief, preview, refine — then 1-click PDF.",
-        use_h2:"Popular use cases",use_sub:"From B2B quotes to e-commerce offers, we cover the essentials.",
-        use_t1:"B2B quotes",use_t2:"Services",use_t3:"E-commerce",
-        use1:"Scoping, deliverables, timeline, terms.",use2:"Marketing, design, engineering, consulting, training.",use3:"Product pages, bundles and seasonal offers.",
-        price_h2:"Clear plans for every need",price_sub:"Start free and scale when ready.",
-        p1_t:"Free",p1_b1:"3 previews per month",p1_b2:"Guided AI chat",p1_b3:"Locked PDF export",
-        p2_t:"Starter",p2_b1:"No-watermark PDF",p2_b2:"50 previews / month",p2_b3:"Up to 3 embedded proofs",
-        p3_t:"Pro",p3_b1:"Unlimited previews",p3_b2:"Unlimited sections & templates",p3_b3:"Micro-sample when no proof",
-        badge_popular:"Most popular",badge_teams:"Teams",
-        cta_try:"Try it",cta_choose:"Choose Starter",cta_choose_pro:"Choose Pro",
-        rights:"All rights reserved.",legal:"Legal",privacy:"Privacy",
-        placeholder:"Paste your brief here… (Enter = send • Shift+Enter = new line)",
-        free_limit_reached:"Limit reached: 3 free previews/month. Upgrade to Starter for more previews and PDF export.",
-        left_label:"Previews left this month",
-        assistant_h2:"Assistant"
-      }
-    };
-    const $=(q,ctx=document)=>ctx.querySelector(q); const $$=(q,ctx=document)=>Array.from(ctx.querySelectorAll(q));
-
-    /* i18n apply */
-    function setLang(lang){
-      const t=I18N[lang]||I18N.fr; document.documentElement.lang=lang;
-      $$("[data-i18n]").forEach(el=>{ const k=el.dataset.i18n; if(k && t[k]!=null) el.textContent=t[k]; });
-      $$("[data-i18n-html]").forEach(el=>{ const k=el.dataset.i18nHtml; if(k && t[k]!=null) el.innerHTML=t[k]; });
-      const brief=$("#brief"); if(brief) brief.placeholder=t.placeholder;
-      const chipsMap = [["chip1","chip_b2b"],["chip2","chip_ecom"],["chip3","chip_marketing"],["chip4","chip_website"]];
-      chipsMap.forEach(([id,key])=>{ const el=$("#"+id); if(el && t[key]){ el.textContent=t[key]; el.dataset.chip=t[key]; }});
-      updateFreeBadge();
-    }
-
-    /* initial language */
-    document.addEventListener("DOMContentLoaded", ()=>{
-      const navLang=(navigator.language||"fr").slice(0,2);
-      const sel=$("#lang"); sel.value=(["fr","en"].includes(navLang)?navLang:"en");
-      setLang(sel.value);
-      sel.addEventListener("change", e=>setLang(e.target.value));
-      $("#y").textContent=new Date().getFullYear();
-    });
-
-    /* Chips autofill */
-    $$(".chip").forEach(c=>c.addEventListener("click",()=>{
-      const v=$("#brief").value.trim();
-      $("#brief").value=(v?v+"\n":"")+"Contexte : "+c.dataset.chip; $("#brief").focus();
-    }));
-
-    /* FREE PREVIEW LIMIT (front-only demo) */
-    const PLAN='free';
-    const LIMITS={free:3, starter:50, pro:1e9};
-    const monthKey=(plan)=>{const d=new Date(); return `pf_${plan}_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`;}
-    const getCount=(plan)=>parseInt(localStorage.getItem(monthKey(plan))||'0',10);
-    const incCount=(plan)=>localStorage.setItem(monthKey(plan), String(getCount(plan)+1));
-    const leftCount=(plan)=> (LIMITS[plan]||0) - getCount(plan);
-    function updateFreeBadge(){
-      const badge=$("#freeBadge"); if(!badge) return;
-      const l=document.documentElement.lang;
-      const left=Math.max(0,leftCount('free'));
-      badge.textContent = l==='fr' ? `${left}/mois` : `${left}/mo`;
-    }
-
-    /* ==== Utilitaires chat (UI locale) ==== */
-    const thread = $('#threadHero');
-    function addMsg(text, who='ai'){
-      if(!thread) return;
-      const row=document.createElement('div'); row.className='msg'+(who==='me'?' me':'');
-      const b=document.createElement('div'); b.className='bubble'; b.textContent=String(text||'');
-      row.appendChild(b); thread.appendChild(row); thread.scrollTop=thread.scrollHeight;
-    }
-
-    // Typing indicator
-    function showTyping(){
-      removeTyping();
-      const row=document.createElement('div'); row.className='msg'; row.id='typingRow';
-      const b=document.createElement('div'); b.className='bubble typing';
-      b.innerHTML='<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
-      row.appendChild(b); thread.appendChild(row); thread.scrollTop=thread.scrollHeight;
-    }
-    function removeTyping(){ const t=document.getElementById('typingRow'); if(t) t.remove(); }
-
-    function enablePreviewIfReady(){
-      try{
-        const spec = JSON.parse(localStorage.getItem('pf_proposal')||'{}');
-        const hasContent = Array.isArray(spec.sections) ? spec.sections.length>0 : Object.keys(spec).length>0;
-        const btn = document.getElementById('openPreviewBtn');
-        if(btn) btn.classList.toggle('hidden', !hasContent);
-        // update logo mini
-        const logo = spec?.meta?.style?.logoDataUrl;
-        const mini = document.getElementById('logoMini');
-        if(mini){
-          if(logo){ mini.src = logo; mini.classList.remove('hidden'); }
-          else { mini.classList.add('hidden'); }
-        }
-      }catch{}
-    }
-
-    function resetDiscussion(){
-      localStorage.removeItem('pf_chat');
-      localStorage.removeItem('pf_proposal');
-      localStorage.removeItem('pf_chat_ts');
-      if(thread) thread.innerHTML='';
-      enablePreviewIfReady();
-    }
-    const CHAT_TTL_MS = 6*60*60*1000; // 6 heures
-    function maybeExpireChat(){
-      const ts = Number(localStorage.getItem('pf_chat_ts')||0);
-      if(ts && (Date.now() - ts > CHAT_TTL_MS)){
-        resetDiscussion();
-      }
-    }
-    if(new URLSearchParams(location.search).has('new')) resetDiscussion();
-
-    /* Rendu de l'historique local au chargement */
-    document.addEventListener('DOMContentLoaded', () => {
-      maybeExpireChat();
-      const hist = JSON.parse(localStorage.getItem('pf_chat') || '[]');
-      if (hist.length && thread) {
-        thread.innerHTML = '';
-        hist.forEach(m => addMsg(m.content, m.role === 'user' ? 'me' : 'ai'));
-      }
-      document.getElementById('openPreviewBtn')?.addEventListener('click',()=>{ window.location.href='preview.html?t=modern'; });
-      enablePreviewIfReady();
-    });
-
-    /* ===== Supabase Auth + Cloud Chats ===== */
-    const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co'; // ← à remplacer si besoin
+    const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    document.getElementById('y').textContent = new Date().getFullYear();
 
-    const authBtn     = document.getElementById('authBtn');
-    const historyCard = document.getElementById('historyCard');
-    const chatList    = document.getElementById('chatList');
-    let currentChatId = localStorage.getItem('pf_chat_id') || null;
-
-    function show(el){ el && el.classList.remove('hidden'); }
-    function hide(el){ el && el.classList.add('hidden'); }
+    const authBtn  = document.getElementById('authBtn');
+    const startBtn = document.getElementById('startBtn');
 
     async function refreshAuthUI(){
       const { data:{ session } } = await sb.auth.getSession();
       if(session){
         authBtn.textContent = 'Se déconnecter';
-        authBtn.onclick = async ()=>{ await sb.auth.signOut(); localStorage.removeItem('pf_chat_id'); location.reload(); };
-        show(historyCard);
-        await listChats();
+        authBtn.onclick = async ()=>{ await sb.auth.signOut(); location.reload(); };
       }else{
         authBtn.textContent = 'Se connecter';
-        // ⬇️ Redirection vers la page d’auth dédiée
-        authBtn.onclick = () => { window.location.href = 'auth.html'; };
-        hide(historyCard);
+        authBtn.onclick = ()=> location.href = 'auth.html?return=studio';
       }
     }
-    sb.auth.onAuthStateChange(()=>refreshAuthUI());
-    document.addEventListener('DOMContentLoaded', refreshAuthUI);
+    refreshAuthUI(); sb.auth.onAuthStateChange(refreshAuthUI);
 
-    async function listChats(){
-      const { data:{ user } } = await sb.auth.getUser();
-      if(!user) return;
-      const { data, error } = await sb.from('chats')
-        .select('id,title,created_at')
-        .order('created_at', { ascending:false })
-        .limit(20);
-      if(error){ console.error(error); return; }
-      chatList.innerHTML = '';
-      data.forEach(c=>{
-        const btn = document.createElement('button');
-        btn.className = 'btn btn-ghost';
-        btn.style.justifyContent='space-between';
-        btn.style.textAlign='left';
-        btn.innerHTML = `<span>${c.title || 'Sans titre'}</span>
-                         <span style="color:var(--muted);font-size:12px">${new Date(c.created_at).toLocaleString()}</span>`;
-        btn.onclick = ()=> openChat(c.id);
-        chatList.appendChild(btn);
-      });
-    }
-
-    async function openChat(chatId){
-      currentChatId = chatId;
-      localStorage.setItem('pf_chat_id', chatId);
-      thread.innerHTML = '';
-      const { data, error } = await sb.from('messages')
-        .select('role,content,created_at')
-        .eq('chat_id', chatId)
-        .order('created_at', { ascending:true });
-      if(error){ console.error(error); return; }
-      data.forEach(m => addMsg(m.content, m.role==='user' ? 'me' : 'ai'));
-      document.getElementById('brief').focus();
-      enablePreviewIfReady();
-    }
-
-    async function ensureChat(titleFallback='Sans titre'){
-      if(currentChatId) return currentChatId;
-      const { data:{ user } } = await sb.auth.getUser();
-      if(!user) return null; // non connecté → local only
-
-      // (Option) limite plan Free via RPC can_create_chat
-      try{
-        const { data:can } = await sb.rpc('can_create_chat', { uid: user.id });
-        if(can === false){
-          alert('Votre plan Free permet 1 discussion / mois. Passez à Starter pour continuer.');
-          return null;
-        }
-      }catch(_e){}
-
-      const title = (document.getElementById('brief').value || titleFallback).slice(0,80);
-      const { data, error } = await sb.from('chats')
-        .insert({ user_id:user.id, title })
-        .select()
-        .single();
-      if(error){ console.error(error); return null; }
-      currentChatId = data.id;
-      localStorage.setItem('pf_chat_id', data.id);
-      listChats();
-      return data.id;
-    }
-
-    async function saveMessage(role, content){
-      const { data:{ user } } = await sb.auth.getUser();
-      if(!user || !currentChatId) return;
-      await sb.from('messages').insert({ chat_id: currentChatId, user_id: user.id, role, content });
-    }
-
-    // Bouton "Nouvelle discussion"
-    const newChatBtn = document.getElementById('newChatBtn');
-    if(newChatBtn){
-      newChatBtn.addEventListener('click', async ()=>{
-        const { data:{ user } } = await sb.auth.getUser();
-        if(user){
-          currentChatId = null;
-          localStorage.removeItem('pf_chat_id');
-          thread.innerHTML = '';
-          document.getElementById('brief').value = '';
-          document.getElementById('brief').focus();
-          enablePreviewIfReady();
-          return;
-        }
-        // local : 1 discussion max
-        const used = parseInt(localStorage.getItem('pf_local_chats')||'0',10);
-        if(used >= 1){
-          alert("Vous avez déjà utilisé la discussion gratuite.\nConnectez-vous pour sauvegarder l’historique et créer d’autres discussions.");
-          return;
-        }
-        localStorage.setItem('pf_local_chats', String(used+1));
-        resetDiscussion();
-        document.getElementById('brief').focus();
-      });
-    }
-
-    /* ==== API chat ==== */
-    async function callChatAPI(message, proposalSpec, history){
-      const { data:{ session } } = await sb.auth.getSession();
-      const headers = {'Content-Type':'application/json'};
-      if(session?.access_token){ headers.Authorization = `Bearer ${session.access_token}`; }
-      const res = await fetch('/api/chat',{
-        method:'POST',
-        headers,
-        body: JSON.stringify({ message, proposalSpec, history })
-      });
-      if(!res.ok) throw new Error('HTTP '+res.status);
-      return res.json();
-    }
-
-    /* ==== Bouton Envoyer (chat) ==== */
-    $("#sendBrief").addEventListener("click",async ()=>{
-      const lang=document.documentElement.lang||'fr';
-      const v=$("#brief").value.trim(); if(!v){$("#brief").focus();return;}
-
-      if(PLAN==='free' && leftCount('free')<=0){
-        console.warn('[FREE] Limite de prévisualisations atteinte. Le chat reste utilisable.');
-      }
-
-      addMsg(v,'me');
-      const btn=$("#sendBrief"); btn.classList.add('loading'); btn.disabled=true;
-      showTyping();
-
-      try{
-        await ensureChat('Nouvelle discussion');
-        await saveMessage('user', v);
-
-        const history = JSON.parse(localStorage.getItem('pf_chat')||'[]');
-        const proposalSpec = JSON.parse(localStorage.getItem('pf_proposal')||'{"meta":{"lang":"'+lang+'"}}');
-
-        const data = await callChatAPI(v, proposalSpec, history);
-
-        if(data.reply){
-          removeTyping();
-          addMsg(data.reply,'ai');
-          await saveMessage('assistant', data.reply);
-        }else{
-          removeTyping();
-        }
-
-        if(data.proposalSpec){
-          const merged = { ...proposalSpec, ...data.proposalSpec, meta:{ ...(proposalSpec.meta||{}), ...(data.proposalSpec.meta||{}) } };
-          localStorage.setItem('pf_proposal', JSON.stringify(merged));
-          enablePreviewIfReady();
-
-          // Sauvegarde cloud de l’aperçu (si connecté)
-          try {
-            const { data:{ user } } = await sb.auth.getUser();
-            if (user && currentChatId) {
-              await sb.from('proposals').upsert(
-                { user_id: user.id, chat_id: currentChatId,
-                  spec: JSON.parse(localStorage.getItem('pf_proposal') || '{}'), },
-                { onConflict: 'chat_id' }
-              );
-            }
-          } catch(_) {}
-        }
-
-        const newHist = [...history, {role:'user',content:v}, {role:'assistant',content:(data.reply||'')}].slice(-20);
-        localStorage.setItem('pf_chat', JSON.stringify(newHist));
-        localStorage.setItem('pf_chat_ts', String(Date.now()));
-
-        const { data:{ user } } = await sb.auth.getUser();
-        if(!user){ incCount('free'); updateFreeBadge(); }
-
-        const wantPreview = Array.isArray(data.actions) && data.actions.some(a => a.type === 'preview');
-        if (wantPreview) setTimeout(()=>{ window.location.href='preview.html?t=modern'; }, 150);
-
-        const ask = Array.isArray(data.actions) && data.actions.find(a=>a.type==='ask');
-        if(ask){ $("#brief").value += `\n${ask.field}: `; $("#brief").focus(); }
-      }catch(e){
-        console.error(e);
-        removeTyping();
-        addMsg(lang==='fr'?'Erreur serveur. Réessayez.':'Server error. Please retry.','ai');
-      }finally{
-        removeTyping();
-        btn.classList.remove('loading'); btn.disabled=false;
-        $("#brief").value=''; // ← vide le textarea à l’envoi
-      }
-    });
-
-    /* ==== ENTRÉE = envoyer | Maj+Entrée = NL | Ctrl/Cmd+Entrée = envoyer ==== */
-    (function () {
-      const briefEl = document.getElementById('brief');
-      const sendBtn = document.getElementById('sendBrief');
-      if (!briefEl || !sendBtn) return;
-      briefEl.addEventListener('keydown', (e) => {
-        if (e.isComposing || e.keyCode === 229) return;
-        const isEnter = e.key === 'Enter';
-        const sendCombo = (isEnter && !e.shiftKey) || (isEnter && (e.ctrlKey || e.metaKey));
-        if (sendCombo) { e.preventDefault(); sendBtn.click(); }
-      });
-    })();
-
-    /* ==== Logo uploader + auto-branding ==== */
-    const logoBtn = document.getElementById('logoBtn');
-    const logoInput = document.getElementById('logoInput');
-
-    logoBtn?.addEventListener('click', ()=> logoInput?.click());
-    logoInput?.addEventListener('change', async (e)=>{
-      const file = e.target.files?.[0];
-      if(!file) return;
-      const dataUrl = await fileToDataURL(file);
-      const { primary, secondary } = await extractPaletteFromDataUrl(dataUrl);
-
-      // Merge spec (+ accent pour l’aperçu)
-      const lang = document.documentElement.lang || 'fr';
-      const current = JSON.parse(localStorage.getItem('pf_proposal') || '{"meta":{"lang":"'+lang+'"}}');
-      const next = {
-        ...current,
-        meta: {
-          ...(current.meta||{}),
-          accent: primary, // << pour que preview.html prenne immédiatement la bonne couleur
-          style: {
-            ...((current.meta && current.meta.style) || {}),
-            logoDataUrl: dataUrl,
-            primary, secondary
-          }
-        }
+    // Lance le studio (prépare une spec par défaut si besoin)
+    startBtn.onclick = ()=>{
+      const spec = JSON.parse(localStorage.getItem('pf_proposal')||'null') || {
+        meta:{ lang:'fr', title:'Proposition commerciale', company:'Votre société', client:'Client' },
+        pricing:{ model:'forfait', price:0, currency:'EUR' },
+        sections:[]
       };
-      localStorage.setItem('pf_proposal', JSON.stringify(next));
-      enablePreviewIfReady();
-      addMsg(`Logo importé. Couleurs détectées : ${primary} & ${secondary}. L’aperçu s’adaptera au branding.`, 'ai');
-    });
+      localStorage.setItem('pf_proposal', JSON.stringify(spec));
+      location.href = 'studio.html';
+    };
 
-    async function fileToDataURL(file){
-      return new Promise((resolve,reject)=>{
-        const fr=new FileReader();
-        fr.onload=()=>resolve(fr.result);
-        fr.onerror=reject;
-        fr.readAsDataURL(file);
-      });
-    }
-
-    async function extractPaletteFromDataUrl(dataUrl){
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.src = dataUrl;
-      await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; });
-
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d',{ willReadFrequently:true });
-      // downscale to speed up
-      const W = 180, H = Math.max(90, Math.round(img.height * (W / img.width)));
-      canvas.width = W; canvas.height = H;
-      ctx.drawImage(img, 0, 0, W, H);
-      const { data } = ctx.getImageData(0,0,W,H);
-
-      const map = new Map();
-      for (let i=0;i<data.length;i+=4*10){ // sample 1 every 10 pixels
-        const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3]/255;
-        if (a < 0.6) continue;
-        const lum = (0.2126*r + 0.7152*g + 0.0722*b)/255;
-        if (lum < 0.12 || lum > 0.98) continue; // ignore near-black/near-white
-        // reduce color space
-        const key = ((r&0xF0)<<16) | ((g&0xF0)<<8) | (b&0xF0);
-        map.set(key, (map.get(key)||0)+1);
+    // Depuis l’accueil, permet d’envoyer le brief directement au studio
+    document.getElementById('sendBrief').onclick = ()=>{
+      const v=(document.getElementById('brief').value||'').trim(); if(!v) return;
+      localStorage.setItem('pf_welcome_msg', v);
+      if(!localStorage.getItem('pf_proposal')){
+        localStorage.setItem('pf_proposal', JSON.stringify({ meta:{ lang:'fr', title:'Proposition commerciale'} , sections:[] }));
       }
-      const sorted = [...map.entries()].sort((a,b)=>b[1]-a[1]).slice(0,8).map(([k])=>{
-        const r=(k>>16)&0xF0, g=(k>>8)&0xF0, b=k&0xF0;
-        return `#${(r|0x0F).toString(16).padStart(2,'0')}${(g|0x0F).toString(16).padStart(2,'0')}${(b|0x0F).toString(16).padStart(2,'0')}`.toUpperCase();
-      });
-      const primary = sorted[0] || '#3B82F6';
-      // pick secondary sufficiently different
-      let secondary = '#8B5CF6';
-      for (let i=1;i<sorted.length;i++){
-        if (colorDistance(sorted[0], sorted[i]) > 80){ secondary = sorted[i]; break; }
-      }
-      return { primary, secondary };
-    }
-
-    function colorDistance(hex1, hex2){
-      const a = hexToRGB(hex1), b = hexToRGB(hex2);
-      const dr=a.r-b.r, dg=a.g-b.g, db=a.b-b.b;
-      return Math.sqrt(dr*dr+dg*dg+db*db);
-    }
-    function hexToRGB(hex){
-      const s=hex.replace('#','');
-      return { r:parseInt(s.slice(0,2),16), g:parseInt(s.slice(2,4),16), b:parseInt(s.slice(4,6),16) };
-    }
-
-    /* ==== Bouton Commencer (génère et ouvre l’aperçu) ==== */
-    (function(){
-      const startBtn = document.getElementById('startBtn');
-      if(!startBtn) return;
-
-      startBtn.addEventListener('click', async () => {
-        const lang = document.documentElement.lang || 'fr';
-        const briefEl = document.getElementById('brief');
-        let msg = '';
-        if (briefEl && briefEl.value) msg = briefEl.value.trim();
-        if (!msg) {
-          msg = (lang === 'fr')
-            ? "Crée une proposition commerciale complète à partir d'un brief vide (exemple)."
-            : "Create a complete business proposal from an empty brief (sample).";
-        }
-
-        try {
-          const baseSpec = JSON.parse(localStorage.getItem('pf_proposal') || '{"meta":{"lang":"'+lang+'"},"sections":[]}');
-          const data = await callChatAPI(msg, baseSpec, []);
-          const nextSpec = data && data.proposalSpec ? data.proposalSpec : baseSpec;
-          const merged = { ...baseSpec, ...nextSpec, meta:{ ...(baseSpec.meta||{}), ...((nextSpec&&nextSpec.meta)||{}) } };
-          localStorage.setItem('pf_proposal', JSON.stringify(merged));
-          localStorage.setItem('pf_chat_ts', String(Date.now()));
-
-          try {
-            const { data:{ user } } = await sb.auth.getUser();
-            if (user) {
-              if (!currentChatId) { await ensureChat('Aperçu'); }
-              if (currentChatId) {
-                await sb.from('proposals').upsert(
-                  { user_id: user.id, chat_id: currentChatId,
-                    spec: JSON.parse(localStorage.getItem('pf_proposal') || '{}'), },
-                  { onConflict: 'chat_id' }
-                );
-              }
-            }
-          } catch(_) {}
-
-          window.location.href = 'preview.html?t=modern';
-        } catch (e) {
-          console.error(e);
-          alert((lang === 'fr' ? 'Erreur: ' : 'Error: ') + e.message);
-        }
-      });
-    })();
-
-    /* 3D tilt + parallax */
-    (()=>{const el=$("#tilt");const rect=()=>el.getBoundingClientRect();
-      const on=e=>{const r=rect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
-        el.style.transform=`rotateX(${(-y*3).toFixed(2)}deg) rotateY(${(x*3).toFixed(2)}deg)`};
-      const off=()=>{el.style.transform="rotateX(0) rotateY(0)"}; el.addEventListener("mousemove",on); el.addEventListener("mouseleave",off);
-    })();
-    (()=>{const orb=$("#orb");window.addEventListener("mousemove",(e)=>{
-      const x=(e.clientX/window.innerWidth-.5)*14,y=(e.clientY/window.innerHeight-.5)*14;
-      orb.style.transform=`translate(${x}px, ${y}px)`;});})();
+      location.href = 'studio.html';
+    };
   </script>
 </body>
 </html>
