@@ -105,9 +105,13 @@
   </div>
 
   <script>
+    // === Supabase ===
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, { auth: { persistSession: true, detectSessionInUrl: true }});
+
+    const params = new URLSearchParams(location.search);
+    const RETURN = params.get('return') === 'studio' ? 'studio.html' : 'index.html';
 
     const form = document.getElementById('authForm');
     const email = document.getElementById('email');
@@ -125,15 +129,29 @@
     function showOk(txt){ msgOk.textContent = txt; msgOk.style.display='block'; msgErr.style.display='none'; }
     function clearMsgs(){ msgErr.style.display='none'; msgOk.style.display='none'; }
 
-    // Déjà connecté ? → studio direct
-    (async ()=>{ const { data:{ session } } = await sb.auth.getSession(); if(session){ location.href='studio.html'; } })();
+    // → Si déjà connecté au chargement, on va au studio
+    (async ()=>{ const { data:{ session } } = await sb.auth.getSession(); if(session){ location.replace('studio.html'); } })();
 
-    // Google OAuth → studio.html
+    // → Écoute l'événement de fin d'OAuth / login
+    sb.auth.onAuthStateChange(async (event, session)=>{
+      if(event === 'SIGNED_IN' && session){ location.replace('studio.html'); }
+    });
+
+    // → Si l'URL de retour OAuth contient des tokens (#access_token...), laisse Supabase hydrater puis redirige
+    if (location.hash && /(access_token|provider_token|code)=/i.test(location.hash)) {
+      // laisse le SDK traiter le hash, puis on vérifie la session
+      setTimeout(async ()=>{
+        const { data:{ session } } = await sb.auth.getSession();
+        if(session){ location.replace('studio.html'); }
+      }, 0);
+    }
+
+    // Google OAuth : revient toujours ici (login.html), puis on redirige via onAuthStateChange
     googleBtn.onclick = async ()=>{
       clearMsgs();
       const { error } = await sb.auth.signInWithOAuth({
         provider:'google',
-        options:{ redirectTo: window.location.origin + '/studio.html' }
+        options:{ redirectTo: `${window.location.origin}/login.html?return=studio` }
       });
       if(error) showErr(error.message);
     };
@@ -149,7 +167,7 @@
     forgot.onclick = async (e)=>{
       e.preventDefault(); clearMsgs();
       if(!email.value){ email.focus(); return showErr('Indique ton email pour recevoir le lien de réinitialisation.'); }
-      const { error } = await sb.auth.resetPasswordForEmail(email.value, { redirectTo: window.location.origin + '/login.html' });
+      const { error } = await sb.auth.resetPasswordForEmail(email.value, { redirectTo: `${window.location.origin}/login.html?return=studio` });
       if(error) return showErr(error.message);
       showOk('Email envoyé ✅. Clique sur le lien reçu pour définir un nouveau mot de passe.');
     };
@@ -165,7 +183,7 @@
         }else{
           const { error } = await sb.auth.signInWithPassword({ email: email.value, password: pass.value });
           if(error) return showErr(error.message);
-          location.href='studio.html';
+          location.replace('studio.html');
         }
       }catch(err){ showErr(err?.message || 'Erreur inattendue'); }
       finally{ submitBtn.disabled=false; submitBtn.style.opacity=1; }
