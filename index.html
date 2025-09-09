@@ -73,16 +73,8 @@
     .footer a{color:inherit}
     @media (max-width:980px){.grid3,.price-grid{grid-template-columns:1fr}}
   </style>
-
-  <!-- Supabase UMD en chargement SYNCHRONE (pas de defer) -->
-  <script id="sb-umd" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.2/dist/umd/supabase.js"></script>
-  <!-- Fallback ESM qui installe window.supabase si UMD indisponible -->
-  <script type="module">
-    if (!window.supabase || !window.supabase.createClient) {
-      const m = await import('https://esm.sh/@supabase/supabase-js@2.45.2');
-      window.supabase = { createClient: m.createClient };
-    }
-  </script>
+  <!-- ⚠️ UMD build qui expose window.supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js?v=umd"></script>
 </head>
 <body>
   <div class="nav">
@@ -207,64 +199,50 @@
     </div>
   </footer>
 
-  <!-- App bootstrap (attend le SDK) -->
   <script>
+    if(!window.supabase){ console.error('Supabase non chargé (window.supabase manquant).'); }
+
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-    async function ensureSupabase(){
-      if (window.supabase && window.supabase.createClient) return;
-      for (let i=0;i<120;i++){ // ~3s max
-        await new Promise(r=>setTimeout(r,25));
-        if (window.supabase && window.supabase.createClient) return;
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    const authBtn  = document.getElementById('authBtn');
+    const startBtn = document.getElementById('startBtn');
+
+    async function refreshAuthUI(){
+      const { data:{ session } } = await sb.auth.getSession();
+      if(session){
+        authBtn.textContent = 'Se déconnecter';
+        authBtn.onclick = async ()=>{ await sb.auth.signOut(); location.reload(); };
+      }else{
+        authBtn.textContent = 'Se connecter';
+        authBtn.onclick = ()=> location.href = 'auth.html?return=studio';
       }
-      throw new Error('Supabase SDK not available');
     }
+    refreshAuthUI(); sb.auth.onAuthStateChange(refreshAuthUI);
 
-    (async function init(){
-      try{
-        await ensureSupabase();
-        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    // Lance le studio (prépare une spec par défaut si besoin)
+    startBtn.onclick = ()=>{
+      const spec = JSON.parse(localStorage.getItem('pf_proposal')||'null') || {
+        meta:{ lang:'fr', title:'Proposition commerciale', company:'Votre société', client:'Client' },
+        pricing:{ model:'forfait', price:0, currency:'EUR' },
+        sections:[]
+      };
+      localStorage.setItem('pf_proposal', JSON.stringify(spec));
+      location.href = 'studio.html';
+    };
 
-        document.getElementById('y').textContent = new Date().getFullYear();
-        const authBtn  = document.getElementById('authBtn');
-        const startBtn = document.getElementById('startBtn');
-
-        async function refreshAuthUI(){
-          const { data:{ session } } = await sb.auth.getSession();
-          if(session){
-            authBtn.textContent = 'Se déconnecter';
-            authBtn.onclick = async ()=>{ await sb.auth.signOut(); location.reload(); };
-          }else{
-            authBtn.textContent = 'Se connecter';
-            authBtn.onclick = ()=> location.href = 'auth.html?return=studio';
-          }
-        }
-        refreshAuthUI(); sb.auth.onAuthStateChange(refreshAuthUI);
-
-        startBtn.onclick = ()=>{
-          const spec = JSON.parse(localStorage.getItem('pf_proposal')||'null') || {
-            meta:{ lang:'fr', title:'Proposition commerciale', company:'Votre société', client:'Client' },
-            pricing:{ model:'forfait', price:0, currency:'EUR' },
-            sections:[]
-          };
-          localStorage.setItem('pf_proposal', JSON.stringify(spec));
-          location.href = 'studio.html';
-        };
-
-        document.getElementById('sendBrief').onclick = ()=>{
-          const v=(document.getElementById('brief').value||'').trim(); if(!v) return;
-          localStorage.setItem('pf_welcome_msg', v);
-          if(!localStorage.getItem('pf_proposal')){
-            localStorage.setItem('pf_proposal', JSON.stringify({ meta:{ lang:'fr', title:'Proposition commerciale'} , sections:[] }));
-          }
-          location.href = 'studio.html';
-        };
-      }catch(e){
-        console.error(e);
-        alert('Le SDK Supabase n’a pas pu se charger. Recharge la page (Ctrl/Cmd+Shift+R).');
+    // Depuis l’accueil : envoyer le brief directement au studio
+    document.getElementById('sendBrief').onclick = ()=>{
+      const v=(document.getElementById('brief').value||'').trim(); if(!v) return;
+      localStorage.setItem('pf_welcome_msg', v);
+      if(!localStorage.getItem('pf_proposal')){
+        localStorage.setItem('pf_proposal', JSON.stringify({ meta:{ lang:'fr', title:'Proposition commerciale'} , sections:[] }));
       }
-    })();
+      location.href = 'studio.html';
+    };
   </script>
 </body>
 </html>
