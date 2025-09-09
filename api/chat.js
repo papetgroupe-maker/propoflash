@@ -90,7 +90,6 @@ export default async function handler(req, res) {
     try { out = JSON.parse(resp.choices[0].message.content || "{}"); }
     catch { out = { reply:"Je n’ai pas pu structurer la proposition. Reformulez.", actions:[] }; }
 
-    // Merge minimal sur meta
     if (out.proposalSpec) {
       out.proposalSpec.meta = { ...(proposalSpec?.meta||{}), ...(out.proposalSpec.meta||{}) };
     }
