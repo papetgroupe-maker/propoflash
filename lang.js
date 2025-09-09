@@ -1,57 +1,41 @@
-<script>
-/* lang.js — gestion globale FR/EN + auto-traduction de libellés et placeholders
-   Utilisation dans le HTML :
-   - Texte : <span data-t-fr="Bonjour" data-t-en="Hello"></span>
-   - Placeholder : <textarea data-ph-fr="Collez votre brief ici…" data-ph-en="Paste your brief here…"></textarea>
-   - HTML riche : <div data-html-fr="<b>Titre</b>" data-html-en="<b>Title</b>"></div>
-*/
-(function(){
+// lang.js
+(() => {
   const KEY = 'pf_lang';
   const SUP = ['fr','en'];
-  const FALLBACK = 'en';
+  const FALLBACK = 'fr';
 
-  const norm = l => {
-    const s = String(l||'').slice(0,2).toLowerCase();
+  const norm = (l) => {
+    const s = (l || '').toString().slice(0, 2).toLowerCase();
     return SUP.includes(s) ? s : FALLBACK;
   };
 
-  window.getLang = function(){
-    return norm(localStorage.getItem(KEY) || (navigator.language||'en'));
-  };
-
-  window.setLang = function(l){
-    const lang = norm(l);
-    localStorage.setItem(KEY, lang);
-    document.documentElement.lang = lang;
-    updateDomLang(lang);
-    window.dispatchEvent(new CustomEvent('langchange', { detail: lang }));
-  };
-
-  function updateDomLang(lang){
-    // Texte simple
-    document.querySelectorAll('[data-t-fr],[data-t-en]').forEach(el=>{
-      el.textContent = el.getAttribute(lang==='en'?'data-t-en':'data-t-fr') || el.textContent;
-    });
-    // Placeholder
-    document.querySelectorAll('[data-ph-fr],[data-ph-en]').forEach(el=>{
-      el.placeholder = el.getAttribute(lang==='en'?'data-ph-en':'data-ph-fr') || el.placeholder;
-    });
-    // HTML riche
-    document.querySelectorAll('[data-html-fr],[data-html-en]').forEach(el=>{
-      const html = el.getAttribute(lang==='en'?'data-html-en':'data-html-fr');
-      if(html!=null) el.innerHTML = html;
-    });
+  function getLang() {
+    try {
+      return norm(localStorage.getItem(KEY) || navigator.language || FALLBACK);
+    } catch {
+      return FALLBACK;
+    }
   }
 
-  document.addEventListener('DOMContentLoaded', ()=>{
-    const lang = getLang();
+  function setLang(l) {
+    const lang = norm(l);
+    try { localStorage.setItem(KEY, lang); } catch {}
     document.documentElement.lang = lang;
-    updateDomLang(lang);
-    // branche tous les sélecteurs de langue présents
-    document.querySelectorAll('select[data-lang-picker]').forEach(sel=>{
-      sel.value = lang;
-      sel.addEventListener('change', e=> setLang(e.target.value));
+    window.dispatchEvent(new CustomEvent('langchange', { detail: lang }));
+  }
+
+  // expose global
+  window.getLang = getLang;
+  window.setLang = setLang;
+
+  // init document lang
+  document.documentElement.lang = getLang();
+
+  // auto-bind sur tous les <select data-lang-picker>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('select[data-lang-picker]').forEach((sel) => {
+      sel.value = getLang();
+      sel.addEventListener('change', (e) => setLang(e.target.value));
     });
   });
 })();
-</script>
