@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr" data-theme="light">
+<html lang="fr">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -11,13 +11,8 @@
       --accent:#3b82f6; --accent2:#8b5cf6; --accent-ink:#fff;
       --paper-w:210mm; --paper-h:297mm; --elev:0 18px 48px rgba(10,16,32,.10), inset 0 1px 0 #ffffffaa;
     }
-    [data-theme="dark"]{
-      --bg:#0b1220; --panel:#0f172a; --ink:#e6edf7; --muted:#9aa6bf; --stroke:#1f2a44;
-      --accent:#60a5fa; --accent2:#a78bfa; --accent-ink:#081225;
-      --elev:0 18px 48px rgba(0,0,0,.45), inset 0 1px 0 #ffffff1a;
-    }
     *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0;background:linear-gradient(180deg,var(--bg),#0e1426);font-family:Inter,system-ui,sans-serif;color:var(--ink)}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),#eef3ff);font-family:Inter,system-ui,sans-serif;color:var(--ink)}
 
     /* Top bar */
     .bar{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--stroke);
@@ -26,7 +21,6 @@
     .brand{display:flex;gap:10px;align-items:center;font-weight:800;cursor:pointer}
     .spark{width:22px;height:22px;border-radius:6px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd)}
     .btn{border:1px solid var(--stroke);background:var(--panel);border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow:var(--elev)}
-    .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:#0000}
     .sel{border:1px solid var(--stroke);border-radius:10px;padding:7px 10px;background:var(--panel);color:var(--ink)}
     .avatar{width:32px;height:32px;border-radius:50%;border:1px solid var(--stroke);display:grid;place-items:center;font-weight:800;background:var(--panel);cursor:pointer;box-shadow:var(--elev)}
     .menu{position:absolute;top:54px;right:14px;background:var(--panel);border:1px solid var(--stroke);border-radius:12px;box-shadow:var(--elev);display:none;overflow:hidden}
@@ -87,7 +81,6 @@
     .drawer-list{padding:8px;overflow:auto}
     .row-item{border:1px solid var(--stroke);border-radius:10px;padding:10px;margin-bottom:8px;cursor:pointer;background:var(--panel)}
     .row-item:hover{background:color-mix(in hsl, var(--panel) 85%, transparent)}
-
     @media (max-width:1100px){ .main{grid-template-columns:1fr} .sheet{width:100%;min-height:auto}}
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -104,8 +97,6 @@
     <div class="right">
       <label class="muted">Langue</label>
       <select class="sel" id="langSel" data-lang-picker><option value="fr">FR</option><option value="en">EN</option></select>
-      <button class="btn" id="previewBtn">Aperçu plein écran</button>
-      <button class="btn" id="themeBtn"><span id="themeIcon">🌙</span></button>
       <div class="avatar" id="avatar">U</div>
       <div class="menu" id="menu">
         <a href="studio.html">Studio</a>
@@ -148,12 +139,6 @@
   </div>
 
   <script>
-    /* Theme */
-    const THEME_KEY='pf_theme', html=document.documentElement, themeBtn=document.getElementById('themeBtn'), themeIcon=document.getElementById('themeIcon');
-    function applyTheme(t){ html.setAttribute('data-theme', t); localStorage.setItem(THEME_KEY,t); themeIcon.textContent=(t==='dark'?'☀️':'🌙'); }
-    applyTheme(localStorage.getItem(THEME_KEY)||'light');
-    themeBtn.onclick=()=> applyTheme(html.getAttribute('data-theme')==='dark'?'light':'dark');
-
     /* Supabase guard: 1 essai anonyme puis login → retour studio */
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
@@ -163,7 +148,7 @@
       const { data:{ session } } = await sb.auth.getSession();
       if(session?.user) return true;
       const tries = parseInt(localStorage.getItem('pf_anon_uses')||'0',10);
-      if(tries>=1){ location.href = 'login.html?return=studio'; return false; }
+      if(tries>=1){ location.href = 'auth.html?return=studio'; return false; }
       localStorage.setItem('pf_anon_uses', String(tries+1));
       return true;
     }
@@ -181,7 +166,6 @@
 
     /* Nav */
     document.getElementById('homeBtn').onclick=()=>location.href='index.html';
-    document.getElementById('previewBtn').onclick=()=>{ localStorage.setItem('pf_proposal', JSON.stringify(spec)); location.href='preview.html'; };
     document.getElementById('logoBtn').onclick=()=>location.href='index.html';
 
     /* Historique */
@@ -219,7 +203,7 @@
     }
     loadSpec();
 
-    // inject brief depuis l'accueil
+    // inject brief depuis l’accueil
     (function consumeWelcome(){
       const w = localStorage.getItem('pf_welcome_msg');
       if(w){ messages.push({ role:'user', content:w }); localStorage.removeItem('pf_welcome_msg'); }
@@ -269,7 +253,7 @@
       }
     }
 
-    // Enter = envoyer ; Shift+Enter = nouvelle ligne (barre espace non bloquée)
+    // Enter = envoyer ; Shift+Enter = nouvelle ligne
     composer.addEventListener('keydown', (e)=>{
       if(e.isComposing || e.keyCode===229) return;
       if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(composer.value); }
@@ -281,7 +265,7 @@
       sendMessage(messages[messages.length-1].content);
     }
 
-    /* Preview mini (mêmes libellés) */
+    /* Preview mini (libellés) */
     const t = {
       fr:{ title:"Proposition commerciale", to:"Pour", from:"Émis par", date:"Date", letter:"Lettre d’introduction", executive:"Résumé exécutif", objectives:"Objectifs", approach:"Approche & phasage", deliverables:"Livrables", in_scope:"Inclus", out_scope:"Hors-périmètre", timeline:"Planning", pricing:"Tarification", assumptions:"Hypothèses / Risques", next:"Prochaines étapes", price_model:"Modèle", terms:"Conditions", toc:"Sommaire" },
       en:{ title:"Business Proposal", to:"To", from:"Issued by", date:"Date", letter:"Cover Letter", executive:"Executive Summary", objectives:"Objectives", approach:"Approach & Phasing", deliverables:"Deliverables", in_scope:"In scope", out_scope:"Out of scope", timeline:"Timeline", pricing:"Pricing", assumptions:"Assumptions / Risks", next:"Next Steps", price_model:"Model", terms:"Terms", toc:"Table of Contents" }
@@ -416,8 +400,6 @@
       const en=(getLang()==='en');
       document.getElementById('composer').placeholder = en?'Type your message':'Écrivez votre message';
       document.getElementById('chatHint').textContent = en?'Enter = send • Shift+Enter = new line':'Entrée = envoyer • Maj+Entrée = nouvelle ligne';
-      document.getElementById('previewBtn').textContent = en?'Full preview':'Aperçu plein écran';
-      document.getElementById('openHistory').textContent = en?'History':'Historique';
     }
     applyChatLang();
     window.addEventListener('langchange', ()=>{
@@ -426,9 +408,6 @@
       applyChatLang();
       renderSpec();
     });
-
-    /* Render chat initially */
-    function renderChat(){ chatBody.innerHTML=''; messages.forEach(m=> bubble(m.role, escapeHTML(m.content).replace(/\n/g,'<br/>'))); }
   </script>
 </body>
 </html>
