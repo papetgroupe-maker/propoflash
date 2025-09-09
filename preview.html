@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr" data-theme="light">
+<html lang="fr">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -9,23 +9,18 @@
     :root{
       --paper-w:210mm; --paper-h:297mm;
       --bg:#f3f6fb; --ink:#0a1020; --muted:#5c667a; --stroke:#e7ecf6;
-      --accent:#3b82f6; --accent2:#8b5cf6; --accent-ink:#fff; --panel:#fff; --elev:0 18px 48px rgba(10,16,32,.10), inset 0 1px 0 #ffffffaa;
-    }
-    [data-theme="dark"]{
-      --bg:#0b1220; --ink:#e6edf7; --muted:#9aa6bf; --stroke:#1f2a44;
-      --accent:#60a5fa; --accent2:#a78bfa; --accent-ink:#081225; --panel:#0f172a; --elev:0 18px 48px rgba(0,0,0,.45), inset 0 1px 0 #ffffff1a;
+      --accent:#3b82f6; --accent2:#8b5cf6; --panel:#fff; --elev:0 18px 48px rgba(10,16,32,.10), inset 0 1px 0 #ffffffaa;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;background:linear-gradient(180deg,var(--bg),#0e1426);font-family:Inter,system-ui,sans-serif;color:var(--ink)}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),#eef3ff);font-family:Inter,system-ui,sans-serif;color:var(--ink)}
     .bar{position:sticky;top:0;z-index:10;background:var(--panel);border-bottom:1px solid var(--stroke);
       display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px;box-shadow:var(--elev)}
     .left,.right{display:flex;gap:8px;align-items:center}
     .brand{display:flex;gap:10px;align-items:center;font-weight:800;cursor:pointer}
     .spark{width:22px;height:22px;border-radius:6px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd)}
     .btn{border:1px solid var(--stroke);background:var(--panel);border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow:var(--elev)}
-    .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:#0000}
-    .sel,.color{border:1px solid var(--stroke);border-radius:10px;padding:7px 10px;background:var(--panel);color:var(--ink)}
+    .sel{border:1px solid var(--stroke);border-radius:10px;padding:7px 10px;background:var(--panel);color:var(--ink)}
     .hint{color:var(--muted);font-size:12px}
     .wrap{display:grid;place-items:center;padding:22px}
     .sheet{width:var(--paper-w); min-height:var(--paper-h); background:var(--panel); border:1px solid var(--stroke);
@@ -76,8 +71,7 @@
     <div class="right">
       <label class="hint">Langue</label>
       <select class="sel" id="langSel"><option value="fr">FR</option><option value="en">EN</option></select>
-      <button class="btn" id="themeBtn"><span id="themeIcon">🌙</span></button>
-      <button class="btn primary" id="pdfBtn">Exporter PDF</button>
+      <button class="btn" id="pdfBtn">Exporter PDF</button>
     </div>
   </div>
 
@@ -86,11 +80,6 @@
   </div>
 
   <script>
-    const THEME_KEY='pf_theme', html=document.documentElement, themeBtn=document.getElementById('themeBtn'), themeIcon=document.getElementById('themeIcon');
-    function applyTheme(t){ html.setAttribute('data-theme', t); localStorage.setItem(THEME_KEY,t); themeIcon.textContent=(t==='dark'?'☀️':'🌙'); }
-    applyTheme(localStorage.getItem(THEME_KEY)||'light');
-    themeBtn.onclick=()=> applyTheme(html.getAttribute('data-theme')==='dark'?'light':'dark');
-
     const $=(q,ctx=document)=>ctx.querySelector(q); let spec=null;
     (function init(){
       try{ const raw=localStorage.getItem('pf_proposal'); if(raw) spec=JSON.parse(raw); }catch{}
@@ -102,19 +91,15 @@
     function safeArr(v){ return Array.isArray(v)?v:[]; }
     function safeStr(v,fb=''){ return (v==null?'':String(v)).trim() || fb; }
     function fmtDate(d){ try{ const dt=d?new Date(d):new Date(); return dt.toLocaleDateString(document.documentElement.lang||getLang(), {year:'numeric',month:'short',day:'2-digit'});}catch{return ''} }
-    function money(n,c){ try{ return new Intl.NumberFormat(document.documentElement.lang||getLang(),{style:'currency',currency:c||'EUR'}).format(Number(n||0)); }catch{ return String(n||0)+' '+(c||'€') } }
-
-    function section(titleHTML, id){ const h=document.createElement('h2'); h.innerHTML=titleHTML; if(id) h.id=id; sheet.appendChild(h); }
-    function para(text){ const p=document.createElement('p'); p.textContent=text; sheet.appendChild(p); }
-    function list(items){ if(!items?.length) return; const ul=document.createElement('ul'); items.forEach(it=>{ const li=document.createElement('li'); li.textContent=String(it); ul.appendChild(li); }); sheet.appendChild(ul); }
-    function buildTOC(sections){ const L = (spec.meta?.lang==='en') ? t.en : t.fr; const box=document.createElement('div'); box.className='toc'; box.innerHTML=`<b>${L.toc}</b>`; sections.forEach(s=>{ if(s.present){ const a=document.createElement('a'); a.href='#'+s.id; a.textContent=s.title; box.appendChild(a);} }); sheet.appendChild(box); }
 
     const t = {
-      fr:{ title:"Proposition commerciale", to:"Pour", from:"Émis par", date:"Date", letter:"Lettre d’introduction", executive:"Résumé exécutif", objectives:"Objectifs", approach:"Approche & phasage", deliverables:"Livrables", in_scope:"Inclus", out_scope:"Hors-périmètre", timeline:"Planning", pricing:"Tarification", assumptions:"Hypothèses / Risques", next:"Prochaines étapes", price_model:"Modèle", terms:"Conditions", toc:"Sommaire" },
-      en:{ title:"Business Proposal", to:"To", from:"Issued by", date:"Date", letter:"Cover Letter", executive:"Executive Summary", objectives:"Objectives", approach:"Approach & Phasing", deliverables:"Deliverables", in_scope:"In scope", out_scope:"Out of scope", timeline:"Timeline", pricing:"Pricing", assumptions:"Assumptions / Risks", next:"Next Steps", price_model:"Model", terms:"Terms", toc:"Table of Contents" }
+      fr:{ title:"Proposition commerciale", to:"Pour", from:"Émis par", date:"Date", letter:"Lettre d’introduction", executive:"Résumé exécutif", objectives:"Objectifs", approach:"Approche & phasage", deliverables:"Livrables", in_scope:"Inclus", out_scope:"Hors-périmètre", timeline:"Planning", pricing:"Tarification", assumptions:"Hypothèses / Risques", next:"Prochaines étapes", toc:"Sommaire" },
+      en:{ title:"Business Proposal", to:"To", from:"Issued by", date:"Date", letter:"Cover Letter", executive:"Executive Summary", objectives:"Objectives", approach:"Approach & Phasing", deliverables:"Deliverables", in_scope:"In scope", out_scope:"Out of scope", timeline:"Timeline", pricing:"Pricing", assumptions:"Assumptions / Risks", next:"Next Steps", toc:"Table of Contents" }
     };
 
     const sheet=document.getElementById('sheet'), statusEl=document.getElementById('status');
+
+    function buildTOC(sections){ const L = (spec.meta?.lang==='en') ? t.en : t.fr; const box=document.createElement('div'); box.className='toc'; box.innerHTML=`<b>${L.toc}</b>`; sections.forEach(s=>{ if(s.present){ const a=document.createElement('a'); a.href='#'+s.id; a.textContent=s.title; box.appendChild(a);} }); sheet.appendChild(box); }
 
     function render(){
       sheet.innerHTML='';
@@ -125,41 +110,23 @@
       if(spec.meta?.style?.logoDataUrl){ const im=new Image(); im.src=spec.meta.style.logoDataUrl; logoBox.appendChild(im);} else { logoBox.textContent='LOGO'; logoBox.style.color='#9aa6bf'; }
       const bi=document.createElement('div'); bi.className='brand-info';
       const company=safeStr(spec.meta?.company || spec.meta?.brand?.company,'Votre société');
-      const contact=safeStr(spec.meta?.brand?.contact_name,''), website=safeStr(spec.meta?.brand?.website,''), email=safeStr(spec.meta?.brand?.email,''), phone=safeStr(spec.meta?.brand?.phone,'');
-      bi.innerHTML=`<div class="company">${company}</div><div class="muted">${[contact,website,email,phone].filter(Boolean).join(' • ')}</div>`;
+      bi.innerHTML=`<div class="company">${company}</div>`;
       header.appendChild(logoBox); header.appendChild(bi); sheet.appendChild(header);
 
       const title=safeStr(spec.meta?.title,L.title); const client=safeStr(spec.meta?.client,'Client'); const date=safeStr(spec.meta?.date, fmtDate());
       const h1=document.createElement('div');
-      h1.innerHTML = `<div class="h1" contenteditable="true">${title}</div>
-        <div class="meta">${L.to}: <span class="tag" contenteditable="true">${client}</span> &nbsp;•&nbsp;
-        ${L.from}: <span class="tag" contenteditable="true">${company}</span> &nbsp;•&nbsp; ${L.date}: ${date}</div>`;
+      h1.innerHTML = `<div class="h1">${title}</div>
+        <div class="meta">${L.to}: <span class="tag">${client}</span> &nbsp;•&nbsp;
+        ${L.from}: <span class="tag">${company}</span> &nbsp;•&nbsp; ${L.date}: ${date}</div>`;
       sheet.appendChild(h1);
       sheet.appendChild(Object.assign(document.createElement('div'),{className:'hr'}));
 
-      const tocSections=[
-        { id:'s_letter', title:L.letter, present:safeArr(spec.letter?.body_paragraphs||spec.letter?.paragraphs).length || spec.letter?.greeting||spec.letter?.closing||spec.letter?.signature },
-        { id:'s_executive', title:L.executive, present:safeArr(spec.executive_summary?.paragraphs).length },
-        { id:'s_objectives', title:L.objectives, present:safeArr(spec.objectives?.bullets).length },
-        { id:'s_approach', title:L.approach, present:safeArr(spec.approach?.phases).length },
-        { id:'s_deliverables', title:L.deliverables, present:(spec.deliverables && (safeArr(spec.deliverables.in).length || safeArr(spec.deliverables.out).length)) },
-        { id:'s_timeline', title:L.timeline, present:safeArr(spec.timeline?.milestones).length },
-        { id:'s_pricing', title:L.pricing, present:(spec.pricing && (spec.pricing.items?.length || spec.pricing.price!=null)) },
-        { id:'s_assumptions', title:L.assumptions, present:safeArr(spec.assumptions?.paragraphs).length },
-        { id:'s_next', title:L.next, present:safeArr(spec.next_steps?.paragraphs).length },
-      ];
-      buildTOC(tocSections);
-
-      // … (mêmes sections que le studio — abrégé pour tenir, identique au rendu du studio)
-      // executive + objectives + approach + deliverables + timeline + pricing + assumptions + next
-      if (tocSections[1].present){ section(L.executive,'s_executive'); safeArr(spec.executive_summary.paragraphs).forEach(p=>para(p)); }
-      if (tocSections[2].present){ section(L.objectives,'s_objectives'); list(spec.objectives.bullets); }
       statusEl.textContent = (spec.meta?.lang==='en') ? 'Preview ready' : 'Aperçu prêt';
     }
 
     document.getElementById('brandBtn').onclick = ()=> location.href='index.html';
     document.getElementById('backBtn').onclick = ()=> location.href='studio.html';
-    document.getElementById('pdfBtn').onclick  = ()=> { statusEl.textContent = (spec.meta?.lang==='en') ? 'Preparing PDF…' : 'Préparation du PDF…'; setTimeout(()=>{ window.print(); statusEl.textContent = (spec.meta?.lang==='en') ? 'Preview ready' : 'Aperçu prêt'; }, 100); };
+    document.getElementById('pdfBtn').onclick  = ()=> { window.print(); };
     document.getElementById('langSel').onchange = (e)=>{ spec.meta = { ...(spec.meta||{}), lang:e.target.value }; localStorage.setItem('pf_proposal', JSON.stringify(spec)); render(); };
   </script>
 </body>
