@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr" data-theme="light">
+<html lang="fr">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -7,40 +7,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg-start:#eef3ff; --bg-end:#e6edf9;
-      --ink:#0b1324; --muted:#5f6b84; --stroke:#d7e0f3;
+      --bg-start:#f3f6fb; --bg-end:#eaf2ff;
+      --ink:#0a1020; --muted:#5c667a; --stroke:#dfe6f4;
       --accent:#3b82f6; --accent2:#8b5cf6; --accent-ink:#fff;
-      --panel:#ffffff; --card:#fffffff2;
-      --elev-sm:0 6px 16px rgba(10,16,32,.08);
-      --elev:0 16px 44px rgba(10,16,32,.12), inset 0 1px 0 #ffffffcc;
-    }
-    [data-theme="dark"]{
-      --bg-start:#0a1020; --bg-end:#0d1429;
-      --ink:#e7edf9; --muted:#9aa6bf; --stroke:#263757;
-      --accent:#60a5fa; --accent2:#a78bfa; --accent-ink:#081225;
-      --panel:#0f172a; --card:#0f172af0;
-      --elev-sm:0 8px 18px rgba(0,0,0,.35);
-      --elev:0 22px 60px rgba(0,0,0,.5), inset 0 1px 0 #ffffff1a;
+      --card:#ffffffee; --panel:#ffffff; --shadow:0 18px 48px rgba(10,16,32,.12);
+      --elev:0 12px 30px rgba(10,16,32,.10), inset 0 1px 0 #ffffff80;
     }
     *{box-sizing:border-box} html,body{height:100%}
-    body{
-      margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);
-      background:
-        radial-gradient(1000px 500px at 70% 10%, color-mix(in hsl, var(--accent) 8%, transparent), transparent 60%),
-        radial-gradient(900px 450px at 20% 80%, color-mix(in hsl, var(--accent2) 10%, transparent), transparent 60%),
-        linear-gradient(180deg,var(--bg-start),var(--bg-end));
-      -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility
-    }
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);
+      background:linear-gradient(180deg,var(--bg-start),var(--bg-end));-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
     .container{max-width:1200px;margin:0 auto;padding:0 24px}
 
     /* NAV */
     .nav{position:fixed;top:12px;left:0;right:0;z-index:50;backdrop-filter:saturate(140%) blur(8px)}
-    .nav-inner{
-      border:1px solid var(--stroke);
-      background:color-mix(in hsl, var(--panel) 90%, transparent);
-      box-shadow:var(--elev);
-      border-radius:999px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between
-    }
+    .nav-inner{border:1px solid var(--stroke);background:color-mix(in hsl, var(--panel) 88%, transparent);box-shadow:var(--elev);
+      border-radius:999px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
     .brand{display:flex;align-items:center;gap:10px;font-weight:800;cursor:pointer}
     .brand a{color:inherit;text-decoration:none}
     .spark{width:26px;height:26px;border-radius:8px;
@@ -48,27 +29,24 @@
       box-shadow:inset 0 0 0 2px #0001, 0 1px 2px #0002}
     .menu{display:flex;gap:22px;align-items:center}
     .menu a{color:var(--muted);text-decoration:none;font-weight:600;font-size:14px;padding:8px 10px;border-radius:10px}
-    .menu a:hover{color:var(--ink);background:color-mix(in hsl, var(--panel) 80%, transparent)}
+    .menu a:hover{color:var(--ink);background:color-mix(in hsl, var(--panel) 75%, transparent)}
     .right{display:flex;align-items:center;gap:10px}
     .btn{display:inline-grid;place-items:center;gap:8px;padding:10px 16px;border-radius:999px;border:1px solid #0000;font-weight:800;cursor:pointer;font-family:inherit}
-    .btn-accent{background:var(--accent);color:var(--accent-ink);box-shadow:0 12px 28px color-mix(in hsl, var(--accent) 45%, black)}
-    .btn-ghost{background:var(--panel);color:var(--ink);border:1px solid var(--stroke);box-shadow:var(--elev-sm)}
-    .icon-btn{width:40px;height:40px;border-radius:12px;border:1px solid var(--stroke);background:var(--panel);display:grid;place-items:center;box-shadow:var(--elev-sm);cursor:pointer}
+    .btn-accent{background:var(--accent);color:var(--accent-ink);box-shadow:0 10px 28px color-mix(in hsl, var(--accent) 40%, black)}
+    .btn-ghost{background:var(--panel);color:var(--ink);border:1px solid var(--stroke);box-shadow:var(--elev)}
+    .icon-sel{height:40px;border-radius:12px;border:1px solid var(--stroke);background:var(--panel);box-shadow:var(--elev);padding:0 10px}
 
     /* HERO */
     .hero{position:relative;overflow:hidden;padding-top:120px;padding-bottom:80px}
-    .grid-overlay{position:absolute;inset:0;pointer-events:none;opacity:.22;mix-blend:overlay}
-    [data-theme="dark"] .grid-overlay{opacity:.12}
+    .grid-overlay{position:absolute;inset:0;pointer-events:none;opacity:.25;mix-blend:overlay}
     .lead{text-align:center;max-width:1000px;margin:0 auto 18px auto;letter-spacing:-.02em}
     .lead h1{font-weight:900;line-height:1.02;margin:0;font-size:clamp(40px,7vw,72px)}
     .accent-word{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
     .lead p{margin:14px auto 0;color:var(--muted);font-size:18px;max-width:720px}
 
     /* Prompt */
-    .prompt-wrap{margin:30px auto 16px;max-width:960px;padding:12px;border-radius:24px;
-      background:linear-gradient(180deg, color-mix(in hsl, var(--panel) 94%, transparent), color-mix(in hsl, var(--panel) 76%, transparent));
-      border:1px solid var(--stroke);box-shadow:var(--elev)}
-    .prompt{background:var(--panel);border:1px solid var(--stroke);border-radius:18px;display:flex;align-items:center;gap:12px;padding:10px;box-shadow:var(--elev-sm)}
+    .prompt-wrap{margin:30px auto 16px;max-width:960px;padding:12px;border-radius:24px;background:linear-gradient(180deg, color-mix(in hsl, var(--panel) 90%, transparent), color-mix(in hsl, var(--panel) 70%, transparent));border:1px solid var(--stroke);box-shadow:var(--shadow)}
+    .prompt{background:var(--panel);border:1px solid var(--stroke);border-radius:18px;display:flex;align-items:center;gap:12px;padding:10px;box-shadow:var(--elev)}
     .prompt textarea{flex:1;min-height:92px;border:none;outline:none;resize:vertical;background:transparent;font:500 16px/1.5 Inter,system-ui;color:var(--ink)}
     .send{width:42px;height:42px;border-radius:12px;border:1px solid var(--stroke);background:var(--ink);color:#fff;display:grid;place-items:center;cursor:pointer}
 
@@ -77,16 +55,15 @@
     .h2{font-size:34px;line-height:1.1;margin:0 0 12px;font-weight:900;letter-spacing:-.01em}
     .sub{color:var(--muted);margin:0 0 26px}
     .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-    .card{background:var(--card);border:1px solid var(--stroke);border-radius:20px;padding:20px;box-shadow:var(--elev)}
+    .card{background:var(--card);border:1px solid var(--stroke);border-radius:20px;padding:20px;box-shadow:var(--shadow)}
     .card h3{margin:2px 0 6px;font-size:18px}.card p{margin:0;color:var(--muted);font-size:14px}
     .icon{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#fff;margin-bottom:8px}
 
     /* Pricing */
     .pricing{background:linear-gradient(180deg,#061830,#0b2446);color:#e8eefc}
-    [data-theme="dark"] .pricing{background:linear-gradient(180deg,#07101f,#0a1a33)}
     .pricing .h2{color:#fff}.pricing .sub{color:#9fb0d0}
     .price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-    .pcard{background:color-mix(in hsl, #0b2446 92%, black);border:1px solid #1e3358;border-radius:20px;padding:20px;box-shadow:0 18px 44px rgba(0,0,0,.38)}
+    .pcard{background:color-mix(in hsl, #0b2446 88%, black);border:1px solid #1e3358;border-radius:20px;padding:20px;box-shadow:0 14px 34px rgba(0,0,0,.35)}
     .pcard .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
     .tier{font-weight:800}.price{font-weight:900;font-size:28px}
     .bullets{margin:10px 0 16px 0;padding:0;list-style:none;color:#c8d6f2}
@@ -111,12 +88,11 @@
         <a href="#pricing">Tarifs</a>
       </nav>
       <div class="right">
-        <select class="icon-btn" id="langSel" data-lang-picker>
+        <select class="icon-sel" id="langSel" data-lang-picker>
           <option value="fr">FR</option><option value="en">EN</option>
         </select>
-        <button class="icon-btn" id="themeBtn" title="Thème"><span id="themeIcon">🌙</span></button>
-        <button class="btn btn-ghost" id="authBtn" data-t-fr="Se connecter" data-t-en="Sign in">Se connecter</button>
-        <button class="btn btn-accent" id="startBtn" data-t-fr="Commencer" data-t-en="Start">Commencer</button>
+        <button class="btn btn-ghost" id="authBtn">Se connecter</button>
+        <button class="btn btn-accent" id="startBtn">Commencer</button>
       </div>
     </div>
   </div>
@@ -132,15 +108,12 @@
     <div class="container">
       <div class="lead">
         <h1>Donnez vie à vos propositions. <span class="accent-word">Maintenant.</span></h1>
-        <p id="heroSub" data-t-fr="Générez des offres et propositions professionnelles en minutes, à partir d’un simple brief. Zéro complexité."
-                        data-t-en="Create professional proposals in minutes from a simple brief. Zero complexity.">
-          Générez des offres et propositions professionnelles en minutes, à partir d’un simple brief. Zéro complexité.
-        </p>
+        <p id="heroSub">Générez des offres et propositions professionnelles en minutes, à partir d’un simple brief. Zéro complexité.</p>
       </div>
 
       <div class="prompt-wrap">
         <div class="prompt">
-          <textarea id="brief" data-ph-fr="Collez votre brief ici…" data-ph-en="Paste your brief here…"></textarea>
+          <textarea id="brief" placeholder="Collez votre brief ici…"></textarea>
           <button class="send" id="sendBrief" title="Envoyer" aria-label="Envoyer">
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
           </button>
@@ -173,6 +146,18 @@
     </div>
   </section>
 
+  <section class="section" id="use">
+    <div class="container">
+      <h2 class="h2">Cas d’usage fréquents</h2>
+      <p class="sub">Du devis B2B aux offres e-commerce, PropoFlash couvre les besoins essentiels.</p>
+      <div class="grid3">
+        <div class="card"><h3>Devis B2B</h3><p>Qualification, périmètre, livrables, échéancier et conditions.</p></div>
+        <div class="card"><h3>Services</h3><p>Marketing, design, développement, conseil, formation.</p></div>
+        <div class="card"><h3>E-commerce</h3><p>Fiches produits, bundles et offres saisonnières structurées.</p></div>
+      </div>
+    </div>
+  </section>
+
   <section class="section pricing" id="pricing">
     <div class="container">
       <h2 class="h2">Des plans clairs pour chaque besoin</h2>
@@ -196,7 +181,7 @@
             <li>• 50 aperçus / mois</li>
             <li>• Jusqu’à 3 preuves intégrées</li>
           </ul>
-          <a class="btn btn-accent" href="login.html?return=studio">Choisir Starter</a>
+          <a class="btn btn-accent" href="auth.html?return=studio">Choisir Starter</a>
         </div>
         <div class="pcard">
           <div class="head"><span class="tier">Pro</span><span class="badge">Équipes</span></div>
@@ -206,7 +191,7 @@
             <li>• Sections & modèles illimités</li>
             <li>• Micro-échantillon si aucune preuve</li>
           </ul>
-          <a class="btn btn-ghost" href="login.html?return=studio">Choisir Pro</a>
+          <a class="btn btn-ghost" href="auth.html?return=studio">Choisir Pro</a>
         </div>
       </div>
     </div>
@@ -225,32 +210,38 @@
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
     document.getElementById('y').textContent = new Date().getFullYear();
 
-    /* THEME */
-    const THEME_KEY='pf_theme'; const html=document.documentElement; const themeBtn=document.getElementById('themeBtn'); const themeIcon=document.getElementById('themeIcon');
-    function applyTheme(t){ html.setAttribute('data-theme', t); localStorage.setItem(THEME_KEY,t); themeIcon.textContent = (t==='dark'?'☀️':'🌙'); }
-    applyTheme(localStorage.getItem(THEME_KEY)||'light');
-    themeBtn.onclick=()=> applyTheme(html.getAttribute('data-theme')==='dark'?'light':'dark');
+    /* LANG placeholders */
+    function applyPlaceholders(){
+      const l = getLang();
+      const brief = document.getElementById('brief');
+      brief.placeholder = (l==='en'?'Paste your brief here…':'Collez votre brief ici…');
+      document.getElementById('startBtn').textContent = (l==='en'?'Start':'Commencer');
+      document.getElementById('authBtn').textContent = (l==='en'?'Sign in':'Se connecter');
+      document.getElementById('heroSub').textContent = (l==='en'?'Create professional proposals in minutes from a simple brief. Zero complexity.':'Générez des offres et propositions professionnelles en minutes, à partir d’un simple brief. Zéro complexité.');
+    }
+    document.addEventListener('DOMContentLoaded', ()=>{
+      applyPlaceholders();
+      document.querySelectorAll('[data-lang-picker]').forEach(sel=> sel.value=getLang());
+    });
+    window.addEventListener('langchange', applyPlaceholders);
 
-    /* LANG already handled by lang.js via data-* attributes */
-
+    /* Auth UI */
     const authBtn  = document.getElementById('authBtn');
     const startBtn = document.getElementById('startBtn');
 
     async function refreshAuthUI(){
       const { data:{ session } } = await sb.auth.getSession();
       if(session){
-        authBtn.setAttribute('data-t-fr','Se déconnecter'); authBtn.setAttribute('data-t-en','Sign out');
         authBtn.textContent = (getLang()==='en'?'Sign out':'Se déconnecter');
         authBtn.onclick = async ()=>{ await sb.auth.signOut(); location.reload(); };
       }else{
-        authBtn.setAttribute('data-t-fr','Se connecter'); authBtn.setAttribute('data-t-en','Sign in');
         authBtn.textContent = (getLang()==='en'?'Sign in':'Se connecter');
-        authBtn.onclick = ()=> location.href = 'login.html?return=studio';
+        authBtn.onclick = ()=> location.href = 'auth.html?return=studio';
       }
     }
     refreshAuthUI(); sb.auth.onAuthStateChange(refreshAuthUI);
 
-    // Commencer → prépare spec + va au studio
+    // Commencer → prépare une spec et va au studio
     startBtn.onclick = ()=>{
       const spec = JSON.parse(localStorage.getItem('pf_proposal')||'null') || {
         meta:{ lang:getLang(), title:(getLang()==='en'?'Business Proposal':'Proposition commerciale'), company:'Votre société', client:'Client' },
