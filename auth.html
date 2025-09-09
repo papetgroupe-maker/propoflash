@@ -128,11 +128,11 @@
   </div>
 
   <script>
-    // === Supabase (mêmes constantes que votre site) ===
+    // === Supabase (identiques au site) ===
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
-      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce' }
     });
 
     // Destination après connexion (par défaut studio)
@@ -154,37 +154,57 @@
     const applyResetBtn = document.getElementById('applyResetBtn');
 
     let mode = 'signin'; // 'signup' ou 'signin'
+    let redirected = false;
 
     function showErr(txt){ msgErr.textContent = txt; msgErr.style.display='block'; msgOk.style.display='none'; }
     function showOk(txt){ msgOk.textContent = txt; msgOk.style.display='block'; msgErr.style.display='none'; }
     function clearMsgs(){ msgErr.style.display='none'; msgOk.style.display='none'; }
 
-    // Déjà connecté ? -> studio
+    // 1) Traite le retour OAuth (?code=...) puis redirige
     (async ()=>{
-      const { data:{ session } } = await sb.auth.getSession();
-      if(session){ location.replace(DEST); }
+      try {
+        const url = new URL(location.href);
+        const code = url.searchParams.get('code');
+        const errDesc = url.searchParams.get('error_description');
+        if (errDesc) showErr(decodeURIComponent(errDesc));
+
+        if (code) {
+          const { error } = await sb.auth.exchangeCodeForSession(location.href);
+          if (error) { showErr(error.message); return; }
+          // Nettoie l’URL (garde éventuellement ?return=..)
+          const clean = 'auth.html' + (RET ? `?return=${encodeURIComponent(RET)}` : '');
+          history.replaceState({}, '', clean);
+          redirected = true;
+          location.replace(DEST);
+          return;
+        }
+
+        // Déjà connecté sans code (session persistée) ?
+        const { data:{ session } } = await sb.auth.getSession();
+        if (session && !redirected) { location.replace(DEST); }
+      } catch(e) {
+        showErr(e?.message || String(e));
+      }
     })();
 
-    // Gère fin d’OAuth / changements de session
+    // 2) Réagit à la création de session par le SDK
     sb.auth.onAuthStateChange(async (event, session)=>{
-      if(event === 'SIGNED_IN' && session){ location.replace(DEST); }
+      if(event === 'SIGNED_IN' && session && !redirected){
+        redirected = true;
+        location.replace(DEST);
+      }
       if(event === 'PASSWORD_RECOVERY'){
-        // Affiche la zone pour définir un nouveau mot de passe
         resetBox.style.display = 'block';
         showOk('Définissez un nouveau mot de passe puis validez.');
       }
     });
 
-    // Si retour OAuth (hash avec tokens), laisse le SDK hydrater puis redirige
-    if (location.hash && /(access_token|provider_token|code|type=recovery)/i.test(location.hash)) {
-      setTimeout(async ()=>{
-        const { data:{ session } } = await sb.auth.getSession();
-        if(session && !/type=recovery/i.test(location.hash)){ location.replace(DEST); }
-        if(/type=recovery/i.test(location.hash)){ resetBox.style.display='block'; }
-      }, 0);
+    // 3) Flux “password recovery” (hash type=recovery)
+    if (location.hash && /type=recovery/i.test(location.hash)) {
+      resetBox.style.display = 'block';
     }
 
-    // Google OAuth : revient ici (auth.html), puis redirection via onAuthStateChange
+    // Google OAuth
     googleBtn.onclick = async ()=>{
       clearMsgs();
       const { error } = await sb.auth.signInWithOAuth({
@@ -221,13 +241,13 @@
       showOk('Email envoyé ✅. Clique sur le lien reçu pour définir un nouveau mot de passe.');
     };
 
-    // Appliquer le nouveau mot de passe (flux "password recovery")
+    // Appliquer le nouveau mot de passe (recovery)
     applyResetBtn.onclick = async ()=>{
       clearMsgs();
       const np = (newPassEl.value||'').trim();
       if(np.length < 6) return showErr('Mot de passe trop court (6 caractères min).');
       try{
-        const { data, error } = await sb.auth.updateUser({ password: np });
+        const { error } = await sb.auth.updateUser({ password: np });
         if(error) return showErr(error.message);
         showOk('Mot de passe mis à jour ✅. Redirection…');
         setTimeout(()=>location.replace(DEST), 600);
