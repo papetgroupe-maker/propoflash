@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr">
+<html lang="fr" data-theme="light">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -10,65 +10,54 @@
       --bg-start:#f3f6fb; --bg-end:#eaf2ff;
       --ink:#0a1020; --muted:#5c667a; --stroke:#dfe6f4;
       --accent:#3b82f6; --accent2:#8b5cf6; --accent-ink:#fff;
-      --card:#ffffffee; --shadow:0 12px 36px rgba(10,16,32,.10);
+      --card:#ffffffee; --panel:#ffffff; --shadow:0 18px 48px rgba(10,16,32,.12);
+      --elev:0 12px 30px rgba(10,16,32,.12), inset 0 1px 0 #ffffff80;
     }
-    /* Dark theme */
-    :root.dark{
-      --bg-start:#0b1220; --bg-end:#0f172a;
-      --ink:#e8eefc; --muted:#98a2b3; --stroke:#273449;
-      --card:#101828ee; --shadow:0 12px 36px rgba(0,0,0,.35);
+    [data-theme="dark"]{
+      --bg-start:#0b1220; --bg-end:#111a2e;
+      --ink:#e6edf7; --muted:#9aa6bf; --stroke:#20304f;
+      --accent:#60a5fa; --accent2:#a78bfa; --accent-ink:#081225;
+      --card:#101827ee; --panel:#0f172a; --shadow:0 22px 60px rgba(0,0,0,.45);
+      --elev:0 12px 30px rgba(0,0,0,.35), inset 0 1px 0 #ffffff1a;
     }
+
     *{box-sizing:border-box} html,body{height:100%}
     body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);
       background:linear-gradient(180deg,var(--bg-start),var(--bg-end));-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+
     .container{max-width:1200px;margin:0 auto;padding:0 24px}
 
     /* NAV */
     .nav{position:fixed;top:12px;left:0;right:0;z-index:50;backdrop-filter:saturate(140%) blur(8px)}
-    .nav-inner{border:1px solid var(--stroke);background:#fff7;box-shadow:var(--shadow);
+    .nav-inner{border:1px solid var(--stroke);background:color-mix(in hsl, var(--panel) 88%, transparent);box-shadow:var(--elev);
       border-radius:999px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
-    :root.dark .nav-inner{background:#0b1220a6}
-    .brand{display:flex;align-items:center;gap:10px;font-weight:800}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800;cursor:pointer}
     .brand a{color:inherit;text-decoration:none}
     .spark{width:26px;height:26px;border-radius:8px;
       background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd);
-      box-shadow:inset 0 0 0 2px #0001, 0 1px 2px #0001}
+      box-shadow:inset 0 0 0 2px #0001, 0 1px 2px #0002}
     .menu{display:flex;gap:22px;align-items:center}
     .menu a{color:var(--muted);text-decoration:none;font-weight:600;font-size:14px;padding:8px 10px;border-radius:10px}
-    .menu a:hover{color:var(--ink);background:#ffffffa6}
-    :root.dark .menu a:hover{background:#1f2a44}
+    .menu a:hover{color:var(--ink);background:color-mix(in hsl, var(--panel) 75%, transparent)}
     .right{display:flex;align-items:center;gap:10px}
     .btn{display:inline-grid;place-items:center;gap:8px;padding:10px 16px;border-radius:999px;border:1px solid #0000;font-weight:800;cursor:pointer;font-family:inherit}
-    .btn-accent{background:var(--accent);color:var(--accent-ink);box-shadow:0 10px 28px rgba(59,130,246,.35)}
-    .btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--stroke)}
-    :root.dark .btn-ghost{background:#0f172a;color:var(--ink);border-color:var(--stroke)}
-    .icon-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--stroke);background:#fff;border-radius:999px;padding:8px 12px;font-weight:700;cursor:pointer}
-    :root.dark .icon-btn{background:#0f172a}
-
-    /* Profile dropdown */
-    .profile{position:relative}
-    .avatar{width:34px;height:34px;border-radius:50%;border:1px solid var(--stroke);display:grid;place-items:center;font-weight:800;background:#fff}
-    :root.dark .avatar{background:#0f172a}
-    .dd{position:absolute;right:0;top:44px;background:#fff;border:1px solid var(--stroke);border-radius:12px;box-shadow:var(--shadow);min-width:200px;display:none;overflow:hidden}
-    :root.dark .dd{background:#0f172a}
-    .dd a,.dd button{display:block;width:100%;text-align:left;padding:10px 12px;font-weight:600;border:none;background:transparent;color:var(--ink);cursor:pointer}
-    .dd a:hover,.dd button:hover{background:#f2f6ff}
-    :root.dark .dd a:hover,:root.dark .dd button:hover{background:#18233a}
+    .btn-accent{background:var(--accent);color:var(--accent-ink);box-shadow:0 10px 28px color-mix(in hsl, var(--accent) 40%, black)}
+    .btn-ghost{background:var(--panel);color:var(--ink);border:1px solid var(--stroke);box-shadow:var(--elev)}
+    .icon-btn{width:40px;height:40px;border-radius:12px;border:1px solid var(--stroke);background:var(--panel);display:grid;place-items:center;box-shadow:var(--elev);cursor:pointer}
 
     /* HERO */
     .hero{position:relative;overflow:hidden;padding-top:120px;padding-bottom:80px}
-    .grid-overlay{position:absolute;inset:0;pointer-events:none;opacity:.35;mix-blend:overlay}
+    .grid-overlay{position:absolute;inset:0;pointer-events:none;opacity:.25;mix-blend:overlay}
+    [data-theme="dark"] .grid-overlay{opacity:.18}
     .lead{text-align:center;max-width:1000px;margin:0 auto 18px auto;letter-spacing:-.02em}
     .lead h1{font-weight:900;line-height:1.02;margin:0;font-size:clamp(40px,7vw,72px)}
-    .accent-word{background:linear-gradient(90deg,#60a5fa,#93c5fd);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .accent-word{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
     .lead p{margin:14px auto 0;color:var(--muted);font-size:18px;max-width:720px}
 
     /* Prompt */
-    .prompt-wrap{margin:30px auto 16px;max-width:960px;padding:12px;border-radius:24px;background:linear-gradient(180deg,#ffffffcc,#ffffff80);border:1px solid var(--stroke);box-shadow:var(--shadow)}
-    :root.dark .prompt-wrap{background:linear-gradient(180deg,#0f172acc,#0f172a80)}
-    .prompt{background:#fff;border:1px solid var(--stroke);border-radius:18px;display:flex;align-items:center;gap:12px;padding:10px}
-    :root.dark .prompt{background:#0b1220}
-    .prompt textarea{flex:1;min-height:92px;border:none;outline:none;resize:vertical;font:500 16px/1.5 Inter,system-ui;color:var(--ink);background:transparent}
+    .prompt-wrap{margin:30px auto 16px;max-width:960px;padding:12px;border-radius:24px;background:linear-gradient(180deg, color-mix(in hsl, var(--panel) 90%, transparent), color-mix(in hsl, var(--panel) 70%, transparent));border:1px solid var(--stroke);box-shadow:var(--shadow)}
+    .prompt{background:var(--panel);border:1px solid var(--stroke);border-radius:18px;display:flex;align-items:center;gap:12px;padding:10px;box-shadow:var(--elev)}
+    .prompt textarea{flex:1;min-height:92px;border:none;outline:none;resize:vertical;background:transparent;font:500 16px/1.5 Inter,system-ui;color:var(--ink)}
     .send{width:42px;height:42px;border-radius:12px;border:1px solid var(--stroke);background:var(--ink);color:#fff;display:grid;place-items:center;cursor:pointer}
 
     /* Sections */
@@ -78,61 +67,48 @@
     .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
     .card{background:var(--card);border:1px solid var(--stroke);border-radius:20px;padding:20px;box-shadow:var(--shadow)}
     .card h3{margin:2px 0 6px;font-size:18px}.card p{margin:0;color:var(--muted);font-size:14px}
-    .icon{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#93c5fd,#c4b5fd);display:grid;place-items:center;color:#fff;margin-bottom:8px}
+    .icon{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#fff;margin-bottom:8px}
 
     /* Pricing */
-    .pricing{background:#061830;color:#e8eefc}
+    .pricing{background:linear-gradient(180deg,#061830,#0b2446);color:#e8eefc}
+    [data-theme="dark"] .pricing{background:linear-gradient(180deg,#07101f,#0a1a33)}
     .pricing .h2{color:#fff}.pricing .sub{color:#9fb0d0}
     .price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-    .pcard{background:#0b2446;border:1px solid #1e3358;border-radius:20px;padding:20px;box-shadow:0 14px 34px rgba(0,0,0,.25)}
+    .pcard{background:color-mix(in hsl, #0b2446 88%, black);border:1px solid #1e3358;border-radius:20px;padding:20px;box-shadow:0 14px 34px rgba(0,0,0,.35)}
     .pcard .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
     .tier{font-weight:800}.price{font-weight:900;font-size:28px}
     .bullets{margin:10px 0 16px 0;padding:0;list-style:none;color:#c8d6f2}
     .bullets li{margin:8px 0;display:flex;gap:8px;align-items:flex-start}
-    .badge{display:inline-block;font-size:11px;background:#ffffff14;border:1px solid #ffffff22;padding:4px 8px;border-radius:999px}
+    .badge{display:inline-block;font-size:11px;background:#ffffff27;border:1px solid #ffffff33;padding:4px 8px;border-radius:999px}
 
     /* Footer */
     .footer{padding:36px 0;color:var(--muted);font-size:14px}
     .footer a{color:inherit}
-
     @media (max-width:980px){.grid3,.price-grid{grid-template-columns:1fr}}
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="lang.js"></script>
 </head>
 <body>
-  <!-- NAV -->
   <div class="nav">
     <div class="container nav-inner">
-      <div class="brand"><div class="spark" aria-hidden="true"></div><a href="index.html" id="brandLink">PropoFlash</a></div>
+      <div class="brand" onclick="location.href='index.html'"><div class="spark" aria-hidden="true"></div><a>PropoFlash</a></div>
       <nav class="menu" aria-label="Primary">
-        <a href="#why" data-i18n="nav_why">Pourquoi nous</a>
-        <a href="#use" data-i18n="nav_use">Cas d’usage</a>
-        <a href="#pricing" data-i18n="nav_pricing">Tarifs</a>
+        <a href="#why">Pourquoi nous</a>
+        <a href="#use">Cas d’usage</a>
+        <a href="#pricing">Tarifs</a>
       </nav>
       <div class="right">
-        <!-- Lang -->
-        <select class="icon-btn" id="langSel" data-lang-picker aria-label="Language">
+        <select class="icon-btn" id="langSel" data-lang-picker>
           <option value="fr">FR</option><option value="en">EN</option>
         </select>
-        <!-- Theme -->
-        <button class="icon-btn" id="themeBtn" title="Theme">🌙</button>
-        <!-- Auth / Profile -->
-        <button class="btn btn-ghost" id="authBtn" data-i18n="nav_login">Se connecter</button>
-        <div class="profile" id="profileBox" style="display:none">
-          <button class="avatar" id="avatarBtn">U</button>
-          <div class="dd" id="profileMenu">
-            <a href="studio.html" data-i18n="menu_studio">Studio</a>
-            <a href="studio.html#history" data-i18n="menu_history">Historique</a>
-            <button id="logoutBtn" data-i18n="menu_logout">Se déconnecter</button>
-          </div>
-        </div>
-        <!-- CTA -->
-        <button class="btn btn-accent" id="startBtn" data-i18n="cta_start">Commencer</button>
+        <button class="icon-btn" id="themeBtn" title="Thème"><span id="themeIcon">🌙</span></button>
+        <button class="btn btn-ghost" id="authBtn">Se connecter</button>
+        <button class="btn btn-accent" id="startBtn">Commencer</button>
       </div>
     </div>
   </div>
 
-  <!-- HERO -->
   <section class="hero" id="hero">
     <svg class="grid-overlay" viewBox="0 0 100 100" preserveAspectRatio="none">
       <defs><pattern id="g" width="10" height="10" patternUnits="userSpaceOnUse">
@@ -143,13 +119,13 @@
 
     <div class="container">
       <div class="lead">
-        <h1 data-i18n-html="h1">Donnez vie à vos propositions. <span class="accent-word">Maintenant.</span></h1>
-        <p data-i18n="h1_sub">Générez des offres et propositions professionnelles en minutes, à partir d’un simple brief. Zéro complexité.</p>
+        <h1>Donnez vie à vos propositions. <span class="accent-word">Maintenant.</span></h1>
+        <p id="heroSub">Générez des offres et propositions professionnelles en minutes, à partir d’un simple brief. Zéro complexité.</p>
       </div>
 
       <div class="prompt-wrap">
         <div class="prompt">
-          <textarea id="brief" placeholder="Écrivez votre message"></textarea>
+          <textarea id="brief" placeholder="Collez votre brief ici…"></textarea>
           <button class="send" id="sendBrief" title="Envoyer" aria-label="Envoyer">
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
           </button>
@@ -158,258 +134,139 @@
     </div>
   </section>
 
-  <!-- WHY -->
   <section class="section" id="why">
     <div class="container">
-      <h2 class="h2" data-i18n="why_h2">Pourquoi PropoFlash ?</h2>
-      <p class="sub" data-i18n="why_sub">Notre signature : qualité éditoriale + exécution instantanée, sans vous perdre dans des outils.</p>
+      <h2 class="h2">Pourquoi PropoFlash ?</h2>
+      <p class="sub">Notre signature : qualité éditoriale + exécution instantanée, sans vous perdre dans des outils.</p>
       <div class="grid3">
         <div class="card">
           <div class="icon">✍️</div>
-          <h3 data-i18n="why1_t">Rédaction premium</h3>
-          <p data-i18n="why1_p">Ton professionnel, argumentation claire, structure prête à envoyer à des décideurs.</p>
+          <h3>Rédaction premium</h3>
+          <p>Ton professionnel, argumentation claire, structure prête à envoyer à des décideurs.</p>
         </div>
         <div class="card">
           <div class="icon">🎯</div>
-          <h3 data-i18n="why2_t">Adaptée au contexte</h3>
-          <p data-i18n="why2_p">Chaque proposition s’appuie sur votre brief et vos preuves pour coller à l’objectif.</p>
+          <h3>Adaptée au contexte</h3>
+          <p>Chaque proposition s’appuie sur votre brief et vos preuves pour coller à l’objectif.</p>
         </div>
         <div class="card">
           <div class="icon">⚡</div>
-          <h3 data-i18n="why3_t">Aperçu instantané</h3>
-          <p data-i18n="why3_p">Vous collez le brief, vous prévisualisez, vous peaufinez — puis PDF en 1 clic.</p>
+          <h3>Aperçu instantané</h3>
+          <p>Vous collez le brief, vous prévisualisez, vous peaufinez — puis PDF en 1 clic.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- USE CASES -->
-  <section class="section" id="use">
-    <div class="container">
-      <h2 class="h2" data-i18n="use_h2">Cas d’usage fréquents</h2>
-      <p class="sub" data-i18n="use_sub">Du devis B2B aux offres e-commerce, PropoFlash couvre les besoins essentiels.</p>
-      <div class="grid3">
-        <div class="card"><h3 data-i18n="use_t1">Devis B2B</h3><p data-i18n="use1">Qualification, périmètre, livrables, échéancier et conditions.</p></div>
-        <div class="card"><h3 data-i18n="use_t2">Services</h3><p data-i18n="use2">Marketing, design, développement, conseil, formation.</p></div>
-        <div class="card"><h3 data-i18n="use_t3">E-commerce</h3><p data-i18n="use3">Fiches produits, bundles et offres saisonnières structurées.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- PRICING -->
   <section class="section pricing" id="pricing">
     <div class="container">
-      <h2 class="h2" data-i18n="price_h2">Des plans clairs pour chaque besoin</h2>
-      <p class="sub" data-i18n="price_sub">Commencez gratuitement, évoluez quand vous êtes prêt.</p>
+      <h2 class="h2">Des plans clairs pour chaque besoin</h2>
+      <p class="sub">Commencez gratuitement, évoluez quand vous êtes prêt.</p>
       <div class="price-grid">
         <div class="pcard">
-          <div class="head"><span class="tier" data-i18n="p1_t">Gratuit</span><span class="badge" id="freeBadge">3/mois</span></div>
+          <div class="head"><span class="tier">Gratuit</span><span class="badge">3/mois</span></div>
           <div class="price">€0</div>
           <ul class="bullets">
-            <li>• <span data-i18n="p1_b1">3 aperçus par mois</span></li>
-            <li>• <span data-i18n="p1_b2">Chat IA guidé</span></li>
-            <li>• <span data-i18n="p1_b3">Export PDF verrouillé</span></li>
+            <li>• 3 aperçus par mois</li>
+            <li>• Chat IA guidé</li>
+            <li>• Export PDF verrouillé</li>
           </ul>
-          <a class="btn btn-ghost" href="#hero" aria-disabled="true" data-i18n="cta_try" title="L’export est réservé aux offres payantes">Essayer</a>
+          <a class="btn btn-ghost" href="#hero" aria-disabled="true" title="L’export est réservé aux offres payantes">Essayer</a>
         </div>
         <div class="pcard" style="border-color:#2a4c8c">
-          <div class="head"><span class="tier" data-i18n="p2_t">Starter</span><span class="badge" data-i18n="badge_popular">Populaire</span></div>
+          <div class="head"><span class="tier">Starter</span><span class="badge">Populaire</span></div>
           <div class="price">€19<span style="font-weight:700;font-size:14px">/mo</span></div>
           <ul class="bullets">
-            <li>• <span data-i18n="p2_b1">PDF sans filigrane</span></li>
-            <li>• <span data-i18n="p2_b2">50 aperçus / mois</span></li>
-            <li>• <span data-i18n="p2_b3">Jusqu’à 3 preuves intégrées</span></li>
+            <li>• PDF sans filigrane</li>
+            <li>• 50 aperçus / mois</li>
+            <li>• Jusqu’à 3 preuves intégrées</li>
           </ul>
-          <a class="btn btn-accent" href="auth.html?return=studio" data-i18n="cta_choose">Choisir Starter</a>
+          <a class="btn btn-accent" href="login.html?return=studio">Choisir Starter</a>
         </div>
         <div class="pcard">
-          <div class="head"><span class="tier" data-i18n="p3_t">Pro</span><span class="badge" data-i18n="badge_teams">Équipes</span></div>
+          <div class="head"><span class="tier">Pro</span><span class="badge">Équipes</span></div>
           <div class="price">€49<span style="font-weight:700;font-size:14px">/mo</span></div>
           <ul class="bullets">
-            <li>• <span data-i18n="p3_b1">Aperçus illimités</span></li>
-            <li>• <span data-i18n="p3_b2">Sections & modèles illimités</span></li>
-            <li>• <span data-i18n="p3_b3">Micro-échantillon si aucune preuve</span></li>
+            <li>• Aperçus illimités</li>
+            <li>• Sections & modèles illimités</li>
+            <li>• Micro-échantillon si aucune preuve</li>
           </ul>
-          <a class="btn btn-ghost" href="auth.html?return=studio" data-i18n="cta_choose_pro">Choisir Pro</a>
+          <a class="btn btn-ghost" href="login.html?return=studio">Choisir Pro</a>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- FOOTER -->
   <footer class="footer">
     <div class="container" style="display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap">
-      <div>© <span id="y"></span> PropoFlash. <span data-i18n="rights">Tous droits réservés.</span></div>
-      <div><a href="#" data-i18n="legal">Mentions légales</a> · <a href="#" data-i18n="privacy">Confidentialité</a></div>
+      <div>© <span id="y"></span> PropoFlash. Tous droits réservés.</div>
+      <div><a href="#">Mentions légales</a> · <a href="#">Confidentialité</a></div>
     </div>
   </footer>
 
   <script>
-    /* ===== Supabase ===== */
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-
-    /* ===== Lang handler (inline, version “lang.js” sans balise <script>) ===== */
-    (function(){
-      const KEY='pf_lang', FALLBACK='en', SUP=['fr','en'];
-      function norm(l){const s=String(l||'').slice(0,2).toLowerCase(); return SUP.includes(s)?s:FALLBACK;}
-      window.getLang = ()=> norm(localStorage.getItem(KEY) || (navigator.language||'en'));
-      window.setLang = (l)=>{ const lang=norm(l); localStorage.setItem(KEY,lang); document.documentElement.lang=lang; window.dispatchEvent(new CustomEvent('langchange',{detail:lang})); };
-      document.addEventListener('DOMContentLoaded', ()=>{
-        const lang = getLang(); document.documentElement.lang=lang;
-        document.querySelectorAll('select[data-lang-picker]').forEach(sel=>{ sel.value=lang; sel.addEventListener('change',e=>setLang(e.target.value)); });
-      });
-    })();
-
-    /* ===== i18n dictionnaire ===== */
-    const I18N={
-      fr:{nav_why:"Pourquoi nous",nav_use:"Cas d’usage",nav_pricing:"Tarifs",nav_login:"Se connecter",
-          menu_studio:"Studio",menu_history:"Historique",menu_logout:"Se déconnecter",
-          h1:"Donnez vie à vos propositions. <span class='accent-word'>Maintenant.</span>",
-          h1_sub:"Générez des offres et propositions professionnelles en minutes, à partir d’un simple brief. Zéro complexité.",
-          why_h2:"Pourquoi PropoFlash ?",why_sub:"Notre signature : qualité éditoriale + exécution instantanée, sans vous perdre dans des outils.",
-          why1_t:"Rédaction premium",why1_p:"Ton professionnel, argumentation claire, structure prête à envoyer à des décideurs.",
-          why2_t:"Adaptée au contexte",why2_p:"Chaque proposition s’appuie sur votre brief et vos preuves pour coller à l’objectif.",
-          why3_t:"Aperçu instantané",why3_p:"Vous collez le brief, vous prévisualisez, vous peaufinez — puis PDF en 1 clic.",
-          use_h2:"Cas d’usage fréquents",use_sub:"Du devis B2B aux offres e-commerce, PropoFlash couvre les besoins essentiels.",
-          use_t1:"Devis B2B",use1:"Qualification, périmètre, livrables, échéancier et conditions.",
-          use_t2:"Services",use2:"Marketing, design, développement, conseil, formation.",
-          use_t3:"E-commerce",use3:"Fiches produits, bundles et offres saisonnières structurées.",
-          price_h2:"Des plans clairs pour chaque besoin",price_sub:"Commencez gratuitement, évoluez quand vous êtes prêt.",
-          p1_t:"Gratuit",p1_b1:"3 aperçus par mois",p1_b2:"Chat IA guidé",p1_b3:"Export PDF verrouillé",
-          p2_t:"Starter",p2_b1:"PDF sans filigrane",p2_b2:"50 aperçus / mois",p2_b3:"Jusqu’à 3 preuves intégrées",
-          p3_t:"Pro",p3_b1:"Aperçus illimités",p3_b2:"Sections & modèles illimités",p3_b3:"Micro-échantillon si aucune preuve",
-          badge_popular:"Populaire",badge_teams:"Équipes",
-          cta_try:"Essayer",cta_choose:"Choisir Starter",cta_choose_pro:"Choisir Pro",
-          rights:"Tous droits réservés.",legal:"Mentions légales",privacy:"Confidentialité",
-          cta_start:"Commencer"},
-      en:{nav_why:"Why us",nav_use:"Use cases",nav_pricing:"Pricing",nav_login:"Sign in",
-          menu_studio:"Studio",menu_history:"History",menu_logout:"Sign out",
-          h1:"Make your proposal a <span class='accent-word'>reality</span>. Right now.",
-          h1_sub:"Generate professional proposals in minutes from a simple brief. Zero complexity.",
-          why_h2:"Why PropoFlash?",why_sub:"Our signature: editorial excellence + instant execution, without tool overload.",
-          why1_t:"Premium writing",why1_p:"Executive tone, clear arguments, structure ready for decision-makers.",
-          why2_t:"Context-aware",why2_p:"Every proposal adapts to your brief and evidence to match the goal.",
-          why3_t:"Instant preview",why3_p:"Paste brief, preview, refine — then 1-click PDF.",
-          use_h2:"Popular use cases",use_sub:"From B2B quotes to e-commerce offers, we cover the essentials.",
-          use_t1:"B2B quotes",use1:"Scoping, deliverables, schedule, terms.",
-          use_t2:"Services",use2:"Marketing, design, development, consulting, training.",
-          use_t3:"E-commerce",use3:"Product pages, bundles & seasonal offers.",
-          price_h2:"Clear plans for every need",price_sub:"Start free and scale when ready.",
-          p1_t:"Free",p1_b1:"3 previews / month",p1_b2:"Guided AI chat",p1_b3:"Locked PDF export",
-          p2_t:"Starter",p2_b1:"No-watermark PDF",p2_b2:"50 previews / month",p2_b3:"Up to 3 embedded proofs",
-          p3_t:"Pro",p3_b1:"Unlimited previews",p3_b2:"Unlimited sections & templates",p3_b3:"Micro-sample when no proof",
-          badge_popular:"Most popular",badge_teams:"Teams",
-          cta_try:"Try it",cta_choose:"Choose Starter",cta_choose_pro:"Choose Pro",
-          rights:"All rights reserved.",legal:"Legal",privacy:"Privacy",
-          cta_start:"Start"}
-    };
-    function applyI18N(){
-      const L = I18N[getLang()] || I18N.fr;
-      document.querySelectorAll('[data-i18n]').forEach(el=>{ const k=el.dataset.i18n; if(L[k]!=null) el.textContent=L[k]; });
-      document.querySelectorAll('[data-i18n-html]').forEach(el=>{ const k=el.dataset.i18nHtml; if(L[k]!=null) el.innerHTML=L[k]; });
-      document.title = (getLang()==='en') ? 'PropoFlash — Proposals that convert' : 'PropoFlash — Proposals that convert';
-      // prix badge (ex: 3/mo vs 3/mois) — simple
-      const badge=document.getElementById('freeBadge'); if(badge) badge.textContent=(getLang()==='en')?'3/mo':'3/mois';
-    }
-    window.addEventListener('langchange', applyI18N);
-    document.addEventListener('DOMContentLoaded', applyI18N);
-
-    /* ===== Theme ===== */
-    const themeBtn = document.getElementById('themeBtn');
-    (function initTheme(){
-      const saved = localStorage.getItem('pf_theme') || 'light';
-      if(saved==='dark') document.documentElement.classList.add('dark');
-      themeBtn.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
-    })();
-    themeBtn.addEventListener('click', ()=>{
-      document.documentElement.classList.toggle('dark');
-      const dark = document.documentElement.classList.contains('dark');
-      themeBtn.textContent = dark ? '☀️' : '🌙';
-      localStorage.setItem('pf_theme', dark?'dark':'light');
-    });
-
-    /* ===== Footer year ===== */
     document.getElementById('y').textContent = new Date().getFullYear();
 
-    /* ===== Auth UI (profil + actions) ===== */
-    const authBtn  = document.getElementById('authBtn');
-    const profileBox = document.getElementById('profileBox');
-    const avatarBtn = document.getElementById('avatarBtn');
-    const profileMenu = document.getElementById('profileMenu');
-    const logoutBtn = document.getElementById('logoutBtn');
+    /* --- THEME --- */
+    const THEME_KEY='pf_theme';
+    const html=document.documentElement; const themeBtn=document.getElementById('themeBtn'); const themeIcon=document.getElementById('themeIcon');
+    function applyTheme(t){ html.setAttribute('data-theme', t); localStorage.setItem(THEME_KEY,t); themeIcon.textContent = (t==='dark'?'☀️':'🌙'); }
+    applyTheme(localStorage.getItem(THEME_KEY)||'light');
+    themeBtn.onclick=()=> applyTheme(html.getAttribute('data-theme')==='dark'?'light':'dark');
 
-    function showProfile(email){
-      const letter = (email||'?').trim()[0]?.toUpperCase() || 'U';
-      avatarBtn.textContent = letter;
-      authBtn.style.display='none';
-      profileBox.style.display='block';
+    /* --- LANG PLACEHOLDERS --- */
+    function applyPlaceholders(){
+      const l = getLang();
+      const brief = document.getElementById('brief');
+      brief.placeholder = (l==='en'?'Paste your brief here…':'Collez votre brief ici…');
+      document.getElementById('startBtn').textContent = (l==='en'?'Start':'Commencer');
+      document.getElementById('authBtn').textContent = (l==='en'?'Sign in':'Se connecter');
+      document.getElementById('heroSub').textContent = (l==='en'?'Create professional proposals in minutes from a simple brief. Zero complexity.':'Générez des offres et propositions professionnelles en minutes, à partir d’un simple brief. Zéro complexité.');
     }
-    function hideProfile(){
-      profileBox.style.display='none';
-      authBtn.style.display='inline-grid';
-    }
+    window.addEventListener('langchange', applyPlaceholders);
+    document.addEventListener('DOMContentLoaded', applyPlaceholders);
+
+    const authBtn  = document.getElementById('authBtn');
+    const startBtn = document.getElementById('startBtn');
 
     async function refreshAuthUI(){
       const { data:{ session } } = await sb.auth.getSession();
-      if(session?.user){
-        showProfile(session.user.email||'U');
-        // avatar dropdown
-        avatarBtn.onclick = (e)=>{ e.stopPropagation(); profileMenu.style.display = (profileMenu.style.display==='block'?'none':'block'); };
-        document.addEventListener('click', ()=> profileMenu.style.display='none');
-        logoutBtn.onclick = async ()=>{ await sb.auth.signOut(); hideProfile(); location.reload(); };
+      if(session){
+        authBtn.textContent = (getLang()==='en'?'Sign out':'Se déconnecter');
+        authBtn.onclick = async ()=>{ await sb.auth.signOut(); location.reload(); };
       }else{
-        hideProfile();
-        const L = I18N[getLang()] || I18N.fr;
-        authBtn.textContent = L.nav_login;
-        authBtn.onclick = ()=> location.href = 'auth.html?return=studio';
+        authBtn.textContent = (getLang()==='en'?'Sign in':'Se connecter');
+        authBtn.onclick = ()=> location.href = 'login.html?return=studio';
       }
     }
     refreshAuthUI(); sb.auth.onAuthStateChange(refreshAuthUI);
 
-    /* ===== Garde-fou “1 essai anonyme” ===== */
-    async function guardOrGoToStudio(){
-      const { data:{ session } } = await sb.auth.getSession();
-      if(session?.user){ location.href='studio.html'; return; }
-      const tries = parseInt(localStorage.getItem('pf_anon_uses')||'0',10);
-      if(tries>=1){
-        location.href='auth.html?return=studio';
-        return;
-      }
-      localStorage.setItem('pf_anon_uses', String(tries+1));
-      location.href='studio.html';
-    }
+    // Toggle language select to current
+    document.querySelectorAll('[data-lang-picker]').forEach(sel=>{ sel.value=getLang(); });
 
-    /* ===== CTA Commencer ===== */
-    document.getElementById('startBtn').onclick = async ()=>{
-      // init spec si absente
+    // Commencer → prépare une spec et va au studio (si non connecté, le studio demandera login et retournera au studio)
+    startBtn.onclick = ()=>{
       const spec = JSON.parse(localStorage.getItem('pf_proposal')||'null') || {
         meta:{ lang:getLang(), title:(getLang()==='en'?'Business Proposal':'Proposition commerciale'), company:'Votre société', client:'Client' },
         pricing:{ model:'forfait', price:0, currency:'EUR' },
         sections:[]
       };
       localStorage.setItem('pf_proposal', JSON.stringify(spec));
-      await guardOrGoToStudio();
+      location.href = 'studio.html';
     };
 
-    /* ===== Envoi direct depuis l’accueil ===== */
-    const brief = document.getElementById('brief');
-    const sendBrief = document.getElementById('sendBrief');
-    function goWithBrief(){
-      const v=(brief.value||'').trim(); if(!v) return;
+    // Envoyer un brief vers le studio
+    document.getElementById('sendBrief').onclick = ()=>{
+      const v=(document.getElementById('brief').value||'').trim(); if(!v) return;
       localStorage.setItem('pf_welcome_msg', v);
       if(!localStorage.getItem('pf_proposal')){
-        localStorage.setItem('pf_proposal', JSON.stringify({ meta:{ lang:getLang(), title:(getLang()==='en'?'Business Proposal':'Proposition commerciale')}, sections:[] }));
+        localStorage.setItem('pf_proposal', JSON.stringify({ meta:{ lang:getLang(), title:(getLang()==='en'?'Business Proposal':'Proposition commerciale')} , sections:[] }));
       }
-      guardOrGoToStudio();
-    }
-    sendBrief.onclick = goWithBrief;
-    // Enter = envoyer ; Shift+Enter = NL
-    brief.addEventListener('keydown', (e)=>{
-      if(e.isComposing || e.keyCode===229) return;
-      if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); goWithBrief(); }
-    });
+      location.href = 'studio.html';
+    };
   </script>
 </body>
 </html>
