@@ -4,360 +4,503 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>PropoFlash — Studio</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root{
-      --ink:#0a1020; --muted:#667085; --stroke:#e6e9f3; --bg:#f6f8ff;
-      --accent:#3b82f6; --accent-ink:#fff; --shadow:0 10px 28px rgba(10,16,32,.12);
+      --bg:#0b1220; --panel:#0f1629; --ink:#e6ecff; --muted:#9aa6bf; --stroke:#22314d;
+      --accent:#3b82f6; --accent2:#8b5cf6; --accent-ink:#fff;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
-
-    /* Top bar */
-    .bar{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--stroke);
-      display:flex;align-items:center;justify-content:space-between;padding:10px 14px}
-    .brand{display:flex;align-items:center;gap:10px;font-weight:800;cursor:pointer}
-    .spark{width:22px;height:22px;border-radius:6px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd)}
-    .left,.right{display:flex;gap:8px;align-items:center}
-    .btn{border:1px solid var(--stroke);background:#fff;border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer}
-    .btn.accent{background:var(--accent);color:var(--accent-ink);border-color:#0000}
-    select.sel,.theme{border:1px solid var(--stroke);border-radius:10px;padding:7px 10px;background:#fff;cursor:pointer}
-    .avatar{width:32px;height:32px;border-radius:50%;background:#0b2446;color:#e8eefc;font-weight:800;display:grid;place-items:center}
-    .dropdown{position:absolute;right:0;top:calc(100% + 8px);background:#fff;border:1px solid var(--stroke);border-radius:12px;box-shadow:var(--shadow);padding:8px;display:none;min-width:220px}
-    .show{display:block}
-
-    /* Layout */
-    .wrap{display:grid;grid-template-columns:420px 1fr;height:calc(100vh - 52px)}
-    .panel{border-right:1px solid var(--stroke);background:#fff;display:flex;flex-direction:column}
-    .panel-head{padding:12px;border-bottom:1px solid var(--stroke);display:flex;align-items:center;justify-content:space-between}
-    .panel-head strong{font-size:14px}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+    a{color:inherit;text-decoration:none}
+    .top{position:sticky;top:0;z-index:10;background:linear-gradient(180deg, #0f1629ee, #0f1629f5);backdrop-filter:saturate(130%) blur(6px);
+      border-bottom:1px solid var(--stroke);display:flex;align-items:center;justify-content:space-between;padding:10px 14px}
+    .brand{display:flex;align-items:center;gap:10px;cursor:pointer}
+    .spark{width:24px;height:24px;border-radius:6px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd)}
+    .rightBtns{display:flex;gap:8px;align-items:center}
+    .btn{border:1px solid var(--stroke);background:#101a33;border-radius:10px;padding:8px 12px;font-weight:700;color:#cfe1ff;cursor:pointer}
+    .btn:hover{background:#132044}
+    .btn[disabled]{opacity:.6;cursor:not-allowed}
+    .layout{height:calc(100% - 58px);display:grid;grid-template-columns:420px 1fr}
+    .left{border-right:1px solid var(--stroke);background:var(--panel);display:flex;flex-direction:column}
+    .head{padding:10px 12px;border-bottom:1px solid var(--stroke);display:flex;align-items:center;gap:8px;justify-content:space-between}
     .chat{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
-    .msg{display:flex}
-    .msg.me{justify-content:flex-end}
-    .bubble{max-width:78%;background:#fff;border:1px solid var(--stroke);padding:10px 12px;border-radius:12px}
-    .msg.me .bubble{background:#0b2446;color:#e8eefc}
-    .composer{padding:10px;border-top:1px solid var(--stroke);background:#fff}
-    .input{display:flex;gap:8px;border:1px solid var(--stroke);border-radius:12px;padding:8px;background:#fff}
-    textarea{flex:1;border:none;outline:none;resize:none;max-height:160px;font:500 14px/1.4 Inter}
-    .tool{width:38px;height:38px;border-radius:10px;border:1px solid var(--stroke);background:#fff;display:grid;place-items:center;cursor:pointer}
-    .send{background:var(--accent);color:#fff;border-color:#0000}
-
-    /* Preview */
-    .preview{position:relative}
-    .preview iframe{border:0;width:100%;height:100%}
-    .pv-hint{position:absolute;left:12px;top:12px;background:#ffffffd9;border:1px solid var(--stroke);padding:6px 10px;border-radius:10px;font-size:12px;color:#475569}
-
-    /* History drawer */
-    .drawer{position:fixed;left:12px;top:60px;width:360px;max-height:75vh;overflow:auto;background:#fff;border:1px solid var(--stroke);border-radius:12px;box-shadow:var(--shadow);padding:10px;display:none;z-index:25}
-    .item{display:flex;justify-content:space-between;gap:8px;padding:8px;border-radius:10px;border:1px solid transparent;cursor:pointer}
-    .item:hover{background:#f6f8ff}
-    .muted{color:#667085}
-
-    @media (max-width:980px){
-      .wrap{grid-template-columns:1fr}
-      .preview{display:none}
-    }
+    .msg{max-width:88%;padding:10px 12px;border:1px solid #1a2747;border-radius:12px;background:#0d1730;color:#cfe1ff}
+    .me{align-self:flex-end;background:#122043}
+    .composer{padding:10px;border-top:1px solid var(--stroke);display:flex;gap:8px;align-items:flex-end}
+    .logoBtn{min-width:44px;height:44px;border-radius:10px;border:1px solid var(--stroke);background:#0e1832;display:grid;place-items:center;cursor:pointer}
+    .text{flex:1;min-height:44px;max-height:140px;border:1px solid var(--stroke);border-radius:12px;background:#0e1832;color:#cfe1ff;padding:10px 12px;resize:vertical}
+    .send{min-width:100px;height:44px;border-radius:10px;border:1px solid var(--stroke);background:var(--accent);color:var(--accent-ink);font-weight:800;cursor:pointer}
+    .send.loading{opacity:.7;pointer-events:none}
+    .right{position:relative;overflow:auto}
+    .toolbar{position:sticky;top:0;z-index:5;background:linear-gradient(180deg, #0f1629ee, #0f1629f5);padding:8px;border-bottom:1px solid var(--stroke);display:flex;gap:8px;align-items:center}
+    .chip{border:1px solid var(--stroke);background:#101a33;color:#cfe1ff;padding:6px 10px;border-radius:999px;font-size:12px}
+    .wrap{padding:16px;display:grid;place-items:start}
+    .sheet{width:900px;min-height:1200px;background:#0d152b;border:1px solid var(--stroke);border-radius:12px;box-shadow:0 14px 48px rgba(0,0,0,.35);padding:26px;color:#dfe8ff}
+    .h1{font-size:28px;font-weight:800;margin:0 0 4px}
+    .meta{color:#9aa6bf;margin-bottom:16px}
+    h2{margin:20px 0 8px}
+    .tag{display:inline-block;border:1px solid #27406f;background:#121e3d;color:#cfe1ff;padding:2px 8px;border-radius:999px;font-size:12px}
+    .card{border:1px solid #1a2747;background:#0f1a36;border-radius:12px;padding:12px;margin:8px 0}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    ul{margin:6px 0 10px 18px}
+    table{border-collapse:collapse;width:100%;font-size:14px;color:#e6ecff}
+    th,td{border:1px solid #1a2747;padding:8px}
+    th{background:#0f1a36}
+    .muted{color:#9aa6bf}
+    .hidden{display:none}
+    @media (max-width:1100px){.layout{grid-template-columns:1fr}}
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <!-- BAR -->
-  <div class="bar">
-    <div class="left">
-      <div id="home" class="brand" title="Accueil"><div class="spark"></div>PropoFlash</div>
-      <button class="btn" id="historyBtn">Historique</button>
-      <span id="status" class="muted">Prêt</span>
-    </div>
-    <div class="right" style="position:relative">
-      <select class="sel" id="langSel"><option value="fr">FR</option><option value="en">EN</option></select>
-      <button class="theme" id="themeBtn">☀︎/☾</button>
-      <button class="btn" id="backBtn">Accueil</button>
-      <div id="userBox" style="display:none;position:relative">
-        <button class="avatar" id="avatarBtn">U</button>
-        <div class="dropdown" id="dropdown">
-          <div style="padding:6px 8px;color:#667085;font-size:12px" id="userEmail">—</div>
-          <button id="signOutBtn">Se déconnecter</button>
-        </div>
-      </div>
-      <button class="btn accent" id="exportBtn">Exporter PDF</button>
+  <div class="top">
+    <a class="brand" href="index.html" title="Retour à l’accueil">
+      <div class="spark" aria-hidden="true"></div><strong>PropoFlash Studio</strong>
+    </a>
+    <div class="rightBtns">
+      <button id="historyBtn" class="btn">Historique</button>
+      <button id="authBtn" class="btn">Se connecter</button>
     </div>
   </div>
 
-  <!-- HISTORY drawer -->
-  <div class="drawer" id="drawer"></div>
-
-  <!-- MAIN -->
-  <div class="wrap">
-    <!-- LEFT: CHAT -->
-    <div class="panel">
-      <div class="panel-head">
-        <strong>Assistant</strong>
-        <div style="display:flex;gap:8px;align-items:center">
-          <img id="miniLogo" alt="" style="width:20px;height:20px;object-fit:cover;border-radius:6px;border:1px solid var(--stroke);display:none">
-        </div>
+  <div class="layout">
+    <!-- LEFT: Chat -->
+    <aside class="left">
+      <div class="head">
+        <div style="font-weight:800">Assistant</div>
+        <div class="muted" id="chatTitle">Nouvelle discussion</div>
       </div>
       <div id="thread" class="chat" aria-live="polite"></div>
-
       <div class="composer">
-        <div class="input">
-          <input id="logoInput" type="file" accept="image/*" hidden>
-          <button class="tool" id="logoBtn" title="Ajouter un logo">＋</button>
-          <textarea id="message" rows="1" placeholder="Écrivez votre message"></textarea>
-          <button class="tool send" id="sendBtn" title="Envoyer">➤</button>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-top:6px">
-          <small class="muted">Entrée = envoyer • Maj+Entrée = nouvelle ligne</small>
-          <small class="muted"><span id="leftCount">—</span> aperçus restants (Free)</small>
-        </div>
+        <button id="logoBtn" class="logoBtn" title="+ Logo">🖼️</button>
+        <input id="logoInput" type="file" accept="image/*" hidden>
+        <textarea id="prompt" class="text" placeholder="Écrivez votre message… (Entrée = envoyer • Maj+Entrée = nouvelle ligne • Alt+Espace = envoyer)"></textarea>
+        <button id="send" class="send">Envoyer</button>
       </div>
-    </div>
+    </aside>
 
-    <!-- RIGHT: PREVIEW -->
-    <div class="preview">
-      <iframe id="pv" src="preview.html" title="Aperçu"></iframe>
-      <div class="pv-hint" id="pvHint">L’aperçu se mettra à jour automatiquement.</div>
+    <!-- RIGHT: Live preview -->
+    <main class="right">
+      <div class="toolbar">
+        <span class="chip" id="status">Aperçu</span>
+        <button id="openFull" class="btn">Plein écran</button>
+        <button id="emailModeBtn" class="btn">Mode Email</button>
+      </div>
+      <div class="wrap">
+        <div id="preview" class="sheet"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Drawer Historique -->
+  <div id="drawer" class="hidden" style="position:fixed;inset:auto 0 0 auto;width:360px;background:#0f1629;border-left:1px solid var(--stroke);box-shadow:-10px 0 40px rgba(0,0,0,.45)">
+    <div style="padding:10px;border-bottom:1px solid var(--stroke);display:flex;justify-content:space-between;align-items:center">
+      <strong>Mes discussions</strong>
+      <button id="closeDrawer" class="btn">Fermer</button>
     </div>
+    <div id="chatList" style="display:flex;flex-direction:column;gap:8px;padding:10px;max-height:60vh;overflow:auto"></div>
   </div>
 
   <script>
-  (function(){
-    const $=q=>document.querySelector(q);
-
-    // Lang/thème
-    function setLangUI(lang){
-      document.documentElement.lang = lang;
-      $("#message").placeholder = lang==='en' ? "Write your message" : "Écrivez votre message";
-      $("#backBtn").textContent = lang==='en' ? "Home" : "Accueil";
-      $("#historyBtn").textContent = lang==='en' ? "History" : "Historique";
-      $("#exportBtn").textContent = lang==='en' ? "Export PDF" : "Exporter PDF";
-      $("#pvHint").textContent = lang==='en' ? "The preview updates live." : "L’aperçu se mettra à jour automatiquement.";
-    }
-    function applyTheme(theme){
-      if(theme==='dark'){
-        document.body.style.background="#0f1730";
-        document.body.style.color="#e8eefc";
-      }else{
-        document.body.style.background="var(--bg)";
-        document.body.style.color="var(--ink)";
-      }
-    }
-
-    // Supabase
+    /* ============== Supabase ============== */
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
-    let sb, currentChatId = localStorage.getItem('pf_chat_id')||null;
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-    // State
-    const thread=$("#thread");
-    const pv = $("#pv");
-    const status = $("#status");
-    const miniLogo = $("#miniLogo");
-    const LIMITS={free:3, starter:50, pro:1e9};
-    const PLAN='free'; // front-only
-    const monthKey=(plan)=>{const d=new Date(); return `pf_${plan}_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`;}
-    const getCount=(plan)=>parseInt(localStorage.getItem(monthKey(plan))||'0',10);
-    const incCount=(plan)=>localStorage.setItem(monthKey(plan), String(getCount(plan)+1));
-    const leftCount=(plan)=> (LIMITS[plan]||0) - getCount(plan);
-    const updateLeft=()=>{ $("#leftCount").textContent = Math.max(0,leftCount('free')); };
+    /* ============== Mode invité / connecté + limite d’essai ============== */
+    const GUEST_LIMIT = 1; // 1 proposition en mode invité
+    function monthKeyGuest(){
+      const d=new Date(); return `pf_guest_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}`;
+    }
+    function getGuestCount(){ return parseInt(localStorage.getItem(monthKeyGuest())||'0',10); }
+    function incGuestCount(){ localStorage.setItem(monthKeyGuest(), String(getGuestCount()+1)); }
+
+    let IS_GUEST = true;
+    let CURRENT_SESSION = null;
+
+    (async ()=>{
+      const { data:{ session } } = await sb.auth.getSession();
+      CURRENT_SESSION = session;
+      IS_GUEST = !session;
+      setupAuthUI();
+      enforceGuestLimitUI();
+    })();
+
+    function setupAuthUI(){
+      const authBtn = document.getElementById('authBtn');
+      if(IS_GUEST){
+        authBtn.textContent = 'Se connecter';
+        authBtn.onclick = ()=>{ location.href = 'auth.html?from=studio'; };
+      }else{
+        authBtn.textContent = 'Se déconnecter';
+        authBtn.onclick = async ()=>{ await sb.auth.signOut(); localStorage.removeItem('pf_chat_id'); location.reload(); };
+      }
+    }
+
+    function enforceGuestLimitUI(){
+      const count = getGuestCount();
+      const sendBtn = document.getElementById('send');
+      const promptEl = document.getElementById('prompt');
+      const statusEl = document.getElementById('status');
+
+      if(IS_GUEST && count >= GUEST_LIMIT){
+        sendBtn.disabled = true;
+        promptEl.disabled = true;
+        promptEl.placeholder = 'Connectez-vous pour continuer — essai gratuit utilisé.';
+        statusEl.textContent = 'Essai gratuit utilisé';
+      }else{
+        sendBtn.disabled = false;
+        promptEl.disabled = false;
+        statusEl.textContent = 'Aperçu';
+      }
+    }
+
+    /* ============== UI helpers ============== */
+    const $ = (q,ctx=document)=>ctx.querySelector(q);
+    const thread = $('#thread');
+    const statusEl = $('#status');
+    const promptEl = $('#prompt');
+    const sendBtn  = $('#send');
+    const logoBtn  = $('#logoBtn');
+    const logoInput= $('#logoInput');
+    const chatTitle= $('#chatTitle');
+    const drawer   = $('#drawer');
+    const chatList = $('#chatList');
 
     function addMsg(text, who='ai'){
-      const row=document.createElement('div'); row.className='msg'+(who==='me'?' me':'');
-      const b=document.createElement('div'); b.className='bubble'; b.textContent=String(text||'');
-      row.appendChild(b); thread.appendChild(row); thread.scrollTop=thread.scrollHeight;
+      const b = document.createElement('div');
+      b.className = 'msg'+(who==='me'?' me':'');
+      b.textContent = String(text||'');
+      thread.appendChild(b);
+      thread.scrollTop = thread.scrollHeight;
     }
-    function saveLocal(role, content){
-      const hist = JSON.parse(localStorage.getItem('pf_chat')||'[]');
-      const next = [...hist, {role, content}].slice(-50);
-      localStorage.setItem('pf_chat', JSON.stringify(next));
-      localStorage.setItem('pf_chat_ts', String(Date.now()));
+    function setStatus(t){ statusEl.textContent = t; }
+
+    /* ============== State ============== */
+    let currentChatId = localStorage.getItem('pf_chat_id') || null;
+    let spec = null;
+    function loadSpec(){
+      try{ spec = JSON.parse(localStorage.getItem('pf_proposal')||'{"meta":{"lang":"fr"},"sections":[]}'); }
+      catch{ spec = { meta:{ lang:'fr' } }; }
+      renderPreview();
     }
-    function loadLocal(){
-      const hist = JSON.parse(localStorage.getItem('pf_chat')||'[]');
-      thread.innerHTML=''; hist.forEach(m=>addMsg(m.content, m.role==='user'?'me':'ai'));
+    function saveSpec(){ localStorage.setItem('pf_proposal', JSON.stringify(spec||{})); }
+
+    /* ============== Historique ============== */
+    $('#historyBtn').onclick = async ()=>{
+      if(IS_GUEST){ alert("Connectez-vous pour accéder à l’historique."); return; }
+      drawer.classList.remove('hidden'); await listChats();
+    };
+    $('#closeDrawer').onclick = ()=> drawer.classList.add('hidden');
+
+    async function listChats(){
+      chatList.innerHTML = '<div class="muted">Chargement…</div>';
+      const { data:{ user } } = await sb.auth.getUser();
+      if(!user){ chatList.innerHTML = '<div class="muted">Connectez-vous.</div>'; return; }
+      const { data, error } = await sb.from('chats').select('id,title,created_at').order('created_at',{ascending:false}).limit(50);
+      if(error){ chatList.innerHTML = '<div class="muted">Erreur.</div>'; return; }
+      chatList.innerHTML = '';
+      data.forEach(c=>{
+        const btn = document.createElement('button');
+        btn.className = 'btn';
+        btn.style.justifyContent='space-between';
+        btn.innerHTML = `<span>${c.title||'Sans titre'}</span>
+                         <span class="muted" style="font-size:12px">${new Date(c.created_at).toLocaleString()}</span>`;
+        btn.onclick = ()=> openChat(c.id);
+        chatList.appendChild(btn);
+      });
     }
 
-    function pushPreview(spec){
-      // store + ping iframe
-      localStorage.setItem('pf_proposal', JSON.stringify(spec));
-      pv?.contentWindow?.postMessage({type:'pf_spec', payload:spec}, "*");
+    async function openChat(chatId){
+      currentChatId = chatId;
+      localStorage.setItem('pf_chat_id', chatId);
+      thread.innerHTML = '';
+      chatTitle.textContent = 'Discussion';
+      const { data, error } = await sb.from('messages').select('role,content,created_at').eq('chat_id', chatId).order('created_at',{ascending:true});
+      if(!error && data){ data.forEach(m => addMsg(m.content, m.role==='user'?'me':'ai')); }
+      drawer.classList.add('hidden');
+      promptEl.focus();
+      try{
+        const { data: p } = await sb.from('proposals').select('spec').eq('chat_id', chatId).maybeSingle();
+        if(p?.spec){ spec = p.spec; saveSpec(); renderPreview(); }
+      }catch{}
     }
 
+    async function ensureChat(titleFallback='Nouvelle discussion'){
+      if(IS_GUEST) return null;
+      if(currentChatId) return currentChatId;
+      const { data:{ user } } = await sb.auth.getUser();
+      if(!user) return null;
+      const title = (promptEl.value||titleFallback).slice(0,80);
+      const { data, error } = await sb.from('chats').insert({ user_id:user.id, title }).select().single();
+      if(error) return null;
+      currentChatId = data.id;
+      localStorage.setItem('pf_chat_id', data.id);
+      return data.id;
+    }
+
+    async function saveMessage(role, content){
+      if(IS_GUEST || !currentChatId) return;
+      const { data:{ user } } = await sb.auth.getUser();
+      if(!user) return;
+      await sb.from('messages').insert({ chat_id: currentChatId, user_id: user.id, role, content });
+    }
+
+    /* ============== API Chat ============== */
     async function callChatAPI(message, proposalSpec, history){
-      try{
-        const { data:{ session } } = await sb.auth.getSession();
-        const headers = {'Content-Type':'application/json'};
-        if(session?.access_token) headers.Authorization = `Bearer ${session.access_token}`;
-        const res = await fetch('/api/chat',{ method:'POST', headers, body: JSON.stringify({ message, proposalSpec, history })});
-        if(!res.ok) throw new Error('HTTP '+res.status);
-        return await res.json();
-      }catch{
-        // Fallback démo : injecte un petit contenu
-        const reply = (document.documentElement.lang==='en')
-          ? "Draft updated. I added an executive summary and a pricing line."
-          : "Brouillon mis à jour. J’ai ajouté un résumé exécutif et une ligne de tarification.";
-        const spec = JSON.parse(localStorage.getItem('pf_proposal')||'{"meta":{"lang":"fr"},"sections":[]}');
-        const next = {
-          ...spec,
-          meta:{ ...(spec.meta||{}), lang: document.documentElement.lang },
-          executive_summary:{ paragraphs:[
-            "Résumé exécutif généré à partir de votre brief (modifiable)."
-          ]},
-          pricing:{ currency:"EUR", model:"forfait",
-            items:[{ name:"Forfait projet", qty:1, unit:"pack", unit_price:1500 }] }
-        };
-        return { reply, proposalSpec: next, actions:[{type:'preview'}] };
-      }
+      const { data:{ session } } = await sb.auth.getSession();
+      const headers = {'Content-Type':'application/json'};
+      if(session?.access_token){ headers.Authorization = `Bearer ${session.access_token}`; }
+      const res = await fetch('/api/chat',{ method:'POST', headers, body: JSON.stringify({ message, proposalSpec, history }) });
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      return res.json();
     }
 
-    window.addEventListener('DOMContentLoaded', async ()=>{
-      // Lang
-      const langSel=$("#langSel");
-      const lang = localStorage.getItem('pf_lang') || (navigator.language||'fr').slice(0,2);
-      langSel.value = ['fr','en'].includes(lang)?lang:'en';
-      setLangUI(langSel.value);
-      langSel.addEventListener('change', e=>{ localStorage.setItem('pf_lang', e.target.value); setLangUI(e.target.value); });
+    /* ============== Envoi ============== */
+    sendBtn.onclick = async ()=>{
+      // Si mode invité et essai déjà utilisé → forcer la connexion
+      if(IS_GUEST && getGuestCount() >= GUEST_LIMIT){
+        alert("Essai gratuit déjà utilisé. Connectez-vous pour continuer.");
+        location.href = 'auth.html?from=studio';
+        return;
+      }
 
-      // Theme
-      const theme = localStorage.getItem('pf_theme')||'light';
-      applyTheme(theme);
-      $("#themeBtn").addEventListener('click', ()=>{
-        const next = (localStorage.getItem('pf_theme')==='dark') ? 'light' : 'dark';
-        localStorage.setItem('pf_theme', next); applyTheme(next);
-      });
+      const v = (promptEl.value||'').trim(); if(!v) return;
+      addMsg(v,'me'); promptEl.value=''; promptEl.focus();
+      const beforeCount = getGuestCount();
 
-      // Go home
-      $("#home").addEventListener('click', ()=>location.href='index.html');
-      $("#backBtn").addEventListener('click', ()=>location.href='index.html');
-
-      // Supabase init + session
-      let sessionUserEmail = '';
+      sendBtn.classList.add('loading'); sendBtn.disabled=true; setStatus('Génération…');
       try{
-        sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-        const { data:{ session } } = await sb.auth.getSession();
-        if(session?.user){
-          $("#userBox").style.display='block';
-          sessionUserEmail = session.user.email||'';
-          $("#userEmail").textContent = sessionUserEmail;
-          $("#avatarBtn").textContent = (sessionUserEmail[0]||'U').toUpperCase();
-        }else{
-          $("#userBox").style.display='none';
-        }
-        // menu
-        $("#avatarBtn").addEventListener('click', ()=>$("#dropdown").classList.toggle('show'));
-        document.addEventListener('click',(e)=>{ const box=$("#userBox"); if(box && !box.contains(e.target)) $("#dropdown").classList.remove('show'); });
-        $("#signOutBtn").addEventListener('click', async ()=>{ try{await sb.auth.signOut();}catch(_){ } location.href='index.html'; });
-      }catch(e){ console.error(e); }
+        await ensureChat('Nouvelle discussion');
+        await saveMessage('user', v);
 
-      // History drawer
-      const drawer=$("#drawer");
-      $("#historyBtn").addEventListener('click', async ()=>{
-        if(drawer.style.display==='block'){ drawer.style.display='none'; return; }
-        drawer.innerHTML = '<div class="muted" style="padding:6px 8px">Chargement…</div>';
-        drawer.style.display='block';
-        try{
-          const { data:{ user } } = await sb.auth.getUser();
-          if(!user){ drawer.innerHTML = '<div class="muted" style="padding:6px 8px">Connectez-vous pour voir l’historique.</div>'; return; }
-          const { data, error } = await sb.from('chats').select('id,title,created_at').order('created_at',{ascending:false}).limit(30);
-          if(error){ drawer.innerHTML = '<div class="muted" style="padding:6px 8px">Erreur de chargement.</div>'; return; }
-          drawer.innerHTML = '';
-          data.forEach(c=>{
-            const btn=document.createElement('div'); btn.className='item';
-            btn.innerHTML = `<div style="overflow:hidden">
-                <div style="font-weight:700;white-space:nowrap;text-overflow:ellipsis;overflow:hidden">${c.title||'Sans titre'}</div>
-                <div class="muted" style="font-size:12px">${new Date(c.created_at).toLocaleString()}</div>
-              </div><div>›</div>`;
-            btn.onclick = async ()=>{ currentChatId=c.id; localStorage.setItem('pf_chat_id', c.id); await loadChatFromCloud(); drawer.style.display='none'; };
-            drawer.appendChild(btn);
-          });
-        }catch(_){}
-      });
+        const history = JSON.parse(localStorage.getItem('pf_chat')||'[]');
+        const data = await callChatAPI(v, spec, history);
 
-      // Load local history + first msg from home
-      loadLocal(); updateLeft();
-      const first = localStorage.getItem('pf_first_msg');
-      if(first){ localStorage.removeItem('pf_first_msg'); $("#message").value = first; $("#message").focus(); }
+        if(data.reply){ addMsg(data.reply,'ai'); await saveMessage('assistant',data.reply); }
 
-      // Composer
-      const textarea=$("#message"); const sendBtn=$("#sendBtn");
-      textarea.addEventListener('keydown',(e)=>{
-        if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendBtn.click(); }
-      });
-
-      // Logo bouton (dans l’entrée, comme demandé)
-      $("#logoBtn").addEventListener('click', ()=>$("#logoInput").click());
-      $("#logoInput").addEventListener('change', async (e)=>{
-        const file = e.target.files?.[0]; if(!file) return;
-        const fr = new FileReader();
-        fr.onload = ()=>{
-          const spec = JSON.parse(localStorage.getItem('pf_proposal')||'{"meta":{}}');
-          const next = { ...spec, meta:{ ...(spec.meta||{}), style:{ ...(spec.meta?.style||{}), logoDataUrl: fr.result } } };
-          miniLogo.src = fr.result; miniLogo.style.display='inline-block';
-          pushPreview(next);
-          addMsg('Logo importé. Le thème de l’aperçu s’adaptera.', 'ai');
-          saveLocal('assistant','Logo importé. Le thème de l’aperçu s’adaptera.');
-        };
-        fr.readAsDataURL(file);
-      });
-
-      // Export
-      $("#exportBtn").addEventListener('click', ()=> pv?.contentWindow?.postMessage({type:'pf_cmd', payload:'print'}, '*'));
-
-      // Send
-      sendBtn.addEventListener('click', async ()=>{
-        const v = textarea.value.trim(); if(!v){ textarea.focus(); return; }
-        addMsg(v,'me'); saveLocal('user', v); textarea.value=''; textarea.focus();
-
-        if(PLAN==='free' && leftCount('free')<=0){
-          addMsg('Limite atteinte : 3 aperçus gratuits/mois. Connectez-vous ou passez à Starter.','ai');
-          saveLocal('assistant','Limite atteinte : 3 aperçus gratuits/mois.'); return;
+        if(data.proposalSpec){
+          spec = { ...(spec||{}), ...(data.proposalSpec||{}) , meta:{ ...(spec?.meta||{}), ...(data.proposalSpec.meta||{}) } };
+          saveSpec(); renderPreview();
+          if(!IS_GUEST && currentChatId){
+            try{
+              const { data:{ user } } = await sb.auth.getUser();
+              if(user){
+                await sb.from('proposals').upsert({ user_id:user.id, chat_id:currentChatId, spec }, { onConflict:'chat_id' });
+              }
+            }catch{}
+          }
         }
 
-        status.textContent='Traitement…';
-        try{
-          await ensureChat(v.slice(0,80));
-          const history = JSON.parse(localStorage.getItem('pf_chat')||'[]');
-          const spec = JSON.parse(localStorage.getItem('pf_proposal')||'{"meta":{"lang":"'+document.documentElement.lang+'"}}');
+        const newHist = [...history, {role:'user',content:v},{role:'assistant',content:(data.reply||'')}].slice(-30);
+        localStorage.setItem('pf_chat', JSON.stringify(newHist));
+        setStatus('Aperçu mis à jour');
 
-          const data = await callChatAPI(v, spec, history);
-
-          if(data.reply){ addMsg(data.reply,'ai'); saveLocal('assistant', data.reply); }
-          if(data.proposalSpec){ pushPreview(data.proposalSpec); }
-
-          // upsert proposal in cloud
-          try{
-            const { data:{ user } } = await sb.auth.getUser();
-            if(user && currentChatId){
-              await sb.from('proposals').upsert({ user_id: user.id, chat_id: currentChatId, spec: JSON.parse(localStorage.getItem('pf_proposal')||'{}') }, { onConflict:'chat_id' });
-            }
-          }catch(_){}
-
-          incCount('free'); updateLeft();
-          status.textContent='Prêt';
-        }catch(e){
-          console.error(e); addMsg('Erreur serveur. Réessayez.','ai'); status.textContent='Erreur';
+        // Comptabiliser l’essai gratuit dès le premier aller-retour réussi
+        if(IS_GUEST && beforeCount < GUEST_LIMIT){
+          incGuestCount();
+          enforceGuestLimitUI();
+          setTimeout(()=>alert('Votre essai gratuit a été utilisé. Connectez-vous pour continuer.'), 50);
         }
-      });
-
-      // iframe ready hint
-      pv.addEventListener('load', ()=>{ setTimeout(()=>$("#pvHint").style.display='none', 800); });
-
-      // Ensure chat exists when logged-in
-      async function ensureChat(title){
-        const { data:{ user } } = await sb.auth.getUser();
-        if(!user) return; // cloud facultatif
-        if(currentChatId) return currentChatId;
-        const { data, error } = await sb.from('chats').insert({ title }).select().single();
-        if(!error && data){ currentChatId = data.id; localStorage.setItem('pf_chat_id', data.id); }
+      }catch(e){
+        console.error(e); addMsg('Erreur serveur. Réessayez.','ai'); setStatus('Erreur');
+      }finally{
+        sendBtn.classList.remove('loading');
+        // Si l’essai vient d’être consommé, send reste désactivé par enforceGuestLimitUI()
+        if(!(IS_GUEST && getGuestCount() >= GUEST_LIMIT)) sendBtn.disabled=false;
       }
+    };
 
-      async function loadChatFromCloud(){
-        const { data, error } = await sb.from('messages').select('role,content,created_at').eq('chat_id', currentChatId).order('created_at',{ascending:true});
-        if(error){ addMsg('Impossible de charger cette discussion.','ai'); return; }
-        thread.innerHTML=''; data.forEach(m=>addMsg(m.content, m.role==='user'?'me':'ai'));
-      }
+    // Clavier : Entrée pour envoyer (sans Shift) • Alt+Espace pour envoyer
+    promptEl.addEventListener('keydown', (e)=>{
+      const hasText = (promptEl.value||'').trim().length>0;
+      if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); if(hasText) sendBtn.click(); }
+      if(e.key===' ' && e.altKey){ e.preventDefault(); if(hasText) sendBtn.click(); }
     });
-  })();
+
+    /* ============== Logo upload + palette ============== */
+    logoBtn.onclick = ()=> logoInput.click();
+    logoInput.onchange = async (e)=>{
+      const file = e.target.files?.[0]; if(!file) return;
+      const dataUrl = await fileToDataURL(file);
+      const { primary, secondary } = await extractPaletteFromDataUrl(dataUrl);
+      spec = spec || { meta:{} };
+      spec.meta = { ...(spec.meta||{}), accent: primary, style:{ ...(spec.meta?.style||{}), logoDataUrl:dataUrl, primary, secondary } };
+      saveSpec(); renderPreview();
+      addMsg(`Logo importé. Couleurs détectées : ${primary} / ${secondary}.`,'ai');
+    };
+    function fileToDataURL(file){
+      return new Promise((resolve,reject)=>{
+        const fr=new FileReader(); fr.onload=()=>resolve(fr.result); fr.onerror=reject; fr.readAsDataURL(file);
+      });
+    }
+    async function extractPaletteFromDataUrl(dataUrl){
+      const img = new Image(); img.crossOrigin='anonymous'; img.src=dataUrl;
+      await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; });
+      const canvas=document.createElement('canvas'); const ctx=canvas.getContext('2d',{ willReadFrequently:true });
+      const W=180,H=Math.max(90,Math.round(img.height*(W/img.width))); canvas.width=W; canvas.height=H;
+      ctx.drawImage(img,0,0,W,H);
+      const { data }=ctx.getImageData(0,0,W,H);
+      const map=new Map();
+      for(let i=0;i<data.length;i+=4*10){
+        const r=data[i],g=data[i+1],b=data[i+2],a=data[i+3]/255; if(a<0.6) continue;
+        const lum=(0.2126*r+0.7152*g+0.0722*b)/255; if(lum<0.12||lum>0.98) continue;
+        const key=((r&0xF0)<<16)|((g&0xF0)<<8)|(b&0xF0); map.set(key,(map.get(key)||0)+1);
+      }
+      const sorted=[...map.entries()].sort((a,b)=>b[1]-a[1]).slice(0,8).map(([k])=>{
+        const r=(k>>16)&0xF0,g=(k>>8)&0xF0,b=k&0xF0;
+        return `#${(r|0x0F).toString(16).padStart(2,'0')}${(g|0x0F).toString(16).padStart(2,'0')}${(b|0x0F).toString(16).padStart(2,'0')}`.toUpperCase();
+      });
+      const primary=sorted[0]||'#3B82F6';
+      let secondary='#8B5CF6';
+      for(let i=1;i<sorted.length;i++){ if(colorDistance(sorted[0],sorted[i])>80){ secondary=sorted[i]; break; } }
+      return {primary,secondary};
+    }
+    function colorDistance(h1,h2){
+      const a=hexToRGB(h1),b=hexToRGB(h2); const dr=a.r-b.r,dg=a.g-b.g,db=a.b-b.b; return Math.sqrt(dr*dr+dg*dg+db*db);
+    }
+    function hexToRGB(h){ const s=h.replace('#',''); return { r:parseInt(s.slice(0,2),16), g:parseInt(s.slice(2,4),16), b:parseInt(s.slice(4,6),16) }; }
+
+    /* ============== Preview ============== */
+    const previewEl = $('#preview');
+    const emailModeBtn = $('#emailModeBtn');
+    let emailMode = false;
+    $('#openFull').onclick = ()=>{ window.location.href='preview.html'; };
+    emailModeBtn.onclick = ()=>{ emailMode=!emailMode; emailModeBtn.textContent = emailMode?'Vue complète':'Mode Email'; renderPreview(); };
+
+    function money(n,c){ try{ return new Intl.NumberFormat('fr-FR',{style:'currency',currency:c||'EUR'}).format(Number(n||0)); }catch{ return String(n||0)+' '+(c||'€'); } }
+    function safeArr(v){ return Array.isArray(v)?v:[]; }
+    function safeStr(v,f=''){ return (v==null?'':String(v)).trim()||f; }
+    function fmtDate(d){ try{ const dt=d?new Date(d):new Date(); return dt.toLocaleDateString('fr-FR',{year:'numeric',month:'short',day:'2-digit'});}catch{ return '' } }
+
+    function renderPreview(){
+      if(!spec){ previewEl.innerHTML='<div class="muted">Aucune donnée.</div>'; return; }
+      const primary = spec?.meta?.style?.primary || spec?.meta?.accent || '#3b82f6';
+      const secondary = spec?.meta?.style?.secondary || '#8b5cf6';
+      document.documentElement.style.setProperty('--accent', primary);
+      document.documentElement.style.setProperty('--accent2', secondary);
+
+      const L = (spec.meta?.lang==='en') ? {
+        title:"Business Proposal", to:"To", from:"Issued by", date:"Date", letter:"Cover Letter",
+        executive:"Executive Summary", objectives:"Objectives", approach:"Approach & Phasing", deliverables:"Deliverables",
+        in_scope:"In scope", out_scope:"Out of scope", timeline:"Timeline", pricing:"Pricing", terms:"Terms",
+        assumptions:"Assumptions / Risks", next:"Next Steps"
+      } : {
+        title:"Proposition commerciale", to:"Pour", from:"Émis par", date:"Date", letter:"Lettre d’introduction",
+        executive:"Résumé exécutif", objectives:"Objectifs", approach:"Approche & phasage", deliverables:"Livrables",
+        in_scope:"Inclus", out_scope:"Hors-périmètre", timeline:"Planning", pricing:"Tarification", terms:"Conditions",
+        assumptions:"Hypothèses / Risques", next:"Prochaines étapes"
+      };
+
+      previewEl.innerHTML = '';
+      const company = safeStr(spec.meta?.company || spec.meta?.brand?.company, 'Votre société');
+      const client  = safeStr(spec.meta?.client, 'Client');
+      const title   = safeStr(spec.meta?.title, L.title);
+      const date    = safeStr(spec.meta?.date, fmtDate());
+
+      const h1 = document.createElement('div');
+      h1.innerHTML = `<div class="h1">${title}</div>
+                      <div class="meta">${L.to}: <span class="tag">${client}</span> • ${L.from}: <span class="tag">${company}</span> • ${L.date}: ${date}</div>`;
+      previewEl.appendChild(h1);
+
+      if(emailMode){
+        const letter = spec.letter || {};
+        if(letter.greeting) p(letter.greeting);
+        safeArr(letter.body_paragraphs?.length ? letter.body_paragraphs : letter.paragraphs).forEach(t=>p(t));
+        if(letter.closing) p(letter.closing);
+        if(letter.signature) p(letter.signature);
+        return;
+      }
+
+      if(spec.letter && (spec.letter.greeting || (safeArr(spec.letter.body_paragraphs).length||safeArr(spec.letter.paragraphs).length) || spec.letter.closing || spec.letter.signature)){
+        h2(L.letter);
+        const letter = spec.letter;
+        if(letter.greeting) p(letter.greeting);
+        (safeArr(letter.body_paragraphs?.length?letter.body_paragraphs:letter.paragraphs)).forEach(t=>p(t));
+        if(letter.closing) p(letter.closing);
+        if(letter.signature) p(letter.signature);
+      }
+
+      if(safeArr(spec.executive_summary?.paragraphs).length){ h2(L.executive); safeArr(spec.executive_summary.paragraphs).forEach(t=>p(t)); }
+      if(safeArr(spec.objectives?.bullets).length){ h2(L.objectives); ul(spec.objectives.bullets); }
+
+      if(safeArr(spec.approach?.phases).length){
+        h2(L.approach);
+        spec.approach.phases.forEach((ph,i)=>{
+          const c = card(`<strong>Phase ${i+1} — ${safeStr(ph.title,'À confirmer')}</strong> <span class="muted">${safeStr(ph.duration,'')}</span>`);
+          previewEl.appendChild(c);
+          if(ph.description) p(ph.description);
+          const acts = safeArr(ph.activities?.length ? ph.activities : ph.steps);
+          if(acts.length){ ul(acts); }
+          if(safeArr(ph.outcomes).length){ p('Résultats attendus :'); ul(ph.outcomes); }
+        });
+      }
+
+      if(spec.deliverables && (safeArr(spec.deliverables.in).length || safeArr(spec.deliverables.out).length)){
+        h2(L.deliverables);
+        const grid = document.createElement('div'); grid.className='grid2';
+        const a = card(`<div class="muted">${L.in_scope}</div>`); const b = card(`<div class="muted">${L.out_scope}</div>`);
+        grid.appendChild(a); grid.appendChild(b); previewEl.appendChild(grid);
+        ulInto(a, safeArr(spec.deliverables.in)); ulInto(b, safeArr(spec.deliverables.out));
+      }
+
+      if(safeArr(spec.timeline?.milestones).length){
+        h2(L.timeline);
+        const grid = document.createElement('div'); grid.className='grid2'; previewEl.appendChild(grid);
+        spec.timeline.milestones.forEach(ms=>{
+          const c = card(`<strong>${safeStr(ms.title,'Étape')}</strong> <div class="muted">${safeStr(ms.dateOrWeek||ms.date||ms.duration||'')}</div>`);
+          if(ms.notes){ const pp=document.createElement('p'); pp.textContent=ms.notes; c.appendChild(pp); }
+          grid.appendChild(c);
+        });
+      }
+
+      if(spec.pricing && (Array.isArray(spec.pricing.items)?spec.pricing.items.length:spec.pricing.price!=null)){
+        h2(L.pricing);
+        const pr = spec.pricing; const currency = pr.currency || spec.meta?.currency || 'EUR';
+        if(Array.isArray(pr.items) && pr.items.length){
+          const table = document.createElement('table');
+          table.innerHTML = `<thead><tr><th>Item</th><th>Qté</th><th>Unité</th><th>PU</th><th>Sous-total</th></tr></thead><tbody></tbody><tfoot></tfoot>`;
+          const tb = table.querySelector('tbody');
+          let subtotal=0;
+          pr.items.forEach(it=>{
+            const qty=Number(it.qty||1), up=Number(it.unit_price||0);
+            const st = it.subtotal!=null ? Number(it.subtotal) : qty*up; subtotal += (isFinite(st)?st:0);
+            const tr=document.createElement('tr');
+            tr.innerHTML=`<td>${safeStr(it.name,'—')}</td><td>${qty}</td><td>${safeStr(it.unit||'—')}</td><td>${money(up,currency)}</td><td>${money(st,currency)}</td>`;
+            tb.appendChild(tr);
+          });
+          const tax = subtotal*((Number(pr.tax_rate||0))/100); const total=subtotal+tax;
+          const tf=table.querySelector('tfoot');
+          tf.innerHTML = `<tr><td colspan="4" style="text-align:right">Sous-total</td><td>${money(subtotal,currency)}</td></tr>
+                          <tr><td colspan="4" style="text-align:right">Taxes</td><td>${money(tax,currency)} ${pr.tax_rate?`(${pr.tax_rate}%)`:''}</td></tr>
+                          <tr><td colspan="4" style="text-align:right"><strong>Total</strong></td><td><strong>${money(total,currency)}</strong></td></tr>`;
+          previewEl.appendChild(table);
+        }else{
+          const c = card(`<div style="font-size:20px;font-weight:800">${money(pr.price, currency)}</div>`);
+          previewEl.appendChild(c);
+        }
+        if(safeArr(spec.pricing?.terms).length){
+          const c = card(`<div class="muted">Conditions</div>`); ulInto(c, safeArr(spec.pricing.terms)); previewEl.appendChild(c);
+        }
+      }
+
+      if(safeArr(spec.assumptions?.paragraphs).length){ h2(L.assumptions); safeArr(spec.assumptions.paragraphs).forEach(t=>p(t)); }
+      if(safeArr(spec.next_steps?.paragraphs).length){ h2(L.next); safeArr(spec.next_steps.paragraphs).forEach(t=>p(t)); }
+
+      function h2(t){ const el=document.createElement('h2'); el.textContent=t; previewEl.appendChild(el); }
+      function p(t){ const el=document.createElement('p'); el.textContent=t; previewEl.appendChild(el); }
+      function ul(arr){ const u=document.createElement('ul'); arr.forEach(x=>{const li=document.createElement('li'); li.textContent=x; u.appendChild(li);}); previewEl.appendChild(u); }
+      function ulInto(container, arr){ const u=document.createElement('ul'); arr.forEach(x=>{const li=document.createElement('li'); li.textContent=x; u.appendChild(li);}); container.appendChild(u); }
+      function card(html){ const c=document.createElement('div'); c.className='card'; c.innerHTML=html; return c; }
+    }
+
+    /* ============== Divers ============== */
+    document.getElementById('openFull').onclick = ()=>{ window.location.href='preview.html'; };
+
+    // Boot
+    loadSpec();
   </script>
 </body>
 </html>
