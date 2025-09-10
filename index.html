@@ -74,7 +74,7 @@
     @media (max-width:980px){.grid3,.price-grid{grid-template-columns:1fr}}
   </style>
   <!-- Supabase UMD (expose window.supabase) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
 </head>
 <body>
   <div class="nav">
@@ -200,46 +200,100 @@
   </footer>
 
   <script>
-    const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
-    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-    document.getElementById('y').textContent = new Date().getFullYear();
+    // === Helpers & fallbacks ===
+    const $ = (id) => document.getElementById(id);
+    const y = $('y'); if (y) y.textContent = new Date().getFullYear();
 
-    const authBtn  = document.getElementById('authBtn');
-    const startBtn = document.getElementById('startBtn');
+    const startBtn = $('startBtn');
+    const authBtn  = $('authBtn');
+    const sendBrief = $('sendBrief');
+    const briefEl   = $('brief');
 
-    async function refreshAuthUI(){
-      const { data:{ session } } = await sb.auth.getSession();
-      if(session){
-        authBtn.textContent = 'Se déconnecter';
-        authBtn.onclick = async ()=>{ await sb.auth.signOut(); location.reload(); };
-      }else{
-        authBtn.textContent = 'Se connecter';
-        authBtn.onclick = ()=> location.href = 'auth.html?return=studio';
-      }
-    }
-    refreshAuthUI(); sb.auth.onAuthStateChange(refreshAuthUI);
-
-    // Lance le studio (prépare une spec par défaut si besoin)
-    startBtn.onclick = ()=>{
-      const spec = JSON.parse(localStorage.getItem('pf_proposal')||'null') || {
-        meta:{ lang:'fr', title:'Proposition commerciale', company:'Votre société', client:'Client' },
-        pricing:{ model:'forfait', price:0, currency:'EUR' },
-        sections:[]
+    // Fallbacks (au cas où Supabase ne charge pas)
+    function setupFallbackHandlers(){
+      console.warn('[PF] Supabase non chargé – fallback boutons.');
+      if (authBtn)  authBtn.onclick  = () => location.href = 'auth.html?return=studio';
+      if (startBtn) startBtn.onclick = () => {
+        const spec = JSON.parse(localStorage.getItem('pf_proposal')||'null') || {
+          meta:{ lang:'fr', title:'Proposition commerciale', company:'Votre société', client:'Client' },
+          pricing:{ model:'forfait', price:0, currency:'EUR' },
+          sections:[]
+        };
+        localStorage.setItem('pf_proposal', JSON.stringify(spec));
+        location.href = 'studio.html';
       };
-      localStorage.setItem('pf_proposal', JSON.stringify(spec));
-      location.href = 'studio.html';
-    };
+      if (sendBrief) sendBrief.onclick = ()=>{
+        const v=(briefEl?.value||'').trim(); if(!v) return;
+        localStorage.setItem('pf_welcome_msg', v);
+        if(!localStorage.getItem('pf_proposal')){
+          localStorage.setItem('pf_proposal', JSON.stringify({ meta:{ lang:'fr', title:'Proposition commerciale'} , sections:[] }));
+        }
+        location.href = 'studio.html';
+      };
+    }
 
-    // Depuis l’accueil, permet d’envoyer le brief directement au studio
-    document.getElementById('sendBrief').onclick = ()=>{
-      const v=(document.getElementById('brief').value||'').trim(); if(!v) return;
-      localStorage.setItem('pf_welcome_msg', v);
-      if(!localStorage.getItem('pf_proposal')){
-        localStorage.setItem('pf_proposal', JSON.stringify({ meta:{ lang:'fr', title:'Proposition commerciale'} , sections:[] }));
+    // Init complète avec Supabase si dispo
+    function setupWithSupabase(){
+      const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
+      const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
+
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+      async function refreshAuthUI(){
+        try{
+          const { data:{ session } } = await sb.auth.getSession();
+          if(session){
+            authBtn.textContent = 'Se déconnecter';
+            authBtn.onclick = async ()=>{ try{ await sb.auth.signOut(); }finally{ location.reload(); } };
+          }else{
+            authBtn.textContent = 'Se connecter';
+            authBtn.onclick = ()=> location.href = 'auth.html?return=studio';
+          }
+        }catch(e){
+          console.error('[PF] refreshAuthUI error:', e);
+          setupFallbackHandlers();
+        }
       }
-      location.href = 'studio.html';
-    };
+
+      // Handlers standards
+      if (startBtn) startBtn.onclick = ()=>{
+        const spec = JSON.parse(localStorage.getItem('pf_proposal')||'null') || {
+          meta:{ lang:'fr', title:'Proposition commerciale', company:'Votre société', client:'Client' },
+          pricing:{ model:'forfait', price:0, currency:'EUR' },
+          sections:[]
+        };
+        localStorage.setItem('pf_proposal', JSON.stringify(spec));
+        location.href = 'studio.html';
+      };
+
+      if (sendBrief) sendBrief.onclick = ()=>{
+        const v=(briefEl?.value||'').trim(); if(!v) return;
+        localStorage.setItem('pf_welcome_msg', v);
+        if(!localStorage.getItem('pf_proposal')){
+          localStorage.setItem('pf_proposal', JSON.stringify({ meta:{ lang:'fr', title:'Proposition commerciale'} , sections:[] }));
+        }
+        location.href = 'studio.html';
+      };
+
+      refreshAuthUI();
+      sb.auth.onAuthStateChange(refreshAuthUI);
+    }
+
+    // Démarrage
+    document.addEventListener('DOMContentLoaded', ()=>{
+      if (window.supabase && typeof window.supabase.createClient === 'function') {
+        setupWithSupabase();
+      } else {
+        // Donne une chance au script UMD "defer" de finir de charger
+        setTimeout(()=>{
+          if (window.supabase && typeof window.supabase.createClient === 'function') {
+            setupWithSupabase();
+          } else {
+            setupFallbackHandlers();
+          }
+        }, 100);
+      }
+    });
   </script>
 </body>
 </html>
