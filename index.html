@@ -10,7 +10,8 @@
       --bg-start:#f3f6fb; --bg-end:#eaf2ff;
       --ink:#0a1020; --muted:#5c667a; --stroke:#dfe6f4;
       --accent:#3b82f6; --accent2:#8b5cf6; --accent-ink:#fff;
-      --card:#ffffffee; --shadow:0 12px 36px rgba(10,16,32,.10);
+      --card:#ffffffee; --panel:#ffffff; --shadow:0 18px 48px rgba(10,16,32,.12);
+      --elev:0 12px 30px rgba(10,16,32,.10), inset 0 1px 0 #ffffff80;
     }
     *{box-sizing:border-box} html,body{height:100%}
     body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);
@@ -19,33 +20,34 @@
 
     /* NAV */
     .nav{position:fixed;top:12px;left:0;right:0;z-index:50;backdrop-filter:saturate(140%) blur(8px)}
-    .nav-inner{border:1px solid var(--stroke);background:#fff7;box-shadow:var(--shadow);
+    .nav-inner{border:1px solid var(--stroke);background:color-mix(in hsl, var(--panel) 88%, transparent);box-shadow:var(--elev);
       border-radius:999px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
-    .brand{display:flex;align-items:center;gap:10px;font-weight:800}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800;cursor:pointer}
     .brand a{color:inherit;text-decoration:none}
     .spark{width:26px;height:26px;border-radius:8px;
       background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd);
-      box-shadow:inset 0 0 0 2px #0001, 0 1px 2px #0001}
+      box-shadow:inset 0 0 0 2px #0001, 0 1px 2px #0002}
     .menu{display:flex;gap:22px;align-items:center}
     .menu a{color:var(--muted);text-decoration:none;font-weight:600;font-size:14px;padding:8px 10px;border-radius:10px}
-    .menu a:hover{color:var(--ink);background:#ffffffa6}
+    .menu a:hover{color:var(--ink);background:color-mix(in hsl, var(--panel) 75%, transparent)}
     .right{display:flex;align-items:center;gap:10px}
     .btn{display:inline-grid;place-items:center;gap:8px;padding:10px 16px;border-radius:999px;border:1px solid #0000;font-weight:800;cursor:pointer;font-family:inherit}
-    .btn-accent{background:var(--accent);color:var(--accent-ink);box-shadow:0 10px 28px rgba(59,130,246,.35)}
-    .btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--stroke)}
+    .btn-accent{background:var(--accent);color:var(--accent-ink);box-shadow:0 10px 28px color-mix(in hsl, var(--accent) 40%, black)}
+    .btn-ghost{background:var(--panel);color:var(--ink);border:1px solid var(--stroke);box-shadow:var(--elev)}
+    .icon-sel{height:40px;border-radius:12px;border:1px solid var(--stroke);background:var(--panel);box-shadow:var(--elev);padding:0 10px}
 
     /* HERO */
     .hero{position:relative;overflow:hidden;padding-top:120px;padding-bottom:80px}
-    .grid-overlay{position:absolute;inset:0;pointer-events:none;opacity:.35;mix-blend:overlay}
+    .grid-overlay{position:absolute;inset:0;pointer-events:none;opacity:.25;mix-blend:overlay}
     .lead{text-align:center;max-width:1000px;margin:0 auto 18px auto;letter-spacing:-.02em}
     .lead h1{font-weight:900;line-height:1.02;margin:0;font-size:clamp(40px,7vw,72px)}
-    .accent-word{background:linear-gradient(90deg,#60a5fa,#93c5fd);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .accent-word{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
     .lead p{margin:14px auto 0;color:var(--muted);font-size:18px;max-width:720px}
 
     /* Prompt */
-    .prompt-wrap{margin:30px auto 16px;max-width:960px;padding:12px;border-radius:24px;background:linear-gradient(180deg,#ffffffcc,#ffffff80);border:1px solid var(--stroke);box-shadow:var(--shadow)}
-    .prompt{background:#fff;border:1px solid var(--stroke);border-radius:18px;display:flex;align-items:center;gap:12px;padding:10px}
-    .prompt textarea{flex:1;min-height:92px;border:none;outline:none;resize:vertical;font:500 16px/1.5 Inter,system-ui;color:var(--ink)}
+    .prompt-wrap{margin:30px auto 16px;max-width:960px;padding:12px;border-radius:24px;background:linear-gradient(180deg, color-mix(in hsl, var(--panel) 90%, transparent), color-mix(in hsl, var(--panel) 70%, transparent));border:1px solid var(--stroke);box-shadow:var(--shadow)}
+    .prompt{background:var(--panel);border:1px solid var(--stroke);border-radius:18px;display:flex;align-items:center;gap:12px;padding:10px;box-shadow:var(--elev)}
+    .prompt textarea{flex:1;min-height:92px;border:none;outline:none;resize:vertical;background:transparent;font:500 16px/1.5 Inter,system-ui;color:var(--ink)}
     .send{width:42px;height:42px;border-radius:12px;border:1px solid var(--stroke);background:var(--ink);color:#fff;display:grid;place-items:center;cursor:pointer}
 
     /* Sections */
@@ -55,39 +57,40 @@
     .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
     .card{background:var(--card);border:1px solid var(--stroke);border-radius:20px;padding:20px;box-shadow:var(--shadow)}
     .card h3{margin:2px 0 6px;font-size:18px}.card p{margin:0;color:var(--muted);font-size:14px}
-    .icon{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#93c5fd,#c4b5fd);display:grid;place-items:center;color:#fff;margin-bottom:8px}
+    .icon{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#fff;margin-bottom:8px}
 
     /* Pricing */
-    .pricing{background:#061830;color:#e8eefc}
+    .pricing{background:linear-gradient(180deg,#061830,#0b2446);color:#e8eefc}
     .pricing .h2{color:#fff}.pricing .sub{color:#9fb0d0}
     .price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-    .pcard{background:#0b2446;border:1px solid #1e3358;border-radius:20px;padding:20px;box-shadow:0 14px 34px rgba(0,0,0,.25)}
+    .pcard{background:color-mix(in hsl, #0b2446 88%, black);border:1px solid #1e3358;border-radius:20px;padding:20px;box-shadow:0 14px 34px rgba(0,0,0,.35)}
     .pcard .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
     .tier{font-weight:800}.price{font-weight:900;font-size:28px}
     .bullets{margin:10px 0 16px 0;padding:0;list-style:none;color:#c8d6f2}
     .bullets li{margin:8px 0;display:flex;gap:8px;align-items:flex-start}
-    .badge{display:inline-block;font-size:11px;background:#ffffff14;border:1px solid #ffffff22;padding:4px 8px;border-radius:999px}
+    .badge{display:inline-block;font-size:11px;background:#ffffff27;border:1px solid #ffffff33;padding:4px 8px;border-radius:999px}
 
     /* Footer */
     .footer{padding:36px 0;color:var(--muted);font-size:14px}
     .footer a{color:inherit}
     @media (max-width:980px){.grid3,.price-grid{grid-template-columns:1fr}}
   </style>
-
-  <!-- IMPORTANT : charger lang.js avant tout script qui l’utilise -->
-  <script src="lang.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="lang.js"></script>
 </head>
 <body>
   <div class="nav">
     <div class="container nav-inner">
-      <div class="brand"><div class="spark" aria-hidden="true"></div><a href="index.html">PropoFlash</a></div>
+      <div class="brand" onclick="location.href='index.html'"><div class="spark" aria-hidden="true"></div><a>PropoFlash</a></div>
       <nav class="menu" aria-label="Primary">
         <a href="#why">Pourquoi nous</a>
         <a href="#use">Cas d’usage</a>
         <a href="#pricing">Tarifs</a>
       </nav>
       <div class="right">
+        <select class="icon-sel" id="langSel" data-lang-picker>
+          <option value="fr">FR</option><option value="en">EN</option>
+        </select>
         <button class="btn btn-ghost" id="authBtn">Se connecter</button>
         <button class="btn btn-accent" id="startBtn">Commencer</button>
       </div>
@@ -105,12 +108,12 @@
     <div class="container">
       <div class="lead">
         <h1>Donnez vie à vos propositions. <span class="accent-word">Maintenant.</span></h1>
-        <p>Générez des offres et propositions professionnelles en minutes, à partir d’un simple brief. Zéro complexité.</p>
+        <p id="heroSub">Générez des offres et propositions professionnelles en minutes, à partir d’un simple brief. Zéro complexité.</p>
       </div>
 
       <div class="prompt-wrap">
         <div class="prompt">
-          <textarea id="brief" placeholder="Collez votre brief ici… (Entrée = envoyer • Maj+Entrée = nouvelle ligne)"></textarea>
+          <textarea id="brief" placeholder="Collez votre brief ici…"></textarea>
           <button class="send" id="sendBrief" title="Envoyer" aria-label="Envoyer">
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
           </button>
@@ -201,48 +204,47 @@
     </div>
   </footer>
 
-  <!-- i18n léger pour le placeholder et le bouton -->
-  <script>
-    const I18N = {
-      fr: { brief_ph: 'Collez votre brief ici… (Entrée = envoyer • Maj+Entrée = nouvelle ligne)', start: 'Commencer', login:'Se connecter' },
-      en: { brief_ph: 'Paste your brief here… (Enter = send • Shift+Enter = new line)', start: 'Start', login:'Log in' }
-    };
-    function applyI18N(){
-      const lang = (window.getLang && window.getLang()) || 'fr';
-      const L = I18N[lang] || I18N.fr;
-      const brief = document.getElementById('brief'); if (brief) brief.placeholder = L.brief_ph;
-      const start = document.getElementById('startBtn'); if (start) start.textContent = L.start;
-      const auth = document.getElementById('authBtn'); if (auth) auth.textContent = L.login;
-    }
-    window.addEventListener('langchange', applyI18N);
-    document.addEventListener('DOMContentLoaded', applyI18N);
-  </script>
-
   <script>
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
     document.getElementById('y').textContent = new Date().getFullYear();
 
+    /* LANG placeholders */
+    function applyPlaceholders(){
+      const l = getLang();
+      const brief = document.getElementById('brief');
+      brief.placeholder = (l==='en'?'Paste your brief here…':'Collez votre brief ici…');
+      document.getElementById('startBtn').textContent = (l==='en'?'Start':'Commencer');
+      document.getElementById('authBtn').textContent = (l==='en'?'Sign in':'Se connecter');
+      document.getElementById('heroSub').textContent = (l==='en'?'Create professional proposals in minutes from a simple brief. Zero complexity.':'Générez des offres et propositions professionnelles en minutes, à partir d’un simple brief. Zéro complexité.');
+    }
+    document.addEventListener('DOMContentLoaded', ()=>{
+      applyPlaceholders();
+      document.querySelectorAll('[data-lang-picker]').forEach(sel=> sel.value=getLang());
+    });
+    window.addEventListener('langchange', applyPlaceholders);
+
+    /* Auth UI */
     const authBtn  = document.getElementById('authBtn');
     const startBtn = document.getElementById('startBtn');
 
     async function refreshAuthUI(){
       const { data:{ session } } = await sb.auth.getSession();
       if(session){
-        authBtn.textContent = (getLang()==='en'?'Log out':'Se déconnecter');
+        authBtn.textContent = (getLang()==='en'?'Sign out':'Se déconnecter');
         authBtn.onclick = async ()=>{ await sb.auth.signOut(); location.reload(); };
       }else{
-        authBtn.textContent = (getLang()==='en'?'Log in':'Se connecter');
+        authBtn.textContent = (getLang()==='en'?'Sign in':'Se connecter');
         authBtn.onclick = ()=> location.href = 'auth.html?return=studio';
       }
     }
     refreshAuthUI(); sb.auth.onAuthStateChange(refreshAuthUI);
 
-    // Lance le studio (prépare une spec par défaut si besoin)
+    // Commencer → prépare une spec et va au studio
     startBtn.onclick = ()=>{
       const spec = JSON.parse(localStorage.getItem('pf_proposal')||'null') || {
-        meta:{ lang: (window.getLang && window.getLang()) || 'fr', title:'Proposition commerciale', company:'Votre société', client:'Client' },
+        meta:{ lang:getLang(), title:(getLang()==='en'?'Business Proposal':'Proposition commerciale'), company:'Votre société', client:'Client' },
         pricing:{ model:'forfait', price:0, currency:'EUR' },
         sections:[]
       };
@@ -250,12 +252,12 @@
       location.href = 'studio.html';
     };
 
-    // Depuis l’accueil, permet d’envoyer le brief directement au studio
+    // Envoyer un brief vers le studio
     document.getElementById('sendBrief').onclick = ()=>{
       const v=(document.getElementById('brief').value||'').trim(); if(!v) return;
       localStorage.setItem('pf_welcome_msg', v);
       if(!localStorage.getItem('pf_proposal')){
-        localStorage.setItem('pf_proposal', JSON.stringify({ meta:{ lang:(window.getLang&&window.getLang())||'fr', title:'Proposition commerciale'} , sections:[] }));
+        localStorage.setItem('pf_proposal', JSON.stringify({ meta:{ lang:getLang(), title:(getLang()==='en'?'Business Proposal':'Proposition commerciale')} , sections:[] }));
       }
       location.href = 'studio.html';
     };
