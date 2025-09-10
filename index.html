@@ -73,8 +73,17 @@
     .footer a{color:inherit}
     @media (max-width:980px){.grid3,.price-grid{grid-template-columns:1fr}}
   </style>
-  <!-- Supabase UMD (expose window.supabase) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
+  <!-- Supabase UMD (global window.supabase) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.2/dist/umd/supabase.js" defer></script>
+  <!-- Fallback ESM → crée window.supabase si besoin -->
+  <script type="module">
+    if (!window.supabase) {
+      import('https://esm.sh/@supabase/supabase-js@2.45.2').then(m=>{
+        window.supabase = { createClient: m.createClient };
+      });
+    }
+  </script>
 </head>
 <body>
   <div class="nav">
@@ -199,7 +208,7 @@
     </div>
   </footer>
 
-  <script>
+  <script defer>
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -220,7 +229,6 @@
     }
     refreshAuthUI(); sb.auth.onAuthStateChange(refreshAuthUI);
 
-    // Lance le studio (prépare une spec par défaut si besoin)
     startBtn.onclick = ()=>{
       const spec = JSON.parse(localStorage.getItem('pf_proposal')||'null') || {
         meta:{ lang:'fr', title:'Proposition commerciale', company:'Votre société', client:'Client' },
@@ -231,7 +239,6 @@
       location.href = 'studio.html';
     };
 
-    // Depuis l’accueil, permet d’envoyer le brief directement au studio
     document.getElementById('sendBrief').onclick = ()=>{
       const v=(document.getElementById('brief').value||'').trim(); if(!v) return;
       localStorage.setItem('pf_welcome_msg', v);
