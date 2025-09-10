@@ -140,7 +140,6 @@
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
     });
 
-    // Destination après connexion (par défaut studio)
     const params = new URLSearchParams(location.search);
     const ret = params.get('return') || 'studio';
     const redirectPath = (ret === 'studio') ? 'studio.html' : 'index.html';
@@ -155,19 +154,19 @@
     const toggle = document.getElementById('toggleMode');
     const forgot = document.getElementById('forgot');
 
-    let mode = 'signin'; // 'signup' ou 'signin'
+    let mode = 'signin';
 
     function showErr(txt){ msgErr.textContent = txt; msgErr.style.display='block'; msgOk.style.display='none'; }
     function showOk(txt){ msgOk.textContent = txt; msgOk.style.display='block'; msgErr.style.display='none'; }
     function clearMsgs(){ msgErr.style.display='none'; msgOk.style.display='none'; }
 
-    // Déjà connecté ? -> redirige
+    // 1) Déjà connecté ? → redirige
     (async ()=>{
       const { data:{ session } } = await sb.auth.getSession();
       if(session){ location.replace(redirectPath); }
     })();
 
-    // Gère fin d’OAuth / changements de session
+    // 2) Gère les changements de session
     sb.auth.onAuthStateChange(async (event, session)=>{
       if(event === 'SIGNED_IN' && session){ location.replace(redirectPath); }
       if(event === 'PASSWORD_RECOVERY'){
@@ -175,25 +174,46 @@
       }
     });
 
-    // Si retour OAuth (hash avec tokens), laisse le SDK hydrater puis redirige
-    if (location.hash && /(access_token|provider_token|code|type=recovery)/i.test(location.hash)) {
+    // 3) Traite explicitement le retour PKCE (?code=...) si présent
+    (async function handlePkceReturn(){
+      const qs = new URLSearchParams(location.search);
+      if (qs.get('error_description')) {
+        showErr(qs.get('error_description'));
+        return;
+      }
+      if (qs.get('code')) {
+        try{
+          const { data, error } = await sb.auth.exchangeCodeForSession(window.location.href);
+          if(error) return showErr(error.message);
+          location.replace(redirectPath);
+        }catch(e){ showErr(e?.message || 'Erreur OAuth'); }
+      }
+    })();
+
+    // 4) Compatibilité : si retour hash implicit (#access_token=...) → laisse hydrater puis redirige
+    if (location.hash && /(access_token|provider_token|type=recovery)/i.test(location.hash)) {
       setTimeout(async ()=>{
         const { data:{ session } } = await sb.auth.getSession();
         if(session && !/type=recovery/i.test(location.hash)){ location.replace(redirectPath); }
       }, 0);
     }
 
-    // Google OAuth : revient toujours ici (auth.html), puis redirection via onAuthStateChange
+    // 5) Google OAuth en PKCE → revient sur auth.html (pas studio)
     googleBtn.onclick = async ()=>{
       clearMsgs();
+      const dest = `${window.location.origin}/auth.html?return=${encodeURIComponent(ret)}`;
       const { error } = await sb.auth.signInWithOAuth({
         provider:'google',
-        options:{ redirectTo: `${window.location.origin}/auth.html?return=${encodeURIComponent(ret)}` }
+        options:{
+          redirectTo: dest,
+          queryParams: { prompt: 'select_account' },
+          flowType: 'pkce'
+        }
       });
       if(error) showErr(error.message);
     };
 
-    // Basculer Connexion / Inscription
+    // 6) Basculer Connexion / Inscription
     toggle.onclick = (e)=>{
       e.preventDefault(); clearMsgs();
       const en=(getLang()==='en');
@@ -210,7 +230,7 @@
       }
     };
 
-    // Mot de passe oublié
+    // 7) Mot de passe oublié
     forgot.onclick = async (e)=>{
       e.preventDefault(); clearMsgs();
       if(!email.value){ email.focus(); return showErr((getLang()==='en')?'Enter your email first.':'Indique ton email pour recevoir le lien de réinitialisation.'); }
@@ -221,7 +241,7 @@
       showOk((getLang()==='en')?'Email sent ✅. Check your inbox.':'Email envoyé ✅. Clique sur le lien reçu pour définir un nouveau mot de passe.');
     };
 
-    // Submit (email/password)
+    // 8) Email / password
     form.addEventListener('submit', async (e)=>{
       e.preventDefault(); clearMsgs(); submitBtn.disabled=true; submitBtn.style.opacity=.7;
       try{
