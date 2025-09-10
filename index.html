@@ -74,44 +74,9 @@
     @media (max-width:980px){.grid3,.price-grid{grid-template-columns:1fr}}
   </style>
   <!-- Supabase UMD (expose window.supabase) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
-  <!-- Fallbacks inline : les boutons marchent même si aucun JS n'a encore tourné -->
-  <script>
-    window.PF = (function(){
-      function ensureSpec(){
-        const spec = JSON.parse(localStorage.getItem('pf_proposal')||'null') || {
-          meta:{ lang:'fr', title:'Proposition commerciale', company:'Votre société', client:'Client' },
-          pricing:{ model:'forfait', price:0, currency:'EUR' },
-          sections:[]
-        };
-        localStorage.setItem('pf_proposal', JSON.stringify(spec));
-      }
-      return {
-        start(){
-          try{ ensureSpec(); }catch(e){}
-          location.href = 'studio.html';
-          return false;
-        },
-        auth(){
-          // si le SDK est là, le script bas de page surchargera ce comportement
-          location.href = 'auth.html?return=studio';
-          return false;
-        },
-        send(){
-          const el = document.getElementById('brief');
-          const v  = (el?.value||'').trim();
-          if(!v) return false;
-          localStorage.setItem('pf_welcome_msg', v);
-          if(!localStorage.getItem('pf_proposal')) ensureSpec();
-          location.href='studio.html';
-          return false;
-        }
-      };
-    })();
-  </script>
-
   <div class="nav">
     <div class="container nav-inner">
       <div class="brand"><div class="spark" aria-hidden="true"></div><a href="index.html">PropoFlash</a></div>
@@ -121,8 +86,8 @@
         <a href="#pricing">Tarifs</a>
       </nav>
       <div class="right">
-        <button class="btn btn-ghost" id="authBtn" onclick="return PF.auth()">Se connecter</button>
-        <button class="btn btn-accent" id="startBtn" onclick="return PF.start()">Commencer</button>
+        <button class="btn btn-ghost" id="authBtn">Se connecter</button>
+        <button class="btn btn-accent" id="startBtn">Commencer</button>
       </div>
     </div>
   </div>
@@ -144,7 +109,7 @@
       <div class="prompt-wrap">
         <div class="prompt">
           <textarea id="brief" placeholder="Collez votre brief ici… (Entrée = envoyer • Maj+Entrée = nouvelle ligne)"></textarea>
-          <button class="send" id="sendBrief" onclick="return PF.send()" title="Envoyer" aria-label="Envoyer">
+          <button class="send" id="sendBrief" title="Envoyer" aria-label="Envoyer">
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
           </button>
         </div>
@@ -201,7 +166,7 @@
             <li>• Chat IA guidé</li>
             <li>• Export PDF verrouillé</li>
           </ul>
-          <a class="btn btn-ghost" href="#hero">Essayer</a>
+          <a class="btn btn-ghost" href="#hero" aria-disabled="true" title="L’export est réservé aux offres payantes">Essayer</a>
         </div>
         <div class="pcard" style="border-color:#2a4c8c">
           <div class="head"><span class="tier">Starter</span><span class="badge">Populaire</span></div>
@@ -235,34 +200,46 @@
   </footer>
 
   <script>
-    // Ajout « luxe » : si Supabase est prêt, on met à jour le bouton connexion (login/logout)
-    document.addEventListener('DOMContentLoaded', ()=>{
-      if (!(window.supabase && typeof window.supabase.createClient==='function')) return;
+    const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    document.getElementById('y').textContent = new Date().getFullYear();
 
-      const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
-      const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
-      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    const authBtn  = document.getElementById('authBtn');
+    const startBtn = document.getElementById('startBtn');
 
-      const authBtn = document.getElementById('authBtn');
-
-      async function refresh(){
-        try{
-          const { data:{ session } } = await sb.auth.getSession();
-          if(session){
-            authBtn.textContent = 'Se déconnecter';
-            authBtn.onclick = async ()=>{ try{ await sb.auth.signOut(); } finally { location.reload(); } };
-          }else{
-            authBtn.textContent = 'Se connecter';
-            authBtn.onclick = ()=> PF.auth();
-          }
-        }catch(e){
-          // en cas d’erreur on garde les fallbacks inline
-          console.warn('[PF] auth refresh error:', e);
-        }
+    async function refreshAuthUI(){
+      const { data:{ session } } = await sb.auth.getSession();
+      if(session){
+        authBtn.textContent = 'Se déconnecter';
+        authBtn.onclick = async ()=>{ await sb.auth.signOut(); location.reload(); };
+      }else{
+        authBtn.textContent = 'Se connecter';
+        authBtn.onclick = ()=> location.href = 'auth.html?return=studio';
       }
-      refresh();
-      sb.auth.onAuthStateChange(refresh);
-    });
+    }
+    refreshAuthUI(); sb.auth.onAuthStateChange(refreshAuthUI);
+
+    // Lance le studio (prépare une spec par défaut si besoin)
+    startBtn.onclick = ()=>{
+      const spec = JSON.parse(localStorage.getItem('pf_proposal')||'null') || {
+        meta:{ lang:'fr', title:'Proposition commerciale', company:'Votre société', client:'Client' },
+        pricing:{ model:'forfait', price:0, currency:'EUR' },
+        sections:[]
+      };
+      localStorage.setItem('pf_proposal', JSON.stringify(spec));
+      location.href = 'studio.html';
+    };
+
+    // Depuis l’accueil, permet d’envoyer le brief directement au studio
+    document.getElementById('sendBrief').onclick = ()=>{
+      const v=(document.getElementById('brief').value||'').trim(); if(!v) return;
+      localStorage.setItem('pf_welcome_msg', v);
+      if(!localStorage.getItem('pf_proposal')){
+        localStorage.setItem('pf_proposal', JSON.stringify({ meta:{ lang:'fr', title:'Proposition commerciale'} , sections:[] }));
+      }
+      location.href = 'studio.html';
+    };
   </script>
 </body>
 </html>
