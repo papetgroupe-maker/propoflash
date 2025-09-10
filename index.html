@@ -13,9 +13,15 @@
       --card:#ffffffee; --panel:#ffffff; --shadow:0 18px 48px rgba(10,16,32,.12);
       --elev:0 12px 30px rgba(10,16,32,.10), inset 0 1px 0 #ffffff80;
     }
-    *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);
-      background:linear-gradient(180deg,var(--bg-start),var(--bg-end));-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);
+      background:linear-gradient(180deg,var(--bg-start),var(--bg-end));
+      -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+      perspective:1200px; perspective-origin:50% 20vh; /* pour les effets 3D doux */
+    }
     .container{max-width:1200px;margin:0 auto;padding:0 24px}
 
     /* NAV */
@@ -39,10 +45,10 @@
     /* HERO — pleine hauteur + 3D soft */
     .hero{
       position:relative;overflow:hidden;
-      min-height:100svh;               /* plein viewport, versions mobiles incluses */
+      min-height:100svh;               /* plein viewport, mobiles inclus */
       display:flex;align-items:center; /* centre verticalement le contenu */
     }
-    /* Effet “3D soft” (inchangé) */
+    /* Effet “3D soft” */
     .hero .fx{position:absolute;inset:0;pointer-events:none;z-index:0}
     .hero .fx .blob{position:absolute;width:520px;height:520px;border-radius:50%;filter:blur(60px);opacity:.35}
     .hero .fx .b1{top:-140px;left:-120px;
@@ -101,6 +107,16 @@
     .bullets li{margin:8px 0;display:flex;gap:8px;align-items:flex-start}
     .badge{display:inline-block;font-size:11px;background:#ffffff27;border:1px solid #ffffff33;padding:4px 8px;border-radius:999px}
 
+    /* 3D SCROLL / CLIC — états et animations */
+    .section3d{transform-style:preserve-3d; will-change:transform,opacity;
+      transform:translateY(60px) rotateX(7deg) scale(.985); opacity:0}
+    .section3d.in{opacity:1; transform:translateY(0) rotateX(var(--tilt, 0deg)) scale(1);
+      transition:transform 700ms cubic-bezier(.2,.7,.1,1), opacity 600ms ease}
+    .section3d.in.pulse3d{transform:translateY(0) rotateX(var(--tilt,0deg)) translateZ(70px) scale(1.015)}
+    @media (prefers-reduced-motion:reduce){
+      .section3d,.section3d.in,.section3d.in.pulse3d{transform:none!important;opacity:1!important;transition:none!important}
+    }
+
     /* Footer */
     .footer{padding:36px 0;color:var(--muted);font-size:14px}
     .footer a{color:inherit}
@@ -114,9 +130,9 @@
     <div class="container nav-inner">
       <div class="brand" onclick="location.href='index.html'"><div class="spark" aria-hidden="true"></div><a>PropoFlash</a></div>
       <nav class="menu" aria-label="Primary">
-        <a href="#why">Pourquoi nous</a>
-        <a href="#use">Cas d’usage</a>
-        <a href="#pricing">Tarifs</a>
+        <a href="#why" data-nav>Pourquoi nous</a>
+        <a href="#use" data-nav>Cas d’usage</a>
+        <a href="#pricing" data-nav>Tarifs</a>
       </nav>
       <div class="right">
         <select class="icon-sel" id="langSel" data-lang-picker>
@@ -152,7 +168,7 @@
     </div>
   </section>
 
-  <section class="section" id="why">
+  <section class="section section3d" id="why">
     <div class="container">
       <h2 class="h2">Pourquoi PropoFlash ?</h2>
       <p class="sub">Notre signature : qualité éditoriale + exécution instantanée, sans vous perdre dans des outils.</p>
@@ -176,7 +192,7 @@
     </div>
   </section>
 
-  <section class="section" id="use">
+  <section class="section section3d" id="use">
     <div class="container">
       <h2 class="h2">Cas d’usage fréquents</h2>
       <p class="sub">Du devis B2B aux offres e-commerce, PropoFlash couvre les besoins essentiels.</p>
@@ -188,7 +204,7 @@
     </div>
   </section>
 
-  <section class="section pricing" id="pricing">
+  <section class="section pricing section3d" id="pricing">
     <div class="container">
       <h2 class="h2">Des plans clairs pour chaque besoin</h2>
       <p class="sub">Commencez gratuitement, évoluez quand vous êtes prêt.</p>
@@ -227,7 +243,7 @@
     </div>
   </section>
 
-  <footer class="footer">
+  <footer class="footer section3d" id="footer">
     <div class="container" style="display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap">
       <div>© <span id="y"></span> PropoFlash. Tous droits réservés.</div>
       <div><a href="#">Mentions légales</a> · <a href="#">Confidentialité</a></div>
@@ -252,6 +268,8 @@
     document.addEventListener('DOMContentLoaded', ()=>{
       applyPlaceholders();
       document.querySelectorAll('[data-lang-picker]').forEach(sel=> sel.value=getLang());
+      init3DTransitions();
+      bindNav3D();
     });
     window.addEventListener('langchange', applyPlaceholders);
 
@@ -291,6 +309,57 @@
       }
       location.href = 'studio.html';
     };
+
+    /* === 3D scroll reveals + tilt === */
+    function init3DTransitions(){
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const sections = Array.from(document.querySelectorAll('.section3d'));
+      const visible = new Set();
+
+      const io = new IntersectionObserver((entries)=>{
+        entries.forEach(e=>{
+          if(e.isIntersecting){
+            e.target.classList.add('in');
+            visible.add(e.target);
+          }else{
+            e.target.classList.remove('in');
+            visible.delete(e.target);
+          }
+        });
+      }, { threshold:0.15 });
+      sections.forEach(s=> io.observe(s));
+
+      function tick(){
+        const vh = window.innerHeight;
+        visible.forEach(el=>{
+          const r = el.getBoundingClientRect();
+          const center = r.top + r.height/2;
+          const delta = (vh/2 - center) / vh; // ~ -0.5..0.5
+          const tilt = Math.max(-1, Math.min(1, delta)) * 5; // -5..5 deg
+          el.style.setProperty('--tilt', tilt.toFixed(2)+'deg');
+        });
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    /* === Effet 3D lors des clics de navigation vers une section === */
+    function bindNav3D(){
+      const links = document.querySelectorAll('a[data-nav][href^="#"]');
+      links.forEach(a=>{
+        a.addEventListener('click', (e)=>{
+          const id = a.getAttribute('href');
+          const target = document.querySelector(id);
+          if(!target) return;
+          // Smooth scroll natif (CSS) + petit effet 3D au focus
+          // On ajoute un délai pour laisser le scroll atteindre la cible
+          setTimeout(()=>{
+            target.classList.add('pulse3d');
+            target.addEventListener('transitionend', ()=> target.classList.remove('pulse3d'), { once:true });
+          }, 180);
+        });
+      });
+    }
   </script>
 </body>
 </html>
