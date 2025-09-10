@@ -36,9 +36,13 @@
     .btn-ghost{background:var(--panel);color:var(--ink);border:1px solid var(--stroke);box-shadow:var(--elev)}
     .icon-sel{height:40px;border-radius:12px;border:1px solid var(--stroke);background:var(--panel);box-shadow:var(--elev);padding:0 10px}
 
-    /* HERO */
-    .hero{position:relative;overflow:hidden;padding-top:120px;padding-bottom:80px}
-    /* --- Nouvel effet “3D soft” sans quadrillage --- */
+    /* HERO — pleine hauteur + 3D soft */
+    .hero{
+      position:relative;overflow:hidden;
+      min-height:100svh;               /* plein viewport, versions mobiles incluses */
+      display:flex;align-items:center; /* centre verticalement le contenu */
+    }
+    /* Effet “3D soft” (inchangé) */
     .hero .fx{position:absolute;inset:0;pointer-events:none;z-index:0}
     .hero .fx .blob{position:absolute;width:520px;height:520px;border-radius:50%;filter:blur(60px);opacity:.35}
     .hero .fx .b1{top:-140px;left:-120px;
@@ -47,7 +51,6 @@
     .hero .fx .b2{bottom:-180px;right:-160px;
       background:radial-gradient( circle at 70% 70%, color-mix(in hsl, var(--accent2) 60%, white) 0%, transparent 58% );
       animation:float2 22s ease-in-out infinite alternate}
-    /* Halo conique très léger qui tourne lentement */
     .hero .fx::after{
       content:"";position:absolute;inset:-25% -25%;
       background:conic-gradient(from 120deg,
@@ -58,10 +61,8 @@
         color-mix(in hsl, var(--accent) 18%, transparent) 1turn);
       filter:blur(80px);opacity:.18;animation:spin 60s linear infinite
     }
-    /* Le contenu passe au-dessus de l’effet */
-    .hero .container{position:relative;z-index:1}
+    .hero .container{position:relative;z-index:1;padding-top:120px;padding-bottom:80px}
 
-    /* Animations & accessibility */
     @keyframes float1{ from{transform:translate3d(0,0,0)} to{transform:translate3d(20px,30px,0)} }
     @keyframes float2{ from{transform:translate3d(0,0,0)} to{transform:translate3d(-30px,-20px,0)} }
     @keyframes spin{ to{ transform:rotate(360deg) } }
@@ -128,7 +129,7 @@
   </div>
 
   <section class="hero" id="hero">
-    <!-- NOUVEL EFFET (remplace l'ancien quadrillage) -->
+    <!-- Effet 3D soft -->
     <div class="fx" aria-hidden="true">
       <div class="blob b1"></div>
       <div class="blob b2"></div>
@@ -286,7 +287,7 @@
       const v=(document.getElementById('brief').value||'').trim(); if(!v) return;
       localStorage.setItem('pf_welcome_msg', v);
       if(!localStorage.getItem('pf_proposal')){
-        localStorage.setItem('pf_proposal', JSON.stringify({ meta:{ lang:getLang(), title:(getLang()==='en'?'Business Proposal':'Proposition commerciale')} , sections:[] }));
+        localStorage.setItem('pf_proposal', JSON.stringify({ meta:{ lang:getLang(), title:(getLang()==='en')?'Business Proposal':'Proposition commerciale'} , sections:[] }));
       }
       location.href = 'studio.html';
     };
