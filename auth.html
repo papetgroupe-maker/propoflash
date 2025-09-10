@@ -8,29 +8,30 @@
   <style>
     :root{
       --ink:#0a1020; --muted:#5c667a; --stroke:#e7ecf6;
-      --accent:#3b82f6; --accent-ink:#fff; --bg:#f6f8fc;
+      --accent:#3b82f6; --accent-ink:#fff; --bg:#f6f8fc; --panel:#fff; --elev:0 12px 30px rgba(10,16,32,.10), inset 0 1px 0 #ffffff90;
     }
     *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0;background:var(--bg);font-family:Inter,system-ui,sans-serif;color:var(--ink)}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),#eef4ff);font-family:Inter,system-ui,sans-serif;color:var(--ink)}
     a{color:var(--ink)}
     .page{display:grid;grid-template-columns:1fr 1.1fr;min-height:100vh}
     .left{display:flex;align-items:center;justify-content:center;padding:32px}
-    .panel{width:100%;max-width:420px}
-    .brand{display:flex;align-items:center;gap:10px;margin-bottom:28px;font-weight:800;cursor:pointer}
+    .panel{width:100%;max-width:420px;background:var(--panel);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--elev);padding:22px}
+    .brand{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-weight:800;cursor:pointer}
     .spark{width:24px;height:24px;border-radius:7px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd)}
-    h1{font-size:40px;line-height:1.05;letter-spacing:-.02em;margin:0 0 10px}
-    .sub{font-size:18px;color:var(--muted);margin:0 0 24px}
+    h1{font-size:32px;line-height:1.1;letter-spacing:-.02em;margin:6px 0 8px}
+    .sub{font-size:14px;color:var(--muted);margin:0 0 14px}
+    .row-top{display:flex;gap:8px;align-items:center;justify-content:space-between}
+    .icon-sel{height:40px;border-radius:12px;border:1px solid var(--stroke);background:var(--panel);box-shadow:var(--elev);padding:0 10px}
     .btn{width:100%;display:inline-flex;align-items:center;justify-content:center;gap:10px;
-         padding:12px 14px;border:1px solid var(--stroke);border-radius:12px;background:#fff;
-         font-weight:700;cursor:pointer}
-    .btn:hover{box-shadow:0 6px 18px rgba(10,16,32,.08)}
+         padding:12px 14px;border:1px solid var(--stroke);border-radius:12px;background:var(--panel);
+         font-weight:700;cursor:pointer;box-shadow:var(--elev)}
     .btn.primary{background:var(--ink);color:#fff;border-color:#0000}
-    .btn.google{background:#fff}
+    .btn.google{background:var(--panel)}
     .or{display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--muted)}
     .or:before,.or:after{content:"";flex:1;height:1px;background:var(--stroke)}
     .fld{display:flex;flex-direction:column;gap:8px;margin:12px 0}
     .fld label{font-weight:600}
-    .fld input{width:100%;padding:12px 12px;border:1px solid var(--stroke);border-radius:12px;font:inherit}
+    .fld input{width:100%;padding:12px 12px;border:1px solid var(--stroke);border-radius:12px;font:inherit;background:transparent;color:var(--ink)}
     .row{display:flex;align-items:center;justify-content:space-between}
     .hint{color:var(--muted);font-size:12px}
     .muted{color:var(--muted)}
@@ -38,54 +39,51 @@
     .error{background:#fee2e2;border:1px solid #fecaca;color:#7f1d1d;padding:10px 12px;border-radius:10px;font-size:14px;margin:10px 0;display:none}
     .ok{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;padding:10px 12px;border-radius:10px;font-size:14px;margin:10px 0;display:none}
     .foot{margin-top:14px;text-align:center}
+
     .right{position:relative;overflow:hidden}
     .hero{position:absolute;inset:24px;border-radius:28px;background:
       radial-gradient(60% 60% at 70% 30%, rgba(59,130,246,.28), transparent 60%),
       radial-gradient(50% 50% at 30% 70%, rgba(139,92,246,.22), transparent 60%),
-      #eaf2ff;
-      box-shadow:inset 0 0 0 1px #ffffff90, 0 20px 60px rgba(10,16,32,.12);
-      display:flex;align-items:center;justify-content:center}
-    .bubble{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--stroke);
-            border-radius:18px;padding:14px 16px;min-width:62%;box-shadow:0 10px 28px rgba(10,16,32,.12)}
-    .bubble input{flex:1;border:none;outline:none;font:600 18px/1.2 Inter,system-ui}
-    .up{width:28px;height:28px;border-radius:8px;background:var(--ink);color:#fff;
-        display:grid;place-items:center}
-    @media (max-width:980px){
-      .page{grid-template-columns:1fr}
-      .right{display:none}
-    }
+      #eaf2ff; box-shadow:var(--elev); display:flex;align-items:center;justify-content:center}
+    .bubble{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--stroke);
+            border-radius:18px;padding:14px 16px;min-width:62%;box-shadow:var(--elev)}
+    .bubble input{flex:1;border:none;outline:none;background:transparent;color:var(--ink);font:600 18px/1.2 Inter,system-ui}
+    .up{width:28px;height:28px;border-radius:8px;background:var(--ink);color:#fff;display:grid;place-items:center}
+    @media (max-width:980px){.page{grid-template-columns:1fr}.right{display:none}}
   </style>
-  <script src="lang.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="lang.js"></script>
 </head>
 <body>
   <div class="page">
     <div class="left">
       <div class="panel">
-        <div class="brand" onclick="location.href='index.html'">
-          <div class="spark" aria-hidden="true"></div>PropoFlash
+        <div class="row-top">
+          <div class="brand" onclick="location.href='index.html'"><div class="spark" aria-hidden="true"></div>PropoFlash</div>
+          <select class="icon-sel" id="langSel" data-lang-picker><option value="fr">FR</option><option value="en">EN</option></select>
         </div>
-        <h1>Bienvenue</h1>
-        <p class="sub">Connectez-vous pour retrouver vos discussions et aperçus.</p>
 
-        <button class="btn google" id="googleBtn">
-          <img alt="" src="https://www.svgrepo.com/show/475656/google-color.svg" width="18" height="18"/>
-          Se connecter avec Google
-        </button>
-
-        <div class="or"><span>ou</span></div>
+        <h1 id="ttl">Bienvenue</h1>
+        <p class="sub" id="sub">Connectez-vous pour retrouver vos discussions et aperçus.</p>
 
         <div id="msgErr" class="error"></div>
         <div id="msgOk" class="ok"></div>
 
+        <button class="btn google" id="googleBtn">
+          <img alt="" src="https://www.svgrepo.com/show/475656/google-color.svg" width="18" height="18"/>
+          <span id="gbtn">Se connecter avec Google</span>
+        </button>
+
+        <div class="or"><span id="or">ou</span></div>
+
         <form id="authForm" autocomplete="on">
           <div class="fld">
-            <label for="email">Email</label>
-            <input id="email" name="email" type="email" placeholder="votre@email.com" required/>
+            <label for="email" id="lem">Email</label>
+            <input id="email" name="email" type="email" placeholder="vous@email.com" required/>
           </div>
           <div class="fld">
             <div class="row">
-              <label for="password">Mot de passe</label>
+              <label for="password" id="lpw">Mot de passe</label>
               <a href="#" id="forgot" class="hint">Mot de passe oublié ?</a>
             </div>
             <input id="password" name="password" type="password" placeholder="••••••••" required minlength="6"/>
@@ -93,21 +91,13 @@
           <button type="submit" class="btn primary" id="submitBtn">Se connecter</button>
         </form>
 
-        <div id="resetBox" style="display:none;margin-top:12px">
-          <div class="fld">
-            <label for="newpass">Nouveau mot de passe</label>
-            <input id="newpass" type="password" placeholder="••••••••" minlength="6"/>
-          </div>
-          <button class="btn primary" id="applyResetBtn">Mettre à jour le mot de passe</button>
-        </div>
-
         <div class="foot">
-          <span class="muted">Pas de compte ?</span>
+          <span class="muted" id="noacc">Pas de compte ?</span>
           <a href="#" id="toggleMode" class="link">Créer un compte</a>
         </div>
 
         <div style="margin-top:12px">
-          <a class="hint" href="index.html">← Retour au site</a>
+          <a class="hint" href="index.html" id="back">← Retour au site</a>
         </div>
       </div>
     </div>
@@ -123,121 +113,99 @@
   </div>
 
   <script>
+    /* i18n */
+    function i18n(){
+      const en=(getLang()==='en');
+      document.getElementById('ttl').textContent = en?'Welcome':'Bienvenue';
+      document.getElementById('sub').textContent = en?'Sign in to access your chats and previews.':'Connectez-vous pour retrouver vos discussions et aperçus.';
+      document.getElementById('gbtn').textContent = en?'Sign in with Google':'Se connecter avec Google';
+      document.getElementById('or').textContent = en?'or':'ou';
+      document.getElementById('lem').textContent = 'Email';
+      document.getElementById('lpw').textContent = en?'Password':'Mot de passe';
+      document.getElementById('forgot').textContent = en?'Forgot password?':'Mot de passe oublié ?';
+      document.getElementById('submitBtn').textContent = en?'Log in':'Se connecter';
+      document.getElementById('noacc').textContent = en?'No account?':'Pas de compte ?';
+      document.getElementById('toggleMode').textContent = en?'Create an account':'Créer un compte';
+      document.getElementById('back').textContent = en?'← Back to site':'← Retour au site';
+    }
+    document.addEventListener('DOMContentLoaded', ()=>{ i18n(); document.querySelectorAll('[data-lang-picker]').forEach(s=>s.value=getLang()); });
+    window.addEventListener('langchange', i18n);
+
+    /* Supabase */
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
-      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-    });
-
-    const params = new URLSearchParams(location.search);
-    const RET = params.get('return') || 'studio';
-    const DEST = (RET === 'studio') ? 'studio.html' : 'index.html';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
     const form = document.getElementById('authForm');
     const email = document.getElementById('email');
-    const pass  = document.getElementById('password');
+    const pass = document.getElementById('password');
     const submitBtn = document.getElementById('submitBtn');
     const googleBtn = document.getElementById('googleBtn');
     const msgErr = document.getElementById('msgErr');
-    const msgOk  = document.getElementById('msgOk');
+    const msgOk = document.getElementById('msgOk');
     const toggle = document.getElementById('toggleMode');
     const forgot = document.getElementById('forgot');
-    const resetBox = document.getElementById('resetBox');
-    const newPassEl = document.getElementById('newpass');
-    const applyResetBtn = document.getElementById('applyResetBtn');
 
-    let mode = 'signin';
+    const ret = new URLSearchParams(location.search).get('return') || 'studio';
+    const redirectPath = ret==='studio' ? '/studio.html' : '/index.html';
 
     function showErr(txt){ msgErr.textContent = txt; msgErr.style.display='block'; msgOk.style.display='none'; }
     function showOk(txt){ msgOk.textContent = txt; msgOk.style.display='block'; msgErr.style.display='none'; }
     function clearMsgs(){ msgErr.style.display='none'; msgOk.style.display='none'; }
 
+    // Déjà connecté ? → redirige vers studio (ou home)
     (async ()=>{
       const { data:{ session } } = await sb.auth.getSession();
-      if(session){ location.replace(DEST); }
+      if(session){ location.href = redirectPath; }
     })();
 
-    sb.auth.onAuthStateChange(async (event, session)=>{
-      if(event === 'SIGNED_IN' && session){ location.replace(DEST); }
-      if(event === 'PASSWORD_RECOVERY'){
-        resetBox.style.display = 'block';
-        showOk('Définissez un nouveau mot de passe puis validez.');
-      }
-    });
-
-    if (location.hash && /(access_token|provider_token|code|type=recovery)/i.test(location.hash)) {
-      setTimeout(async ()=>{
-        const { data:{ session } } = await sb.auth.getSession();
-        if(session && !/type=recovery/i.test(location.hash)){ location.replace(DEST); }
-        if(/type=recovery/i.test(location.hash)){ resetBox.style.display='block'; }
-      }, 0);
-    }
-
+    // Google OAuth → redirige vers studio.html
     googleBtn.onclick = async ()=>{
       clearMsgs();
       const { error } = await sb.auth.signInWithOAuth({
         provider:'google',
-        options:{ redirectTo: `${window.location.origin}/auth.html?return=${encodeURIComponent(RET)}` }
+        options:{ redirectTo: window.location.origin + redirectPath }
       });
       if(error) showErr(error.message);
     };
 
+    // Toggle mode
+    let mode='signin';
     toggle.onclick = (e)=>{
       e.preventDefault(); clearMsgs();
+      const en=(getLang()==='en');
       if(mode==='signin'){
-        mode='signup';
-        submitBtn.textContent='Créer le compte';
-        toggle.textContent='J’ai déjà un compte';
-        forgot.style.visibility='hidden';
+        mode='signup'; submitBtn.textContent=en?'Create account':'Créer le compte'; toggle.textContent=en?'Log in':'J’ai déjà un compte'; forgot.style.visibility='hidden';
       }else{
-        mode='signin';
-        submitBtn.textContent='Se connecter';
-        toggle.textContent='Créer un compte';
-        forgot.style.visibility='visible';
+        mode='signin'; submitBtn.textContent=en?'Log in':'Se connecter'; toggle.textContent=en?'Create an account':'Créer un compte'; forgot.style.visibility='visible';
       }
     };
 
+    // Reset mdp
     forgot.onclick = async (e)=>{
       e.preventDefault(); clearMsgs();
-      if(!email.value){ email.focus(); return showErr('Indique ton email pour recevoir le lien de réinitialisation.'); }
-      const { error } = await sb.auth.resetPasswordForEmail(email.value, {
-        redirectTo: `${window.location.origin}/auth.html?return=${encodeURIComponent(RET)}`
-      });
+      if(!email.value){ email.focus(); return showErr((getLang()==='en')?'Enter your email first.':'Indique ton email pour recevoir le lien de réinitialisation.'); }
+      const { error } = await sb.auth.resetPasswordForEmail(email.value, { redirectTo: window.location.origin + '/auth.html' });
       if(error) return showErr(error.message);
-      showOk('Email envoyé ✅. Clique sur le lien reçu pour définir un nouveau mot de passe.');
+      showOk((getLang()==='en')?'Email sent ✅. Check your inbox.':'Email envoyé ✅. Clique sur le lien reçu pour définir un nouveau mot de passe.');
     };
 
-    applyResetBtn.onclick = async ()=>{
-      clearMsgs();
-      const np = (newPassEl.value||'').trim();
-      if(np.length < 6) return showErr('Mot de passe trop court (6 caractères min).');
-      try{
-        const { error } = await sb.auth.updateUser({ password: np });
-        if(error) return showErr(error.message);
-        showOk('Mot de passe mis à jour ✅. Redirection…');
-        setTimeout(()=>location.replace(DEST), 600);
-      }catch(err){ showErr(err?.message || 'Erreur inattendue'); }
-    };
-
+    // Submit
     form.addEventListener('submit', async (e)=>{
-      e.preventDefault(); clearMsgs();
-      submitBtn.disabled = true; submitBtn.style.opacity=.7;
-
+      e.preventDefault(); clearMsgs(); submitBtn.disabled=true; submitBtn.style.opacity=.7;
       try{
         if(mode==='signup'){
           const { error } = await sb.auth.signUp({ email: email.value, password: pass.value });
           if(error) return showErr(error.message);
-          showOk('Compte créé ✅. Vérifie ta boîte mail pour confirmer ton adresse.');
+          showOk((getLang()==='en')?'Account created. Check your inbox to confirm.':'Compte créé ✅. Vérifie ta boîte mail pour confirmer.');
         }else{
           const { error } = await sb.auth.signInWithPassword({ email: email.value, password: pass.value });
           if(error) return showErr(error.message);
-          location.replace(DEST);
+          showOk((getLang()==='en')?'Login successful. Redirecting…':'Connexion réussie. Redirection…');
+          setTimeout(()=> location.href=redirectPath, 200);
         }
-      }catch(err){
-        showErr(err?.message || 'Erreur inattendue');
-      }finally{
-        submitBtn.disabled = false; submitBtn.style.opacity=1;
-      }
+      }catch(err){ showErr(err?.message || 'Erreur inattendue'); }
+      finally{ submitBtn.disabled=false; submitBtn.style.opacity=1; }
     });
   </script>
 </body>
