@@ -14,7 +14,6 @@
     body{margin:0;background:var(--bg);font-family:Inter,system-ui,sans-serif;color:var(--ink)}
     a{color:var(--ink)}
     .page{display:grid;grid-template-columns:1fr 1.1fr;min-height:100vh}
-    /* Left (form) */
     .left{display:flex;align-items:center;justify-content:center;padding:32px}
     .panel{width:100%;max-width:420px}
     .brand{display:flex;align-items:center;gap:10px;margin-bottom:28px;font-weight:800;cursor:pointer}
@@ -39,7 +38,6 @@
     .error{background:#fee2e2;border:1px solid #fecaca;color:#7f1d1d;padding:10px 12px;border-radius:10px;font-size:14px;margin:10px 0;display:none}
     .ok{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;padding:10px 12px;border-radius:10px;font-size:14px;margin:10px 0;display:none}
     .foot{margin-top:14px;text-align:center}
-    /* Right (hero) */
     .right{position:relative;overflow:hidden}
     .hero{position:absolute;inset:24px;border-radius:28px;background:
       radial-gradient(60% 60% at 70% 30%, rgba(59,130,246,.28), transparent 60%),
@@ -50,20 +48,13 @@
     .bubble{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--stroke);
             border-radius:18px;padding:14px 16px;min-width:62%;box-shadow:0 10px 28px rgba(10,16,32,.12)}
     .bubble input{flex:1;border:none;outline:none;font:600 18px/1.2 Inter,system-ui}
-    .up{width:28px;height:28px;border-radius:8px;background:var(--ink);color:#fff;
-        display:grid;place-items:center}
-    /* Small screens */
-    @media (max-width:980px){
-      .page{grid-template-columns:1fr}
-      .right{display:none}
-    }
+    .up{width:28px;height:28px;border-radius:8px;background:var(--ink);color:#fff;display:grid;place-items:center}
+    @media (max-width:980px){ .page{grid-template-columns:1fr} .right{display:none} }
   </style>
-  <!-- Supabase UMD (expose window.supabase) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
 </head>
 <body>
   <div class="page">
-    <!-- LEFT: form -->
     <div class="left">
       <div class="panel">
         <div class="brand" onclick="location.href='index.html'">
@@ -72,15 +63,15 @@
         <h1>Bienvenue</h1>
         <p class="sub">Connectez-vous pour retrouver vos discussions et aperçus.</p>
 
+        <div id="msgErr" class="error"></div>
+        <div id="msgOk" class="ok"></div>
+
         <button class="btn google" id="googleBtn">
           <img alt="" src="https://www.svgrepo.com/show/475656/google-color.svg" width="18" height="18"/>
           Se connecter avec Google
         </button>
 
         <div class="or"><span>ou</span></div>
-
-        <div id="msgErr" class="error"></div>
-        <div id="msgOk" class="ok"></div>
 
         <form id="authForm" autocomplete="on">
           <div class="fld">
@@ -97,7 +88,6 @@
           <button type="submit" class="btn primary" id="submitBtn">Se connecter</button>
         </form>
 
-        <!-- Bloc réinitialisation si retour de lien "reset password" -->
         <div id="resetBox" style="display:none;margin-top:12px">
           <div class="fld">
             <label for="newpass">Nouveau mot de passe</label>
@@ -117,7 +107,6 @@
       </div>
     </div>
 
-    <!-- RIGHT: hero -->
     <div class="right" aria-hidden="true">
       <div class="hero">
         <div class="bubble">
@@ -129,131 +118,108 @@
   </div>
 
   <script>
-    // === Supabase (mêmes constantes que votre site) ===
-    const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
-    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
-      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-    });
+    const $ = (id)=>document.getElementById(id);
+    const msgErr=$('msgErr'), msgOk=$('msgOk');
+    const googleBtn=$('googleBtn'), form=$('authForm'), email=$('email'), pass=$('password');
+    const toggle=$('toggleMode'), forgot=$('forgot'), resetBox=$('resetBox');
+    const newPassEl=$('newpass'), applyResetBtn=$('applyResetBtn'), submitBtn=$('submitBtn');
 
-    // Destination après connexion (par défaut studio)
     const params = new URLSearchParams(location.search);
     const RET = params.get('return') || 'studio';
     const DEST = (RET === 'studio') ? 'studio.html' : 'index.html';
 
-    const form = document.getElementById('authForm');
-    const email = document.getElementById('email');
-    const pass  = document.getElementById('password');
-    const submitBtn = document.getElementById('submitBtn');
-    const googleBtn = document.getElementById('googleBtn');
-    const msgErr = document.getElementById('msgErr');
-    const msgOk  = document.getElementById('msgOk');
-    const toggle = document.getElementById('toggleMode');
-    const forgot = document.getElementById('forgot');
-    const resetBox = document.getElementById('resetBox');
-    const newPassEl = document.getElementById('newpass');
-    const applyResetBtn = document.getElementById('applyResetBtn');
-
-    let mode = 'signin'; // 'signup' ou 'signin'
-
-    function showErr(txt){ msgErr.textContent = txt; msgErr.style.display='block'; msgOk.style.display='none'; }
-    function showOk(txt){ msgOk.textContent = txt; msgOk.style.display='block'; msgErr.style.display='none'; }
+    function showErr(t){ msgErr.textContent=t; msgErr.style.display='block'; msgOk.style.display='none'; }
+    function showOk(t){ msgOk.textContent=t; msgOk.style.display='block'; msgErr.style.display='none'; }
     function clearMsgs(){ msgErr.style.display='none'; msgOk.style.display='none'; }
 
-    // Déjà connecté ? -> studio
-    (async ()=>{
-      const { data:{ session } } = await sb.auth.getSession();
-      if(session){ location.replace(DEST); }
-    })();
-
-    // Gère fin d’OAuth / changements de session
-    sb.auth.onAuthStateChange(async (event, session)=>{
-      if(event === 'SIGNED_IN' && session){ location.replace(DEST); }
-      if(event === 'PASSWORD_RECOVERY'){
-        resetBox.style.display = 'block';
-        showOk('Définissez un nouveau mot de passe puis validez.');
-      }
-    });
-
-    // Si retour OAuth (hash avec tokens), laisse le SDK hydrater puis redirige
-    if (location.hash && /(access_token|provider_token|code|type=recovery)/i.test(location.hash)) {
-      setTimeout(async ()=>{
-        const { data:{ session } } = await sb.auth.getSession();
-        if(session && !/type=recovery/i.test(location.hash)){ location.replace(DEST); }
-        if(/type=recovery/i.test(location.hash)){ resetBox.style.display='block'; }
-      }, 0);
+    function noSDK(){
+      // SDK indisponible → prévenir et proposer retour
+      showErr("Le service d'authentification n'a pas pu se charger (réseau/extension). Réessayez ou utilisez un autre réseau.");
+      // on garde quand même le bouton retour site
+      googleBtn.disabled = true;
+      submitBtn.disabled = true;
     }
 
-    // Google OAuth : revient ici (auth.html), puis redirection via onAuthStateChange
-    googleBtn.onclick = async ()=>{
-      clearMsgs();
-      const { error } = await sb.auth.signInWithOAuth({
-        provider:'google',
-        options:{ redirectTo: `${window.location.origin}/auth.html?return=${encodeURIComponent(RET)}` }
+    function boot(){
+      if (!(window.supabase && typeof window.supabase.createClient==='function')) { return noSDK(); }
+
+      const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
+      const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
+        auth:{ persistSession:true, autoRefreshToken:true, detectSessionInUrl:true }
       });
-      if(error) showErr(error.message);
-    };
 
-    // Basculer Connexion / Inscription
-    toggle.onclick = (e)=>{
-      e.preventDefault(); clearMsgs();
-      if(mode==='signin'){
-        mode='signup';
-        submitBtn.textContent='Créer le compte';
-        toggle.textContent='J’ai déjà un compte';
-        forgot.style.visibility='hidden';
-      }else{
-        mode='signin';
-        submitBtn.textContent='Se connecter';
-        toggle.textContent='Créer un compte';
-        forgot.style.visibility='visible';
-      }
-    };
+      (async()=>{
+        const { data:{ session } } = await sb.auth.getSession();
+        if(session) location.replace(DEST);
+      })();
 
-    // Mot de passe oublié
-    forgot.onclick = async (e)=>{
-      e.preventDefault(); clearMsgs();
-      if(!email.value){ email.focus(); return showErr('Indique ton email pour recevoir le lien de réinitialisation.'); }
-      const { error } = await sb.auth.resetPasswordForEmail(email.value, {
-        redirectTo: `${window.location.origin}/auth.html?return=${encodeURIComponent(RET)}`
+      sb.auth.onAuthStateChange((event, session)=>{
+        if(event==='SIGNED_IN' && session) location.replace(DEST);
+        if(event==='PASSWORD_RECOVERY'){ resetBox.style.display='block'; showOk('Définissez un nouveau mot de passe puis validez.'); }
       });
-      if(error) return showErr(error.message);
-      showOk('Email envoyé ✅. Clique sur le lien reçu pour définir un nouveau mot de passe.');
-    };
 
-    // Appliquer le nouveau mot de passe (flux "password recovery")
-    applyResetBtn.onclick = async ()=>{
-      clearMsgs();
-      const np = (newPassEl.value||'').trim();
-      if(np.length < 6) return showErr('Mot de passe trop court (6 caractères min).');
-      try{
+      googleBtn.onclick = async ()=>{
+        clearMsgs();
+        const { error } = await sb.auth.signInWithOAuth({
+          provider:'google',
+          options:{ redirectTo: `${location.origin}/auth.html?return=${encodeURIComponent(RET)}` }
+        });
+        if(error) showErr(error.message);
+      };
+
+      let mode='signin';
+      toggle.onclick = (e)=>{
+        e.preventDefault(); clearMsgs();
+        if(mode==='signin'){ mode='signup'; submitBtn.textContent='Créer le compte'; toggle.textContent='J’ai déjà un compte'; forgot.style.visibility='hidden'; }
+        else { mode='signin'; submitBtn.textContent='Se connecter'; toggle.textContent='Créer un compte'; forgot.style.visibility='visible'; }
+      };
+
+      forgot.onclick = async (e)=>{
+        e.preventDefault(); clearMsgs();
+        if(!email.value) return showErr('Indique ton email pour recevoir le lien.');
+        const { error } = await sb.auth.resetPasswordForEmail(email.value,{ redirectTo:`${location.origin}/auth.html?return=${encodeURIComponent(RET)}` });
+        if(error) return showErr(error.message);
+        showOk('Email envoyé ✅. Suivez le lien reçu.');
+      };
+
+      applyResetBtn.onclick = async ()=>{
+        clearMsgs();
+        const np=(newPassEl.value||'').trim();
+        if(np.length<6) return showErr('Mot de passe trop court (min 6).');
         const { error } = await sb.auth.updateUser({ password: np });
         if(error) return showErr(error.message);
         showOk('Mot de passe mis à jour ✅. Redirection…');
         setTimeout(()=>location.replace(DEST), 600);
-      }catch(err){ showErr(err?.message || 'Erreur inattendue'); }
-    };
+      };
 
-    // Submit (email/password)
-    form.addEventListener('submit', async (e)=>{
-      e.preventDefault(); clearMsgs();
-      submitBtn.disabled = true; submitBtn.style.opacity=.7;
+      form.addEventListener('submit', async (e)=>{
+        e.preventDefault(); clearMsgs(); submitBtn.disabled=true; submitBtn.style.opacity=.7;
+        try{
+          if(mode==='signup'){
+            const { error } = await sb.auth.signUp({ email:email.value, password:pass.value });
+            if(error) showErr(error.message); else showOk('Compte créé ✅. Vérifie ta boîte mail.');
+          }else{
+            const { error } = await sb.auth.signInWithPassword({ email:email.value, password:pass.value });
+            if(error) showErr(error.message); else location.replace(DEST);
+          }
+        }catch(err){ showErr(err?.message||'Erreur inattendue'); }
+        finally{ submitBtn.disabled=false; submitBtn.style.opacity=1; }
+      });
 
-      try{
-        if(mode==='signup'){
-          const { error } = await sb.auth.signUp({ email: email.value, password: pass.value });
-          if(error) return showErr(error.message);
-          showOk('Compte créé ✅. Vérifie ta boîte mail pour confirmer ton adresse.');
-        }else{
-          const { error } = await sb.auth.signInWithPassword({ email: email.value, password: pass.value });
-          if(error) return showErr(error.message);
-          location.replace(DEST);
-        }
-      }catch(err){
-        showErr(err?.message || 'Erreur inattendue');
-      }finally{
-        submitBtn.disabled = false; submitBtn.style.opacity=1;
+      // Si retour OAuth (hash)
+      if (location.hash && /(access_token|provider_token|code|type=recovery)/i.test(location.hash)) {
+        setTimeout(async ()=>{
+          const { data:{ session } } = await sb.auth.getSession();
+          if(session && !/type=recovery/i.test(location.hash)){ location.replace(DEST); }
+          if(/type=recovery/i.test(location.hash)){ resetBox.style.display='block'; }
+        }, 0);
       }
+    }
+
+    document.addEventListener('DOMContentLoaded', ()=>{
+      if (window.supabase) boot();
+      else setTimeout(boot, 100); // laisse "defer" finir si besoin
     });
   </script>
 </body>
