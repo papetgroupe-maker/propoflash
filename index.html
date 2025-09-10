@@ -73,8 +73,8 @@
     .footer a{color:inherit}
     @media (max-width:980px){.grid3,.price-grid{grid-template-columns:1fr}}
   </style>
-  <!-- ⚠️ UMD build qui expose window.supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js?v=umd"></script>
+  <!-- Supabase UMD (expose window.supabase) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
   <div class="nav">
@@ -200,12 +200,9 @@
   </footer>
 
   <script>
-    if(!window.supabase){ console.error('Supabase non chargé (window.supabase manquant).'); }
-
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-
     document.getElementById('y').textContent = new Date().getFullYear();
 
     const authBtn  = document.getElementById('authBtn');
@@ -234,7 +231,7 @@
       location.href = 'studio.html';
     };
 
-    // Depuis l’accueil : envoyer le brief directement au studio
+    // Depuis l’accueil, permet d’envoyer le brief directement au studio
     document.getElementById('sendBrief').onclick = ()=>{
       const v=(document.getElementById('brief').value||'').trim(); if(!v) return;
       localStorage.setItem('pf_welcome_msg', v);
