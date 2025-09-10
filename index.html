@@ -3,191 +3,262 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>PropoFlash — Connexion</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>PropoFlash — Proposals that convert</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    :root{ --ink:#0a1020; --muted:#5c667a; --stroke:#e7ecf6; --accent:#3b82f6; --accent-ink:#fff; --bg:#f6f8fc; }
+    :root{
+      --bg-start:#f3f6fb; --bg-end:#eaf2ff;
+      --ink:#0a1020; --muted:#5c667a; --stroke:#dfe6f4;
+      --accent:#3b82f6; --accent2:#8b5cf6; --accent-ink:#fff;
+      --card:#ffffffee; --shadow:0 12px 36px rgba(10,16,32,.10);
+    }
     *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0;background:var(--bg);font-family:Inter,system-ui,sans-serif;color:var(--ink)}
-    a{color:var(--ink)}
-    .page{display:grid;grid-template-columns:1fr 1.1fr;min-height:100vh}
-    .left{display:flex;align-items:center;justify-content:center;padding:32px}
-    .panel{width:100%;max-width:420px}
-    .brand{display:flex;align-items:center;gap:10px;margin-bottom:28px;font-weight:800;cursor:pointer}
-    .spark{width:24px;height:24px;border-radius:7px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd)}
-    h1{font-size:40px;line-height:1.05;letter-spacing:-.02em;margin:0 0 10px}
-    .sub{font-size:18px;color:var(--muted);margin:0 0 24px}
-    .btn{width:100%;display:inline-flex;align-items:center;justify-content:center;gap:10px;
-         padding:12px 14px;border:1px solid var(--stroke);border-radius:12px;background:#fff;
-         font-weight:700;cursor:pointer}
-    .btn:hover{box-shadow:0 6px 18px rgba(10,16,32,.08)}
-    .btn.primary{background:var(--ink);color:#fff;border-color:#0000}
-    .btn.google{background:#fff}
-    .or{display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--muted)}
-    .or:before,.or:after{content:"";flex:1;height:1px;background:var(--stroke)}
-    .fld{display:flex;flex-direction:column;gap:8px;margin:12px 0}
-    .fld label{font-weight:600}
-    .fld input{width:100%;padding:12px 12px;border:1px solid var(--stroke);border-radius:12px;font:inherit}
-    .row{display:flex;align-items:center;justify-content:space-between}
-    .hint{color:var(--muted);font-size:12px}
-    .muted{color:var(--muted)}
-    .link{color:var(--ink);font-weight:600;text-decoration:none}
-    .error{background:#fee2e2;border:1px solid #fecaca;color:#7f1d1d;padding:10px 12px;border-radius:10px;font-size:14px;margin:10px 0;display:none}
-    .ok{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;padding:10px 12px;border-radius:10px;font-size:14px;margin:10px 0;display:none}
-    .foot{margin-top:14px;text-align:center}
-    .right{position:relative;overflow:hidden}
-    .hero{position:absolute;inset:24px;border-radius:28px;background:
-      radial-gradient(60% 60% at 70% 30%, rgba(59,130,246,.28), transparent 60%),
-      radial-gradient(50% 50% at 30% 70%, rgba(139,92,246,.22), transparent 60%),
-      #eaf2ff;
-      box-shadow:inset 0 0 0 1px #ffffff90, 0 20px 60px rgba(10,16,32,.12);
-      display:flex;align-items:center;justify-content:center}
-    .bubble{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--stroke);
-            border-radius:18px;padding:14px 16px;min-width:62%;box-shadow:0 10px 28px rgba(10,16,32,.12)}
-    .bubble input{flex:1;border:none;outline:none;font:600 18px/1.2 Inter,system-ui}
-    .up{width:28px;height:28px;border-radius:8px;background:var(--ink);color:#fff;display:grid;place-items:center}
-    @media (max-width:980px){ .page{grid-template-columns:1fr} .right{display:none} }
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--ink);
+      background:linear-gradient(180deg,var(--bg-start),var(--bg-end));-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+    .container{max-width:1200px;margin:0 auto;padding:0 24px}
+
+    /* NAV */
+    .nav{position:fixed;top:12px;left:0;right:0;z-index:50;backdrop-filter:saturate(140%) blur(8px)}
+    .nav-inner{border:1px solid var(--stroke);background:#fff7;box-shadow:var(--shadow);
+      border-radius:999px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800}
+    .brand a{color:inherit;text-decoration:none}
+    .spark{width:26px;height:26px;border-radius:8px;
+      background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd);
+      box-shadow:inset 0 0 0 2px #0001, 0 1px 2px #0001}
+    .menu{display:flex;gap:22px;align-items:center}
+    .menu a{color:var(--muted);text-decoration:none;font-weight:600;font-size:14px;padding:8px 10px;border-radius:10px}
+    .menu a:hover{color:var(--ink);background:#ffffffa6}
+    .right{display:flex;align-items:center;gap:10px}
+    .btn{display:inline-grid;place-items:center;gap:8px;padding:10px 16px;border-radius:999px;border:1px solid #0000;font-weight:800;cursor:pointer;font-family:inherit}
+    .btn-accent{background:var(--accent);color:var(--accent-ink);box-shadow:0 10px 28px rgba(59,130,246,.35)}
+    .btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--stroke)}
+
+    /* HERO */
+    .hero{position:relative;overflow:hidden;padding-top:120px;padding-bottom:80px}
+    .grid-overlay{position:absolute;inset:0;pointer-events:none;opacity:.35;mix-blend:overlay}
+    .lead{text-align:center;max-width:1000px;margin:0 auto 18px auto;letter-spacing:-.02em}
+    .lead h1{font-weight:900;line-height:1.02;margin:0;font-size:clamp(40px,7vw,72px)}
+    .accent-word{background:linear-gradient(90deg,#60a5fa,#93c5fd);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .lead p{margin:14px auto 0;color:var(--muted);font-size:18px;max-width:720px}
+
+    /* Prompt */
+    .prompt-wrap{margin:30px auto 16px;max-width:960px;padding:12px;border-radius:24px;background:linear-gradient(180deg,#ffffffcc,#ffffff80);border:1px solid var(--stroke);box-shadow:var(--shadow)}
+    .prompt{background:#fff;border:1px solid var(--stroke);border-radius:18px;display:flex;align-items:center;gap:12px;padding:10px}
+    .prompt textarea{flex:1;min-height:92px;border:none;outline:none;resize:vertical;font:500 16px/1.5 Inter,system-ui;color:var(--ink)}
+    .send{width:42px;height:42px;border-radius:12px;border:1px solid var(--stroke);background:var(--ink);color:#fff;display:grid;place-items:center;cursor:pointer}
+
+    /* Sections */
+    .section{padding:84px 0}
+    .h2{font-size:34px;line-height:1.1;margin:0 0 12px;font-weight:900;letter-spacing:-.01em}
+    .sub{color:var(--muted);margin:0 0 26px}
+    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .card{background:var(--card);border:1px solid var(--stroke);border-radius:20px;padding:20px;box-shadow:var(--shadow)}
+    .card h3{margin:2px 0 6px;font-size:18px}.card p{margin:0;color:var(--muted);font-size:14px}
+    .icon{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#93c5fd,#c4b5fd);display:grid;place-items:center;color:#fff;margin-bottom:8px}
+
+    /* Pricing */
+    .pricing{background:#061830;color:#e8eefc}
+    .pricing .h2{color:#fff}.pricing .sub{color:#9fb0d0}
+    .price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .pcard{background:#0b2446;border:1px solid #1e3358;border-radius:20px;padding:20px;box-shadow:0 14px 34px rgba(0,0,0,.25)}
+    .pcard .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .tier{font-weight:800}.price{font-weight:900;font-size:28px}
+    .bullets{margin:10px 0 16px 0;padding:0;list-style:none;color:#c8d6f2}
+    .bullets li{margin:8px 0;display:flex;gap:8px;align-items:flex-start}
+    .badge{display:inline-block;font-size:11px;background:#ffffff14;border:1px solid #ffffff22;padding:4px 8px;border-radius:999px}
+
+    /* Footer */
+    .footer{padding:36px 0;color:var(--muted);font-size:14px}
+    .footer a{color:inherit}
+    @media (max-width:980px){.grid3,.price-grid{grid-template-columns:1fr}}
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- IMPORTANT : charger lang.js avant tout script qui l’utilise -->
+  <script src="lang.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 </head>
 <body>
-  <div class="page">
-    <div class="left">
-      <div class="panel">
-        <div class="brand" onclick="location.href='index.html'"><div class="spark" aria-hidden="true"></div>PropoFlash</div>
-        <h1>Bienvenue</h1>
-        <p class="sub">Connectez-vous pour retrouver vos discussions et aperçus.</p>
-
-        <button class="btn google" id="googleBtn">
-          <img alt="" src="https://www.svgrepo.com/show/475656/google-color.svg" width="18" height="18"/>
-          Se connecter avec Google
-        </button>
-
-        <div class="or"><span>ou</span></div>
-
-        <div id="msgErr" class="error"></div>
-        <div id="msgOk" class="ok"></div>
-
-        <form id="authForm" autocomplete="on">
-          <div class="fld">
-            <label for="email">Email</label>
-            <input id="email" name="email" type="email" placeholder="votre@email.com" required/>
-          </div>
-          <div class="fld">
-            <div class="row">
-              <label for="password">Mot de passe</label>
-              <a href="#" id="forgot" class="hint">Mot de passe oublié ?</a>
-            </div>
-            <input id="password" name="password" type="password" placeholder="••••••••" required minlength="6"/>
-          </div>
-          <button type="submit" class="btn primary" id="submitBtn">Se connecter</button>
-        </form>
-
-        <div class="foot">
-          <span class="muted">Pas de compte ?</span>
-          <a href="#" id="toggleMode" class="link">Créer un compte</a>
-        </div>
-
-        <div style="margin-top:12px">
-          <a class="hint" href="index.html">← Retour au site</a>
-        </div>
-      </div>
-    </div>
-
-    <div class="right" aria-hidden="true">
-      <div class="hero">
-        <div class="bubble">
-          <input value="Transformez vos briefs en propositions" aria-label="accroche" disabled>
-          <div class="up">↑</div>
-        </div>
+  <div class="nav">
+    <div class="container nav-inner">
+      <div class="brand"><div class="spark" aria-hidden="true"></div><a href="index.html">PropoFlash</a></div>
+      <nav class="menu" aria-label="Primary">
+        <a href="#why">Pourquoi nous</a>
+        <a href="#use">Cas d’usage</a>
+        <a href="#pricing">Tarifs</a>
+      </nav>
+      <div class="right">
+        <button class="btn btn-ghost" id="authBtn">Se connecter</button>
+        <button class="btn btn-accent" id="startBtn">Commencer</button>
       </div>
     </div>
   </div>
 
+  <section class="hero" id="hero">
+    <svg class="grid-overlay" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <defs><pattern id="g" width="10" height="10" patternUnits="userSpaceOnUse">
+        <path d="M10 0 L0 0 0 10" fill="none" stroke="#cfd8ee" stroke-width=".25"/>
+      </pattern></defs>
+      <rect width="100%" height="100%" fill="url(#g)"/>
+    </svg>
+
+    <div class="container">
+      <div class="lead">
+        <h1>Donnez vie à vos propositions. <span class="accent-word">Maintenant.</span></h1>
+        <p>Générez des offres et propositions professionnelles en minutes, à partir d’un simple brief. Zéro complexité.</p>
+      </div>
+
+      <div class="prompt-wrap">
+        <div class="prompt">
+          <textarea id="brief" placeholder="Collez votre brief ici… (Entrée = envoyer • Maj+Entrée = nouvelle ligne)"></textarea>
+          <button class="send" id="sendBrief" title="Envoyer" aria-label="Envoyer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="why">
+    <div class="container">
+      <h2 class="h2">Pourquoi PropoFlash ?</h2>
+      <p class="sub">Notre signature : qualité éditoriale + exécution instantanée, sans vous perdre dans des outils.</p>
+      <div class="grid3">
+        <div class="card">
+          <div class="icon">✍️</div>
+          <h3>Rédaction premium</h3>
+          <p>Ton professionnel, argumentation claire, structure prête à envoyer à des décideurs.</p>
+        </div>
+        <div class="card">
+          <div class="icon">🎯</div>
+          <h3>Adaptée au contexte</h3>
+          <p>Chaque proposition s’appuie sur votre brief et vos preuves pour coller à l’objectif.</p>
+        </div>
+        <div class="card">
+          <div class="icon">⚡</div>
+          <h3>Aperçu instantané</h3>
+          <p>Vous collez le brief, vous prévisualisez, vous peaufinez — puis PDF en 1 clic.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="use">
+    <div class="container">
+      <h2 class="h2">Cas d’usage fréquents</h2>
+      <p class="sub">Du devis B2B aux offres e-commerce, PropoFlash couvre les besoins essentiels.</p>
+      <div class="grid3">
+        <div class="card"><h3>Devis B2B</h3><p>Qualification, périmètre, livrables, échéancier et conditions.</p></div>
+        <div class="card"><h3>Services</h3><p>Marketing, design, développement, conseil, formation.</p></div>
+        <div class="card"><h3>E-commerce</h3><p>Fiches produits, bundles et offres saisonnières structurées.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section pricing" id="pricing">
+    <div class="container">
+      <h2 class="h2">Des plans clairs pour chaque besoin</h2>
+      <p class="sub">Commencez gratuitement, évoluez quand vous êtes prêt.</p>
+      <div class="price-grid">
+        <div class="pcard">
+          <div class="head"><span class="tier">Gratuit</span><span class="badge">3/mois</span></div>
+          <div class="price">€0</div>
+          <ul class="bullets">
+            <li>• 3 aperçus par mois</li>
+            <li>• Chat IA guidé</li>
+            <li>• Export PDF verrouillé</li>
+          </ul>
+          <a class="btn btn-ghost" href="#hero" aria-disabled="true" title="L’export est réservé aux offres payantes">Essayer</a>
+        </div>
+        <div class="pcard" style="border-color:#2a4c8c">
+          <div class="head"><span class="tier">Starter</span><span class="badge">Populaire</span></div>
+          <div class="price">€19<span style="font-weight:700;font-size:14px">/mo</span></div>
+          <ul class="bullets">
+            <li>• PDF sans filigrane</li>
+            <li>• 50 aperçus / mois</li>
+            <li>• Jusqu’à 3 preuves intégrées</li>
+          </ul>
+          <a class="btn btn-accent" href="auth.html?return=studio">Choisir Starter</a>
+        </div>
+        <div class="pcard">
+          <div class="head"><span class="tier">Pro</span><span class="badge">Équipes</span></div>
+          <div class="price">€49<span style="font-weight:700;font-size:14px">/mo</span></div>
+          <ul class="bullets">
+            <li>• Aperçus illimités</li>
+            <li>• Sections & modèles illimités</li>
+            <li>• Micro-échantillon si aucune preuve</li>
+          </ul>
+          <a class="btn btn-ghost" href="auth.html?return=studio">Choisir Pro</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container" style="display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap">
+      <div>© <span id="y"></span> PropoFlash. Tous droits réservés.</div>
+      <div><a href="#">Mentions légales</a> · <a href="#">Confidentialité</a></div>
+    </div>
+  </footer>
+
+  <!-- i18n léger pour le placeholder et le bouton -->
   <script>
-    // === Supabase ===
+    const I18N = {
+      fr: { brief_ph: 'Collez votre brief ici… (Entrée = envoyer • Maj+Entrée = nouvelle ligne)', start: 'Commencer', login:'Se connecter' },
+      en: { brief_ph: 'Paste your brief here… (Enter = send • Shift+Enter = new line)', start: 'Start', login:'Log in' }
+    };
+    function applyI18N(){
+      const lang = (window.getLang && window.getLang()) || 'fr';
+      const L = I18N[lang] || I18N.fr;
+      const brief = document.getElementById('brief'); if (brief) brief.placeholder = L.brief_ph;
+      const start = document.getElementById('startBtn'); if (start) start.textContent = L.start;
+      const auth = document.getElementById('authBtn'); if (auth) auth.textContent = L.login;
+    }
+    window.addEventListener('langchange', applyI18N);
+    document.addEventListener('DOMContentLoaded', applyI18N);
+  </script>
+
+  <script>
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, { auth: { persistSession: true, detectSessionInUrl: true }});
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    document.getElementById('y').textContent = new Date().getFullYear();
 
-    const params = new URLSearchParams(location.search);
-    const RETURN = params.get('return') === 'studio' ? 'studio.html' : 'index.html';
+    const authBtn  = document.getElementById('authBtn');
+    const startBtn = document.getElementById('startBtn');
 
-    const form = document.getElementById('authForm');
-    const email = document.getElementById('email');
-    const pass  = document.getElementById('password');
-    const submitBtn = document.getElementById('submitBtn');
-    const googleBtn = document.getElementById('googleBtn');
-    const msgErr = document.getElementById('msgErr');
-    const msgOk  = document.getElementById('msgOk');
-    const toggle = document.getElementById('toggleMode');
-    const forgot = document.getElementById('forgot');
-
-    let mode = 'signin';
-
-    function showErr(txt){ msgErr.textContent = txt; msgErr.style.display='block'; msgOk.style.display='none'; }
-    function showOk(txt){ msgOk.textContent = txt; msgOk.style.display='block'; msgErr.style.display='none'; }
-    function clearMsgs(){ msgErr.style.display='none'; msgOk.style.display='none'; }
-
-    // → Si déjà connecté au chargement, on va au studio
-    (async ()=>{ const { data:{ session } } = await sb.auth.getSession(); if(session){ location.replace('studio.html'); } })();
-
-    // → Écoute l'événement de fin d'OAuth / login
-    sb.auth.onAuthStateChange(async (event, session)=>{
-      if(event === 'SIGNED_IN' && session){ location.replace('studio.html'); }
-    });
-
-    // → Si l'URL de retour OAuth contient des tokens (#access_token...), laisse Supabase hydrater puis redirige
-    if (location.hash && /(access_token|provider_token|code)=/i.test(location.hash)) {
-      // laisse le SDK traiter le hash, puis on vérifie la session
-      setTimeout(async ()=>{
-        const { data:{ session } } = await sb.auth.getSession();
-        if(session){ location.replace('studio.html'); }
-      }, 0);
+    async function refreshAuthUI(){
+      const { data:{ session } } = await sb.auth.getSession();
+      if(session){
+        authBtn.textContent = (getLang()==='en'?'Log out':'Se déconnecter');
+        authBtn.onclick = async ()=>{ await sb.auth.signOut(); location.reload(); };
+      }else{
+        authBtn.textContent = (getLang()==='en'?'Log in':'Se connecter');
+        authBtn.onclick = ()=> location.href = 'auth.html?return=studio';
+      }
     }
+    refreshAuthUI(); sb.auth.onAuthStateChange(refreshAuthUI);
 
-    // Google OAuth : revient toujours ici (login.html), puis on redirige via onAuthStateChange
-    googleBtn.onclick = async ()=>{
-      clearMsgs();
-      const { error } = await sb.auth.signInWithOAuth({
-        provider:'google',
-        options:{ redirectTo: `${window.location.origin}/login.html?return=studio` }
-      });
-      if(error) showErr(error.message);
+    // Lance le studio (prépare une spec par défaut si besoin)
+    startBtn.onclick = ()=>{
+      const spec = JSON.parse(localStorage.getItem('pf_proposal')||'null') || {
+        meta:{ lang: (window.getLang && window.getLang()) || 'fr', title:'Proposition commerciale', company:'Votre société', client:'Client' },
+        pricing:{ model:'forfait', price:0, currency:'EUR' },
+        sections:[]
+      };
+      localStorage.setItem('pf_proposal', JSON.stringify(spec));
+      location.href = 'studio.html';
     };
 
-    // Basculer Connexion / Inscription
-    toggle.onclick = (e)=>{
-      e.preventDefault(); clearMsgs();
-      if(mode==='signin'){ mode='signup'; submitBtn.textContent='Créer le compte'; toggle.textContent='J’ai déjà un compte'; forgot.style.visibility='hidden'; }
-      else { mode='signin'; submitBtn.textContent='Se connecter'; toggle.textContent='Créer un compte'; forgot.style.visibility='visible'; }
+    // Depuis l’accueil, permet d’envoyer le brief directement au studio
+    document.getElementById('sendBrief').onclick = ()=>{
+      const v=(document.getElementById('brief').value||'').trim(); if(!v) return;
+      localStorage.setItem('pf_welcome_msg', v);
+      if(!localStorage.getItem('pf_proposal')){
+        localStorage.setItem('pf_proposal', JSON.stringify({ meta:{ lang:(window.getLang&&window.getLang())||'fr', title:'Proposition commerciale'} , sections:[] }));
+      }
+      location.href = 'studio.html';
     };
-
-    // Mot de passe oublié
-    forgot.onclick = async (e)=>{
-      e.preventDefault(); clearMsgs();
-      if(!email.value){ email.focus(); return showErr('Indique ton email pour recevoir le lien de réinitialisation.'); }
-      const { error } = await sb.auth.resetPasswordForEmail(email.value, { redirectTo: `${window.location.origin}/login.html?return=studio` });
-      if(error) return showErr(error.message);
-      showOk('Email envoyé ✅. Clique sur le lien reçu pour définir un nouveau mot de passe.');
-    };
-
-    // Submit (email/password)
-    form.addEventListener('submit', async (e)=>{
-      e.preventDefault(); clearMsgs(); submitBtn.disabled = true; submitBtn.style.opacity=.7;
-      try{
-        if(mode==='signup'){
-          const { error } = await sb.auth.signUp({ email: email.value, password: pass.value });
-          if(error) return showErr(error.message);
-          showOk('Compte créé ✅. Vérifie ta boîte mail pour confirmer ton adresse.');
-        }else{
-          const { error } = await sb.auth.signInWithPassword({ email: email.value, password: pass.value });
-          if(error) return showErr(error.message);
-          location.replace('studio.html');
-        }
-      }catch(err){ showErr(err?.message || 'Erreur inattendue'); }
-      finally{ submitBtn.disabled=false; submitBtn.style.opacity=1; }
-    });
   </script>
 </body>
 </html>
