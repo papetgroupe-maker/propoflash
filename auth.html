@@ -127,6 +127,8 @@
       document.getElementById('noacc').textContent = en?'No account?':'Pas de compte ?';
       document.getElementById('toggleMode').textContent = en?'Create an account':'Créer un compte';
       document.getElementById('back').textContent = en?'← Back to site':'← Retour au site';
+      document.getElementById('email').placeholder = en?'you@email.com':'vous@email.com';
+      document.getElementById('password').placeholder = '••••••••';
     }
     document.addEventListener('DOMContentLoaded', ()=>{ i18n(); document.querySelectorAll('[data-lang-picker]').forEach(s=>s.value=getLang()); });
     window.addEventListener('langchange', i18n);
@@ -134,63 +136,92 @@
     /* Supabase */
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+    });
+
+    // Destination après connexion (par défaut studio)
+    const params = new URLSearchParams(location.search);
+    const ret = params.get('return') || 'studio';
+    const redirectPath = (ret === 'studio') ? 'studio.html' : 'index.html';
 
     const form = document.getElementById('authForm');
     const email = document.getElementById('email');
-    const pass = document.getElementById('password');
+    const pass  = document.getElementById('password');
     const submitBtn = document.getElementById('submitBtn');
     const googleBtn = document.getElementById('googleBtn');
     const msgErr = document.getElementById('msgErr');
-    const msgOk = document.getElementById('msgOk');
+    const msgOk  = document.getElementById('msgOk');
     const toggle = document.getElementById('toggleMode');
     const forgot = document.getElementById('forgot');
 
-    const ret = new URLSearchParams(location.search).get('return') || 'studio';
-    const redirectPath = ret==='studio' ? '/studio.html' : '/index.html';
+    let mode = 'signin'; // 'signup' ou 'signin'
 
     function showErr(txt){ msgErr.textContent = txt; msgErr.style.display='block'; msgOk.style.display='none'; }
     function showOk(txt){ msgOk.textContent = txt; msgOk.style.display='block'; msgErr.style.display='none'; }
     function clearMsgs(){ msgErr.style.display='none'; msgOk.style.display='none'; }
 
-    // Déjà connecté ? → redirige vers studio (ou home)
+    // Déjà connecté ? -> redirige
     (async ()=>{
       const { data:{ session } } = await sb.auth.getSession();
-      if(session){ location.href = redirectPath; }
+      if(session){ location.replace(redirectPath); }
     })();
 
-    // Google OAuth → redirige vers studio.html
+    // Gère fin d’OAuth / changements de session
+    sb.auth.onAuthStateChange(async (event, session)=>{
+      if(event === 'SIGNED_IN' && session){ location.replace(redirectPath); }
+      if(event === 'PASSWORD_RECOVERY'){
+        showOk((getLang()==='en')?'Open the reset link and set a new password.':'Ouvrez le lien de réinitialisation pour définir un nouveau mot de passe.');
+      }
+    });
+
+    // Si retour OAuth (hash avec tokens), laisse le SDK hydrater puis redirige
+    if (location.hash && /(access_token|provider_token|code|type=recovery)/i.test(location.hash)) {
+      setTimeout(async ()=>{
+        const { data:{ session } } = await sb.auth.getSession();
+        if(session && !/type=recovery/i.test(location.hash)){ location.replace(redirectPath); }
+      }, 0);
+    }
+
+    // Google OAuth : revient toujours ici (auth.html), puis redirection via onAuthStateChange
     googleBtn.onclick = async ()=>{
       clearMsgs();
       const { error } = await sb.auth.signInWithOAuth({
         provider:'google',
-        options:{ redirectTo: window.location.origin + redirectPath }
+        options:{ redirectTo: `${window.location.origin}/auth.html?return=${encodeURIComponent(ret)}` }
       });
       if(error) showErr(error.message);
     };
 
-    // Toggle mode
-    let mode='signin';
+    // Basculer Connexion / Inscription
     toggle.onclick = (e)=>{
       e.preventDefault(); clearMsgs();
       const en=(getLang()==='en');
       if(mode==='signin'){
-        mode='signup'; submitBtn.textContent=en?'Create account':'Créer le compte'; toggle.textContent=en?'Log in':'J’ai déjà un compte'; forgot.style.visibility='hidden';
+        mode='signup';
+        submitBtn.textContent = en?'Create account':'Créer le compte';
+        toggle.textContent    = en?'Log in':'J’ai déjà un compte';
+        forgot.style.visibility='hidden';
       }else{
-        mode='signin'; submitBtn.textContent=en?'Log in':'Se connecter'; toggle.textContent=en?'Create an account':'Créer un compte'; forgot.style.visibility='visible';
+        mode='signin';
+        submitBtn.textContent = en?'Log in':'Se connecter';
+        toggle.textContent    = en?'Create an account':'Créer un compte';
+        forgot.style.visibility='visible';
       }
     };
 
-    // Reset mdp
+    // Mot de passe oublié
     forgot.onclick = async (e)=>{
       e.preventDefault(); clearMsgs();
       if(!email.value){ email.focus(); return showErr((getLang()==='en')?'Enter your email first.':'Indique ton email pour recevoir le lien de réinitialisation.'); }
-      const { error } = await sb.auth.resetPasswordForEmail(email.value, { redirectTo: window.location.origin + '/auth.html' });
+      const { error } = await sb.auth.resetPasswordForEmail(email.value, {
+        redirectTo: `${window.location.origin}/auth.html?return=${encodeURIComponent(ret)}`
+      });
       if(error) return showErr(error.message);
       showOk((getLang()==='en')?'Email sent ✅. Check your inbox.':'Email envoyé ✅. Clique sur le lien reçu pour définir un nouveau mot de passe.');
     };
 
-    // Submit
+    // Submit (email/password)
     form.addEventListener('submit', async (e)=>{
       e.preventDefault(); clearMsgs(); submitBtn.disabled=true; submitBtn.style.opacity=.7;
       try{
@@ -202,7 +233,7 @@
           const { error } = await sb.auth.signInWithPassword({ email: email.value, password: pass.value });
           if(error) return showErr(error.message);
           showOk((getLang()==='en')?'Login successful. Redirecting…':'Connexion réussie. Redirection…');
-          setTimeout(()=> location.href=redirectPath, 200);
+          setTimeout(()=> location.replace(redirectPath), 200);
         }
       }catch(err){ showErr(err?.message || 'Erreur inattendue'); }
       finally{ submitBtn.disabled=false; submitBtn.style.opacity=1; }
