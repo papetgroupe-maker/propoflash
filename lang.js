@@ -1,85 +1,8 @@
-// lang.js — i18n global (FR/EN) + propagation auto sur tout le site
+// lang.js — i18n global (FR/EN) avec application auto par page
 (() => {
   const KEY = 'pf_lang';
-  const SUP = ['fr','en'];
+  const SUP = ['fr', 'en'];
   const FALLBACK = 'fr';
-
-  const STR = {
-    fr: {
-      // Global
-      language: 'Langue',
-      // Index (home)
-      nav_why: 'Pourquoi nous',
-      nav_use: 'Cas d’usage',
-      nav_pricing: 'Tarifs',
-      start: 'Commencer',
-      sign_in: 'Se connecter',
-      sign_out: 'Se déconnecter',
-      paste_brief: 'Collez votre brief ici…',
-      hero_sub: 'Générez des offres et propositions professionnelles en minutes, à partir d’un simple brief. Zéro complexité.',
-      // Auth
-      auth_title: 'Bienvenue',
-      auth_sub: 'Connectez-vous pour retrouver vos discussions et aperçus.',
-      auth_google: 'Se connecter avec Google',
-      auth_or: 'ou',
-      auth_email_label: 'Email',
-      auth_pwd_label: 'Mot de passe',
-      auth_forgot: 'Mot de passe oublié ?',
-      auth_login: 'Se connecter',
-      auth_create: 'Créer un compte',
-      auth_have_account: 'J’ai déjà un compte',
-      auth_no_account: 'Pas de compte ?',
-      auth_back_site: '← Retour au site',
-      // Studio
-      chat: 'Chat',
-      chat_hint: 'Entrée = envoyer • Maj+Entrée = nouvelle ligne',
-      history: 'Historique',
-      ready: 'Prêt',
-      logout: 'Se déconnecter',
-      composer_ph: 'Écrivez votre message',
-      // Preview
-      back_chat: '← Retour au chat',
-      export_pdf: 'Exporter PDF',
-      loading_preview: 'Chargement de l’aperçu…',
-    },
-    en: {
-      // Global
-      language: 'Language',
-      // Index (home)
-      nav_why: 'Why us',
-      nav_use: 'Use cases',
-      nav_pricing: 'Pricing',
-      start: 'Start',
-      sign_in: 'Sign in',
-      sign_out: 'Sign out',
-      paste_brief: 'Paste your brief here…',
-      hero_sub: 'Create professional proposals in minutes from a simple brief. Zero complexity.',
-      // Auth
-      auth_title: 'Welcome',
-      auth_sub: 'Sign in to access your chats and previews.',
-      auth_google: 'Sign in with Google',
-      auth_or: 'or',
-      auth_email_label: 'Email',
-      auth_pwd_label: 'Password',
-      auth_forgot: 'Forgot password?',
-      auth_login: 'Log in',
-      auth_create: 'Create an account',
-      auth_have_account: 'Log in',
-      auth_no_account: 'No account?',
-      auth_back_site: '← Back to site',
-      // Studio
-      chat: 'Chat',
-      chat_hint: 'Enter = send • Shift+Enter = new line',
-      history: 'History',
-      ready: 'Ready',
-      logout: 'Sign out',
-      composer_ph: 'Type your message',
-      // Preview
-      back_chat: '← Back to chat',
-      export_pdf: 'Export PDF',
-      loading_preview: 'Loading preview…',
-    }
-  };
 
   const norm = (l) => {
     const s = (l || '').toString().slice(0, 2).toLowerCase();
@@ -98,112 +21,174 @@
     const lang = norm(l);
     try { localStorage.setItem(KEY, lang); } catch {}
     document.documentElement.lang = lang;
-    // sync selects
-    document.querySelectorAll('select[data-lang-picker]').forEach(sel => { sel.value = lang; });
-    const looseSel = document.getElementById('langSel');
-    if (looseSel && !looseSel.matches('[data-lang-picker]')) looseSel.value = lang;
-    // fire event
+    // notifie toutes les pages/composants
     window.dispatchEvent(new CustomEvent('langchange', { detail: lang }));
-    // apply immediately
-    applyI18n();
   }
 
   // expose global
   window.getLang = getLang;
   window.setLang = setLang;
 
-  // helpers
-  const T = () => STR[getLang()] || STR[FALLBACK];
-  const setTxt = (id, key) => { const el = document.getElementById(id); if (el && T()[key] != null) el.textContent = T()[key]; };
-  const setPH  = (id, key) => { const el = document.getElementById(id); if (el && T()[key] != null) el.placeholder = T()[key]; };
-
-  function applyI18n(){
-    // Always set <html lang>
-    document.documentElement.lang = getLang();
-
-    const dict = T();
-
-    // ===== INDEX =====
-    // nav labels by href (pas d’ID dans la nav)
-    const aWhy = document.querySelector('.menu a[href="#why"]'); if (aWhy) aWhy.textContent = dict.nav_why;
-    const aUse = document.querySelector('.menu a[href="#use"]'); if (aUse) aUse.textContent = dict.nav_use;
-    const aPri = document.querySelector('.menu a[href="#pricing"]'); if (aPri) aPri.textContent = dict.nav_pricing;
-
-    setTxt('startBtn', 'start');
-    const authBtn = document.getElementById('authBtn');
-    if (authBtn) {
-      // Si connecté, certains scripts locaux remplacent le libellé; on se base sur le texte courant pour décider
-      if (/déconnecter|sign out/i.test(authBtn.textContent)) {
-        authBtn.textContent = dict.sign_out;
-      } else {
-        authBtn.textContent = dict.sign_in;
-      }
-    }
-    setPH('brief', 'paste_brief');
-    const heroSub = document.getElementById('heroSub'); if (heroSub) heroSub.textContent = dict.hero_sub;
-
-    // ===== AUTH =====
-    setTxt('ttl', 'auth_title');
-    setTxt('sub', 'auth_sub');
-    setTxt('gbtn', 'auth_google');
-    setTxt('or', 'auth_or');
-    setTxt('lem', 'auth_email_label');
-    setTxt('lpw', 'auth_pwd_label');
-    setTxt('forgot', 'auth_forgot');
-    // submit / toggle / foot
-    const submitBtn = document.getElementById('submitBtn');
-    const toggleMode = document.getElementById('toggleMode');
-    const noacc = document.getElementById('noacc');
-    if (noacc) noacc.textContent = dict.auth_no_account;
-    if (toggleMode && submitBtn) {
-      // Si on est en mode "signup" (heuristique sur le libellé)
-      const isSignup = /créer|create/i.test(submitBtn.textContent);
-      submitBtn.textContent = isSignup ? dict.auth_create : dict.auth_login;
-      toggleMode.textContent = isSignup ? dict.auth_have_account : dict.auth_create;
-    }
-    setTxt('back', 'auth_back_site');
-
-    // ===== STUDIO =====
-    setTxt('chatTitle', 'chat');
-    setTxt('chatHint', 'chat_hint');
-    setTxt('openHistory', 'history');
-    const status = document.getElementById('status'); if (status && /prêt|ready|chargement|loading/i.test(status.textContent)) status.textContent = dict.ready;
-    setTxt('logoutBtn', 'logout');
-    setPH('composer', 'composer_ph');
-    // Label "Langue" (pas d’ID)
-    const labelLangStudio = document.querySelector('.bar .right label');
-    if (labelLangStudio) labelLangStudio.textContent = dict.language;
-
-    // ===== PREVIEW =====
-    setTxt('backBtn', 'back_chat');
-    setTxt('pdfBtn', 'export_pdf');
-    const st2 = document.getElementById('status');
-    if (st2 && /aperçu|preview/i.test(st2.textContent)) st2.textContent = dict.loading_preview;
-    const labelLangPrev = document.querySelector('.bar .right label');
-    if (labelLangPrev) labelLangPrev.textContent = dict.language;
-  }
-
-  // init document lang
+  // init
   document.documentElement.lang = getLang();
 
-  // Auto-bind sur tous les <select data-lang-picker> (et fallback #langSel)
-  function bindPickers(){
-    document.querySelectorAll('select[data-lang-picker]').forEach((sel) => {
-      sel.value = getLang();
-      sel.onchange = (e) => setLang(e.target.value);
-    });
-    const looseSel = document.getElementById('langSel');
-    if (looseSel && !looseSel.matches('[data-lang-picker]')) {
-      looseSel.value = getLang();
-      looseSel.onchange = (e) => setLang(e.target.value);
+  // Helpers DOM
+  const Q = (sel, ctx = document) => ctx.querySelector(sel);
+  const QA = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
+  const setTxt = (sel, fr, en) => { const el = Q(sel); if (el) el.textContent = (getLang() === 'en' ? en : fr); };
+  const setHTML = (sel, fr, en) => { const el = Q(sel); if (el) el.innerHTML = (getLang() === 'en' ? en : fr); };
+  const setPH = (sel, fr, en) => { const el = Q(sel); if (el) el.placeholder = (getLang() === 'en' ? en : fr); };
+  const setAttr = (sel, attr, fr, en) => { const el = Q(sel); if (el) el.setAttribute(attr, (getLang() === 'en' ? en : fr)); };
+
+  // Application par page
+  function applyPageTranslations() {
+    const lang = getLang();
+    // Aligne tous les sélecteurs de langue <select data-lang-picker>
+    QA('select[data-lang-picker]').forEach((sel) => { sel.value = lang; });
+
+    const path = (location.pathname || '').toLowerCase();
+
+    // ===== INDEX =====
+    if (path.endsWith('/') || path.endsWith('/index.html') || path === '' ) {
+      // NAV
+      setTxt('.menu a[href="#why"]', 'Pourquoi nous', 'Why us');
+      setTxt('.menu a[href="#use"]', 'Cas d’usage', 'Use cases');
+      setTxt('.menu a[href="#pricing"]', 'Tarifs', 'Pricing');
+
+      setTxt('#authBtn', 'Se connecter', 'Sign in');
+      setTxt('#startBtn', 'Commencer', 'Start');
+
+      // HERO
+      setHTML('.lead h1',
+        'Donnez vie à vos propositions. <span class="accent-word">Maintenant.</span>',
+        'Bring your proposals to life. <span class="accent-word">Now.</span>'
+      );
+      setTxt('#heroSub',
+        'Générez des offres et propositions professionnelles en minutes, à partir d’un simple brief. Zéro complexité.',
+        'Create professional proposals in minutes from a simple brief. Zero complexity.'
+      );
+      setPH('#brief', 'Collez votre brief ici…', 'Paste your brief here…');
+      setAttr('#sendBrief', 'title', 'Envoyer', 'Send');
+      setAttr('#sendBrief', 'aria-label', 'Envoyer', 'Send');
+
+      // SECTION — Pourquoi
+      const why = Q('#why');
+      if (why) {
+        setTxt('#why .h2', 'Pourquoi PropoFlash ?', 'Why PropoFlash?');
+        setTxt('#why .sub',
+          'Notre signature : qualité éditoriale + exécution instantanée, sans vous perdre dans des outils.',
+          'Our signature: editorial quality + instant execution, without getting lost in tools.'
+        );
+        const cards = QA('#why .card');
+        if (cards[0]) { setTxt(cards[0].querySelector('h3'), 'Rédaction premium', 'Premium writing'); setTxt(cards[0].querySelector('p'), 'Ton professionnel, argumentation claire, structure prête à envoyer à des décideurs.', 'Professional tone, clear arguments, structure ready for decision-makers.'); }
+        if (cards[1]) { setTxt(cards[1].querySelector('h3'), 'Adaptée au contexte', 'Context-aware'); setTxt(cards[1].querySelector('p'), 'Chaque proposition s’appuie sur votre brief et vos preuves pour coller à l’objectif.', 'Each proposal uses your brief and proof points to match the goal.'); }
+        if (cards[2]) { setTxt(cards[2].querySelector('h3'), 'Aperçu instantané', 'Instant preview'); setTxt(cards[2].querySelector('p'), 'Vous collez le brief, vous prévisualisez, vous peaufinez — puis PDF en 1 clic.', 'Paste your brief, preview, refine — then one-click PDF.'); }
+      }
+
+      // SECTION — Cas d’usage
+      const use = Q('#use');
+      if (use) {
+        setTxt('#use .h2', 'Cas d’usage fréquents', 'Common use cases');
+        setTxt('#use .sub', 'Du devis B2B aux offres e-commerce, PropoFlash couvre les besoins essentiels.', 'From B2B quotes to e-commerce offers, PropoFlash covers the essentials.');
+        const cards = QA('#use .card');
+        if (cards[0]) { setTxt(cards[0].querySelector('h3'), 'Devis B2B', 'B2B quotes'); setTxt(cards[0].querySelector('p'), 'Qualification, périmètre, livrables, échéancier et conditions.', 'Qualification, scope, deliverables, schedule and terms.'); }
+        if (cards[1]) { setTxt(cards[1].querySelector('h3'), 'Services', 'Services'); setTxt(cards[1].querySelector('p'), 'Marketing, design, développement, conseil, formation.', 'Marketing, design, development, consulting, training.'); }
+        if (cards[2]) { setTxt(cards[2].querySelector('h3'), 'E-commerce', 'E-commerce'); setTxt(cards[2].querySelector('p'), 'Fiches produits, bundles et offres saisonnières structurées.', 'Product sheets, bundles and structured seasonal offers.'); }
+      }
+
+      // SECTION — Pricing
+      const pr = Q('#pricing');
+      if (pr) {
+        setTxt('#pricing .h2', 'Des plans clairs pour chaque besoin', 'Clear plans for every need');
+        setTxt('#pricing .sub', 'Commencez gratuitement, évoluez quand vous êtes prêt.', 'Start free, upgrade when you’re ready.');
+        const tiers = QA('.price-grid .pcard');
+        // Gratuit
+        if (tiers[0]) {
+          setTxt(tiers[0].querySelector('.tier'), 'Gratuit', 'Free');
+          setTxt(tiers[0].querySelector('.badge'), '3/mois', '3/mo');
+          setTxt(tiers[0].querySelector('.bullets li:nth-child(1)'), '• 3 aperçus par mois', '• 3 previews per month');
+          setTxt(tiers[0].querySelector('.bullets li:nth-child(2)'), '• Chat IA guidé', '• Guided AI chat');
+          setTxt(tiers[0].querySelector('.bullets li:nth-child(3)'), '• Export PDF verrouillé', '• Watermarked PDF export');
+          setTxt(tiers[0].querySelector('a.btn'), 'Essayer', 'Try');
+          setAttr(tiers[0].querySelector('a.btn'), 'title', 'L’export est réservé aux offres payantes', 'Export is for paid plans');
+        }
+        // Starter
+        if (tiers[1]) {
+          setTxt(tiers[1].querySelector('.tier'), 'Starter', 'Starter');
+          setTxt(tiers[1].querySelector('.badge'), 'Populaire', 'Popular');
+          setTxt(tiers[1].querySelector('.bullets li:nth-child(1)'), '• PDF sans filigrane', '• PDF without watermark');
+          setTxt(tiers[1].querySelector('.bullets li:nth-child(2)'), '• 50 aperçus / mois', '• 50 previews / month');
+          setTxt(tiers[1].querySelector('.bullets li:nth-child(3)'), '• Jusqu’à 3 preuves intégrées', '• Up to 3 embedded proof points');
+          setTxt(tiers[1].querySelector('a.btn'), 'Choisir Starter', 'Choose Starter');
+        }
+        // Pro
+        if (tiers[2]) {
+          setTxt(tiers[2].querySelector('.tier'), 'Pro', 'Pro');
+          setTxt(tiers[2].querySelector('.badge'), 'Équipes', 'Teams');
+          setTxt(tiers[2].querySelector('.bullets li:nth-child(1)'), '• Aperçus illimités', '• Unlimited previews');
+          setTxt(tiers[2].querySelector('.bullets li:nth-child(2)'), '• Sections & modèles illimités', '• Unlimited sections & templates');
+          setTxt(tiers[2].querySelector('.bullets li:nth-child(3)'), '• Micro-échantillon si aucune preuve', '• Micro-sample if no proof');
+          setTxt(tiers[2].querySelector('a.btn'), 'Choisir Pro', 'Choose Pro');
+        }
+      }
+
+      // FOOTER
+      setHTML('footer .container > div:first-child',
+        `© <span id="y">${new Date().getFullYear()}</span> PropoFlash. Tous droits réservés.`,
+        `© <span id="y">${new Date().getFullYear()}</span> PropoFlash. All rights reserved.`
+      );
+      const fLinks = QA('.footer a');
+      if (fLinks[0]) fLinks[0].textContent = (lang === 'en' ? 'Legal' : 'Mentions légales');
+      if (fLinks[1]) fLinks[1].textContent = (lang === 'en' ? 'Privacy' : 'Confidentialité');
+    }
+
+    // ===== AUTH =====
+    if (path.endsWith('/auth.html')) {
+      setTxt('#ttl', 'Bienvenue', 'Welcome');
+      setTxt('#sub', 'Connectez-vous pour retrouver vos discussions et aperçus.', 'Sign in to access your chats and previews.');
+      setTxt('#gbtn', 'Se connecter avec Google', 'Sign in with Google');
+      setTxt('#or', 'ou', 'or');
+      setTxt('#lem', 'Email', 'Email');
+      setTxt('#lpw', 'Mot de passe', 'Password');
+      setTxt('#forgot', 'Mot de passe oublié ?', 'Forgot password?');
+      setTxt('#submitBtn', 'Se connecter', 'Log in');
+      setTxt('#noacc', 'Pas de compte ?', 'No account?');
+      const toggle = Q('#toggleMode'); if (toggle) toggle.textContent = (lang === 'en' ? 'Create an account' : 'Créer un compte');
+      setTxt('#back', '← Retour au site', '← Back to site');
+      // placeholders
+      setPH('#email', 'vous@email.com', 'you@email.com');
+      setPH('#password', '••••••••', '••••••••');
+    }
+
+    // ===== STUDIO =====
+    if (path.endsWith('/studio.html')) {
+      // Top bar
+      setTxt('#openHistory', 'Historique', 'History');
+      setTxt('#status', 'Prêt', 'Ready');
+      // Menu
+      setTxt('#logoutBtn', 'Se déconnecter', 'Sign out');
+      // Chat area
+      setTxt('#chatTitle', 'Chat', 'Chat');
+      const hint = Q('#chatHint');
+      if (hint) hint.textContent = (lang === 'en' ? 'Enter = send • Shift+Enter = new line' : 'Entrée = envoyer • Maj+Entrée = nouvelle ligne');
+      // Composer placeholder
+      const comp = Q('#composer'); if (comp) comp.placeholder = (lang === 'en' ? 'Type your message' : 'Écrivez votre message');
+    }
+
+    // ===== PREVIEW =====
+    if (path.endsWith('/preview.html')) {
+      setTxt('#brandBtn', 'PropoFlash', 'PropoFlash');
+      setTxt('#backBtn', '← Retour au chat', '← Back to chat');
+      setTxt('#pdfBtn', 'Exporter PDF', 'Export PDF');
+      const st = Q('#status'); if (st) st.textContent = (lang === 'en' ? 'Loading preview…' : 'Chargement de l’aperçu…');
     }
   }
 
+  // Lancer au chargement du DOM puis à chaque changement de langue
   document.addEventListener('DOMContentLoaded', () => {
-    bindPickers();
-    applyI18n();
+    applyPageTranslations();
   });
-
-  // Re-appliquer à chaque changement
-  window.addEventListener('langchange', applyI18n);
+  window.addEventListener('langchange', () => {
+    applyPageTranslations();
+  });
 })();
