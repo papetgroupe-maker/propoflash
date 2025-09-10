@@ -38,7 +38,37 @@
 
     /* HERO */
     .hero{position:relative;overflow:hidden;padding-top:120px;padding-bottom:80px}
-    .grid-overlay{position:absolute;inset:0;pointer-events:none;opacity:.25;mix-blend:overlay}
+    /* --- Nouvel effet “3D soft” sans quadrillage --- */
+    .hero .fx{position:absolute;inset:0;pointer-events:none;z-index:0}
+    .hero .fx .blob{position:absolute;width:520px;height:520px;border-radius:50%;filter:blur(60px);opacity:.35}
+    .hero .fx .b1{top:-140px;left:-120px;
+      background:radial-gradient( circle at 30% 30%, color-mix(in hsl, var(--accent) 60%, white) 0%, transparent 60% );
+      animation:float1 18s ease-in-out infinite alternate}
+    .hero .fx .b2{bottom:-180px;right:-160px;
+      background:radial-gradient( circle at 70% 70%, color-mix(in hsl, var(--accent2) 60%, white) 0%, transparent 58% );
+      animation:float2 22s ease-in-out infinite alternate}
+    /* Halo conique très léger qui tourne lentement */
+    .hero .fx::after{
+      content:"";position:absolute;inset:-25% -25%;
+      background:conic-gradient(from 120deg,
+        color-mix(in hsl, var(--accent) 18%, transparent) 0turn,
+        transparent .25turn,
+        color-mix(in hsl, var(--accent2) 16%, transparent) .5turn,
+        transparent .75turn,
+        color-mix(in hsl, var(--accent) 18%, transparent) 1turn);
+      filter:blur(80px);opacity:.18;animation:spin 60s linear infinite
+    }
+    /* Le contenu passe au-dessus de l’effet */
+    .hero .container{position:relative;z-index:1}
+
+    /* Animations & accessibility */
+    @keyframes float1{ from{transform:translate3d(0,0,0)} to{transform:translate3d(20px,30px,0)} }
+    @keyframes float2{ from{transform:translate3d(0,0,0)} to{transform:translate3d(-30px,-20px,0)} }
+    @keyframes spin{ to{ transform:rotate(360deg) } }
+    @media (prefers-reduced-motion:reduce){
+      .hero .fx .blob,.hero .fx::after{animation:none}
+    }
+
     .lead{text-align:center;max-width:1000px;margin:0 auto 18px auto;letter-spacing:-.02em}
     .lead h1{font-weight:900;line-height:1.02;margin:0;font-size:clamp(40px,7vw,72px)}
     .accent-word{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
@@ -98,12 +128,11 @@
   </div>
 
   <section class="hero" id="hero">
-    <svg class="grid-overlay" viewBox="0 0 100 100" preserveAspectRatio="none">
-      <defs><pattern id="g" width="10" height="10" patternUnits="userSpaceOnUse">
-        <path d="M10 0 L0 0 0 10" fill="none" stroke="#cfd8ee" stroke-width=".25"/>
-      </pattern></defs>
-      <rect width="100%" height="100%" fill="url(#g)"/>
-    </svg>
+    <!-- NOUVEL EFFET (remplace l'ancien quadrillage) -->
+    <div class="fx" aria-hidden="true">
+      <div class="blob b1"></div>
+      <div class="blob b2"></div>
+    </div>
 
     <div class="container">
       <div class="lead">
