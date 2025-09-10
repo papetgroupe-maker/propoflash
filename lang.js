@@ -1,37 +1,41 @@
-// lang.js — global FR/EN for whole site
-(function(){
+// lang.js
+(() => {
   const KEY = 'pf_lang';
   const SUP = ['fr','en'];
   const FALLBACK = 'fr';
 
-  function norm(l){
-    const s = String(l||'').slice(0,2).toLowerCase();
+  const norm = (l) => {
+    const s = (l || '').toString().slice(0, 2).toLowerCase();
     return SUP.includes(s) ? s : FALLBACK;
+  };
+
+  function getLang() {
+    try {
+      return norm(localStorage.getItem(KEY) || navigator.language || FALLBACK);
+    } catch {
+      return FALLBACK;
+    }
   }
 
-  window.getLang = function(){
-    try{
-      return norm(localStorage.getItem(KEY) || (navigator.language||FALLBACK));
-    }catch{ return FALLBACK }
-  };
-
-  window.setLang = function(l){
+  function setLang(l) {
     const lang = norm(l);
-    try{ localStorage.setItem(KEY, lang); }catch{}
+    try { localStorage.setItem(KEY, lang); } catch {}
     document.documentElement.lang = lang;
     window.dispatchEvent(new CustomEvent('langchange', { detail: lang }));
-  };
+  }
 
-  window.applyI18N = function(){  // petit helper si besoin (pages existantes)
-    window.dispatchEvent(new CustomEvent('langchange', { detail: getLang() }));
-  };
+  // expose global
+  window.getLang = getLang;
+  window.setLang = setLang;
 
-  // Auto-init + branchement sur tous les <select data-lang-picker>
-  document.addEventListener('DOMContentLoaded', ()=>{
-    document.documentElement.lang = getLang();
-    document.querySelectorAll('select[data-lang-picker]').forEach(sel=>{
+  // init document lang
+  document.documentElement.lang = getLang();
+
+  // auto-bind sur tous les <select data-lang-picker>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('select[data-lang-picker]').forEach((sel) => {
       sel.value = getLang();
-      sel.addEventListener('change', e=> setLang(e.target.value));
+      sel.addEventListener('change', (e) => setLang(e.target.value));
     });
   });
 })();
