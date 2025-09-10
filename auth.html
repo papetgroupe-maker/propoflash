@@ -14,7 +14,6 @@
     body{margin:0;background:var(--bg);font-family:Inter,system-ui,sans-serif;color:var(--ink)}
     a{color:var(--ink)}
     .page{display:grid;grid-template-columns:1fr 1.1fr;min-height:100vh}
-    /* Left (form) */
     .left{display:flex;align-items:center;justify-content:center;padding:32px}
     .panel{width:100%;max-width:420px}
     .brand{display:flex;align-items:center;gap:10px;margin-bottom:28px;font-weight:800;cursor:pointer}
@@ -39,7 +38,6 @@
     .error{background:#fee2e2;border:1px solid #fecaca;color:#7f1d1d;padding:10px 12px;border-radius:10px;font-size:14px;margin:10px 0;display:none}
     .ok{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;padding:10px 12px;border-radius:10px;font-size:14px;margin:10px 0;display:none}
     .foot{margin-top:14px;text-align:center}
-    /* Right (hero) */
     .right{position:relative;overflow:hidden}
     .hero{position:absolute;inset:24px;border-radius:28px;background:
       radial-gradient(60% 60% at 70% 30%, rgba(59,130,246,.28), transparent 60%),
@@ -52,18 +50,22 @@
     .bubble input{flex:1;border:none;outline:none;font:600 18px/1.2 Inter,system-ui}
     .up{width:28px;height:28px;border-radius:8px;background:var(--ink);color:#fff;
         display:grid;place-items:center}
-    /* Small screens */
-    @media (max-width:980px){
-      .page{grid-template-columns:1fr}
-      .right{display:none}
-    }
+    @media (max-width:980px){.page{grid-template-columns:1fr}.right{display:none}}
   </style>
-  <!-- Supabase UMD (expose window.supabase) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
+  <!-- Supabase UMD -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.2/dist/umd/supabase.js" defer></script>
+  <!-- Fallback ESM → crée window.supabase si besoin -->
+  <script type="module">
+    if (!window.supabase) {
+      import('https://esm.sh/@supabase/supabase-js@2.45.2').then(m=>{
+        window.supabase = { createClient: m.createClient };
+      });
+    }
+  </script>
 </head>
 <body>
   <div class="page">
-    <!-- LEFT: form -->
     <div class="left">
       <div class="panel">
         <div class="brand" onclick="location.href='index.html'">
@@ -97,7 +99,6 @@
           <button type="submit" class="btn primary" id="submitBtn">Se connecter</button>
         </form>
 
-        <!-- Bloc réinitialisation si retour de lien "reset password" -->
         <div id="resetBox" style="display:none;margin-top:12px">
           <div class="fld">
             <label for="newpass">Nouveau mot de passe</label>
@@ -117,7 +118,6 @@
       </div>
     </div>
 
-    <!-- RIGHT: hero -->
     <div class="right" aria-hidden="true">
       <div class="hero">
         <div class="bubble">
@@ -128,15 +128,13 @@
     </div>
   </div>
 
-  <script>
-    // === Supabase (mêmes constantes que votre site) ===
+  <script defer>
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
     });
 
-    // Destination après connexion (par défaut studio)
     const params = new URLSearchParams(location.search);
     const RET = params.get('return') || 'studio';
     const DEST = (RET === 'studio') ? 'studio.html' : 'index.html';
@@ -154,19 +152,17 @@
     const newPassEl = document.getElementById('newpass');
     const applyResetBtn = document.getElementById('applyResetBtn');
 
-    let mode = 'signin'; // 'signup' ou 'signin'
+    let mode = 'signin';
 
     function showErr(txt){ msgErr.textContent = txt; msgErr.style.display='block'; msgOk.style.display='none'; }
     function showOk(txt){ msgOk.textContent = txt; msgOk.style.display='block'; msgErr.style.display='none'; }
     function clearMsgs(){ msgErr.style.display='none'; msgOk.style.display='none'; }
 
-    // Déjà connecté ? -> studio
     (async ()=>{
       const { data:{ session } } = await sb.auth.getSession();
       if(session){ location.replace(DEST); }
     })();
 
-    // Gère fin d’OAuth / changements de session
     sb.auth.onAuthStateChange(async (event, session)=>{
       if(event === 'SIGNED_IN' && session){ location.replace(DEST); }
       if(event === 'PASSWORD_RECOVERY'){
@@ -175,7 +171,6 @@
       }
     });
 
-    // Si retour OAuth (hash avec tokens), laisse le SDK hydrater puis redirige
     if (location.hash && /(access_token|provider_token|code|type=recovery)/i.test(location.hash)) {
       setTimeout(async ()=>{
         const { data:{ session } } = await sb.auth.getSession();
@@ -184,7 +179,6 @@
       }, 0);
     }
 
-    // Google OAuth : revient ici (auth.html), puis redirection via onAuthStateChange
     googleBtn.onclick = async ()=>{
       clearMsgs();
       const { error } = await sb.auth.signInWithOAuth({
@@ -194,7 +188,6 @@
       if(error) showErr(error.message);
     };
 
-    // Basculer Connexion / Inscription
     toggle.onclick = (e)=>{
       e.preventDefault(); clearMsgs();
       if(mode==='signin'){
@@ -210,7 +203,6 @@
       }
     };
 
-    // Mot de passe oublié
     forgot.onclick = async (e)=>{
       e.preventDefault(); clearMsgs();
       if(!email.value){ email.focus(); return showErr('Indique ton email pour recevoir le lien de réinitialisation.'); }
@@ -221,7 +213,6 @@
       showOk('Email envoyé ✅. Clique sur le lien reçu pour définir un nouveau mot de passe.');
     };
 
-    // Appliquer le nouveau mot de passe (flux "password recovery")
     applyResetBtn.onclick = async ()=>{
       clearMsgs();
       const np = (newPassEl.value||'').trim();
@@ -234,7 +225,6 @@
       }catch(err){ showErr(err?.message || 'Erreur inattendue'); }
     };
 
-    // Submit (email/password)
     form.addEventListener('submit', async (e)=>{
       e.preventDefault(); clearMsgs();
       submitBtn.disabled = true; submitBtn.style.opacity=.7;
