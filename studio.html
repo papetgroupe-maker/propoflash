@@ -43,7 +43,7 @@
     .input textarea{flex:1;resize:vertical;min-height:72px;border:none;outline:none;background:transparent;font:500 14px/1.4 Inter;color:var(--ink)}
     .send{width:40px;height:40px;border-radius:12px;border:1px solid var(--stroke);background:var(--ink);color:#fff;display:grid;place-items:center;cursor:pointer}
     .logo-btn{position:absolute;left:18px;bottom:24px;width:28px;height:28px;border-radius:8px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd);border:1px solid #0002;cursor:pointer;box-shadow:var(--elev)}
-    .muted{color:var(--muted)}
+    .logo-btn:hover{filter:brightness(1.02)}
 
     /* Preview */
     .sheet-wrap{display:grid;place-items:center;padding:8px}
@@ -67,6 +67,7 @@
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
     .card{border:1px solid var(--stroke);border-radius:12px;padding:12px;background:var(--panel);box-shadow:var(--elev)}
     .price{font-weight:800;font-size:18px}
+    .muted{color:var(--muted)}
     .pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--stroke);font-size:12px;background:var(--panel)}
 
     table{border-collapse:collapse;width:100%;font-size:14px}
@@ -118,11 +119,13 @@
     <div class="panel chat">
       <div class="chat-head">
         <strong id="chatTitle">Chat</strong>
-        <!-- (hint supprimé) -->
+        <!-- Texte d’aide retiré -->
       </div>
       <div class="chat-body" id="chatBody" aria-live="polite"></div>
       <div class="chat-compose">
-        <div class="logo-btn" id="logoBtn" title="Accueil"></div>
+        <!-- BOUTON = sélecteur de logo -->
+        <div class="logo-btn" id="logoBtn" title="Ajouter un logo"></div>
+        <input id="logoFile" type="file" accept="image/*" style="display:none" />
         <div class="input">
           <textarea id="composer" placeholder="Écrivez votre message"></textarea>
           <button class="send" id="sendBtn" title="Envoyer" aria-label="Envoyer">
@@ -166,7 +169,6 @@
 
     /* Nav */
     document.getElementById('homeBtn').onclick=()=>location.href='index.html';
-    document.getElementById('logoBtn').onclick=()=>location.href='index.html';
 
     /* Historique */
     const drawer=document.getElementById('drawer'); const histList=document.getElementById('histList');
@@ -395,11 +397,10 @@
     }
     renderSpec();
 
-    /* Lang: placeholder uniquement (le hint a été supprimé) */
+    /* Lang: placeholder uniquement (en-tête d’aide retiré) */
     function applyChatLang(){
       const en=(getLang()==='en');
-      const cmp = document.getElementById('composer');
-      if (cmp) cmp.placeholder = en ? 'Type your message' : 'Écrivez votre message';
+      document.getElementById('composer').placeholder = en?'Type your message':'Écrivez votre message';
     }
     applyChatLang();
     window.addEventListener('langchange', ()=>{
@@ -407,6 +408,67 @@
       localStorage.setItem('pf_proposal', JSON.stringify(spec));
       applyChatLang();
       renderSpec();
+    });
+
+    /* === Import de logo depuis le bouton carré à gauche === */
+    const logoBtn = document.getElementById('logoBtn');
+    const logoFile = document.getElementById('logoFile');
+
+    logoBtn.addEventListener('click', ()=> logoFile.click());
+
+    // compress to max 600px on the longest side
+    function readAsDataURL(file){
+      return new Promise((resolve,reject)=>{
+        const r=new FileReader();
+        r.onload = ()=> resolve(r.result);
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
+    }
+    function loadImageFromFile(file){
+      return new Promise((resolve,reject)=>{
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = ()=>{ URL.revokeObjectURL(url); resolve(img); };
+        img.onerror = (e)=>{ URL.revokeObjectURL(url); reject(e); };
+        img.src = url;
+      });
+    }
+    async function fileToCompressedDataURL(file, max=600){
+      try{
+        const img = await loadImageFromFile(file);
+        let { width, height } = img;
+        if(width<=max && height<=max){
+          return await readAsDataURL(file);
+        }
+        const scale = Math.min(max/width, max/height);
+        const w = Math.round(width*scale), h = Math.round(height*scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        return canvas.toDataURL('image/png', 0.92);
+      }catch{
+        return await readAsDataURL(file);
+      }
+    }
+
+    logoFile.addEventListener('change', async (e)=>{
+      const file = e.target.files && e.target.files[0];
+      if(!file) return;
+      statusEl.textContent = 'Import du logo…';
+      try{
+        const dataUrl = await fileToCompressedDataURL(file, 600);
+        spec.meta = { ...(spec.meta||{}), style: { ...(spec.meta?.style||{}), logoDataUrl: dataUrl } };
+        localStorage.setItem('pf_proposal', JSON.stringify(spec));
+        renderSpec();
+        statusEl.textContent = 'Logo importé';
+      }catch{
+        statusEl.textContent = 'Échec import logo';
+      }finally{
+        setTimeout(()=> statusEl.textContent='Prêt', 1200);
+        logoFile.value = '';
+      }
     });
   </script>
 </body>
