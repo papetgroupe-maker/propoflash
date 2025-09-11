@@ -43,6 +43,7 @@
     .input textarea{flex:1;resize:vertical;min-height:72px;border:none;outline:none;background:transparent;font:500 14px/1.4 Inter;color:var(--ink)}
     .send{width:40px;height:40px;border-radius:12px;border:1px solid var(--stroke);background:var(--ink);color:#fff;display:grid;place-items:center;cursor:pointer}
     .logo-btn{position:absolute;left:18px;bottom:24px;width:28px;height:28px;border-radius:8px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd);border:1px solid #0002;cursor:pointer;box-shadow:var(--elev)}
+    .muted{color:var(--muted)}
 
     /* Preview */
     .sheet-wrap{display:grid;place-items:center;padding:8px}
@@ -66,7 +67,6 @@
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
     .card{border:1px solid var(--stroke);border-radius:12px;padding:12px;background:var(--panel);box-shadow:var(--elev)}
     .price{font-weight:800;font-size:18px}
-    .muted{color:var(--muted)}
     .pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--stroke);font-size:12px;background:var(--panel)}
 
     table{border-collapse:collapse;width:100%;font-size:14px}
@@ -118,7 +118,7 @@
     <div class="panel chat">
       <div class="chat-head">
         <strong id="chatTitle">Chat</strong>
-        <div class="muted" id="chatHint">Entrée = envoyer • Maj+Entrée = nouvelle ligne</div>
+        <!-- (hint supprimé) -->
       </div>
       <div class="chat-body" id="chatBody" aria-live="polite"></div>
       <div class="chat-compose">
@@ -222,7 +222,6 @@
     renderChat();
     function escapeHTML(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[m])); }
 
-    // ⬇⬇⬇ UPDATED: robust error handling when calling /api/chat
     async function sendMessage(text){
       const content=text.trim(); if(!content) return;
       messages.push({ role:'user', content: content }); localStorage.setItem('pf_chat', JSON.stringify(messages));
@@ -231,21 +230,10 @@
 
       try{
         const resp = await fetch('/api/chat', {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
+          method:'POST', headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ message: content, proposalSpec: spec, history: messages.slice(-10) })
         });
-
-        // If backend responds with error, surface it
-        if (!resp.ok) {
-          const errText = await resp.text().catch(()=> '');
-          const en = (getLang()==='en');
-          statusEl.textContent = en ? 'Server error' : 'Erreur serveur';
-          bubble('assistant', `<em>${en ? 'Server error' : 'Erreur serveur'} (${resp.status}). ${errText || (en?'Please try again.':'Réessayez.')}</em>`);
-          return;
-        }
-
-        const data = await resp.json().catch(() => ({}));
+        const data = await resp.json();
 
         const reply = data.reply || (getLang()==='en'?'I could not structure the proposal.':'Je n’ai pas pu structurer la proposition.');
         messages.push({ role:'assistant', content: reply }); localStorage.setItem('pf_chat', JSON.stringify(messages));
@@ -260,13 +248,10 @@
         saveHistory(spec?.meta?.title || 'Proposition', spec, messages);
         statusEl.textContent='Prêt';
       }catch(e){
-        console.error('CHAT API ERROR', e);
-        const en=(getLang()==='en');
-        statusEl.textContent = en ? 'Network error' : 'Erreur réseau';
-        bubble('assistant', `<em>${en?'Network error. Try again.':'Erreur réseau. Réessayez.'}</em>`);
+        statusEl.textContent='Erreur réseau';
+        bubble('assistant', '<em>Erreur réseau. Réessayez.</em>');
       }
     }
-    // ⬆⬆⬆ UPDATED
 
     // Enter = envoyer ; Shift+Enter = nouvelle ligne
     composer.addEventListener('keydown', (e)=>{
@@ -410,11 +395,11 @@
     }
     renderSpec();
 
-    /* Lang: placeholder + hint traduits */
+    /* Lang: placeholder uniquement (le hint a été supprimé) */
     function applyChatLang(){
       const en=(getLang()==='en');
-      document.getElementById('composer').placeholder = en?'Type your message':'Écrivez votre message';
-      document.getElementById('chatHint').textContent = en?'Enter = send • Shift+Enter = new line':'Entrée = envoyer • Maj+Entrée = nouvelle ligne';
+      const cmp = document.getElementById('composer');
+      if (cmp) cmp.placeholder = en ? 'Type your message' : 'Écrivez votre message';
     }
     applyChatLang();
     window.addEventListener('langchange', ()=>{
