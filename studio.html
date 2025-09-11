@@ -222,6 +222,7 @@
     renderChat();
     function escapeHTML(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[m])); }
 
+    // ⬇⬇⬇ UPDATED: robust error handling when calling /api/chat
     async function sendMessage(text){
       const content=text.trim(); if(!content) return;
       messages.push({ role:'user', content: content }); localStorage.setItem('pf_chat', JSON.stringify(messages));
@@ -230,10 +231,21 @@
 
       try{
         const resp = await fetch('/api/chat', {
-          method:'POST', headers:{'Content-Type':'application/json'},
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ message: content, proposalSpec: spec, history: messages.slice(-10) })
         });
-        const data = await resp.json();
+
+        // If backend responds with error, surface it
+        if (!resp.ok) {
+          const errText = await resp.text().catch(()=> '');
+          const en = (getLang()==='en');
+          statusEl.textContent = en ? 'Server error' : 'Erreur serveur';
+          bubble('assistant', `<em>${en ? 'Server error' : 'Erreur serveur'} (${resp.status}). ${errText || (en?'Please try again.':'Réessayez.')}</em>`);
+          return;
+        }
+
+        const data = await resp.json().catch(() => ({}));
 
         const reply = data.reply || (getLang()==='en'?'I could not structure the proposal.':'Je n’ai pas pu structurer la proposition.');
         messages.push({ role:'assistant', content: reply }); localStorage.setItem('pf_chat', JSON.stringify(messages));
@@ -248,10 +260,13 @@
         saveHistory(spec?.meta?.title || 'Proposition', spec, messages);
         statusEl.textContent='Prêt';
       }catch(e){
-        statusEl.textContent='Erreur réseau';
-        bubble('assistant', '<em>Erreur réseau. Réessayez.</em>');
+        console.error('CHAT API ERROR', e);
+        const en=(getLang()==='en');
+        statusEl.textContent = en ? 'Network error' : 'Erreur réseau';
+        bubble('assistant', `<em>${en?'Network error. Try again.':'Erreur réseau. Réessayez.'}</em>`);
       }
     }
+    // ⬆⬆⬆ UPDATED
 
     // Enter = envoyer ; Shift+Enter = nouvelle ligne
     composer.addEventListener('keydown', (e)=>{
