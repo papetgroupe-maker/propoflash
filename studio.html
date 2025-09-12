@@ -17,7 +17,7 @@
     body{
       margin:0;
       height:100vh;
-      overflow:hidden; /* << pas de scroll de page */
+      overflow:hidden; /* pas de scroll de page */
       background:linear-gradient(180deg,var(--bg),#eef3ff);
       font-family:Inter,system-ui,sans-serif;color:var(--ink)
     }
@@ -35,17 +35,21 @@
     .menu a,.menu button{display:block;width:100%;text-align:left;padding:10px 12px;border:none;background:var(--panel);cursor:pointer;font-weight:600;color:var(--ink)}
     .menu a:hover,.menu button:hover{background:color-mix(in hsl, var(--panel) 80%, transparent)}
 
-    /* Layout principal : hauteur fixe, items étirés */
+    /* Layout principal : chat élargi & éléments étirés
+       Le clamp garde un rendu homogène sur grands et moyens écrans. */
     .main{
-      height:calc(100vh - 64px); /* adapte si ta barre change */
-      display:grid;grid-template-columns:420px 1fr;gap:18px;padding:18px;
-      align-items:stretch; /* << étire les colonnes en hauteur */
-      min-height:0; /* << requis pour scroll interne grid */
+      height:calc(100vh - 64px);
+      display:grid;
+      grid-template-columns: clamp(520px, 38vw, 640px) 1fr; /* <<< chat élargi */
+      gap:18px;
+      padding:18px 24px;      /* un peu plus d’air */
+      align-items:stretch;
+      min-height:0;
     }
     .panel{
       background:var(--panel);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--elev);
-      display:flex;flex-direction:column; /* << colonne */
-      min-height:0; /* << autorise overflow interne */
+      display:flex;flex-direction:column;
+      min-height:0;
     }
 
     /* Chat */
@@ -54,7 +58,7 @@
     .chat-title{font-weight:800}
     .chat-body{
       padding:12px;
-      overflow:auto; /* << scroll interne chat */
+      overflow:auto; /* scroll interne chat */
       flex:1; min-height:0;
     }
     .msg{display:flex;gap:10px;margin:10px 0}
@@ -79,16 +83,17 @@
     .dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
     @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
 
-    /* Aperçu — scroll interne, comme le chat */
+    /* Aperçu : centré horizontalement + scroll interne */
     .sheet-wrap{
-      flex:1;               /* occupe toute la hauteur dispo */
-      min-height:0;         /* << crucial pour scroll interne */
-      overflow:auto;        /* << scroll interne aperçu */
-      display:flex;justify-content:center;align-items:flex-start;
-      padding:12px
+      flex:1;
+      min-height:0;
+      overflow:auto;                /* scroll interne aperçu */
+      display:flex;justify-content:center;align-items:flex-start; /* <<< centré horizontalement */
+      padding:12px 24px;            /* un peu d’air pour homogénéité */
     }
     .sheet{
       width:var(--paper-w);
+      max-width:100%;               /* ne déborde jamais */
       min-height:var(--paper-h);
       background:var(--panel); border:1px solid var(--stroke); box-shadow:var(--elev);
       border-radius:12px; padding:22mm 18mm; color:var(--ink)
@@ -193,7 +198,7 @@
       </div>
     </div>
 
-    <!-- Aperçu (scroll interne) -->
+    <!-- Aperçu -->
     <div class="panel sheet-wrap">
       <div class="sheet" id="sheet"></div>
     </div>
@@ -268,7 +273,6 @@
     }
     loadSpec();
 
-    // inject brief depuis l’accueil
     (function consumeWelcome(){
       const w = localStorage.getItem('pf_welcome_msg');
       if(w){ messages.push({ role:'user', content:w }); localStorage.removeItem('pf_welcome_msg'); }
@@ -344,7 +348,6 @@
       }
     }
 
-    /* Raccourci Enter */
     composer.addEventListener('keydown', (e)=>{
       if(e.isComposing || e.keyCode===229) return;
       if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(composer.value); }
@@ -507,7 +510,7 @@
       renderSpec();
     });
 
-    /* Si dernier message user sans réponse → relance */
+    /* Si dernier message user est sans réponse → relance */
     if(messages.length && messages[messages.length-1].role==='user' && !chatBody.querySelector('.assistant')){
       sendMessage(messages[messages.length-1].content);
     }
