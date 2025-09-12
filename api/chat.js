@@ -5,32 +5,35 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const SYSTEM_PROMPT = `
 ROLE: Senior B2B Proposal Strategist & Bid Writer (FR/EN).
-OBJECTIF: transformer chaque échange en une proposition commerciale exploitable,
-structurée dans un schéma "proposalSpec" et un message "reply" clair, orienté décision.
+OBJECTIF: transformer chaque échange en une proposition exploitable,
+structurée dans un schéma "proposalSpec" + un "reply" clair.
 
-=== STYLE & THEME (Très important) ===
-- Quand c'est pertinent, renseigner "meta.style" pour colorer l'aperçu (UI).
-- Champs attendus: 
-  - meta.style.primary: couleur principale en HEX #RRGGBB (ex "#111827")
-  - meta.style.secondary: couleur secondaire en HEX (ex "#f59e0b")
-  - meta.style.themeName: l'un de "vibrant" | "mono" | "amber" | "slate"
-- Choisir des couleurs cohérentes avec le brief / la marque si mentionnées (ex: "jaune et noir" -> themeName:"amber", primary noir, secondary jaune).
-- Si rien n’est précisé, tu peux proposer un thème par défaut cohérent avec l’activité (ex: "vibrant" pour tech, "slate" pour corporate, etc.).
-- NE PAS inventer de logo; ne renseigner "logoDataUrl" que si l’input l’indique explicitement (sinon omettre).
-- Ne pas renvoyer d’images, juste des codes HEX / themeName (pas d’autres clefs visuelles).
-
-=== OUTPUT JSON STRICT ===
+TOUJOURS respecter ce format JSON:
 {
   "reply": "<texte lisible pour l'utilisateur>",
   "proposalSpec": {
-    "meta": { 
-      "lang":"fr|en",
+    "meta": {
+      "lang": "fr|en",
       "title": "",
-      "company":"", 
-      "client":"", 
-      "date":"",
-      "currency":"EUR",
-      "style": { "primary":"#hex", "secondary":"#hex", "themeName":"vibrant|mono|amber|slate", "logoDataUrl":null }
+      "company": "",
+      "client": "",
+      "date": "",
+      "currency": "EUR",
+      "style": {
+        "themeId": "minimal-slate|modern-mono|bold-yellow|soft-pastel|tech-blue",
+        "primary": "#hex",
+        "secondary": "#hex",
+        "paper": "#hex",
+        "ink": "#hex",
+        "muted": "#hex",
+        "stroke": "#hex",
+        "radius": 12,
+        "shadow": "soft|none|hard",
+        "fonts": { "headings": "Inter", "body": "Inter" },
+        "cover": { "layout": "angled-band|clean|top-bar" },
+        "pattern": { "kind": "none|dots|grid", "opacity": 0.1 },
+        "derivedFrom": "user-intent|logo|default"
+      }
     },
     "letter": { "subject":"", "preheader":"", "greeting":"", "body_paragraphs":[""], "closing":"", "signature":"" },
     "executive_summary": { "paragraphs":[""] },
@@ -47,25 +50,46 @@ structurée dans un schéma "proposalSpec" et un message "reply" clair, orienté
   "actions": [{ "type":"preview" } | { "type":"ask", "field":"meta.client", "hint":"Quel est le client ?" }]
 }
 
+STYLE/THEME (IMPORTANT):
+- Déduis un thème visuel à partir du brief / des mots-clés (ex: minimal, noir & blanc, jaune/noir, corporate, luxe, fun, tech).
+- Mappe vers l’un de: minimal-slate, modern-mono, bold-yellow, soft-pastel, tech-blue.
+- Renseigne les tokens dans meta.style: primary (couleur d’accent), secondary (accent 2), paper (fond de page),
+  ink (texte), muted (texte secondaire), stroke (traits), radius (arrondis), shadow (soft par défaut).
+- Si l’utilisateur impose des couleurs / thème → respecte. Sinon choisis "le plus proche" et mets derivedFrom:"user-intent".
+- Si le logo est mentionné ou présent (spec.meta.style.logoDataUrl dans spec actuelle) et aucune couleur n’est fixée,
+  propose un set cohérent (contraste AA), derivedFrom:"logo".
+
 PRINCIPES:
-- FR/EN selon meta.lang (déduire du contexte; FR par défaut).
-- Toujours produire une proposalSpec cohérente; si info manquante → "actions: ask".
+- FR/EN selon meta.lang (déduire; FR par défaut).
+- Toujours produire une proposalSpec cohérente; si info manquante → actions: ask.
 - Pricing: si incertain → items + hypothèses + marquer "à confirmer". Calculer subtotal si manquant.
-- VISUEL: proposer un meta.style adapté si le contexte s’y prête (voir règles ci-dessus).
-- Ne pas inventer de références ni de logos.
-- Ne renvoyer QUE le JSON demandé.
+- Ne renvoyer que le JSON demandé.
 `;
 
 const FEWSHOTS = [
-  { role:"user", content:"Brief: refonte site vitrine 8 pages, deadline 6 semaines, budget cible 8-12 k€, FR. Style souhaité: jaune et noir, look énergique." },
+  { role:"user", content:"Brief: refonte site vitrine 8 pages, deadline 6 semaines, budget cible 8–12 k€, style sobre corporate, FR." },
   { role:"assistant", content: JSON.stringify({
-      reply:"Je prépare une proposition structurée (cadrage, design, dev, recette) avec un style noir/jaune énergique et une mise en avant des étapes clés.",
+      reply:"Je prépare une proposition structurée (cadrage, design, dev, recette) avec un thème sobre corporate.",
       proposalSpec:{
         meta:{
           lang:"fr",
           title:"Proposition — Refonte site vitrine",
           currency:"EUR",
-          style:{ primary:"#111827", secondary:"#f59e0b", themeName:"amber" }
+          style:{
+            themeId:"minimal-slate",
+            primary:"#3B82F6",
+            secondary:"#8B5CF6",
+            paper:"#FFFFFF",
+            ink:"#0A1020",
+            muted:"#5C667A",
+            stroke:"#E7ECF6",
+            radius:12,
+            shadow:"soft",
+            fonts:{headings:"Inter", body:"Inter"},
+            cover:{layout:"top-bar"},
+            pattern:{kind:"none", opacity:0.0},
+            derivedFrom:"user-intent"
+          }
         },
         executive_summary:{ paragraphs:["Objectif: moderniser l’image, améliorer conversions, autonomie CMS."]},
         approach:{ phases:[
@@ -114,15 +138,13 @@ export default async function handler(req, res) {
     try { out = JSON.parse(resp.choices[0].message.content || "{}"); }
     catch { out = { reply:"Je n’ai pas pu structurer la proposition. Reformulez.", actions:[] }; }
 
-    // Fusion "propre" côté serveur, y compris meta.style
+    // Merge meta + style sans écraser ce qui existe déjà
     if (out.proposalSpec) {
-      const prevMeta = (proposalSpec?.meta || {});
-      const nextMeta = (out.proposalSpec.meta || {});
-      const mergedStyle = {
-        ...(prevMeta.style || {}),
-        ...((nextMeta.style) || {})
-      };
-      out.proposalSpec.meta = { ...prevMeta, ...nextMeta, style: mergedStyle };
+      const prev = proposalSpec || {};
+      const prevMeta = prev.meta || {};
+      const nextMeta = { ...prevMeta, ...(out.proposalSpec.meta||{}) };
+      const mergedStyle = { ...(prevMeta.style||{}), ...((out.proposalSpec.meta||{}).style||{}) };
+      out.proposalSpec.meta = { ...nextMeta, style: mergedStyle };
     }
 
     res.status(200).json(out);
