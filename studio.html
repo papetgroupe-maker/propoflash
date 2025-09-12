@@ -16,8 +16,8 @@
     html,body{height:100%}
     body{
       margin:0;
-      height:100vh;               /* verrouille le scroll page */
-      overflow:hidden;            /* le scroll se fait dans les panneaux */
+      height:100vh;
+      overflow:hidden; /* << pas de scroll de page */
       background:linear-gradient(180deg,var(--bg),#eef3ff);
       font-family:Inter,system-ui,sans-serif;color:var(--ink)
     }
@@ -35,18 +35,28 @@
     .menu a,.menu button{display:block;width:100%;text-align:left;padding:10px 12px;border:none;background:var(--panel);cursor:pointer;font-weight:600;color:var(--ink)}
     .menu a:hover,.menu button:hover{background:color-mix(in hsl, var(--panel) 80%, transparent)}
 
-    /* Layout */
+    /* Layout principal : hauteur fixe, items étirés */
     .main{
-      height:calc(100vh - 64px);  /* hauteur sous la barre : adapte si ta barre change de taille */
-      display:grid;grid-template-columns:420px 1fr;gap:18px;padding:18px;align-items:start
+      height:calc(100vh - 64px); /* adapte si ta barre change */
+      display:grid;grid-template-columns:420px 1fr;gap:18px;padding:18px;
+      align-items:stretch; /* << étire les colonnes en hauteur */
+      min-height:0; /* << requis pour scroll interne grid */
     }
-    .panel{background:var(--panel);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--elev)}
+    .panel{
+      background:var(--panel);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--elev);
+      display:flex;flex-direction:column; /* << colonne */
+      min-height:0; /* << autorise overflow interne */
+    }
 
     /* Chat */
-    .chat{display:flex;flex-direction:column;height:100%}
+    .chat{min-height:0; display:flex;flex-direction:column;}
     .chat-head{display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--stroke)}
     .chat-title{font-weight:800}
-    .chat-body{padding:12px;overflow:auto; /* scroll interne */ height:100%}
+    .chat-body{
+      padding:12px;
+      overflow:auto; /* << scroll interne chat */
+      flex:1; min-height:0;
+    }
     .msg{display:flex;gap:10px;margin:10px 0}
     .bubble{padding:10px 12px;border:1px solid var(--stroke);border-radius:12px;background:var(--panel);max-width:100%;box-shadow:var(--elev)}
     .assistant{background:color-mix(in hsl, var(--panel) 80%, transparent)}
@@ -55,7 +65,7 @@
     .input textarea{flex:1;resize:vertical;min-height:72px;border:none;outline:none;background:transparent;font:500 14px/1.4 Inter;color:var(--ink)}
     .send{width:40px;height:40px;border-radius:12px;border:1px solid var(--stroke);background:#0a1020;color:#fff;display:grid;place-items:center;cursor:pointer}
 
-    /* Upload/logo bouton */
+    /* Upload/logo bouton + info-bulle */
     .logo-btn{width:34px;height:34px;border-radius:10px;border:1px solid #0002;
       background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd);
       box-shadow:var(--elev);display:grid;place-items:center;cursor:pointer}
@@ -63,22 +73,25 @@
     .logo-tip{position:absolute;left:18px;bottom:60px;background:#111;color:#fff;font-size:12px;padding:6px 8px;border-radius:8px;display:none}
     .logo-wrap:hover .logo-tip{display:block}
 
-    /* Typing indicator */
+    /* Indicateur de frappe */
     .typing{display:inline-flex;gap:5px;padding:8px 12px;border:1px solid var(--stroke);border-radius:12px;background:color-mix(in hsl, var(--panel) 80%, transparent);box-shadow:var(--elev)}
     .dot{width:6px;height:6px;border-radius:50%;background:#8aa0c6;opacity:.6;animation:bounce 1.2s infinite}
     .dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
     @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
 
-    /* Preview : scroll interne + centrage */
+    /* Aperçu — scroll interne, comme le chat */
     .sheet-wrap{
-      height:100%;                /* occupe toute la colonne */
-      overflow:auto;              /* scroll interne de l’aperçu */
+      flex:1;               /* occupe toute la hauteur dispo */
+      min-height:0;         /* << crucial pour scroll interne */
+      overflow:auto;        /* << scroll interne aperçu */
       display:flex;justify-content:center;align-items:flex-start;
       padding:12px
     }
     .sheet{
-      width:var(--paper-w); min-height:var(--paper-h);
-      background:var(--panel); border:1px solid var(--stroke); box-shadow:var(--elev); border-radius:12px; padding:22mm 18mm; color:var(--ink)
+      width:var(--paper-w);
+      min-height:var(--paper-h);
+      background:var(--panel); border:1px solid var(--stroke); box-shadow:var(--elev);
+      border-radius:12px; padding:22mm 18mm; color:var(--ink)
     }
     .doc-header{display:grid;grid-template-columns:100px 1fr;gap:16px;align-items:center;margin-bottom:16px}
     .logo-box{width:100px;height:100px;border:1px solid var(--stroke);border-radius:12px;display:grid;place-items:center;overflow:hidden;background:var(--panel)}
@@ -123,7 +136,7 @@
       .bar{display:none}
       body{overflow:visible;height:auto;background:#fff}
       .main{height:auto}
-      .sheet-wrap{overflow:visible;height:auto;padding:0;box-shadow:none;border:none}
+      .sheet-wrap{overflow:visible;flex:auto;min-height:auto;padding:0}
       .sheet{box-shadow:none;border:none;border-radius:0;width:auto;min-height:auto;padding:18mm 16mm}
       a[href]:after{content:""}
     }
@@ -162,12 +175,8 @@
   <div class="main">
     <!-- Chat -->
     <div class="panel chat">
-      <div class="chat-head">
-        <strong class="chat-title">Chat</strong>
-      </div>
-
+      <div class="chat-head"><strong class="chat-title">Chat</strong></div>
       <div class="chat-body" id="chatBody" aria-live="polite"></div>
-
       <div class="chat-compose">
         <div class="logo-wrap">
           <label class="logo-btn" title="Ajouter un logo (PNG/JPG/SVG)">
@@ -175,7 +184,6 @@
           </label>
           <div class="logo-tip">Ajouter votre logo</div>
         </div>
-
         <div class="input">
           <textarea id="composer" placeholder="Écrivez votre message"></textarea>
           <button class="send" id="sendBtn" title="Envoyer" aria-label="Envoyer">
@@ -185,7 +193,7 @@
       </div>
     </div>
 
-    <!-- Preview -->
+    <!-- Aperçu (scroll interne) -->
     <div class="panel sheet-wrap">
       <div class="sheet" id="sheet"></div>
     </div>
@@ -276,7 +284,7 @@
       return row;
     }
 
-    /* Typing indicator helpers */
+    /* Indicateur de frappe */
     let typingRow=null;
     function showTyping(){
       if(typingRow) return;
@@ -336,25 +344,20 @@
       }
     }
 
-    // Enter = envoyer ; Shift+Enter = nouvelle ligne
+    /* Raccourci Enter */
     composer.addEventListener('keydown', (e)=>{
       if(e.isComposing || e.keyCode===229) return;
       if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(composer.value); }
     });
     sendBtn.onclick = ()=> sendMessage(composer.value);
 
-    // Si un message user est présent sans réponse, déclencher
-    if(messages.length && messages[messages.length-1].role==='user' && !chatBody.querySelector('.assistant')){
-      sendMessage(messages[messages.length-1].content);
-    }
-
-    /* Upload logo -> stocke dans spec.meta.style.logoDataUrl */
+    /* Upload logo -> spec.meta.style.logoDataUrl */
     const logoInput = document.getElementById('logoInput');
     logoInput.addEventListener('change', async (e)=>{
       const file = e.target.files?.[0]; if(!file) return;
       const reader = new FileReader();
       reader.onload = ()=>{
-        const url = reader.result; // data URL
+        const url = reader.result;
         spec.meta = { ...(spec.meta||{}), style:{ ...(spec.meta?.style||{}), logoDataUrl: url } };
         localStorage.setItem('pf_proposal', JSON.stringify(spec));
         renderSpec();
@@ -363,7 +366,7 @@
       e.target.value='';
     });
 
-    /* Preview mini (libellés) */
+    /* Libellés */
     const t = {
       fr:{ title:"Proposition commerciale", to:"Pour", from:"Émis par", date:"Date", letter:"Lettre d’introduction", executive:"Résumé exécutif", objectives:"Objectifs", approach:"Approche & phasage", deliverables:"Livrables", in_scope:"Inclus", out_scope:"Hors-périmètre", timeline:"Planning", pricing:"Tarification", assumptions:"Hypothèses / Risques", next:"Prochaines étapes", price_model:"Modèle", terms:"Conditions", toc:"Sommaire" },
       en:{ title:"Business Proposal", to:"To", from:"Issued by", date:"Date", letter:"Cover Letter", executive:"Executive Summary", objectives:"Objectives", approach:"Approach & Phasing", deliverables:"Deliverables", in_scope:"In scope", out_scope:"Out of scope", timeline:"Timeline", pricing:"Pricing", assumptions:"Assumptions / Risks", next:"Next Steps", price_model:"Model", terms:"Terms", toc:"Table of Contents" }
@@ -503,6 +506,11 @@
       applyChatLang();
       renderSpec();
     });
+
+    /* Si dernier message user sans réponse → relance */
+    if(messages.length && messages[messages.length-1].role==='user' && !chatBody.querySelector('.assistant')){
+      sendMessage(messages[messages.length-1].content);
+    }
   </script>
 </body>
 </html>
