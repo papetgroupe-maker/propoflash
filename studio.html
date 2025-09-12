@@ -35,14 +35,13 @@
     .menu a,.menu button{display:block;width:100%;text-align:left;padding:10px 12px;border:none;background:var(--panel);cursor:pointer;font-weight:600;color:var(--ink)}
     .menu a:hover,.menu button:hover{background:color-mix(in hsl, var(--panel) 80%, transparent)}
 
-    /* Layout principal : chat élargi & éléments étirés
-       Le clamp garde un rendu homogène sur grands et moyens écrans. */
+    /* Layout principal : chat élargi & éléments étirés */
     .main{
       height:calc(100vh - 64px);
       display:grid;
-      grid-template-columns: clamp(520px, 38vw, 640px) 1fr; /* <<< chat élargi */
+      grid-template-columns: clamp(520px, 38vw, 640px) 1fr; /* chat élargi */
       gap:18px;
-      padding:18px 24px;      /* un peu plus d’air */
+      padding:18px 24px;
       align-items:stretch;
       min-height:0;
     }
@@ -64,8 +63,25 @@
     .msg{display:flex;gap:10px;margin:10px 0}
     .bubble{padding:10px 12px;border:1px solid var(--stroke);border-radius:12px;background:var(--panel);max-width:100%;box-shadow:var(--elev)}
     .assistant{background:color-mix(in hsl, var(--panel) 80%, transparent)}
-    .chat-compose{position:relative;padding:12px;border-top:1px solid var(--stroke)}
-    .input{display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--stroke);border-radius:14px;padding:8px;box-shadow:var(--elev)}
+
+    /* >>> ESPACEMENT LOGO + INPUT (nouveau) */
+    .chat-compose{
+      position:relative;
+      padding:12px;
+      border-top:1px solid var(--stroke);
+      display:flex;            /* côte à côte */
+      align-items:flex-end;
+      gap:16px;                /* <<< espace plus esthétique */
+    }
+    .logo-wrap{               /* pour positionner l’infobulle correctement */
+      position:relative;
+      flex:0 0 auto;
+    }
+    .input{
+      display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--stroke);
+      border-radius:14px;padding:8px;box-shadow:var(--elev);
+      flex:1;                 /* <<< l’input prend l’espace restant */
+    }
     .input textarea{flex:1;resize:vertical;min-height:72px;border:none;outline:none;background:transparent;font:500 14px/1.4 Inter;color:var(--ink)}
     .send{width:40px;height:40px;border-radius:12px;border:1px solid var(--stroke);background:#0a1020;color:#fff;display:grid;place-items:center;cursor:pointer}
 
@@ -74,7 +90,10 @@
       background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd);
       box-shadow:var(--elev);display:grid;place-items:center;cursor:pointer}
     .logo-btn input{display:none}
-    .logo-tip{position:absolute;left:18px;bottom:60px;background:#111;color:#fff;font-size:12px;padding:6px 8px;border-radius:8px;display:none}
+    .logo-tip{
+      position:absolute;left:0;bottom:44px;  /* <<< mieux ancrée au bouton */
+      background:#111;color:#fff;font-size:12px;padding:6px 8px;border-radius:8px;display:none;white-space:nowrap
+    }
     .logo-wrap:hover .logo-tip{display:block}
 
     /* Indicateur de frappe */
@@ -88,12 +107,12 @@
       flex:1;
       min-height:0;
       overflow:auto;                /* scroll interne aperçu */
-      display:flex;justify-content:center;align-items:flex-start; /* <<< centré horizontalement */
-      padding:12px 24px;            /* un peu d’air pour homogénéité */
+      display:flex;justify-content:center;align-items:flex-start;
+      padding:12px 24px;
     }
     .sheet{
       width:var(--paper-w);
-      max-width:100%;               /* ne déborde jamais */
+      max-width:100%;
       min-height:var(--paper-h);
       background:var(--panel); border:1px solid var(--stroke); box-shadow:var(--elev);
       border-radius:12px; padding:22mm 18mm; color:var(--ink)
