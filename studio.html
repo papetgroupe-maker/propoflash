@@ -11,6 +11,11 @@
       --accent:#3b82f6; --accent2:#8b5cf6; --accent-ink:#fff;
       --paper-w:210mm; --paper-h:297mm;
       --elev:0 18px 48px rgba(10,16,32,.10), inset 0 1px 0 #ffffffaa;
+
+      /* Chat themes */
+      --assistant-bubble: color-mix(in hsl, var(--panel) 86%, transparent);
+      --user-bubble: linear-gradient(135deg, var(--accent), var(--accent2));
+      --user-ink: #ffffff;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -60,27 +65,58 @@
       overflow:auto; /* scroll interne chat */
       flex:1; min-height:0;
     }
-    .msg{display:flex;gap:10px;margin:10px 0}
-    .bubble{padding:10px 12px;border:1px solid var(--stroke);border-radius:12px;background:var(--panel);max-width:100%;box-shadow:var(--elev)}
-    .assistant{background:color-mix(in hsl, var(--panel) 80%, transparent)}
 
-    /* >>> ESPACEMENT LOGO + INPUT (nouveau) */
+    /* Lignes de message + avatars + bulles */
+    .msg{
+      display:flex;
+      gap:10px;
+      margin:10px 0;
+      align-items:flex-end;
+      width:100%;
+    }
+    .msg.assistant{justify-content:flex-start}
+    .msg.user{justify-content:flex-end}
+
+    .avatar-badge{
+      width:28px;height:28px;border-radius:50%;
+      display:grid;place-items:center;
+      font-weight:800;font-size:11px;
+      border:1px solid var(--stroke);
+      box-shadow:var(--elev);
+      background:var(--panel); color:var(--ink);
+      user-select:none;
+    }
+    .avatar-badge.bot{background:#111827; color:#fff; border-color:#111827} /* PF à gauche */
+    .avatar-badge.you{background:var(--accent); color:#fff; border-color:transparent} /* Toi à droite */
+
+    .bubble{
+      max-width:min(100%, 560px);
+      padding:10px 12px;border-radius:14px;border:1px solid var(--stroke);
+      box-shadow:var(--elev);
+      word-wrap:break-word;overflow-wrap:anywhere;
+    }
+    .bubble-assistant{
+      background:var(--assistant-bubble);
+      color:var(--ink);
+    }
+    .bubble-user{
+      background:var(--user-bubble);
+      color:var(--user-ink);
+      border-color:transparent;
+    }
+
+    /* Composer avec espace pour le logo */
     .chat-compose{
       position:relative;
       padding:12px;
       border-top:1px solid var(--stroke);
-      display:flex;            /* côte à côte */
-      align-items:flex-end;
-      gap:16px;                /* <<< espace plus esthétique */
+      display:flex;align-items:flex-end;gap:16px;
     }
-    .logo-wrap{               /* pour positionner l’infobulle correctement */
-      position:relative;
-      flex:0 0 auto;
-    }
+    .logo-wrap{ position:relative; flex:0 0 auto; }
     .input{
       display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--stroke);
       border-radius:14px;padding:8px;box-shadow:var(--elev);
-      flex:1;                 /* <<< l’input prend l’espace restant */
+      flex:1;
     }
     .input textarea{flex:1;resize:vertical;min-height:72px;border:none;outline:none;background:transparent;font:500 14px/1.4 Inter;color:var(--ink)}
     .send{width:40px;height:40px;border-radius:12px;border:1px solid var(--stroke);background:#0a1020;color:#fff;display:grid;place-items:center;cursor:pointer}
@@ -91,22 +127,20 @@
       box-shadow:var(--elev);display:grid;place-items:center;cursor:pointer}
     .logo-btn input{display:none}
     .logo-tip{
-      position:absolute;left:0;bottom:44px;  /* <<< mieux ancrée au bouton */
+      position:absolute;left:0;bottom:44px;
       background:#111;color:#fff;font-size:12px;padding:6px 8px;border-radius:8px;display:none;white-space:nowrap
     }
     .logo-wrap:hover .logo-tip{display:block}
 
     /* Indicateur de frappe */
-    .typing{display:inline-flex;gap:5px;padding:8px 12px;border:1px solid var(--stroke);border-radius:12px;background:color-mix(in hsl, var(--panel) 80%, transparent);box-shadow:var(--elev)}
-    .dot{width:6px;height:6px;border-radius:50%;background:#8aa0c6;opacity:.6;animation:bounce 1.2s infinite}
+    .typing{display:inline-flex;gap:5px;align-items:center}
+    .dot{width:6px;height:6px;border-radius:50%;background:#8aa0c6;opacity:.7;animation:bounce 1.2s infinite}
     .dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
     @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
 
     /* Aperçu : centré horizontalement + scroll interne */
     .sheet-wrap{
-      flex:1;
-      min-height:0;
-      overflow:auto;                /* scroll interne aperçu */
+      flex:1; min-height:0; overflow:auto;
       display:flex;justify-content:center;align-items:flex-start;
       padding:12px 24px;
     }
@@ -201,6 +235,7 @@
     <div class="panel chat">
       <div class="chat-head"><strong class="chat-title">Chat</strong></div>
       <div class="chat-body" id="chatBody" aria-live="polite"></div>
+
       <div class="chat-compose">
         <div class="logo-wrap">
           <label class="logo-btn" title="Ajouter un logo (PNG/JPG/SVG)">
@@ -300,23 +335,39 @@
     function scrollChat(){ chatBody.scrollTop = chatBody.scrollHeight; }
     function escapeHTML(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[m])); }
 
+    /* Bulle avec avatars & alignement */
     function bubble(role, html){
-      const row=document.createElement('div'); row.className='msg';
-      const bub=document.createElement('div'); bub.className='bubble '+(role==='assistant'?'assistant':''); bub.innerHTML=html;
-      row.appendChild(bub); chatBody.appendChild(row); scrollChat();
+      const row=document.createElement('div');
+      row.className='msg '+(role==='assistant'?'assistant':'user');
+
+      const ava=document.createElement('div');
+      ava.className='avatar-badge '+(role==='assistant'?'bot':'you');
+      ava.textContent = (role==='assistant') ? 'PF' : 'ME';
+
+      const bub=document.createElement('div');
+      bub.className='bubble '+(role==='assistant'?'bubble-assistant':'bubble-user');
+      bub.innerHTML=html;
+
+      if(role==='assistant'){ row.appendChild(ava); row.appendChild(bub); }
+      else { row.appendChild(bub); row.appendChild(ava); }
+
+      chatBody.appendChild(row);
+      scrollChat();
       return row;
     }
 
-    /* Indicateur de frappe */
+    /* Indicateur de frappe (côté assistant) */
     let typingRow=null;
     function showTyping(){
       if(typingRow) return;
       typingRow = document.createElement('div');
-      typingRow.className='msg';
-      const box=document.createElement('div');
-      box.className='typing';
-      box.innerHTML=`<span class="dot"></span><span class="dot"></span><span class="dot"></span>`;
-      typingRow.appendChild(box);
+      typingRow.className='msg assistant';
+      const ava=document.createElement('div');
+      ava.className='avatar-badge bot'; ava.textContent='PF';
+      const bub=document.createElement('div');
+      bub.className='bubble bubble-assistant';
+      bub.innerHTML=`<span class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
+      typingRow.appendChild(ava); typingRow.appendChild(bub);
       chatBody.appendChild(typingRow);
       scrollChat();
     }
@@ -530,7 +581,7 @@
     });
 
     /* Si dernier message user est sans réponse → relance */
-    if(messages.length && messages[messages.length-1].role==='user' && !chatBody.querySelector('.assistant')){
+    if(messages.length && messages[messages.length-1].role==='user' && !chatBody.querySelector('.bubble-assistant')){
       sendMessage(messages[messages.length-1].content);
     }
   </script>
