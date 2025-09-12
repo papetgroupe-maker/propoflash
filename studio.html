@@ -8,14 +8,8 @@
   <style>
     :root{
       --bg:#f6f8fc; --panel:#ffffff; --ink:#0a1020; --muted:#5c667a; --stroke:#e0e6f4;
-      --paper-w:210mm; --paper-h:297mm;
-      --elev:0 18px 48px rgba(10,16,32,.10), inset 0 1px 0 #ffffffaa;
-
-      /* Thème (peut être écrasé dynamiquement) */
-      --p:#3b82f6;    /* primary */
-      --s:#8b5cf6;    /* secondary */
-      --paper:#fff;   /* fond de la feuille */
-      --ink-paper:#0a1020; /* texte sur la feuille */
+      --accent:#3b82f6; --accent2:#8b5cf6; --accent-ink:#fff;
+      --paper-w:210mm; --paper-h:297mm; --elev:0 18px 48px rgba(10,16,32,.10), inset 0 1px 0 #ffffffaa;
     }
     *{box-sizing:border-box} html,body{height:100%}
     body{margin:0;background:linear-gradient(180deg,var(--bg),#eef3ff);font-family:Inter,system-ui,sans-serif;color:var(--ink)}
@@ -40,78 +34,60 @@
     /* Chat */
     .chat{display:flex;flex-direction:column;min-height:calc(100vh - 120px)}
     .chat-head{display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--stroke)}
-    .chat-head h2{margin:0;font-size:16px}
     .chat-body{padding:12px;overflow:auto;max-height:calc(100vh - 260px)}
     .msg{display:flex;gap:10px;margin:10px 0}
     .bubble{padding:10px 12px;border:1px solid var(--stroke);border-radius:12px;background:var(--panel);max-width:100%;box-shadow:var(--elev)}
     .assistant{background:color-mix(in hsl, var(--panel) 80%, transparent)}
-    .typing{display:inline-flex;gap:6px;align-items:center}
-    .dot{width:6px;height:6px;border-radius:50%;background:var(--muted);opacity:.6;animation:b 1.2s infinite}
-    .dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
-    @keyframes b{0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1);opacity:.9}}
     .chat-compose{position:relative;padding:12px;border-top:1px solid var(--stroke)}
     .input{display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--stroke);border-radius:14px;padding:8px;box-shadow:var(--elev)}
     .input textarea{flex:1;resize:vertical;min-height:72px;border:none;outline:none;background:transparent;font:500 14px/1.4 Inter;color:var(--ink)}
     .send{width:40px;height:40px;border-radius:12px;border:1px solid var(--stroke);background:var(--ink);color:#fff;display:grid;place-items:center;cursor:pointer}
-    .logo-btn{width:40px;height:40px;border-radius:12px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd);border:1px solid #0002;cursor:pointer;box-shadow:var(--elev)}
-    .logo-btn:hover{filter:saturate(110%)}
-    input[type="file"]{display:none}
+    .logo-btn{position:absolute;left:18px;bottom:24px;width:28px;height:28px;border-radius:8px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd);border:1px solid #0002;cursor:pointer;box-shadow:var(--elev)}
 
-    /* Preview (feuille) */
+    /* Typing indicator */
+    .typing{display:inline-flex;gap:6px;align-items:center}
+    .dot{width:6px;height:6px;border-radius:50%;background:#9aa6bf;opacity:.7;animation:blink 1.1s infinite}
+    .dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+    @keyframes blink { 0%,80%,100%{opacity:.2} 40%{opacity:1} }
+
+    /* Preview */
     .sheet-wrap{display:grid;place-items:center;padding:8px}
-    .sheet{
-      width:var(--paper-w);min-height:var(--paper-h);
-      background:var(--paper); color:var(--ink-paper);
-      border:1px solid var(--stroke);box-shadow:var(--elev);border-radius:14px;
-      padding:0; overflow:hidden;
-    }
-    /* Couverture / bandeau dégradé */
-    .cover{
-      background:linear-gradient(135deg,var(--p),color-mix(in oklab, var(--p) 40%, var(--s)));
-      color:#fff; padding:22mm 22mm 12mm 22mm; position:relative;
-    }
-    .badge{display:inline-block;background:#ffffff22;border:1px solid #ffffff44;padding:4px 10px;border-radius:999px;font-size:11px}
-    .cover h1{margin:10px 0 6px; font-size:28px; line-height:1.1; letter-spacing:-.01em}
-    .cover .meta{opacity:.9}
-    .logo-box{position:absolute;right:22mm;top:22mm;width:60px;height:60px;border-radius:12px;background:#ffffff22;border:1px solid #ffffff55;display:grid;place-items:center;overflow:hidden}
-    .logo-box img{width:100%;height:100%;object-fit:contain;background:#fff}
-
-    /* Corps */
-    .page-pad{padding:14mm 22mm 22mm 22mm}
+    .sheet{width:var(--paper-w);min-height:var(--paper-h);background:var(--panel);border:1px solid var(--stroke);box-shadow:var(--elev);border-radius:12px;padding:22mm 18mm;color:var(--ink)}
+    .doc-header{display:grid;grid-template-columns:100px 1fr;gap:16px;align-items:center;margin-bottom:16px}
+    .logo-box{width:100px;height:100px;border:1px solid var(--stroke);border-radius:12px;display:grid;place-items:center;overflow:hidden;background:var(--panel)}
+    .logo-box img{width:100%;height:100%;object-fit:contain}
+    .brand-info .company{font-weight:800;font-size:18px}
+    .brand-info .muted{color:var(--muted);font-size:12px}
     .toc{border:1px solid var(--stroke);border-radius:12px;padding:10px 12px;background:color-mix(in hsl, var(--panel) 85%, transparent);margin:10px 0 14px}
     .toc b{display:block;margin-bottom:6px}
-    .toc a{display:block;text-decoration:none;color:var(--ink-paper);font-size:13px;margin:4px 0}
+    .toc a{display:block;text-decoration:none;color:var(--ink);font-size:13px;margin:4px 0}
     .toc a:hover{text-decoration:underline}
-    .section-title{
-      margin:22px 0 10px;
-      font-weight:800; font-size:18px; letter-spacing:.2px;
-      display:flex; align-items:center; gap:10px;
-    }
-    .bar-left{width:8px; height:22px; border-radius:3px; background:linear-gradient(180deg,var(--p),var(--s))}
-    .card{border:1px solid var(--stroke);border-radius:12px;padding:12px;background:var(--panel);
-      box-shadow:0 12px 28px color-mix(in oklab, var(--p) 13%, black, 10%), inset 0 1px 0 #fff}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .muted{color:var(--muted)}
-    .pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--stroke);font-size:12px;background:var(--panel)}
-    .h1{font-size:26px;line-height:1.1;margin:0 0 4px;font-weight:800;letter-spacing:-.01em}
-    .meta-row{color:var(--muted);font-size:14px;margin-bottom:12px}
+    .h1{font-size:28px;line-height:1.1;margin:0 0 6px;font-weight:800;letter-spacing:-.01em}
+    .meta{color:var(--muted);font-size:14px;margin-bottom:18px}
+    h2{margin:22px 0 8px;font-size:18px;letter-spacing:.2px}
+    .hr{height:1px;background:var(--stroke);margin:12px 0}
     p{margin:8px 0 10px}
     ul{margin:8px 0 10px 18px}
-    .tag{display:inline-block;padding:3px 8px;border-radius:999px;background:color-mix(in hsl, var(--p) 16%, transparent);border:1px solid var(--stroke);font-size:12px;color:var(--ink-paper)}
+    .tag{display:inline-block;padding:3px 8px;border-radius:999px;background:color-mix(in hsl, var(--accent) 16%, transparent);border:1px solid var(--stroke);font-size:12px;color:var(--ink)}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .card{border:1px solid var(--stroke);border-radius:12px;padding:12px;background:var(--panel);box-shadow:var(--elev)}
+    .price{font-weight:800;font-size:18px}
+    .muted{color:var(--muted)}
+    .pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--stroke);font-size:12px;background:var(--panel)}
 
     table{border-collapse:collapse;width:100%;font-size:14px}
     th,td{border:1px solid var(--stroke);padding:8px;text-align:left}
-    th{background:color-mix(in hsl, var(--p) 18%, var(--panel)); color:var(--ink-paper)}
+    th{background:color-mix(in hsl, var(--panel) 85%, transparent)}
     tfoot td{font-weight:800}
 
-    @media print{
-      .bar{display:none}
-      body{background:#fff}
-      .main{grid-template-columns:1fr;padding:0}
-      .sheet{box-shadow:none;border:none;border-radius:0;width:auto;min-height:auto}
-      .page-pad{padding:14mm 16mm 18mm}
-      a[href]:after{content:""}
-    }
+    /* History drawer */
+    .drawer{position:fixed;inset:auto 0 0 auto;right:-380px;width:360px;height:100vh;background:var(--panel);border-left:1px solid var(--stroke);box-shadow:var(--elev);transition:transform .25s ease;display:flex;flex-direction:column}
+    .drawer.open{transform:translateX(-380px)}
+    .drawer h3{margin:0;padding:14px;border-bottom:1px solid var(--stroke)}
+    .drawer-list{padding:8px;overflow:auto}
+    .row-item{border:1px solid var(--stroke);border-radius:10px;padding:10px;margin-bottom:8px;cursor:pointer;background:var(--panel)}
+    .row-item:hover{background:color-mix(in hsl, var(--panel) 85%, transparent)}
+    @media (max-width:1100px){ .main{grid-template-columns:1fr} .sheet{width:100%;min-height:auto}}
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="lang.js"></script>
@@ -127,13 +103,6 @@
     <div class="right">
       <label class="muted">Langue</label>
       <select class="sel" id="langSel" data-lang-picker><option value="fr">FR</option><option value="en">EN</option></select>
-      <label class="muted">Style</label>
-      <select class="sel" id="themeSel">
-        <option value="vibrant">Bleu & Violet (Vibrant)</option>
-        <option value="mono">Noir & Blanc (Minimal)</option>
-        <option value="amber">Noir & Jaune (Bold)</option>
-        <option value="slate">Gris Élégant</option>
-      </select>
       <div class="avatar" id="avatar">U</div>
       <div class="menu" id="menu">
         <a href="studio.html">Studio</a>
@@ -144,9 +113,9 @@
   </div>
 
   <!-- History drawer -->
-  <div class="menu" id="drawer" style="position:fixed;inset:auto 0 0 auto;right:-380px;width:360px;height:100vh;">
-    <h3 style="margin:0;padding:14px;border-bottom:1px solid var(--stroke)">Historique</h3>
-    <div class="drawer-list" id="histList" style="padding:8px;overflow:auto;height:calc(100% - 54px)"></div>
+  <div class="drawer" id="drawer">
+    <h3>Historique</h3>
+    <div class="drawer-list" id="histList"></div>
   </div>
 
   <!-- Main -->
@@ -154,16 +123,14 @@
     <!-- Chat -->
     <div class="panel chat">
       <div class="chat-head">
-        <h2>Chat</h2>
-        <div class="muted" id="chatHint">Entrée = envoyer • Maj+Entrée = nouvelle ligne</div>
+        <strong id="chatTitle">Chat</strong>
+        <!-- (Texte d’aide supprimé) -->
       </div>
       <div class="chat-body" id="chatBody" aria-live="polite"></div>
-
       <div class="chat-compose">
+        <div class="logo-btn" id="logoBtn" title="Importer un logo"></div>
+        <input type="file" id="logoPicker" accept="image/*" style="display:none"/>
         <div class="input">
-          <label class="logo-btn" title="Ajouter un logo (PNG/JPG/SVG)">
-            <input type="file" id="logoInput" accept="image/*"/>
-          </label>
           <textarea id="composer" placeholder="Écrivez votre message"></textarea>
           <button class="send" id="sendBtn" title="Envoyer" aria-label="Envoyer">
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="20" height="20"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
@@ -179,7 +146,7 @@
   </div>
 
   <script>
-    /* ========= Supabase guard ========= */
+    /* Supabase guard: 1 essai anonyme puis login → retour studio */
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -194,7 +161,7 @@
     }
     guard();
 
-    /* ========= Profil menu ========= */
+    /* Profil menu */
     const avatar=document.getElementById('avatar'), menu=document.getElementById('menu'), logoutBtn=document.getElementById('logoutBtn');
     (async ()=>{
       const { data:{ session } } = await sb.auth.getSession();
@@ -204,16 +171,12 @@
     document.addEventListener('click', ()=> menu.style.display='none');
     logoutBtn.onclick = async ()=>{ await sb.auth.signOut(); location.reload(); };
 
-    /* ========= Nav / Drawer ========= */
+    /* Nav */
     document.getElementById('homeBtn').onclick=()=>location.href='index.html';
-    const drawer = document.getElementById('drawer');
-    document.getElementById('openHistory').onclick = ()=>{
-      const open = drawer.style.right==='0px';
-      drawer.style.right = open ? '-380px' : '0px';
-    };
 
-    /* ========= Historique ========= */
-    const histList=document.getElementById('histList');
+    /* Historique */
+    const drawer=document.getElementById('drawer'); const histList=document.getElementById('histList');
+    document.getElementById('openHistory').onclick = ()=> drawer.classList.toggle('open');
     function saveHistory(title, spec, messages){
       const h=JSON.parse(localStorage.getItem('pf_history')||'[]');
       h.unshift({ id:Date.now(), title, date:new Date().toISOString(), spec, messages });
@@ -226,28 +189,23 @@
       if(!h.length){ histList.innerHTML='<div class="muted" style="padding:8px">Aucun élément</div>'; return; }
       h.forEach(item=>{
         const d=new Date(item.date);
-        const div=document.createElement('div');
-        div.style.cssText='border:1px solid var(--stroke);border-radius:10px;padding:10px;margin-bottom:8px;cursor:pointer;background:var(--panel)';
+        const div=document.createElement('div'); div.className='row-item';
         div.innerHTML = `<strong>${item.title||'Sans titre'}</strong><br><span class="muted">${d.toLocaleString()}</span>`;
-        div.onclick=()=>{ spec=item.spec; messages=item.messages||[]; localStorage.setItem('pf_proposal', JSON.stringify(spec)); renderSpec(); renderChat(); drawer.style.right='-380px'; };
+        div.onclick=()=>{ spec=item.spec; messages=item.messages||[]; localStorage.setItem('pf_proposal', JSON.stringify(spec)); renderSpec(); renderChat(); drawer.classList.remove('open'); };
         histList.appendChild(div);
       });
     }
     renderHistory();
 
-    /* ========= Chat + Typing ========= */
-    const chatBody=document.getElementById('chatBody');
-    const composer=document.getElementById('composer');
-    const sendBtn=document.getElementById('sendBtn');
-    const statusEl=document.getElementById('status');
+    /* Chat + Spec */
+    const chatBody=document.getElementById('chatBody'); const composer=document.getElementById('composer'); const sendBtn=document.getElementById('sendBtn'); const statusEl=document.getElementById('status');
     let messages = JSON.parse(localStorage.getItem('pf_chat')||'[]');
     let spec = null;
 
     function loadSpec(){
       try{ spec = JSON.parse(localStorage.getItem('pf_proposal')||'null'); }catch{ spec=null; }
-      if(!spec){ spec = { meta:{ lang:getLang(), title:(getLang()==='en'?'Business Proposal':'Proposition commerciale'), currency:'EUR', style:{} }, sections:[] }; }
-      if(!spec.meta) spec.meta = { lang:getLang(), style:{} };
-      if(!spec.meta.style) spec.meta.style = {};
+      if(!spec){ spec = { meta:{ lang:getLang(), title:(getLang()==='en'?'Business Proposal':'Proposition commerciale'), currency:'EUR' }, sections:[] }; }
+      if(!spec.meta) spec.meta = { lang:getLang() };
     }
     loadSpec();
 
@@ -258,22 +216,21 @@
     })();
 
     function scrollChat(){ chatBody.scrollTop = chatBody.scrollHeight; }
+    function bubble(role, html, css=''){
+      const row=document.createElement('div'); row.className='msg';
+      const bub=document.createElement('div'); bub.className='bubble '+(role==='assistant'?'assistant':''); if(css) bub.classList.add(css);
+      bub.innerHTML=html; row.appendChild(bub); chatBody.appendChild(row); scrollChat(); return row;
+    }
     function escapeHTML(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[m])); }
 
-    function bubble(role, html){
-      const row=document.createElement('div'); row.className='msg';
-      const bub=document.createElement('div'); bub.className='bubble '+(role==='assistant'?'assistant':''); bub.innerHTML=html;
-      row.appendChild(bub); chatBody.appendChild(row); scrollChat();
-      return row;
-    }
-
+    // Typing indicator
     let typingRow=null;
     function showTyping(on){
       if(on){
         if(typingRow) return;
-        typingRow = bubble('assistant', `<span class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`);
-      }else if(typingRow){
-        typingRow.remove(); typingRow=null;
+        typingRow = bubble('assistant', `<div class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>`, 'typing-wrap');
+      }else{
+        if(typingRow){ typingRow.remove(); typingRow=null; }
       }
     }
 
@@ -287,7 +244,8 @@
       const content=text.trim(); if(!content) return;
       messages.push({ role:'user', content: content }); localStorage.setItem('pf_chat', JSON.stringify(messages));
       bubble('user', escapeHTML(content).replace(/\n/g,'<br/>'));
-      composer.value=''; statusEl.textContent='Rédaction…'; showTyping(true);
+      composer.value=''; statusEl.textContent=(getLang()==='en')?'Writing...':'Rédaction…';
+      showTyping(true);
 
       try{
         const resp = await fetch('/api/chat', {
@@ -303,12 +261,14 @@
         bubble('assistant', escapeHTML(reply).replace(/\n/g,'<br/>'));
 
         if(data.proposalSpec){
-          // fusion contrôlée + style (couleurs/logo) conservé si non fourni
           spec = { ...(spec||{}), ...(data.proposalSpec||{}) };
+          // fusion meta/style propre
           spec.meta = { ...(spec.meta||{}), ...((data.proposalSpec||{}).meta||{}) };
-          spec.meta.style = { ...(spec.meta.style||{}), ...(((data.proposalSpec||{}).meta||{}).style||{}) };
+          if (spec.meta) {
+            spec.meta.style = { ...((spec.meta||{}).style||{}), ...((((data.proposalSpec||{}).meta||{}).style)||{}) };
+          }
           localStorage.setItem('pf_proposal', JSON.stringify(spec));
-          renderSpec(); // applique éventuellement les nouvelles couleurs
+          renderSpec();
         }
         saveHistory(spec?.meta?.title || 'Proposition', spec, messages);
         statusEl.textContent='Prêt';
@@ -319,131 +279,87 @@
       }
     }
 
+    // Enter = envoyer ; Shift+Enter = nouvelle ligne (le texte d’aide a été retiré de l’en-tête)
     composer.addEventListener('keydown', (e)=>{
       if(e.isComposing || e.keyCode===229) return;
       if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(composer.value); }
     });
     sendBtn.onclick = ()=> sendMessage(composer.value);
 
-    // Si un message user non répondu, déclencher
+    // Si un message user est présent sans réponse, déclencher
     if(messages.length && messages[messages.length-1].role==='user' && !chatBody.querySelector('.assistant')){
       sendMessage(messages[messages.length-1].content);
     }
 
-    /* ========= Logo upload (spécifié dans meta.style.logoDataUrl) ========= */
-    document.getElementById('logoInput').addEventListener('change', async (e)=>{
-      const f=e.target.files?.[0]; if(!f) return;
-      const reader=new FileReader();
+    /* Upload logo (bouton à gauche) → stocké dans spec.meta.style.logoDataUrl */
+    const logoBtn = document.getElementById('logoBtn');
+    const logoPicker = document.getElementById('logoPicker');
+    logoBtn.onclick = ()=> logoPicker.click();
+    logoPicker.onchange = (e)=>{
+      const file=e.target.files?.[0]; if(!file) return;
+      const reader = new FileReader();
       reader.onload = ()=>{
-        const dataUrl=reader.result;
-        spec.meta = {...(spec.meta||{}), style:{ ...(spec.meta?.style||{}), logoDataUrl:dataUrl }};
+        const url = reader.result;
+        spec.meta = spec.meta || {};
+        spec.meta.style = spec.meta.style || {};
+        spec.meta.style.logoDataUrl = url;
         localStorage.setItem('pf_proposal', JSON.stringify(spec));
         renderSpec();
       };
-      reader.readAsDataURL(f);
-      e.target.value='';
-    });
-
-    /* ========= Thèmes ========= */
-    const THEMES = {
-      vibrant:{ name:'Bleu & Violet',  p:'#3b82f6', s:'#8b5cf6', ink:'#0a1020', paper:'#ffffff' },
-      mono   :{ name:'Noir & Blanc',   p:'#111827', s:'#6b7280', ink:'#0a0a0a', paper:'#ffffff' },
-      amber  :{ name:'Noir & Jaune',   p:'#111827', s:'#f59e0b', ink:'#0a0a0a', paper:'#ffffff' },
-      slate  :{ name:'Gris Élégant',   p:'#1f2937', s:'#64748b', ink:'#0b1220', paper:'#fcfcfe' }
+      reader.readAsDataURL(file);
+      logoPicker.value='';
     };
 
-    const themeSel = document.getElementById('themeSel');
-    themeSel.value = (spec.meta?.style?.themeName)||'vibrant';
-
-    function applyTheme(style){
-      const sheet=document.getElementById('sheet');
-      const p = style?.primary || THEMES[themeSel.value].p;
-      const s = style?.secondary || THEMES[themeSel.value].s;
-      const ink = style?.ink || THEMES[themeSel.value].ink;
-      const paper = style?.paper || THEMES[themeSel.value].paper;
-      sheet.style.setProperty('--p', p);
-      sheet.style.setProperty('--s', s);
-      sheet.style.setProperty('--ink-paper', ink);
-      sheet.style.setProperty('--paper', paper);
-    }
-
-    themeSel.onchange = ()=>{
-      const key=themeSel.value;
-      const t=THEMES[key]||THEMES.vibrant;
-      spec.meta.style = { ...(spec.meta.style||{}),
-        themeName:key, primary:t.p, secondary:t.s, ink:t.ink, paper:t.paper
-      };
-      localStorage.setItem('pf_proposal', JSON.stringify(spec));
-      renderSpec();
-    };
-
-    /* ========= Traductions chat (placeholder + hint) ========= */
-    function applyChatLang(){
-      const en=(getLang()==='en');
-      document.getElementById('composer').placeholder = en?'Type your message':'Écrivez votre message';
-      document.getElementById('chatHint').textContent = en?'Enter = send • Shift+Enter = new line':'Entrée = envoyer • Maj+Entrée = nouvelle ligne';
-    }
-    applyChatLang();
-    window.addEventListener('langchange', ()=>{
-      spec.meta = { ...(spec.meta||{}), lang:getLang() };
-      localStorage.setItem('pf_proposal', JSON.stringify(spec));
-      applyChatLang();
-      renderSpec();
-    });
-
-    /* ========= Rendu Aperçu ========= */
-    const sheet=document.getElementById('sheet');
-
+    /* Preview mini (libellés) */
     const t = {
       fr:{ title:"Proposition commerciale", to:"Pour", from:"Émis par", date:"Date", letter:"Lettre d’introduction", executive:"Résumé exécutif", objectives:"Objectifs", approach:"Approche & phasage", deliverables:"Livrables", in_scope:"Inclus", out_scope:"Hors-périmètre", timeline:"Planning", pricing:"Tarification", assumptions:"Hypothèses / Risques", next:"Prochaines étapes", price_model:"Modèle", terms:"Conditions", toc:"Sommaire" },
       en:{ title:"Business Proposal", to:"To", from:"Issued by", date:"Date", letter:"Cover Letter", executive:"Executive Summary", objectives:"Objectives", approach:"Approach & Phasing", deliverables:"Deliverables", in_scope:"In scope", out_scope:"Out of scope", timeline:"Timeline", pricing:"Pricing", assumptions:"Assumptions / Risks", next:"Next Steps", price_model:"Model", terms:"Terms", toc:"Table of Contents" }
     };
+    const sheet=document.getElementById('sheet');
 
     function safeArr(v){ return Array.isArray(v)?v:[]; }
     function safeStr(v,fb=''){ return (v==null?'':String(v)).trim() || fb; }
     function fmtDate(d){ try{ const dt=d?new Date(d):new Date(); return dt.toLocaleDateString(document.documentElement.lang||getLang(), {year:'numeric',month:'short',day:'2-digit'});}catch{return ''} }
     function money(n,c){ try{ return new Intl.NumberFormat(document.documentElement.lang||getLang(),{style:'currency',currency:c||'EUR'}).format(Number(n||0)); }catch{ return String(n||0)+' '+(c||'€') } }
 
-    function sectionTitle(html,id){ const wrap=document.createElement('div'); wrap.className='section-title'; if(id) wrap.id=id; wrap.innerHTML=`<span class="bar-left"></span><span>${html}</span>`; sheet.appendChild(wrap); }
+    function section(titleHTML, id){ const h=document.createElement('h2'); h.innerHTML=titleHTML; if(id) h.id=id; sheet.appendChild(h); }
     function para(text){ const p=document.createElement('p'); p.textContent=text; sheet.appendChild(p); }
     function list(items){ if(!items?.length) return; const ul=document.createElement('ul'); items.forEach(it=>{ const li=document.createElement('li'); li.textContent=String(it); ul.appendChild(li); }); sheet.appendChild(ul); }
     function buildTOC(sections){ const L=t[spec.meta?.lang||getLang()]||t.fr; const box=document.createElement('div'); box.className='toc'; box.innerHTML=`<b>${L.toc}</b>`; sections.forEach(s=>{ if(s.present){ const a=document.createElement('a'); a.href='#'+s.id; a.textContent=s.title; box.appendChild(a);} }); sheet.appendChild(box); }
-
     function computeTotals(){ const pr=spec.pricing||{}; const items=safeArr(pr.items); let subtotal=0; items.forEach(it=>{ const s=it.subtotal!=null?Number(it.subtotal):(Number(it.qty||1)*Number(it.unit_price||0)); subtotal+=(isFinite(s)?s:0); }); const taxRate=Number(pr.tax_rate||0); const taxes=subtotal*(taxRate/100); const total=subtotal+taxes; return {subtotal,taxes,total,taxRate}; }
 
-    function applyCurrentTheme(){
-      // d’abord thème choisi, puis éventuelles couleurs envoyées par l’IA
-      const key = spec?.meta?.style?.themeName || themeSel.value || 'vibrant';
-      themeSel.value = key;
-      applyTheme(spec?.meta?.style||THEMES[key]);
-    }
-
     function renderSpec(){
-      if(!spec) return;
-      applyCurrentTheme();
-      const L = t[spec.meta?.lang||getLang()]||t.fr;
-
+      if(!spec){ sheet.innerHTML='<p class="muted">Aucune donnée.</p>'; return; }
+      const L=t[spec.meta?.lang||getLang()]||t.fr;
       sheet.innerHTML='';
 
-      /* Couverture */
-      const cover=document.createElement('div'); cover.className='cover'; sheet.appendChild(cover);
+      // Couleurs de thème (si fournies par l’IA)
+      const style = (spec.meta && spec.meta.style) ? spec.meta.style : {};
+      const primary = style.primary || '#0a1020';
+      const secondary = style.secondary || '#8b5cf6';
+      const themeBg = `linear-gradient(180deg, ${secondary}15, #ffffff 45%)`;
+      sheet.style.borderColor = primary+'22';
+      sheet.style.boxShadow = '0 18px 48px rgba(10,16,32,.10), inset 0 1px 0 #ffffffaa';
+      sheet.style.background = `color-mix(in hsl, #fff 85%, transparent)`;
+      document.documentElement.style.setProperty('--accent', primary);
+      document.documentElement.style.setProperty('--accent2', secondary);
+
+      const header=document.createElement('div'); header.className='doc-header';
       const logoBox=document.createElement('div'); logoBox.className='logo-box';
-      if(spec.meta?.style?.logoDataUrl){ const im=new Image(); im.src=spec.meta.style.logoDataUrl; logoBox.appendChild(im); }
-      cover.appendChild(logoBox);
+      if(style.logoDataUrl){ const im=new Image(); im.src=style.logoDataUrl; logoBox.appendChild(im);} else { logoBox.textContent='LOGO'; logoBox.style.color='#9aa6bf'; }
+      const bi=document.createElement('div'); bi.className='brand-info';
+      const company=safeStr(spec.meta?.company || spec.meta?.brand?.company,'Votre société');
+      const contact=safeStr(spec.meta?.brand?.contact_name,''), website=safeStr(spec.meta?.brand?.website,''), email=safeStr(spec.meta?.brand?.email,''), phone=safeStr(spec.meta?.brand?.phone,'');
+      bi.innerHTML=`<div class="company">${company}</div><div class="muted">${[contact,website,email,phone].filter(Boolean).join(' • ')}</div>`;
+      header.appendChild(logoBox); header.appendChild(bi); sheet.appendChild(header);
 
-      const small = document.createElement('div'); small.className='badge'; small.textContent = (spec.meta?.company || spec.meta?.brand?.company || 'Votre société');
-      cover.appendChild(small);
+      const title=safeStr(spec.meta?.title,(L.title)); const client=safeStr(spec.meta?.client,'Client'); const date=safeStr(spec.meta?.date, fmtDate());
+      const head=document.createElement('div');
+      head.innerHTML = `<div class="h1" style="background:${themeBg};padding:10px 12px;border-radius:10px;border:1px solid ${primary}22">${title}</div>
+        <div class="meta">${L.to}: <span class="tag">${client}</span> &nbsp;•&nbsp; ${L.from}: <span class="tag">${company}</span> &nbsp;•&nbsp; ${L.date}: ${date}</div>`;
+      sheet.appendChild(head);
+      sheet.appendChild(Object.assign(document.createElement('div'),{className:'hr'}));
 
-      const h1 = document.createElement('h1'); h1.textContent = safeStr(spec.meta?.title, L.title); cover.appendChild(h1);
-      const meta = document.createElement('div'); meta.className='meta';
-      const client=safeStr(spec.meta?.client,'Client');
-      meta.innerHTML = `${L.to}: <strong>${client}</strong> &nbsp;•&nbsp; ${L.date}: ${fmtDate(spec.meta?.date)}`;
-      cover.appendChild(meta);
-
-      /* Corps */
-      const body=document.createElement('div'); body.className='page-pad'; sheet.appendChild(body);
-
-      // Table des matières (selon présence)
       const tocSections=[
         { id:'s_letter', title:L.letter, present:safeArr(spec.letter?.body_paragraphs||spec.letter?.paragraphs).length || spec.letter?.greeting||spec.letter?.closing||spec.letter?.signature },
         { id:'s_executive', title:L.executive, present:safeArr(spec.executive_summary?.paragraphs).length },
@@ -457,41 +373,30 @@
       ];
       buildTOC(tocSections);
 
-      // En-tête infos
-      const metaRow = document.createElement('div'); metaRow.className='meta-row';
-      const company=safeStr(spec.meta?.company || spec.meta?.brand?.company,'Votre société');
-      metaRow.innerHTML = `${L.from}: <span class="tag">${company}</span> &nbsp;•&nbsp; ${L.to}: <span class="tag">${client}</span>`;
-      sheet.appendChild(metaRow);
-
-      // Sections
       if (tocSections[0].present){
-        sectionTitle(L.letter,'s_letter');
+        section(L.letter,'s_letter');
         const letter=spec.letter||{};
         if(letter.greeting) para(letter.greeting);
         const bodies=safeArr(letter.body_paragraphs?.length?letter.body_paragraphs:letter.paragraphs); bodies.forEach(p=>para(p));
         if(letter.closing) para(letter.closing); if(letter.signature) para(letter.signature);
       }
-
-      if (tocSections[1].present){ sectionTitle(L.executive,'s_executive'); safeArr(spec.executive_summary.paragraphs).forEach(p=>para(p)); }
-
-      if (tocSections[2].present){ sectionTitle(L.objectives,'s_objectives'); list(spec.objectives.bullets); }
-
+      if (tocSections[1].present){ section(L.executive,'s_executive'); safeArr(spec.executive_summary.paragraphs).forEach(p=>para(p)); }
+      if (tocSections[2].present){ section(L.objectives,'s_objectives'); list(spec.objectives.bullets); }
       if (tocSections[3].present){
-        sectionTitle(L.approach,'s_approach');
+        section(L.approach,'s_approach');
         safeArr(spec.approach.phases).forEach((ph,i)=>{
           const c=document.createElement('div'); c.className='card';
           c.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center">
             <strong>Phase ${i+1} — ${safeStr(ph.title,'À confirmer')}</strong>
             <span class="pill">${safeStr(ph.duration||'','')}</span></div>`;
-          if(ph.description) para(ph.description);
-          const acts=safeArr(ph.activities?.length?ph.activities:ph.steps); if(acts.length){ const ul=document.createElement('ul'); acts.forEach(a=>{ const li=document.createElement('li'); li.textContent=a; ul.appendChild(li); }); c.appendChild(ul); }
-          const outs=safeArr(ph.outcomes); if(outs.length){ const p=document.createElement('p'); p.innerHTML='<em>Résultats attendus :</em>'; c.appendChild(p); const ul2=document.createElement('ul'); outs.forEach(a=>{ const li=document.createElement('li'); li.textContent=a; ul2.appendChild(li); }); c.appendChild(ul2); }
           sheet.appendChild(c);
+          if(ph.description) para(ph.description);
+          const acts=safeArr(ph.activities?.length?ph.activities:ph.steps); if(acts.length) list(acts);
+          const outs=safeArr(ph.outcomes); if(outs.length){ const p=document.createElement('p'); p.innerHTML='<em>Résultats attendus :</em>'; sheet.appendChild(p); list(outs); }
         });
       }
-
       if (tocSections[4].present){
-        sectionTitle(L.deliverables,'s_deliverables');
+        section(L.deliverables,'s_deliverables');
         const grid=document.createElement('div'); grid.className='grid2';
         const a=document.createElement('div'); a.className='card'; a.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.in_scope}</div>`;
         const b=document.createElement('div'); b.className='card'; b.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.out_scope}</div>`;
@@ -500,9 +405,8 @@
         const ulB=document.createElement('ul'); safeArr(spec.deliverables.out).forEach(x=>{const li=document.createElement('li'); li.textContent=x; ulB.appendChild(li);});
         a.appendChild(ulA); b.appendChild(ulB);
       }
-
       if (tocSections[5].present){
-        sectionTitle(L.timeline,'s_timeline');
+        section(L.timeline,'s_timeline');
         const grid=document.createElement('div'); grid.className='grid2';
         safeArr(spec.timeline.milestones).forEach(ms=>{
           const c=document.createElement('div'); c.className='card';
@@ -512,12 +416,10 @@
         });
         sheet.appendChild(grid);
       }
-
       if (tocSections[6].present){
-        sectionTitle(L.pricing,'s_pricing');
+        section(L.pricing,'s_pricing');
         const pr=spec.pricing||{}; const currency=pr.currency||spec.meta?.currency||'EUR';
-        const model=document.createElement('div'); model.className='muted'; model.style.margin='-6px 0 8px'; model.innerHTML = `${L.price_model}: <span class="pill">${safeStr(pr.model,'forfait')}</span>`; sheet.appendChild(model);
-
+        const m=document.createElement('div'); m.className='muted'; m.style.margin='-6px 0 8px'; m.innerHTML = `${L.price_model}: <span class="pill">${safeStr(pr.model,'forfait')}</span>`; sheet.appendChild(m);
         if(Array.isArray(pr.items)&&pr.items.length){
           const table=document.createElement('table');
           table.innerHTML=`<thead><tr><th>Item</th><th>Qté</th><th>Unité</th><th>PU</th><th>Sous-total</th></tr></thead><tbody></tbody><tfoot>
@@ -532,28 +434,29 @@
             tb.appendChild(tr);
           });
           sheet.appendChild(table);
-          const {subtotal,taxes,total,taxRate} = computeTotals();
+          const subtotal=Array.from(tb.children).reduce((s,tr)=>{ const v=(tr.children[4]?.textContent||'0').replace(/[^\d.,-]/g,'').replace(',','.'); return s + (parseFloat(v)||0); },0);
+          const taxRate=Number(pr.tax_rate||0); const taxes=subtotal*(taxRate/100); const total=subtotal+taxes;
           sheet.querySelector('#ft_subtotal').textContent=money(subtotal,currency);
           sheet.querySelector('#ft_tax').textContent=`${money(taxes,currency)} ${taxRate?`(${taxRate}%)`:''}`;
           sheet.querySelector('#ft_total').textContent=money(total,currency);
-          if((pr.terms||[]).length){
-            const terms=document.createElement('div'); terms.className='card'; terms.style.marginTop='8px';
-            terms.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.terms}</div><ul>${(pr.terms||[]).map(x=>`<li>${x}</li>`).join('')}</ul>`;
-            sheet.appendChild(terms);
-          }
+          if((pr.terms||[]).length){ const terms=document.createElement('div'); terms.className='card'; terms.style.marginTop='8px'; terms.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.terms}</div><ul>${(pr.terms||[]).map(x=>`<li>${x}</li>`).join('')}</ul>`; sheet.appendChild(terms); }
         }else{
-          const priceBox=document.createElement('div'); priceBox.className='card';
-          const price=pr.price!=null?String(pr.price):'—';
-          priceBox.innerHTML=`<div class="h1">${money(price,currency)}</div><div class="muted" style="margin-top:4px">${L.price_model}: <span>${safeStr(pr.model,'forfait')}</span></div>`;
+          const priceBox=document.createElement('div'); priceBox.className='card'; const price=pr.price!=null?String(pr.price):'—';
+          priceBox.innerHTML=`<div class="price">${money(price,currency)}</div><div class="muted" style="margin-top:4px">${L.price_model}: <span>${safeStr(pr.model,'forfait')}</span></div>`;
           sheet.appendChild(priceBox);
         }
       }
-
-      if (tocSections[7].present){ sectionTitle(L.assumptions,'s_assumptions'); safeArr(spec.assumptions.paragraphs).forEach(p=>para(p)); }
-      if (tocSections[8].present){ sectionTitle(L.next,'s_next'); safeArr(spec.next_steps.paragraphs).forEach(p=>para(p)); }
+      if (tocSections[7].present){ section(L.assumptions,'s_assumptions'); safeArr(spec.assumptions.paragraphs).forEach(p=>para(p)); }
+      if (tocSections[8].present){ section(L.next,'s_next'); safeArr(spec.next_steps.paragraphs).forEach(p=>para(p)); }
     }
-
     renderSpec();
+
+    // Lang (on ne remet plus de texte d’aide dans l’en-tête)
+    window.addEventListener('langchange', ()=>{
+      spec.meta = { ...(spec.meta||{}), lang:getLang() };
+      localStorage.setItem('pf_proposal', JSON.stringify(spec));
+      renderSpec();
+    });
   </script>
 </body>
 </html>
