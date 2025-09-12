@@ -1,106 +1,130 @@
-// /api/chat.js
+ // /api/chat.js
 import OpenAI from "openai";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-const SYSTEM_PROMPT = `
-ROLE: Senior B2B Proposal Strategist & Bid Writer (FR/EN).
-OBJECTIF: transformer chaque échange en une proposition commerciale exploitable,
-structurée dans un schéma "proposalSpec" et un message "reply" clair, orienté décision.
-
-=== STYLE & THEME (Très important) ===
-- Quand c'est pertinent, renseigner "meta.style" pour colorer l'aperçu (UI).
-- Champs attendus: 
-  - meta.style.primary: couleur principale en HEX #RRGGBB (ex "#111827")
-  - meta.style.secondary: couleur secondaire en HEX (ex "#f59e0b")
-  - meta.style.themeName: l'un de "vibrant" | "mono" | "amber" | "slate"
-- Choisir des couleurs cohérentes avec le brief / la marque si mentionnées (ex: "jaune et noir" -> themeName:"amber", primary noir, secondary jaune).
-- Si rien n’est précisé, tu peux proposer un thème par défaut cohérent avec l’activité (ex: "vibrant" pour tech, "slate" pour corporate, etc.).
-- NE PAS inventer de logo; ne renseigner "logoDataUrl" que si l’input l’indique explicitement (sinon omettre).
-- Ne pas renvoyer d’images, juste des codes HEX / themeName (pas d’autres clefs visuelles).
-
-=== OUTPUT JSON STRICT ===
-{
-  "reply": "<texte lisible pour l'utilisateur>",
-  "proposalSpec": {
-    "meta": { 
-      "lang":"fr|en",
-      "title": "",
-      "company":"", 
-      "client":"", 
-      "date":"",
-      "currency":"EUR",
-      "style": { "primary":"#hex", "secondary":"#hex", "themeName":"vibrant|mono|amber|slate", "logoDataUrl":null }
-    },
-    "letter": { "subject":"", "preheader":"", "greeting":"", "body_paragraphs":[""], "closing":"", "signature":"" },
-    "executive_summary": { "paragraphs":[""] },
-    "objectives": { "bullets":[""] },
-    "approach": { "phases":[{ "title":"", "duration":"", "activities":[""], "outcomes":[""] }] },
-    "deliverables": { "in":[""], "out":[""] },
-    "timeline": { "milestones":[{ "title":"", "dateOrWeek":"", "notes":"" }] },
-    "pricing": { "model":"forfait|regie", "currency":"EUR",
-                 "items":[{ "name":"", "qty":1, "unit":"jour|mois|forfait", "unit_price":0, "subtotal":0 }],
-                 "tax_rate":20, "terms":[""], "price": null },
-    "assumptions": { "paragraphs":[""] },
-    "next_steps": { "paragraphs":[""] }
+/* -----------------------------------------------------------
+   DEFAULT DESIGN SPEC (contrat par défaut côté serveur)
+   Sert de base pour merge si l'IA renvoie un design partiel
+----------------------------------------------------------- */
+const DEFAULT_DESIGN_SPEC = {
+  palette: {
+    primary:   "#3b82f6",   // accent 1
+    secondary: "#8b5cf6",   // accent 2 (dégradé / tags…)
+    surface:   "#f6f8fc",   // fond de la page / cartes
+    ink:       "#0a1020",   // texte principal
+    muted:     "#5c667a",   // texte secondaire
+    stroke:    "#e0e6f4"    // bordures
   },
-  "actions": [{ "type":"preview" } | { "type":"ask", "field":"meta.client", "hint":"Quel est le client ?" }]
+  radius: { panel: 16, bubble: 14, card: 12 }, // px
+  texture: { kind: "none", intensity: 0.0 },   // "none" | "mesh" | "blob"
+  brand: { company: "", website: "", contact: "" }
+};
+
+/* -------- utils: deep merge (obj1 <- obj2 <- obj3) -------- */
+function isObj(v) { return v && typeof v === "object" && !Array.isArray(v); }
+function deepMerge(...objs) {
+  const out = {};
+  for (const o of objs) {
+    if (!isObj(o)) continue;
+    for (const k of Object.keys(o)) {
+      if (isObj(o[k])) out[k] = deepMerge(out[k], o[k]);
+      else out[k] = o[k];
+    }
+  }
+  return out;
 }
 
-PRINCIPES:
-- FR/EN selon meta.lang (déduire du contexte; FR par défaut).
-- Toujours produire une proposalSpec cohérente; si info manquante → "actions: ask".
-- Pricing: si incertain → items + hypothèses + marquer "à confirmer". Calculer subtotal si manquant.
-- VISUEL: proposer un meta.style adapté si le contexte s’y prête (voir règles ci-dessus).
-- Ne pas inventer de références ni de logos.
-- Ne renvoyer QUE le JSON demandé.
+/* -------------------- SYSTEM PROMPT ----------------------- */
+const SYSTEM_PROMPT = `
+ROLE: Senior B2B Proposal Strategist & Layout Designer (FR/EN).
+
+OBJECTIF:
+- Produire à chaque tour un JSON strict { reply, proposalSpec, actions }.
+- "proposalSpec" décrit le contenu (lettre, phasage, pricing, etc.)
+- Et contient META.STYLE.DESIGNSPEC = contrat de design (voir ci-dessous).
+- Quand l’utilisateur évoque un style / thème / couleurs / logo,
+  tu mets à jour proposalSpec.meta.style.designSpec (partiellement possible).
+
+CONTRAT DESIGNSPEC (toujours sous proposalSpec.meta.style.designSpec) :
+{
+  "palette": {
+    "primary":   "#RRGGBB",    // accent 1 (boutons, tags, dégradé user bubble)
+    "secondary": "#RRGGBB",    // accent 2
+    "surface":   "#RRGGBB",    // fond général / cartes
+    "ink":       "#RRGGBB",    // texte principal
+    "muted":     "#RRGGBB",    // texte secondaire
+    "stroke":    "#RRGGBB"     // bordures
+  },
+  "radius": { "panel": <px>, "bubble": <px>, "card": <px> },
+  "texture": { "kind": "none|mesh|blob", "intensity": 0..1 },
+  "brand":   { "company": "", "website": "", "contact": "" }
+}
+
+RÈGLES :
+- Si l’utilisateur tape un style ("corporate navy", "lime accent", "radius 12",
+  "texture mesh légère", "super pro minimal", etc.), mets à jour "designSpec"
+  en conséquence en renvoyant uniquement les champs utiles (partiel OK).
+- Ne jamais inventer des champs hors contrat.
+- Répondre en JSON STRICT (response_format=json_object), pas de texte hors JSON.
 `;
 
+/* ------------------- Fewshots (facultatif) ---------------- */
 const FEWSHOTS = [
-  { role:"user", content:"Brief: refonte site vitrine 8 pages, deadline 6 semaines, budget cible 8-12 k€, FR. Style souhaité: jaune et noir, look énergique." },
-  { role:"assistant", content: JSON.stringify({
-      reply:"Je prépare une proposition structurée (cadrage, design, dev, recette) avec un style noir/jaune énergique et une mise en avant des étapes clés.",
-      proposalSpec:{
-        meta:{
-          lang:"fr",
-          title:"Proposition — Refonte site vitrine",
-          currency:"EUR",
-          style:{ primary:"#111827", secondary:"#f59e0b", themeName:"amber" }
-        },
-        executive_summary:{ paragraphs:["Objectif: moderniser l’image, améliorer conversions, autonomie CMS."]},
-        approach:{ phases:[
-          { title:"Cadrage & ateliers", duration:"1 semaine", activities:["Atelier objectifs","Arborescence"], outcomes:["Backlog validé"] },
-          { title:"Design UI", duration:"2 semaines", activities:["Maquettes","Design system"], outcomes:["UI validée"] },
-          { title:"Développement", duration:"2 semaines", activities:["Intégration","CMS"], outcomes:["Site prêt à recetter"] },
-          { title:"Recette & mise en ligne", duration:"1 semaine", activities:["Tests","Corrections","Go-live"], outcomes:["Prod en ligne"] }
-        ]},
-        pricing:{ model:"forfait", currency:"EUR", tax_rate:20,
-          items:[
-            { name:"Cadrage & ateliers", qty:1, unit:"forfait", unit_price:1800, subtotal:1800 },
-            { name:"Design UI (8 pages)", qty:1, unit:"forfait", unit_price:3200, subtotal:3200 },
-            { name:"Développement & intégration", qty:1, unit:"forfait", unit_price:4200, subtotal:4200 }
-          ],
-          terms:["40% commande, 40% design, 20% livraison","Validité: 30 jours"]
-        },
-        next_steps:{ paragraphs:["Point 30 min pour valider périmètre & planning."] }
+  {
+    role: "user",
+    content:
+      "Style: corporate navy, accent lime, radius 14 panel/12 bubble/10 card, texture mesh légère."
+  },
+  {
+    role: "assistant",
+    content: JSON.stringify({
+      reply:
+        "Je passe sur une charte corporate (bleu marine avec accent lime) et des rayons plus doux.",
+      proposalSpec: {
+        meta: {
+          style: {
+            designSpec: {
+              palette: {
+                primary: "#0b1a3a",
+                secondary: "#68d391",
+                surface: "#f5f8ff",
+                ink: "#0a1020",
+                muted: "#5c667a",
+                stroke: "#dfe6f4"
+              },
+              radius: { panel: 14, bubble: 12, card: 10 },
+              texture: { kind: "mesh", intensity: 0.2 }
+            }
+          }
+        }
       },
-      actions:[{type:"preview"}]
+      actions: [{ type: "preview" }]
     })
   }
 ];
 
+/* ----------------------- Handler -------------------------- */
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Method not allowed' }); return;
+  if (req.method !== "POST") {
+    res.status(405).json({ error: "Method not allowed" });
+    return;
   }
+
   try {
     const { message, proposalSpec, history = [] } = req.body || {};
+
     const messages = [
-      { role:"system", content: SYSTEM_PROMPT },
+      { role: "system", content: SYSTEM_PROMPT },
       ...FEWSHOTS,
-      ...history.map(m => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: m.content })),
-      proposalSpec ? { role:"user", content: `Spec actuelle:\n${JSON.stringify(proposalSpec)}` } : null,
-      { role:"user", content: message || "" },
+      ...history.map((m) => ({
+        role: m.role === "assistant" ? "assistant" : "user",
+        content: m.content
+      })),
+      proposalSpec
+        ? { role: "user", content: `Spec actuelle:\n${JSON.stringify(proposalSpec)}` }
+        : null,
+      { role: "user", content: message || "" }
     ].filter(Boolean);
 
     const resp = await openai.chat.completions.create({
@@ -111,19 +135,27 @@ export default async function handler(req, res) {
     });
 
     let out = {};
-    try { out = JSON.parse(resp.choices[0].message.content || "{}"); }
-    catch { out = { reply:"Je n’ai pas pu structurer la proposition. Reformulez.", actions:[] }; }
-
-    // Fusion "propre" côté serveur, y compris meta.style
-    if (out.proposalSpec) {
-      const prevMeta = (proposalSpec?.meta || {});
-      const nextMeta = (out.proposalSpec.meta || {});
-      const mergedStyle = {
-        ...(prevMeta.style || {}),
-        ...((nextMeta.style) || {})
-      };
-      out.proposalSpec.meta = { ...prevMeta, ...nextMeta, style: mergedStyle };
+    try {
+      out = JSON.parse(resp.choices[0]?.message?.content || "{}");
+    } catch {
+      out = { reply: "Je n’ai pas pu structurer la proposition.", actions: [] };
     }
+
+    /* --------- merge du designSpec (DEFAULT <- existing <- AI) --------- */
+    const existingDesign =
+      proposalSpec?.meta?.style?.designSpec || {};
+
+    const aiDesign =
+      out?.proposalSpec?.meta?.style?.designSpec || {};
+
+    const finalDesign = deepMerge(DEFAULT_DESIGN_SPEC, existingDesign, aiDesign);
+
+    // Toujours renvoyer proposalSpec + meta + style + designSpec fusionné
+    out.proposalSpec = deepMerge(
+      { meta: { style: {} } },
+      out.proposalSpec || {},
+      { meta: { style: { designSpec: finalDesign } } }
+    );
 
     res.status(200).json(out);
   } catch (e) {
