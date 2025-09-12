@@ -9,10 +9,18 @@
     :root{
       --bg:#f6f8fc; --panel:#ffffff; --ink:#0a1020; --muted:#5c667a; --stroke:#e0e6f4;
       --accent:#3b82f6; --accent2:#8b5cf6; --accent-ink:#fff;
-      --paper-w:210mm; --paper-h:297mm; --elev:0 18px 48px rgba(10,16,32,.10), inset 0 1px 0 #ffffffaa;
+      --paper-w:210mm; --paper-h:297mm;
+      --elev:0 18px 48px rgba(10,16,32,.10), inset 0 1px 0 #ffffffaa;
     }
-    *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0;background:linear-gradient(180deg,var(--bg),#eef3ff);font-family:Inter,system-ui,sans-serif;color:var(--ink)}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      height:100vh;               /* verrouille le scroll page */
+      overflow:hidden;            /* le scroll se fait dans les panneaux */
+      background:linear-gradient(180deg,var(--bg),#eef3ff);
+      font-family:Inter,system-ui,sans-serif;color:var(--ink)
+    }
 
     /* Top bar */
     .bar{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--stroke);
@@ -28,43 +36,50 @@
     .menu a:hover,.menu button:hover{background:color-mix(in hsl, var(--panel) 80%, transparent)}
 
     /* Layout */
-    .main{display:grid;grid-template-columns:420px 1fr;gap:18px;padding:18px;align-items:start}
+    .main{
+      height:calc(100vh - 64px);  /* hauteur sous la barre : adapte si ta barre change de taille */
+      display:grid;grid-template-columns:420px 1fr;gap:18px;padding:18px;align-items:start
+    }
     .panel{background:var(--panel);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--elev)}
 
     /* Chat */
-    .chat{display:flex;flex-direction:column;min-height:calc(100vh - 120px)}
+    .chat{display:flex;flex-direction:column;height:100%}
     .chat-head{display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--stroke)}
-    .chat-body{padding:12px;overflow:auto;max-height:calc(100vh - 260px)}
+    .chat-title{font-weight:800}
+    .chat-body{padding:12px;overflow:auto; /* scroll interne */ height:100%}
     .msg{display:flex;gap:10px;margin:10px 0}
     .bubble{padding:10px 12px;border:1px solid var(--stroke);border-radius:12px;background:var(--panel);max-width:100%;box-shadow:var(--elev)}
     .assistant{background:color-mix(in hsl, var(--panel) 80%, transparent)}
     .chat-compose{position:relative;padding:12px;border-top:1px solid var(--stroke)}
     .input{display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--stroke);border-radius:14px;padding:8px;box-shadow:var(--elev)}
     .input textarea{flex:1;resize:vertical;min-height:72px;border:none;outline:none;background:transparent;font:500 14px/1.4 Inter;color:var(--ink)}
-    .send{width:40px;height:40px;border-radius:12px;border:1px solid var(--stroke);background:var(--ink);color:#fff;display:grid;place-items:center;cursor:pointer}
+    .send{width:40px;height:40px;border-radius:12px;border:1px solid var(--stroke);background:#0a1020;color:#fff;display:grid;place-items:center;cursor:pointer}
 
-    /* Upload logo — bouton clair */
-    .logo-btn{
-      position:absolute;left:18px;bottom:22px;
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 10px;border:1px solid var(--stroke);border-radius:10px;
-      background:var(--panel);box-shadow:var(--elev);cursor:pointer;
-      user-select:none;
-    }
-    .logo-icon{width:18px;height:18px;border-radius:6px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd);border:1px solid #0002}
-    .logo-label{font-size:12px;font-weight:600;color:var(--ink);white-space:nowrap}
-    .logo-btn:focus-visible{outline:2px solid var(--accent)}
-    @media (max-width:560px){ .logo-label{display:none} }
+    /* Upload/logo bouton */
+    .logo-btn{width:34px;height:34px;border-radius:10px;border:1px solid #0002;
+      background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd);
+      box-shadow:var(--elev);display:grid;place-items:center;cursor:pointer}
+    .logo-btn input{display:none}
+    .logo-tip{position:absolute;left:18px;bottom:60px;background:#111;color:#fff;font-size:12px;padding:6px 8px;border-radius:8px;display:none}
+    .logo-wrap:hover .logo-tip{display:block}
 
     /* Typing indicator */
-    .typing{display:inline-flex;gap:6px;align-items:center}
-    .dot{width:6px;height:6px;border-radius:50%;background:#9aa6bf;opacity:.7;animation:blink 1.1s infinite}
-    .dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
-    @keyframes blink { 0%,80%,100%{opacity:.2} 40%{opacity:1} }
+    .typing{display:inline-flex;gap:5px;padding:8px 12px;border:1px solid var(--stroke);border-radius:12px;background:color-mix(in hsl, var(--panel) 80%, transparent);box-shadow:var(--elev)}
+    .dot{width:6px;height:6px;border-radius:50%;background:#8aa0c6;opacity:.6;animation:bounce 1.2s infinite}
+    .dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
+    @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
 
-    /* Preview */
-    .sheet-wrap{display:grid;place-items:center;padding:8px}
-    .sheet{width:var(--paper-w);min-height:var(--paper-h);background:var(--panel);border:1px solid var(--stroke);box-shadow:var(--elev);border-radius:12px;padding:22mm 18mm;color:var(--ink)}
+    /* Preview : scroll interne + centrage */
+    .sheet-wrap{
+      height:100%;                /* occupe toute la colonne */
+      overflow:auto;              /* scroll interne de l’aperçu */
+      display:flex;justify-content:center;align-items:flex-start;
+      padding:12px
+    }
+    .sheet{
+      width:var(--paper-w); min-height:var(--paper-h);
+      background:var(--panel); border:1px solid var(--stroke); box-shadow:var(--elev); border-radius:12px; padding:22mm 18mm; color:var(--ink)
+    }
     .doc-header{display:grid;grid-template-columns:100px 1fr;gap:16px;align-items:center;margin-bottom:16px}
     .logo-box{width:100px;height:100px;border:1px solid var(--stroke);border-radius:12px;display:grid;place-items:center;overflow:hidden;background:var(--panel)}
     .logo-box img{width:100%;height:100%;object-fit:contain}
@@ -86,7 +101,6 @@
     .price{font-weight:800;font-size:18px}
     .muted{color:var(--muted)}
     .pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--stroke);font-size:12px;background:var(--panel)}
-
     table{border-collapse:collapse;width:100%;font-size:14px}
     th,td{border:1px solid var(--stroke);padding:8px;text-align:left}
     th{background:color-mix(in hsl, var(--panel) 85%, transparent)}
@@ -99,8 +113,22 @@
     .drawer-list{padding:8px;overflow:auto}
     .row-item{border:1px solid var(--stroke);border-radius:10px;padding:10px;margin-bottom:8px;cursor:pointer;background:var(--panel)}
     .row-item:hover{background:color-mix(in hsl, var(--panel) 85%, transparent)}
-    @media (max-width:1100px){ .main{grid-template-columns:1fr} .sheet{width:100%;min-height:auto}}
+
+    @media (max-width:1100px){
+      .main{grid-template-columns:1fr}
+      .sheet{width:100%;min-height:auto}
+    }
+
+    @media print{
+      .bar{display:none}
+      body{overflow:visible;height:auto;background:#fff}
+      .main{height:auto}
+      .sheet-wrap{overflow:visible;height:auto;padding:0;box-shadow:none;border:none}
+      .sheet{box-shadow:none;border:none;border-radius:0;width:auto;min-height:auto;padding:18mm 16mm}
+      a[href]:after{content:""}
+    }
   </style>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="lang.js"></script>
 </head>
@@ -135,16 +163,19 @@
     <!-- Chat -->
     <div class="panel chat">
       <div class="chat-head">
-        <strong id="chatTitle">Chat</strong>
+        <strong class="chat-title">Chat</strong>
       </div>
+
       <div class="chat-body" id="chatBody" aria-live="polite"></div>
+
       <div class="chat-compose">
-        <!-- Nouveau bouton clair : Ajouter un logo -->
-        <div class="logo-btn" id="logoBtn" title="Ajouter un logo" role="button" tabindex="0" aria-label="Ajouter un logo">
-          <div class="logo-icon" aria-hidden="true"></div>
-          <span class="logo-label">Ajouter un logo</span>
+        <div class="logo-wrap">
+          <label class="logo-btn" title="Ajouter un logo (PNG/JPG/SVG)">
+            <input type="file" id="logoInput" accept="image/*,.svg"/>
+          </label>
+          <div class="logo-tip">Ajouter votre logo</div>
         </div>
-        <input type="file" id="logoPicker" accept="image/*" style="display:none"/>
+
         <div class="input">
           <textarea id="composer" placeholder="Écrivez votre message"></textarea>
           <button class="send" id="sendBtn" title="Envoyer" aria-label="Envoyer">
@@ -213,7 +244,12 @@
     renderHistory();
 
     /* Chat + Spec */
-    const chatBody=document.getElementById('chatBody'); const composer=document.getElementById('composer'); const sendBtn=document.getElementById('sendBtn'); const statusEl=document.getElementById('status');
+    const chatBody=document.getElementById('chatBody');
+    const composer=document.getElementById('composer');
+    const sendBtn=document.getElementById('sendBtn');
+    const statusEl=document.getElementById('status');
+    const sheet=document.getElementById('sheet');
+
     let messages = JSON.parse(localStorage.getItem('pf_chat')||'[]');
     let spec = null;
 
@@ -224,29 +260,37 @@
     }
     loadSpec();
 
-    // accueil → message
+    // inject brief depuis l’accueil
     (function consumeWelcome(){
       const w = localStorage.getItem('pf_welcome_msg');
       if(w){ messages.push({ role:'user', content:w }); localStorage.removeItem('pf_welcome_msg'); }
     })();
 
     function scrollChat(){ chatBody.scrollTop = chatBody.scrollHeight; }
-    function bubble(role, html, css=''){
-      const row=document.createElement('div'); row.className='msg';
-      const bub=document.createElement('div'); bub.className='bubble '+(role==='assistant'?'assistant':''); if(css) bub.classList.add(css);
-      bub.innerHTML=html; row.appendChild(bub); chatBody.appendChild(row); scrollChat(); return row;
-    }
     function escapeHTML(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[m])); }
 
-    // Indicateur "l'IA écrit…"
+    function bubble(role, html){
+      const row=document.createElement('div'); row.className='msg';
+      const bub=document.createElement('div'); bub.className='bubble '+(role==='assistant'?'assistant':''); bub.innerHTML=html;
+      row.appendChild(bub); chatBody.appendChild(row); scrollChat();
+      return row;
+    }
+
+    /* Typing indicator helpers */
     let typingRow=null;
-    function showTyping(on){
-      if(on){
-        if(typingRow) return;
-        typingRow = bubble('assistant', `<div class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>`, 'typing-wrap');
-      }else{
-        if(typingRow){ typingRow.remove(); typingRow=null; }
-      }
+    function showTyping(){
+      if(typingRow) return;
+      typingRow = document.createElement('div');
+      typingRow.className='msg';
+      const box=document.createElement('div');
+      box.className='typing';
+      box.innerHTML=`<span class="dot"></span><span class="dot"></span><span class="dot"></span>`;
+      typingRow.appendChild(box);
+      chatBody.appendChild(typingRow);
+      scrollChat();
+    }
+    function hideTyping(){
+      if(typingRow){ typingRow.remove(); typingRow=null; }
     }
 
     function renderChat(){
@@ -259,17 +303,19 @@
       const content=text.trim(); if(!content) return;
       messages.push({ role:'user', content: content }); localStorage.setItem('pf_chat', JSON.stringify(messages));
       bubble('user', escapeHTML(content).replace(/\n/g,'<br/>'));
-      composer.value=''; statusEl.textContent=(getLang()==='en')?'Writing...':'Rédaction…';
-      showTyping(true);
+      composer.value='';
+      statusEl.textContent='Rédaction…';
 
       try{
+        showTyping();
+
         const resp = await fetch('/api/chat', {
           method:'POST', headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ message: content, proposalSpec: spec, history: messages.slice(-10) })
         });
         const data = await resp.json();
 
-        showTyping(false);
+        hideTyping();
 
         const reply = data.reply || (getLang()==='en'?'I could not structure the proposal.':'Je n’ai pas pu structurer la proposition.');
         messages.push({ role:'assistant', content: reply }); localStorage.setItem('pf_chat', JSON.stringify(messages));
@@ -278,59 +324,50 @@
         if(data.proposalSpec){
           spec = { ...(spec||{}), ...(data.proposalSpec||{}) };
           spec.meta = { ...(spec.meta||{}), ...((data.proposalSpec||{}).meta||{}) };
-          if (spec.meta) {
-            spec.meta.style = { ...((spec.meta||{}).style||{}), ...((((data.proposalSpec||{}).meta||{}).style)||{}) };
-          }
           localStorage.setItem('pf_proposal', JSON.stringify(spec));
           renderSpec();
         }
         saveHistory(spec?.meta?.title || 'Proposition', spec, messages);
         statusEl.textContent='Prêt';
       }catch(e){
-        showTyping(false);
+        hideTyping();
         statusEl.textContent='Erreur réseau';
         bubble('assistant', '<em>Erreur réseau. Réessayez.</em>');
       }
     }
 
-    // Entrée = envoyer ; Maj+Entrée = nouvelle ligne
+    // Enter = envoyer ; Shift+Enter = nouvelle ligne
     composer.addEventListener('keydown', (e)=>{
       if(e.isComposing || e.keyCode===229) return;
       if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(composer.value); }
     });
     sendBtn.onclick = ()=> sendMessage(composer.value);
 
-    // Relance automatique si dernier message = user
+    // Si un message user est présent sans réponse, déclencher
     if(messages.length && messages[messages.length-1].role==='user' && !chatBody.querySelector('.assistant')){
       sendMessage(messages[messages.length-1].content);
     }
 
-    /* Upload logo */
-    const logoBtn = document.getElementById('logoBtn');
-    const logoPicker = document.getElementById('logoPicker');
-    logoBtn.onclick = ()=> logoPicker.click();
-    logoBtn.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); logoPicker.click(); }});
-    logoPicker.onchange = (e)=>{
-      const file=e.target.files?.[0]; if(!file) return;
+    /* Upload logo -> stocke dans spec.meta.style.logoDataUrl */
+    const logoInput = document.getElementById('logoInput');
+    logoInput.addEventListener('change', async (e)=>{
+      const file = e.target.files?.[0]; if(!file) return;
       const reader = new FileReader();
       reader.onload = ()=>{
-        const url = reader.result;
-        spec.meta = spec.meta || {};
-        spec.meta.style = spec.meta.style || {};
-        spec.meta.style.logoDataUrl = url;
+        const url = reader.result; // data URL
+        spec.meta = { ...(spec.meta||{}), style:{ ...(spec.meta?.style||{}), logoDataUrl: url } };
         localStorage.setItem('pf_proposal', JSON.stringify(spec));
         renderSpec();
       };
       reader.readAsDataURL(file);
-      logoPicker.value='';
-    };
+      e.target.value='';
+    });
 
-    /* Preview libellés */
+    /* Preview mini (libellés) */
     const t = {
       fr:{ title:"Proposition commerciale", to:"Pour", from:"Émis par", date:"Date", letter:"Lettre d’introduction", executive:"Résumé exécutif", objectives:"Objectifs", approach:"Approche & phasage", deliverables:"Livrables", in_scope:"Inclus", out_scope:"Hors-périmètre", timeline:"Planning", pricing:"Tarification", assumptions:"Hypothèses / Risques", next:"Prochaines étapes", price_model:"Modèle", terms:"Conditions", toc:"Sommaire" },
       en:{ title:"Business Proposal", to:"To", from:"Issued by", date:"Date", letter:"Cover Letter", executive:"Executive Summary", objectives:"Objectives", approach:"Approach & Phasing", deliverables:"Deliverables", in_scope:"In scope", out_scope:"Out of scope", timeline:"Timeline", pricing:"Pricing", assumptions:"Assumptions / Risks", next:"Next Steps", price_model:"Model", terms:"Terms", toc:"Table of Contents" }
     };
-    const sheet=document.getElementById('sheet');
 
     function safeArr(v){ return Array.isArray(v)?v:[]; }
     function safeStr(v,fb=''){ return (v==null?'':String(v)).trim() || fb; }
@@ -347,41 +384,32 @@
       const L=t[spec.meta?.lang||getLang()]||t.fr;
       sheet.innerHTML='';
 
-      // Thème couleurs
-      const style = (spec.meta && spec.meta.style) ? spec.meta.style : {};
-      const primary = style.primary || '#0a1020';
-      const secondary = style.secondary || '#8b5cf6';
-      const themeBg = `linear-gradient(180deg, ${secondary}15, #ffffff 45%)`;
-      sheet.style.borderColor = primary+'22';
-      document.documentElement.style.setProperty('--accent', primary);
-      document.documentElement.style.setProperty('--accent2', secondary);
-
       const header=document.createElement('div'); header.className='doc-header';
       const logoBox=document.createElement('div'); logoBox.className='logo-box';
-      if(style.logoDataUrl){ const im=new Image(); im.src=style.logoDataUrl; logoBox.appendChild(im);} else { logoBox.textContent='LOGO'; logoBox.style.color='#9aa6bf'; }
+      if(spec.meta?.style?.logoDataUrl){ const im=new Image(); im.src=spec.meta.style.logoDataUrl; logoBox.appendChild(im);} else { logoBox.textContent='LOGO'; logoBox.style.color='#9aa6bf'; }
       const bi=document.createElement('div'); bi.className='brand-info';
       const company=safeStr(spec.meta?.company || spec.meta?.brand?.company,'Votre société');
       const contact=safeStr(spec.meta?.brand?.contact_name,''), website=safeStr(spec.meta?.brand?.website,''), email=safeStr(spec.meta?.brand?.email,''), phone=safeStr(spec.meta?.brand?.phone,'');
       bi.innerHTML=`<div class="company">${company}</div><div class="muted">${[contact,website,email,phone].filter(Boolean).join(' • ')}</div>`;
       header.appendChild(logoBox); header.appendChild(bi); sheet.appendChild(header);
 
-      const title=safeStr(spec.meta?.title,(L.title)); const client=safeStr(spec.meta?.client,'Client'); const date=safeStr(spec.meta?.date, fmtDate());
+      const title=safeStr(spec.meta?.title,L.title); const client=safeStr(spec.meta?.client,'Client'); const date=safeStr(spec.meta?.date, fmtDate());
       const head=document.createElement('div');
-      head.innerHTML = `<div class="h1" style="background:${themeBg};padding:10px 12px;border-radius:10px;border:1px solid ${primary}22">${title}</div>
+      head.innerHTML = `<div class="h1">${title}</div>
         <div class="meta">${L.to}: <span class="tag">${client}</span> &nbsp;•&nbsp; ${L.from}: <span class="tag">${company}</span> &nbsp;•&nbsp; ${L.date}: ${date}</div>`;
       sheet.appendChild(head);
       sheet.appendChild(Object.assign(document.createElement('div'),{className:'hr'}));
 
       const tocSections=[
-        { id:'s_letter', title:L.letter, present: (Array.isArray(spec.letter?.body_paragraphs)&&spec.letter.body_paragraphs.length) || (Array.isArray(spec.letter?.paragraphs)&&spec.letter.paragraphs.length) || spec.letter?.greeting||spec.letter?.closing||spec.letter?.signature },
-        { id:'s_executive', title:L.executive, present:Array.isArray(spec.executive_summary?.paragraphs)&&spec.executive_summary.paragraphs.length },
-        { id:'s_objectives', title:L.objectives, present:Array.isArray(spec.objectives?.bullets)&&spec.objectives.bullets.length },
-        { id:'s_approach', title:L.approach, present:Array.isArray(spec.approach?.phases)&&spec.approach.phases.length },
-        { id:'s_deliverables', title:L.deliverables, present:(spec.deliverables && ((Array.isArray(spec.deliverables.in)&&spec.deliverables.in.length) || (Array.isArray(spec.deliverables.out)&&spec.deliverables.out.length))) },
-        { id:'s_timeline', title:L.timeline, present:Array.isArray(spec.timeline?.milestones)&&spec.timeline.milestones.length },
-        { id:'s_pricing', title:L.pricing, present:(spec.pricing && ((Array.isArray(spec.pricing.items)&&spec.pricing.items.length) || spec.pricing.price!=null)) },
-        { id:'s_assumptions', title:L.assumptions, present:Array.isArray(spec.assumptions?.paragraphs)&&spec.assumptions.paragraphs.length },
-        { id:'s_next', title:L.next, present:Array.isArray(spec.next_steps?.paragraphs)&&spec.next_steps.paragraphs.length },
+        { id:'s_letter', title:L.letter, present:safeArr(spec.letter?.body_paragraphs||spec.letter?.paragraphs).length || spec.letter?.greeting||spec.letter?.closing||spec.letter?.signature },
+        { id:'s_executive', title:L.executive, present:safeArr(spec.executive_summary?.paragraphs).length },
+        { id:'s_objectives', title:L.objectives, present:safeArr(spec.objectives?.bullets).length },
+        { id:'s_approach', title:L.approach, present:safeArr(spec.approach?.phases).length },
+        { id:'s_deliverables', title:L.deliverables, present:(spec.deliverables && (safeArr(spec.deliverables.in).length || safeArr(spec.deliverables.out).length)) },
+        { id:'s_timeline', title:L.timeline, present:safeArr(spec.timeline?.milestones).length },
+        { id:'s_pricing', title:L.pricing, present:(spec.pricing && (spec.pricing.items?.length || spec.pricing.price!=null)) },
+        { id:'s_assumptions', title:L.assumptions, present:safeArr(spec.assumptions?.paragraphs).length },
+        { id:'s_next', title:L.next, present:safeArr(spec.next_steps?.paragraphs).length },
       ];
       buildTOC(tocSections);
 
@@ -389,25 +417,22 @@
         section(L.letter,'s_letter');
         const letter=spec.letter||{};
         if(letter.greeting) para(letter.greeting);
-        const bodies=(Array.isArray(letter.body_paragraphs)&&letter.body_paragraphs.length)?letter.body_paragraphs:letter.paragraphs;
-        (bodies||[]).forEach(p=>para(p));
-        if(letter.closing) para(letter.closing);
-        if(letter.signature) para(letter.signature);
+        const bodies=safeArr(letter.body_paragraphs?.length?letter.body_paragraphs:letter.paragraphs); bodies.forEach(p=>para(p));
+        if(letter.closing) para(letter.closing); if(letter.signature) para(letter.signature);
       }
-      if (tocSections[1].present){ section(L.executive,'s_executive'); (spec.executive_summary.paragraphs||[]).forEach(p=>para(p)); }
+      if (tocSections[1].present){ section(L.executive,'s_executive'); safeArr(spec.executive_summary.paragraphs).forEach(p=>para(p)); }
       if (tocSections[2].present){ section(L.objectives,'s_objectives'); list(spec.objectives.bullets); }
       if (tocSections[3].present){
         section(L.approach,'s_approach');
-        (spec.approach.phases||[]).forEach((ph,i)=>{
+        safeArr(spec.approach.phases).forEach((ph,i)=>{
           const c=document.createElement('div'); c.className='card';
           c.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center">
             <strong>Phase ${i+1} — ${safeStr(ph.title,'À confirmer')}</strong>
             <span class="pill">${safeStr(ph.duration||'','')}</span></div>`;
           sheet.appendChild(c);
           if(ph.description) para(ph.description);
-          const acts=(Array.isArray(ph.activities)&&ph.activities.length)?ph.activities:ph.steps;
-          list(acts||[]);
-          const outs=ph.outcomes; if(Array.isArray(outs)&&outs.length){ const p=document.createElement('p'); p.innerHTML='<em>Résultats attendus :</em>'; sheet.appendChild(p); list(outs); }
+          const acts=safeArr(ph.activities?.length?ph.activities:ph.steps); if(acts.length) list(acts);
+          const outs=safeArr(ph.outcomes); if(outs.length){ const p=document.createElement('p'); p.innerHTML='<em>Résultats attendus :</em>'; sheet.appendChild(p); list(outs); }
         });
       }
       if (tocSections[4].present){
@@ -416,14 +441,14 @@
         const a=document.createElement('div'); a.className='card'; a.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.in_scope}</div>`;
         const b=document.createElement('div'); b.className='card'; b.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.out_scope}</div>`;
         grid.appendChild(a); grid.appendChild(b); sheet.appendChild(grid);
-        const ulA=document.createElement('ul'); (spec.deliverables.in||[]).forEach(x=>{const li=document.createElement('li'); li.textContent=x; ulA.appendChild(li);});
-        const ulB=document.createElement('ul'); (spec.deliverables.out||[]).forEach(x=>{const li=document.createElement('li'); li.textContent=x; ulB.appendChild(li);});
+        const ulA=document.createElement('ul'); safeArr(spec.deliverables.in).forEach(x=>{const li=document.createElement('li'); li.textContent=x; ulA.appendChild(li);});
+        const ulB=document.createElement('ul'); safeArr(spec.deliverables.out).forEach(x=>{const li=document.createElement('li'); li.textContent=x; ulB.appendChild(li);});
         a.appendChild(ulA); b.appendChild(ulB);
       }
       if (tocSections[5].present){
         section(L.timeline,'s_timeline');
         const grid=document.createElement('div'); grid.className='grid2';
-        (spec.timeline.milestones||[]).forEach(ms=>{
+        safeArr(spec.timeline.milestones).forEach(ms=>{
           const c=document.createElement('div'); c.className='card';
           c.innerHTML = `<div><strong>${safeStr(ms.title,'Étape')}</strong></div><div class="muted">${safeStr(ms.dateOrWeek || ms.date || ms.duration || '', '')}</div>`;
           if(ms.notes){ const p=document.createElement('p'); p.textContent=ms.notes; c.appendChild(p); }
@@ -434,7 +459,7 @@
       if (tocSections[6].present){
         section(L.pricing,'s_pricing');
         const pr=spec.pricing||{}; const currency=pr.currency||spec.meta?.currency||'EUR';
-        const m=document.createElement('div'); m.className='muted'; m.style.margin='-6px 0 8px'; m.innerHTML = `Modèle: <span class="pill">${safeStr(pr.model,'forfait')}</span>`; sheet.appendChild(m);
+        const m=document.createElement('div'); m.className='muted'; m.style.margin='-6px 0 8px'; m.innerHTML = `${L.price_model}: <span class="pill">${safeStr(pr.model,'forfait')}</span>`; sheet.appendChild(m);
         if(Array.isArray(pr.items)&&pr.items.length){
           const table=document.createElement('table');
           table.innerHTML=`<thead><tr><th>Item</th><th>Qté</th><th>Unité</th><th>PU</th><th>Sous-total</th></tr></thead><tbody></tbody><tfoot>
@@ -454,22 +479,28 @@
           sheet.querySelector('#ft_subtotal').textContent=money(subtotal,currency);
           sheet.querySelector('#ft_tax').textContent=`${money(taxes,currency)} ${taxRate?`(${taxRate}%)`:''}`;
           sheet.querySelector('#ft_total').textContent=money(total,currency);
-          if((pr.terms||[]).length){ const terms=document.createElement('div'); terms.className='card'; terms.style.marginTop='8px'; terms.innerHTML=`<div class="muted" style="margin-bottom:6px">Conditions</div><ul>${(pr.terms||[]).map(x=>`<li>${x}</li>`).join('')}</ul>`; sheet.appendChild(terms); }
+          if((pr.terms||[]).length){ const terms=document.createElement('div'); terms.className='card'; terms.style.marginTop='8px'; terms.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.terms}</div><ul>${(pr.terms||[]).map(x=>`<li>${x}</li>`).join('')}</ul>`; sheet.appendChild(terms); }
         }else{
           const priceBox=document.createElement('div'); priceBox.className='card'; const price=pr.price!=null?String(pr.price):'—';
-          priceBox.innerHTML=`<div class="price">${money(price,currency)}</div><div class="muted" style="margin-top:4px">Modèle: <span>${safeStr(pr.model,'forfait')}</span></div>`;
+          priceBox.innerHTML=`<div class="price">${money(price,currency)}</div><div class="muted" style="margin-top:4px">${L.price_model}: <span>${safeStr(pr.model,'forfait')}</span></div>`;
           sheet.appendChild(priceBox);
         }
       }
-      if (tocSections[7].present){ section('Hypothèses / Risques','s_assumptions'); (spec.assumptions.paragraphs||[]).forEach(p=>para(p)); }
-      if (tocSections[8].present){ section('Prochaines étapes','s_next'); (spec.next_steps.paragraphs||[]).forEach(p=>para(p)); }
+      if (tocSections[7].present){ section(L.assumptions,'s_assumptions'); safeArr(spec.assumptions.paragraphs).forEach(p=>para(p)); }
+      if (tocSections[8].present){ section(L.next,'s_next'); safeArr(spec.next_steps.paragraphs).forEach(p=>para(p)); }
     }
     renderSpec();
 
-    // Langue
+    /* Lang */
+    function applyChatLang(){
+      const en=(getLang()==='en');
+      document.getElementById('composer').placeholder = en?'Type your message':'Écrivez votre message';
+    }
+    applyChatLang();
     window.addEventListener('langchange', ()=>{
       spec.meta = { ...(spec.meta||{}), lang:getLang() };
       localStorage.setItem('pf_proposal', JSON.stringify(spec));
+      applyChatLang();
       renderSpec();
     });
   </script>
