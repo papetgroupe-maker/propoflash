@@ -157,6 +157,74 @@
     .decor{position:absolute; inset:0; pointer-events:none; z-index:0}
     .content{position:relative; z-index:1}
 
+    /* ---------- Étape 3 : styles “Canva-like” ---------- */
+    .cover{
+      position:relative;
+      border-radius:var(--radius, 12px);
+      padding:28mm 20mm 18mm;
+      margin:-16mm -10mm 12px; /* déborde dans la marge du papier pour effet plein */
+      color:#fff;
+      background:linear-gradient(135deg, color-mix(in hsl, var(--accent) 78%, black), color-mix(in hsl, var(--accent2) 78%, black));
+      box-shadow:var(--elev);
+      overflow:hidden;
+    }
+    .cover .ribbon{
+      position:absolute; inset:auto -20% -12% auto;
+      width:70%; height:70%;
+      background:radial-gradient(closest-side, #ffffff44, transparent 70%);
+      transform:rotate(-18deg);
+      filter:blur(18px);
+      pointer-events:none;
+    }
+    .cover-top{display:flex;gap:14px;align-items:center;margin-bottom:10px}
+    .cover .logo-box{width:64px;height:64px;border-color:#ffffff33;background:#ffffff14}
+    .cover-badge{display:inline-block;padding:6px 10px;border-radius:999px;background:#ffffff22;border:1px solid #ffffff33;font-weight:700;font-size:12px}
+    .cover-title{font-size:40px;line-height:1.06;letter-spacing:-.02em;margin:6px 0 4px;font-weight:900}
+    .cover-sub{opacity:.95}
+    .cover-meta{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
+    .cover-meta .tag{border-color:#ffffff33;background:#ffffff22;color:#fff}
+
+    .sec-title{
+      position:relative;
+      font-size:20px; font-weight:900; letter-spacing:.2px; margin:22px 0 10px;
+      font-family: var(--font-heading, Inter), system-ui, sans-serif;
+    }
+    .sec-title::before{
+      content:""; position:absolute; left:-12px; top:50%; transform:translateY(-50%);
+      width:6px; height:18px; border-radius:999px;
+      background:linear-gradient(180deg,var(--accent),var(--accent2));
+      box-shadow:0 6px 14px color-mix(in hsl, var(--accent) 35%, black);
+    }
+
+    /* Timeline (Approche) */
+    .timeline{position:relative;margin:8px 0 4px 0; padding-left:14px}
+    .timeline::before{
+      content:""; position:absolute; left:8px; top:2px; bottom:2px; width:2px;
+      background:color-mix(in hsl, var(--accent) 28%, #fff);
+      border-radius:2px;
+    }
+    .tl-item{position:relative; margin:12px 0 14px 18px}
+    .tl-dot{
+      position:absolute; left:-18px; top:4px; width:12px; height:12px; border-radius:50%;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      box-shadow:0 4px 10px color-mix(in hsl, var(--accent) 40%, black);
+      border:2px solid #fff;
+    }
+    .tl-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+    .tl-title{font-weight:800}
+    .tl-pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--stroke);font-size:12px;background:var(--panel)}
+
+    /* CTA band */
+    .cta{
+      margin:16px 0 0; padding:14px 16px; border-radius:var(--radius,12px);
+      color:#fff; background:linear-gradient(135deg, color-mix(in hsl, var(--accent) 78%, black), color-mix(in hsl, var(--accent2) 78%, black));
+      box-shadow:var(--elev)
+    }
+
+    /* Print helpers */
+    .page-break{break-after:page; height:1px; margin:12px 0; background:transparent}
+
+    /* header / blocs classiques (déjà présent) */
     .doc-header{display:grid;grid-template-columns:100px 1fr;gap:16px;align-items:center;margin-bottom:16px}
     .logo-box{width:100px;height:100px;border:1px solid var(--stroke);border-radius:var(--radius, 12px);display:grid;place-items:center;overflow:hidden;background:var(--panel)}
     .logo-box img{width:100%;height:100%;object-fit:contain}
@@ -463,7 +531,6 @@
 
     /* === THEME: applique proposalSpec.meta.style à l'aperçu uniquement === */
     function applyStyleTokens(style){
-      // valeurs par défaut si aucune info
       const palette = {
         primary: "#3B82F6",
         secondary: "#8B5CF6",
@@ -478,7 +545,6 @@
       const shapes = { radius:"12px", shadow:"0 18px 48px rgba(10,16,32,.12)", ...(style?.shapes||{}) };
       const typo = { heading:"Inter", body:"Inter", accent:"Inter", ...(style?.typography||{}) };
 
-      // Scope des variables sur #sheet (n’affecte PAS le chat)
       sheet.style.setProperty('--panel', palette.surface);
       sheet.style.setProperty('--ink', palette.ink);
       sheet.style.setProperty('--muted', palette.muted);
@@ -490,7 +556,6 @@
       sheet.style.setProperty('--font-body', typo.body);
       sheet.style.setProperty('--font-heading', typo.heading);
 
-      // Couche décoratives
       renderDecorLayers(style?.decor_layers||[], palette);
     }
 
@@ -506,8 +571,8 @@
       return map[pos] || map.center;
     }
 
-    function renderDecorLayers(layers, palette){
-      decor.innerHTML = ''; // reset
+    function renderDecorLayers(layers){
+      decor.innerHTML = '';
       if(!layers || !layers.length) return;
 
       layers.forEach((L, i)=>{
@@ -521,7 +586,6 @@
         const scale = Math.max(0.25, Number(L.scale||1));
         const color = hsla(L.h ?? 220, L.s ?? 60, L.l ?? 55, L.opacity ?? 0.20);
 
-        // Type-specific rendering
         switch((L.type||'').toLowerCase()){
           case 'glow': {
             const size = 900*scale;
@@ -588,7 +652,6 @@
             break;
           }
           default: {
-            // fallback discret
             const size = 900*scale;
             layer.style.width = layer.style.height = size+'px';
             layer.style.borderRadius='50%';
@@ -601,10 +664,50 @@
       });
     }
 
+    /* Helpers de rendu */
+    function secTitle(text, id){
+      const h=document.createElement('h2'); h.className='sec-title'; h.textContent=text; if(id) h.id=id; sheetContent.appendChild(h);
+    }
     function section(titleHTML, id){ const h=document.createElement('h2'); h.innerHTML=titleHTML; if(id) h.id=id; sheetContent.appendChild(h); }
     function para(text){ const p=document.createElement('p'); p.textContent=text; sheetContent.appendChild(p); }
     function list(items){ if(!items?.length) return; const ul=document.createElement('ul'); items.forEach(it=>{ const li=document.createElement('li'); li.textContent=String(it); ul.appendChild(li); }); sheetContent.appendChild(ul); }
     function buildTOC(sections){ const L=t[spec.meta?.lang||getLang()]||t.fr; const box=document.createElement('div'); box.className='toc'; box.innerHTML=`<b>${L.toc}</b>`; sections.forEach(s=>{ if(s.present){ const a=document.createElement('a'); a.href='#'+s.id; a.textContent=s.title; box.appendChild(a);} }); sheetContent.appendChild(box); }
+
+    function buildCover(L){
+      const cover=document.createElement('div'); cover.className='cover';
+      const ribbon=document.createElement('div'); ribbon.className='ribbon'; cover.appendChild(ribbon);
+
+      const top=document.createElement('div'); top.className='cover-top';
+      const lb=document.createElement('div'); lb.className='logo-box';
+      if(spec.meta?.style?.logoDataUrl){ const im=new Image(); im.src=spec.meta.style.logoDataUrl; lb.appendChild(im); } else { lb.textContent='LOGO'; lb.style.color='#ffffffaa'; }
+      const badge=document.createElement('span'); badge.className='cover-badge'; badge.textContent=(L.title);
+      top.appendChild(lb); top.appendChild(badge); cover.appendChild(top);
+
+      const ttl=document.createElement('div'); ttl.className='cover-title';
+      ttl.textContent = safeStr(spec.meta?.title, L.title);
+      cover.appendChild(ttl);
+
+      const sub=document.createElement('div'); sub.className='cover-sub';
+      const tagline = safeStr(
+        (spec.executive_summary?.paragraphs||[])[0] ||
+        spec.letter?.subject ||
+        '',
+      '');
+      if(tagline) { sub.textContent = tagline; cover.appendChild(sub); }
+
+      const meta=document.createElement('div'); meta.className='cover-meta';
+      const company=safeStr(spec.meta?.company || spec.meta?.brand?.company,'Votre société');
+      const client=safeStr(spec.meta?.client,'Client'); const date=safeStr(spec.meta?.date, fmtDate());
+      const a=document.createElement('span'); a.className='tag'; a.textContent=`${L.from}: ${company}`;
+      const b=document.createElement('span'); b.className='tag'; b.textContent=`${L.to}: ${client}`;
+      const c=document.createElement('span'); c.className='tag'; c.textContent=`${L.date}: ${date}`;
+      meta.appendChild(a); meta.appendChild(b); meta.appendChild(c);
+      cover.appendChild(meta);
+
+      sheetContent.appendChild(cover);
+      // Saut de page à l'impression
+      sheetContent.appendChild(Object.assign(document.createElement('div'),{className:'page-break'}));
+    }
 
     function renderSpec(){
       // 1) Style tokens -> thème aperçu
@@ -614,21 +717,28 @@
       const L=t[spec.meta?.lang||getLang()]||t.fr;
       sheetContent.innerHTML='';
 
-      const header=document.createElement('div'); header.className='doc-header';
-      const logoBox=document.createElement('div'); logoBox.className='logo-box';
-      if(spec.meta?.style?.logoDataUrl){ const im=new Image(); im.src=spec.meta.style.logoDataUrl; logoBox.appendChild(im);} else { logoBox.textContent='LOGO'; logoBox.style.color='#9aa6bf'; }
-      const bi=document.createElement('div'); bi.className='brand-info';
-      const company=safeStr(spec.meta?.company || spec.meta?.brand?.company,'Votre société');
-      const contact=safeStr(spec.meta?.brand?.contact_name,''), website=safeStr(spec.meta?.brand?.website,''), email=safeStr(spec.meta?.brand?.email,''), phone=safeStr(spec.meta?.brand?.phone,'');
-      bi.innerHTML=`<div class="company">${company}</div><div class="muted">${[contact,website,email,phone].filter(Boolean).join(' • ')}</div>`;
-      header.appendChild(logoBox); header.appendChild(bi); sheetContent.appendChild(header);
+      // Cover (par défaut active, peut être désactivée via meta.style.cover === false)
+      const useCover = spec?.meta?.style?.cover !== false;
+      if(useCover){
+        buildCover(L);
+      }else{
+        // fallback header classique
+        const header=document.createElement('div'); header.className='doc-header';
+        const logoBox=document.createElement('div'); logoBox.className='logo-box';
+        if(spec.meta?.style?.logoDataUrl){ const im=new Image(); im.src=spec.meta.style.logoDataUrl; logoBox.appendChild(im);} else { logoBox.textContent='LOGO'; logoBox.style.color='#9aa6bf'; }
+        const bi=document.createElement('div'); bi.className='brand-info';
+        const company=safeStr(spec.meta?.company || spec.meta?.brand?.company,'Votre société');
+        const contact=safeStr(spec.meta?.brand?.contact_name,''), website=safeStr(spec.meta?.brand?.website,''), email=safeStr(spec.meta?.brand?.email,''), phone=safeStr(spec.meta?.brand?.phone,'');
+        bi.innerHTML=`<div class="company">${company}</div><div class="muted">${[contact,website,email,phone].filter(Boolean).join(' • ')}</div>`;
+        header.appendChild(logoBox); header.appendChild(bi); sheetContent.appendChild(header);
 
-      const title=safeStr(spec.meta?.title,L.title); const client=safeStr(spec.meta?.client,'Client'); const date=safeStr(spec.meta?.date, fmtDate());
-      const head=document.createElement('div');
-      head.innerHTML = `<div class="h1">${title}</div>
-        <div class="meta">${L.to}: <span class="tag">${client}</span> &nbsp;•&nbsp; ${L.from}: <span class="tag">${company}</span> &nbsp;•&nbsp; ${L.date}: ${date}</div>`;
-      sheetContent.appendChild(head);
-      sheetContent.appendChild(Object.assign(document.createElement('div'),{className:'hr'}));
+        const title=safeStr(spec.meta?.title,L.title); const client=safeStr(spec.meta?.client,'Client'); const date=safeStr(spec.meta?.date, fmtDate());
+        const head=document.createElement('div');
+        head.innerHTML = `<div class="h1">${title}</div>
+          <div class="meta">${L.to}: <span class="tag">${client}</span> &nbsp;•&nbsp; ${L.from}: <span class="tag">${company}</span> &nbsp;•&nbsp; ${L.date}: ${date}</div>`;
+        sheetContent.appendChild(head);
+        sheetContent.appendChild(Object.assign(document.createElement('div'),{className:'hr'}));
+      }
 
       const tocSections=[
         { id:'s_letter', title:L.letter, present:safeArr(spec.letter?.body_paragraphs||spec.letter?.paragraphs).length || spec.letter?.greeting||spec.letter?.closing||spec.letter?.signature },
@@ -640,33 +750,39 @@
         { id:'s_pricing', title:L.pricing, present:(spec.pricing && (spec.pricing.items?.length || spec.pricing.price!=null)) },
         { id:'s_assumptions', title:L.assumptions, present:safeArr(spec.assumptions?.paragraphs).length },
         { id:'s_next', title:L.next, present:safeArr(spec.next_steps?.paragraphs).length },
-      };
+      ];
       buildTOC(tocSections);
 
       if (tocSections[0].present){
-        section(L.letter,'s_letter');
+        secTitle(L.letter,'s_letter');
         const letter=spec.letter||{};
         if(letter.greeting) para(letter.greeting);
         const bodies=safeArr(letter.body_paragraphs?.length?letter.body_paragraphs:letter.paragraphs); bodies.forEach(p=>para(p));
         if(letter.closing) para(letter.closing); if(letter.signature) para(letter.signature);
       }
-      if (tocSections[1].present){ section(L.executive,'s_executive'); safeArr(spec.executive_summary.paragraphs).forEach(p=>para(p)); }
-      if (tocSections[2].present){ section(L.objectives,'s_objectives'); list(spec.objectives.bullets); }
+      if (tocSections[1].present){ secTitle(L.executive,'s_executive'); safeArr(spec.executive_summary.paragraphs).forEach(p=>para(p)); }
+      if (tocSections[2].present){ secTitle(L.objectives,'s_objectives'); list(spec.objectives.bullets); }
       if (tocSections[3].present){
-        section(L.approach,'s_approach');
+        secTitle(L.approach,'s_approach');
+        const tl=document.createElement('div'); tl.className='timeline';
         safeArr(spec.approach.phases).forEach((ph,i)=>{
-          const c=document.createElement('div'); c.className='card';
-          c.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center">
-            <strong>Phase ${i+1} — ${safeStr(ph.title,'À confirmer')}</strong>
-            <span class="pill">${safeStr(ph.duration||'','')}</span></div>`;
-          sheetContent.appendChild(c);
-          if(ph.description) para(ph.description);
-          const acts=safeArr(ph.activities?.length?ph.activities:ph.steps); if(acts.length) list(acts);
-          const outs=safeArr(ph.outcomes); if(outs.length){ const p=document.createElement('p'); p.innerHTML='<em>Résultats attendus :</em>'; sheetContent.appendChild(p); list(outs); }
+          const it=document.createElement('div'); it.className='tl-item';
+          const dot=document.createElement('div'); dot.className='tl-dot'; it.appendChild(dot);
+          const head=document.createElement('div'); head.className='tl-head';
+          const title=document.createElement('div'); title.className='tl-title'; title.textContent=`Phase ${i+1} — ${safeStr(ph.title,'À confirmer')}`;
+          const pill=document.createElement('span'); pill.className='tl-pill'; pill.textContent=safeStr(ph.duration||'','');
+          head.appendChild(title); head.appendChild(pill); it.appendChild(head);
+          if(ph.description){ const p=document.createElement('p'); p.textContent=ph.description; it.appendChild(p); }
+          const acts=safeArr(ph.activities?.length?ph.activities:ph.steps); if(acts.length){
+            const ul=document.createElement('ul'); acts.forEach(a=>{ const li=document.createElement('li'); li.textContent=a; ul.appendChild(li); }); it.appendChild(ul);
+          }
+          const outs=safeArr(ph.outcomes); if(outs.length){ const p=document.createElement('p'); p.innerHTML='<em>Résultats attendus :</em>'; it.appendChild(p); const ul=document.createElement('ul'); outs.forEach(o=>{ const li=document.createElement('li'); li.textContent=o; ul.appendChild(li); }); it.appendChild(ul); }
+          tl.appendChild(it);
         });
+        sheetContent.appendChild(tl);
       }
       if (tocSections[4].present){
-        section(L.deliverables,'s_deliverables');
+        secTitle(L.deliverables,'s_deliverables');
         const grid=document.createElement('div'); grid.className='grid2';
         const a=document.createElement('div'); a.className='card'; a.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.in_scope}</div>`;
         const b=document.createElement('div'); b.className='card'; b.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.out_scope}</div>`;
@@ -676,7 +792,7 @@
         a.appendChild(ulA); b.appendChild(ulB);
       }
       if (tocSections[5].present){
-        section(L.timeline,'s_timeline');
+        secTitle(L.timeline,'s_timeline');
         const grid=document.createElement('div'); grid.className='grid2';
         safeArr(spec.timeline.milestones).forEach(ms=>{
           const c=document.createElement('div'); c.className='card';
@@ -687,7 +803,7 @@
         sheetContent.appendChild(grid);
       }
       if (tocSections[6].present){
-        section(L.pricing,'s_pricing');
+        secTitle(L.pricing,'s_pricing');
         const pr=spec.pricing||{}; const currency=pr.currency||spec.meta?.currency||'EUR';
         const m=document.createElement('div'); m.className='muted'; m.style.margin='-6px 0 8px'; m.innerHTML = `${L.price_model}: <span class="pill">${safeStr(pr.model,'forfait')}</span>`; sheetContent.appendChild(m);
         if(Array.isArray(pr.items)&&pr.items.length){
@@ -716,8 +832,17 @@
           sheetContent.appendChild(priceBox);
         }
       }
-      if (tocSections[7].present){ section(L.assumptions,'s_assumptions'); safeArr(spec.assumptions.paragraphs).forEach(p=>para(p)); }
-      if (tocSections[8].present){ section(L.next,'s_next'); safeArr(spec.next_steps.paragraphs).forEach(p=>para(p)); }
+      if (tocSections[7].present){ secTitle(L.assumptions,'s_assumptions'); safeArr(spec.assumptions.paragraphs).forEach(p=>para(p)); }
+      if (tocSections[8].present){
+        secTitle(L.next,'s_next');
+        safeArr(spec.next_steps.paragraphs).forEach(p=>para(p));
+        // Bandeau CTA final
+        const cta=document.createElement('div'); cta.className='cta';
+        cta.innerHTML = (spec.meta?.lang==='en')
+          ? `<strong>Ready to proceed?</strong> Let’s schedule a 30-minute call to validate scope & planning.`
+          : `<strong>On y va ?</strong> Planifions un appel de 30 min pour valider périmètre & planning.`;
+        sheetContent.appendChild(cta);
+      }
     }
     renderSpec();
 
