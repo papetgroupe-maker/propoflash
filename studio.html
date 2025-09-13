@@ -7,26 +7,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root{
-      /* Palette & rayons – valeurs par défaut (écrasées par designSpec) */
-      --palette-primary:#3b82f6;
-      --palette-secondary:#8b5cf6;
-      --palette-surface:#ffffff;
-      --palette-ink:#0a1020;
-      --palette-muted:#5c667a;
-      --palette-stroke:#e0e6f4;
-
-      --radius-panel:16px;
-      --radius-bubble:14px;
-      --radius-card:12px;
-
-      /* Dérivées (ne pas toucher) */
-      --bg:#f6f8fc;
-      --panel:var(--palette-surface);
-      --ink:var(--palette-ink);
-      --muted:var(--palette-muted);
-      --stroke:var(--palette-stroke);
-      --accent:var(--palette-primary);
-      --accent2:var(--palette-secondary);
+      --bg:#f6f8fc; --panel:#ffffff; --ink:#0a1020; --muted:#5c667a; --stroke:#e0e6f4;
+      --accent:#3b82f6; --accent2:#8b5cf6; --accent-ink:#fff;
+      --paper-w:210mm; --paper-h:297mm;
       --elev:0 18px 48px rgba(10,16,32,.10), inset 0 1px 0 #ffffffaa;
 
       /* Chat themes */
@@ -34,7 +17,6 @@
       --user-bubble: linear-gradient(135deg, var(--accent), var(--accent2));
       --user-ink: #ffffff;
     }
-
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
@@ -46,10 +28,8 @@
     }
 
     /* Top bar */
-    .bar{
-      position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--stroke);
-      display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px;box-shadow:var(--elev)
-    }
+    .bar{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--stroke);
+      display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px;box-shadow:var(--elev)}
     .left,.right{display:flex;gap:10px;align-items:center}
     .brand{display:flex;gap:10px;align-items:center;font-weight:800;cursor:pointer}
     .spark{width:22px;height:22px;border-radius:6px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd)}
@@ -71,7 +51,7 @@
       min-height:0;
     }
     .panel{
-      background:var(--panel);border:1px solid var(--stroke);border-radius:var(--radius-panel);box-shadow:var(--elev);
+      background:var(--panel);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--elev);
       display:flex;flex-direction:column;
       min-height:0;
     }
@@ -98,24 +78,20 @@
     .msg.user{justify-content:flex-end}
 
     .avatar-badge{
-      width:34px;height:34px;border-radius:50%;
+      width:28px;height:28px;border-radius:50%;
       display:grid;place-items:center;
-      font-weight:800;font-size:12px;
-      border:1.5px solid var(--stroke);
-      box-shadow:0 6px 18px rgba(10,16,32,.12), inset 0 1px 0 #ffffff90;
+      font-weight:800;font-size:11px;
+      border:1px solid var(--stroke);
+      box-shadow:var(--elev);
       background:var(--panel); color:var(--ink);
       user-select:none;
     }
-    .avatar-badge.bot{
-      background:#111827; color:#fff; border-color:#111827
-    }
-    .avatar-badge.you{
-      background:var(--accent); color:#fff; border-color:transparent
-    }
+    .avatar-badge.bot{background:#111827; color:#fff; border-color:#111827} /* PF à gauche */
+    .avatar-badge.you{background:var(--accent); color:#fff; border-color:transparent} /* Toi à droite */
 
     .bubble{
       max-width:min(100%, 560px);
-      padding:10px 12px;border-radius:var(--radius-bubble);border:1px solid var(--stroke);
+      padding:10px 12px;border-radius:14px;border:1px solid var(--stroke);
       box-shadow:var(--elev);
       word-wrap:break-word;overflow-wrap:anywhere;
     }
@@ -136,7 +112,7 @@
       border-top:1px solid var(--stroke);
       display:flex;align-items:flex-end;gap:16px;
     }
-    .logo-wrap{ position:relative; flex:0 0 auto; margin-right:6px; }
+    .logo-wrap{ position:relative; flex:0 0 auto; }
     .input{
       display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--stroke);
       border-radius:14px;padding:8px;box-shadow:var(--elev);
@@ -164,21 +140,16 @@
 
     /* Aperçu : centré horizontalement + scroll interne */
     .sheet-wrap{
-      position:relative;
       flex:1; min-height:0; overflow:auto;
       display:flex;justify-content:center;align-items:flex-start;
       padding:12px 24px;
     }
-    .texture-overlay{
-      position:absolute; inset:0;
-      pointer-events:none; opacity:.0; transition:opacity .25s ease;
-    }
     .sheet{
-      width:210mm;
+      width:var(--paper-w);
       max-width:100%;
-      min-height:297mm;
+      min-height:var(--paper-h);
       background:var(--panel); border:1px solid var(--stroke); box-shadow:var(--elev);
-      border-radius:var(--radius-card); padding:22mm 18mm; color:var(--ink)
+      border-radius:12px; padding:22mm 18mm; color:var(--ink)
     }
     .doc-header{display:grid;grid-template-columns:100px 1fr;gap:16px;align-items:center;margin-bottom:16px}
     .logo-box{width:100px;height:100px;border:1px solid var(--stroke);border-radius:12px;display:grid;place-items:center;overflow:hidden;background:var(--panel)}
@@ -283,7 +254,6 @@
 
     <!-- Aperçu -->
     <div class="panel sheet-wrap">
-      <div class="texture-overlay" id="texture"></div>
       <div class="sheet" id="sheet"></div>
     </div>
   </div>
@@ -292,7 +262,9 @@
     /* Supabase guard */
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
+      auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true }
+    });
 
     async function guard(){
       const { data:{ session } } = await sb.auth.getSession();
@@ -334,7 +306,7 @@
         const d=new Date(item.date);
         const div=document.createElement('div'); div.className='row-item';
         div.innerHTML = `<strong>${item.title||'Sans titre'}</strong><br><span class="muted">${d.toLocaleString()}</span>`;
-        div.onclick=()=>{ spec=item.spec; messages=item.messages||[]; localStorage.setItem('pf_proposal', JSON.stringify(spec)); applyDesignFromSpec(spec?.meta?.style?.designSpec||{}); renderSpec(); renderChat(); drawer.classList.remove('open'); };
+        div.onclick=()=>{ spec=item.spec; messages=item.messages||[]; localStorage.setItem('pf_proposal', JSON.stringify(spec)); renderSpec(); renderChat(); drawer.classList.remove('open'); };
         histList.appendChild(div);
       });
     }
@@ -346,7 +318,6 @@
     const sendBtn=document.getElementById('sendBtn');
     const statusEl=document.getElementById('status');
     const sheet=document.getElementById('sheet');
-    const textureEl=document.getElementById('texture');
 
     let messages = JSON.parse(localStorage.getItem('pf_chat')||'[]');
     let spec = null;
@@ -422,24 +393,27 @@
       try{
         showTyping();
 
-        const resp = await fetch('/api/chat', {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ message: content, proposalSpec: spec, history: messages.slice(-10) })
+        /* >>> Edge Function Supabase 'chat' <<< */
+        const { data, error } = await sb.functions.invoke('chat', {
+          body: { message: content, proposalSpec: spec, history: messages.slice(-10) }
         });
-        const data = await resp.json();
 
         hideTyping();
 
-        const reply = data.reply || (getLang()==='en'?'I could not structure the proposal.':'Je n’ai pas pu structurer la proposition.');
+        if(error) {
+          statusEl.textContent='Erreur serveur';
+          bubble('assistant', `<em>${escapeHTML(error.message||'Erreur serveur')}</em>`);
+          return;
+        }
+
+        const reply = data?.reply || (getLang()==='en'?'I could not structure the proposal.':'Je n’ai pas pu structurer la proposition.');
         messages.push({ role:'assistant', content: reply }); localStorage.setItem('pf_chat', JSON.stringify(messages));
         bubble('assistant', escapeHTML(reply).replace(/\n/g,'<br/>'));
 
-        if(data.proposalSpec){
-          // merge shallow pour conserver ce qui existe côté front
+        if(data?.proposalSpec){
           spec = { ...(spec||{}), ...(data.proposalSpec||{}) };
           spec.meta = { ...(spec.meta||{}), ...((data.proposalSpec||{}).meta||{}) };
           localStorage.setItem('pf_proposal', JSON.stringify(spec));
-          applyDesignFromSpec(spec?.meta?.style?.designSpec||{});
           renderSpec();
         }
         saveHistory(spec?.meta?.title || 'Proposition', spec, messages);
@@ -472,58 +446,6 @@
       e.target.value='';
     });
 
-    /* --------- THEME / DESIGN --------- */
-
-    function cssVar(name, value){
-      if(value==null) return;
-      document.documentElement.style.setProperty(name, String(value));
-    }
-
-    function applyDesignFromSpec(d){
-      if(!d) return;
-
-      // Palette
-      if(d.palette){
-        cssVar('--palette-primary',  d.palette.primary);
-        cssVar('--palette-secondary',d.palette.secondary);
-        cssVar('--palette-surface',  d.palette.surface);
-        cssVar('--palette-ink',      d.palette.ink);
-        cssVar('--palette-muted',    d.palette.muted);
-        cssVar('--palette-stroke',   d.palette.stroke);
-      }
-
-      // Rayons
-      if(d.radius){
-        if(d.radius.panel != null)  cssVar('--radius-panel',  d.radius.panel +'px');
-        if(d.radius.bubble!= null)  cssVar('--radius-bubble', d.radius.bubble+'px');
-        if(d.radius.card  != null)  cssVar('--radius-card',   d.radius.card  +'px');
-      }
-
-      // Texture décor (overlay au-dessus de sheet-wrap)
-      const kind = d.texture?.kind || 'none';
-      const intensity = Math.max(0, Math.min(1, Number(d.texture?.intensity ?? 0)));
-      let css = '', op = 0;
-      if(kind === 'mesh'){
-        // léger maillage radial + linéaire
-        const col = getComputedStyle(document.documentElement).getPropertyValue('--palette-secondary').trim() || '#8b5cf6';
-        css = `
-          radial-gradient(1200px 800px at 80% 20%, ${col}20, transparent 60%),
-          radial-gradient(900px 600px at 20% 80%, ${col}18, transparent 60%)
-        `;
-        op = 0.18 * intensity * 2;
-      } else if(kind === 'blob'){
-        const col = getComputedStyle(document.documentElement).getPropertyValue('--palette-primary').trim() || '#3b82f6';
-        css = `
-          radial-gradient(220px 220px at 20% 30%, ${col}26, transparent 65%),
-          radial-gradient(260px 260px at 80% 70%, ${col}22, transparent 60%),
-          radial-gradient(180px 180px at 60% 20%, ${col}22, transparent 60%)
-        `;
-        op = 0.22 * intensity * 2;
-      }
-      textureEl.style.background = css || 'none';
-      textureEl.style.opacity = String(op || 0);
-    }
-
     /* Libellés */
     const t = {
       fr:{ title:"Proposition commerciale", to:"Pour", from:"Émis par", date:"Date", letter:"Lettre d’introduction", executive:"Résumé exécutif", objectives:"Objectifs", approach:"Approche & phasage", deliverables:"Livrables", in_scope:"Inclus", out_scope:"Hors-périmètre", timeline:"Planning", pricing:"Tarification", assumptions:"Hypothèses / Risques", next:"Prochaines étapes", price_model:"Modèle", terms:"Conditions", toc:"Sommaire" },
@@ -544,9 +466,6 @@
       if(!spec){ sheet.innerHTML='<p class="muted">Aucune donnée.</p>'; return; }
       const L=t[spec.meta?.lang||getLang()]||t.fr;
       sheet.innerHTML='';
-
-      // appliquer le thème avant de construire le contenu
-      applyDesignFromSpec(spec?.meta?.style?.designSpec||{});
 
       const header=document.createElement('div'); header.className='doc-header';
       const logoBox=document.createElement('div'); logoBox.className='logo-box';
@@ -665,7 +584,6 @@
       spec.meta = { ...(spec.meta||{}), lang:getLang() };
       localStorage.setItem('pf_proposal', JSON.stringify(spec));
       applyChatLang();
-      applyDesignFromSpec(spec?.meta?.style?.designSpec||{});
       renderSpec();
     });
 
@@ -673,9 +591,6 @@
     if(messages.length && messages[messages.length-1].role==='user' && !chatBody.querySelector('.bubble-assistant')){
       sendMessage(messages[messages.length-1].content);
     }
-
-    /* appliquer le design au tout premier rendu (si historique) */
-    applyDesignFromSpec(spec?.meta?.style?.designSpec||{});
   </script>
 </body>
 </html>
