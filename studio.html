@@ -16,11 +16,6 @@
       --assistant-bubble: color-mix(in hsl, var(--panel) 86%, transparent);
       --user-bubble: linear-gradient(135deg, var(--accent), var(--accent2));
       --user-ink: #ffffff;
-
-      /* Avatars & bulles (mêmes tailles) */
-      --avatar-size: 28px;
-      --bubble-radius: 14px;
-      --bubble-maxw: 560px;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -83,21 +78,20 @@
     .msg.user{justify-content:flex-end}
 
     .avatar-badge{
-      width:var(--avatar-size); height:var(--avatar-size); border-radius:50%;
+      width:28px;height:28px;border-radius:50%;
       display:grid;place-items:center;
       font-weight:800;font-size:11px;
       border:1px solid var(--stroke);
       box-shadow:var(--elev);
       background:var(--panel); color:var(--ink);
       user-select:none;
-      flex:0 0 var(--avatar-size);
     }
     .avatar-badge.bot{background:#111827; color:#fff; border-color:#111827} /* PF à gauche */
     .avatar-badge.you{background:var(--accent); color:#fff; border-color:transparent} /* Toi à droite */
 
     .bubble{
-      max-width:min(100%, var(--bubble-maxw));
-      padding:10px 12px;border-radius:var(--bubble-radius);border:1px solid var(--stroke);
+      max-width:min(100%, 560px);
+      padding:10px 12px;border-radius:14px;border:1px solid var(--stroke);
       box-shadow:var(--elev);
       word-wrap:break-word;overflow-wrap:anywhere;
     }
@@ -151,30 +145,36 @@
       padding:12px 24px;
     }
     .sheet{
+      position:relative; /* pour les couches décoratives */
+      overflow:hidden;   /* masque les décors qui débordent */
       width:var(--paper-w);
       max-width:100%;
       min-height:var(--paper-h);
       background:var(--panel); border:1px solid var(--stroke); box-shadow:var(--elev);
-      border-radius:12px; padding:22mm 18mm; color:var(--ink)
+      border-radius:var(--radius, 12px); padding:22mm 18mm; color:var(--ink);
+      font-family: var(--font-body, Inter), system-ui, sans-serif;
     }
+    .decor{position:absolute; inset:0; pointer-events:none; z-index:0}
+    .content{position:relative; z-index:1}
+
     .doc-header{display:grid;grid-template-columns:100px 1fr;gap:16px;align-items:center;margin-bottom:16px}
-    .logo-box{width:100px;height:100px;border:1px solid var(--stroke);border-radius:12px;display:grid;place-items:center;overflow:hidden;background:var(--panel)}
+    .logo-box{width:100px;height:100px;border:1px solid var(--stroke);border-radius:var(--radius, 12px);display:grid;place-items:center;overflow:hidden;background:var(--panel)}
     .logo-box img{width:100%;height:100%;object-fit:contain}
-    .brand-info .company{font-weight:800;font-size:18px}
+    .brand-info .company{font-weight:800;font-size:18px; font-family: var(--font-heading, Inter), system-ui, sans-serif;}
     .brand-info .muted{color:var(--muted);font-size:12px}
-    .toc{border:1px solid var(--stroke);border-radius:12px;padding:10px 12px;background:color-mix(in hsl, var(--panel) 85%, transparent);margin:10px 0 14px}
+    .toc{border:1px solid var(--stroke);border-radius:var(--radius, 12px);padding:10px 12px;background:color-mix(in hsl, var(--panel) 85%, transparent);margin:10px 0 14px}
     .toc b{display:block;margin-bottom:6px}
     .toc a{display:block;text-decoration:none;color:var(--ink);font-size:13px;margin:4px 0}
     .toc a:hover{text-decoration:underline}
-    .h1{font-size:28px;line-height:1.1;margin:0 0 6px;font-weight:800;letter-spacing:-.01em}
+    .h1{font-size:28px;line-height:1.1;margin:0 0 6px;font-weight:800;letter-spacing:-.01em; font-family: var(--font-heading, Inter), system-ui, sans-serif;}
     .meta{color:var(--muted);font-size:14px;margin-bottom:18px}
-    h2{margin:22px 0 8px;font-size:18px;letter-spacing:.2px}
+    h2{margin:22px 0 8px;font-size:18px;letter-spacing:.2px; font-family: var(--font-heading, Inter), system-ui, sans-serif;}
     .hr{height:1px;background:var(--stroke);margin:12px 0}
     p{margin:8px 0 10px}
     ul{margin:8px 0 10px 18px}
     .tag{display:inline-block;padding:3px 8px;border-radius:999px;background:color-mix(in hsl, var(--accent) 16%, transparent);border:1px solid var(--stroke);font-size:12px;color:var(--ink)}
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .card{border:1px solid var(--stroke);border-radius:12px;padding:12px;background:var(--panel);box-shadow:var(--elev)}
+    .card{border:1px solid var(--stroke);border-radius:var(--radius, 12px);padding:12px;background:var(--panel);box-shadow:var(--elev)}
     .price{font-weight:800;font-size:18px}
     .muted{color:var(--muted)}
     .pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--stroke);font-size:12px;background:var(--panel)}
@@ -260,7 +260,10 @@
 
     <!-- Aperçu -->
     <div class="panel sheet-wrap">
-      <div class="sheet" id="sheet"></div>
+      <div class="sheet" id="sheet">
+        <div class="decor" id="decor"></div>
+        <div class="content" id="sheetContent"></div>
+      </div>
     </div>
   </div>
 
@@ -322,6 +325,8 @@
     const sendBtn=document.getElementById('sendBtn');
     const statusEl=document.getElementById('status');
     const sheet=document.getElementById('sheet');
+    const decor=document.getElementById('decor');
+    const sheetContent=document.getElementById('sheetContent');
 
     let messages = JSON.parse(localStorage.getItem('pf_chat')||'[]');
     let spec = null;
@@ -413,7 +418,7 @@
           spec = { ...(spec||{}), ...(data.proposalSpec||{}) };
           spec.meta = { ...(spec.meta||{}), ...((data.proposalSpec||{}).meta||{}) };
           localStorage.setItem('pf_proposal', JSON.stringify(spec));
-          renderSpec();
+          renderSpec(); // => applique style + contenu
         }
         saveHistory(spec?.meta?.title || 'Proposition', spec, messages);
         statusEl.textContent='Prêt';
@@ -456,15 +461,158 @@
     function fmtDate(d){ try{ const dt=d?new Date(d):new Date(); return dt.toLocaleDateString(document.documentElement.lang||getLang(), {year:'numeric',month:'short',day:'2-digit'});}catch{return ''} }
     function money(n,c){ try{ return new Intl.NumberFormat(document.documentElement.lang||getLang(),{style:'currency',currency:c||'EUR'}).format(Number(n||0)); }catch{ return String(n||0)+' '+(c||'€') } }
 
-    function section(titleHTML, id){ const h=document.createElement('h2'); h.innerHTML=titleHTML; if(id) h.id=id; sheet.appendChild(h); }
-    function para(text){ const p=document.createElement('p'); p.textContent=text; sheet.appendChild(p); }
-    function list(items){ if(!items?.length) return; const ul=document.createElement('ul'); items.forEach(it=>{ const li=document.createElement('li'); li.textContent=String(it); ul.appendChild(li); }); sheet.appendChild(ul); }
-    function buildTOC(sections){ const L=t[spec.meta?.lang||getLang()]||t.fr; const box=document.createElement('div'); box.className='toc'; box.innerHTML=`<b>${L.toc}</b>`; sections.forEach(s=>{ if(s.present){ const a=document.createElement('a'); a.href='#'+s.id; a.textContent=s.title; box.appendChild(a);} }); sheet.appendChild(box); }
+    /* === THEME: applique proposalSpec.meta.style à l'aperçu uniquement === */
+    function applyStyleTokens(style){
+      // valeurs par défaut si aucune info
+      const palette = {
+        primary: "#3B82F6",
+        secondary: "#8B5CF6",
+        surface: "#FFFFFF",
+        ink: "#0A1020",
+        muted: "#5C667A",
+        stroke: "#E0E6F4",
+        accentA: "#60A5FA",
+        accentB: "#93C5FD",
+        ...(style?.palette||{})
+      };
+      const shapes = { radius:"12px", shadow:"0 18px 48px rgba(10,16,32,.12)", ...(style?.shapes||{}) };
+      const typo = { heading:"Inter", body:"Inter", accent:"Inter", ...(style?.typography||{}) };
+
+      // Scope des variables sur #sheet (n’affecte PAS le chat)
+      sheet.style.setProperty('--panel', palette.surface);
+      sheet.style.setProperty('--ink', palette.ink);
+      sheet.style.setProperty('--muted', palette.muted);
+      sheet.style.setProperty('--stroke', palette.stroke);
+      sheet.style.setProperty('--accent', palette.primary);
+      sheet.style.setProperty('--accent2', palette.secondary);
+      sheet.style.setProperty('--elev', shapes.shadow);
+      sheet.style.setProperty('--radius', shapes.radius);
+      sheet.style.setProperty('--font-body', typo.body);
+      sheet.style.setProperty('--font-heading', typo.heading);
+
+      // Couche décoratives
+      renderDecorLayers(style?.decor_layers||[], palette);
+    }
+
+    function hsla(h,s,l,a){ return `hsla(${Number(h||0)},${Number(s||0)}%,${Number(l||0)}%,${Number(a||1)})`; }
+    function pickCorner(pos){
+      const map = {
+        top: {top:-120, left:'50%', transform:'translateX(-50%)'},
+        bottom: {bottom:-120, left:'50%', transform:'translateX(-50%)'},
+        left: {left:-120, top:'50%', transform:'translateY(-50%)'},
+        right:{right:-120, top:'50%', transform:'translateY(-50%)'},
+        center:{top:'50%', left:'50%', transform:'translate(-50%,-50%)'}
+      };
+      return map[pos] || map.center;
+    }
+
+    function renderDecorLayers(layers, palette){
+      decor.innerHTML = ''; // reset
+      if(!layers || !layers.length) return;
+
+      layers.forEach((L, i)=>{
+        const layer = document.createElement('div');
+        layer.style.position='absolute';
+        layer.style.pointerEvents='none';
+        layer.style.mixBlendMode = (L.blend||'normal');
+        const pos = pickCorner(L.position);
+        Object.assign(layer.style, pos);
+        const rot = Number(L.rotate||0);
+        const scale = Math.max(0.25, Number(L.scale||1));
+        const color = hsla(L.h ?? 220, L.s ?? 60, L.l ?? 55, L.opacity ?? 0.20);
+
+        // Type-specific rendering
+        switch((L.type||'').toLowerCase()){
+          case 'glow': {
+            const size = 900*scale;
+            layer.style.width = layer.style.height = size+'px';
+            layer.style.borderRadius='50%';
+            layer.style.filter='blur(40px)';
+            layer.style.background = `radial-gradient(closest-side, ${color} 0%, transparent 70%)`;
+            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
+            break;
+          }
+          case 'gradient_blob': {
+            const w = 800*scale, h = 600*scale;
+            layer.style.width = w+'px'; layer.style.height = h+'px';
+            layer.style.borderRadius='40%';
+            layer.style.filter='blur(18px)';
+            layer.style.background = `conic-gradient(from 180deg, ${color}, transparent 60%)`;
+            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
+            break;
+          }
+          case 'diagonal': {
+            const size = 1400*scale;
+            layer.style.width = size+'px'; layer.style.height = size+'px';
+            layer.style.background = `
+              repeating-linear-gradient(${rot}deg,
+                ${color} 0px, ${color} 4px,
+                transparent 4px, transparent 22px)`;
+            break;
+          }
+          case 'grid': {
+            const size = 1200*scale;
+            layer.style.width = size+'px'; layer.style.height = size+'px';
+            const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+            svg.setAttribute('viewBox','0 0 100 100'); svg.setAttribute('width','100%'); svg.setAttribute('height','100%');
+            const defs = document.createElementNS(svg.namespaceURI,'defs');
+            const pat = document.createElementNS(svg.namespaceURI,'pattern');
+            pat.setAttribute('id',`p-${i}`); pat.setAttribute('width','10'); pat.setAttribute('height','10'); pat.setAttribute('patternUnits','userSpaceOnUse');
+            const path = document.createElementNS(svg.namespaceURI,'path');
+            path.setAttribute('d','M10 0 L0 0 0 10');
+            path.setAttribute('fill','none'); path.setAttribute('stroke', color); path.setAttribute('stroke-width','0.4');
+            pat.appendChild(path); defs.appendChild(pat); svg.appendChild(defs);
+            const rect = document.createElementNS(svg.namespaceURI,'rect');
+            rect.setAttribute('width','100%'); rect.setAttribute('height','100%'); rect.setAttribute('fill',`url(#p-${i})`);
+            svg.appendChild(rect);
+            layer.appendChild(svg);
+            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
+            break;
+          }
+          case 'dots': {
+            const size = 1200*scale;
+            layer.style.width = size+'px'; layer.style.height = size+'px';
+            const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+            svg.setAttribute('viewBox','0 0 100 100'); svg.setAttribute('width','100%'); svg.setAttribute('height','100%');
+            const defs = document.createElementNS(svg.namespaceURI,'defs');
+            const pat = document.createElementNS(svg.namespaceURI,'pattern');
+            pat.setAttribute('id',`d-${i}`); pat.setAttribute('width','6'); pat.setAttribute('height','6'); pat.setAttribute('patternUnits','userSpaceOnUse');
+            const circle = document.createElementNS(svg.namespaceURI,'circle');
+            circle.setAttribute('cx','1.5'); circle.setAttribute('cy','1.5'); circle.setAttribute('r','0.6'); circle.setAttribute('fill', color);
+            pat.appendChild(circle); defs.appendChild(pat); svg.appendChild(defs);
+            const rect = document.createElementNS(svg.namespaceURI,'rect');
+            rect.setAttribute('width','100%'); rect.setAttribute('height','100%'); rect.setAttribute('fill',`url(#d-${i})`);
+            svg.appendChild(rect);
+            layer.appendChild(svg);
+            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
+            break;
+          }
+          default: {
+            // fallback discret
+            const size = 900*scale;
+            layer.style.width = layer.style.height = size+'px';
+            layer.style.borderRadius='50%';
+            layer.style.filter='blur(30px)';
+            layer.style.background = `radial-gradient(closest-side, ${color} 0%, transparent 70%)`;
+            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
+          }
+        }
+        decor.appendChild(layer);
+      });
+    }
+
+    function section(titleHTML, id){ const h=document.createElement('h2'); h.innerHTML=titleHTML; if(id) h.id=id; sheetContent.appendChild(h); }
+    function para(text){ const p=document.createElement('p'); p.textContent=text; sheetContent.appendChild(p); }
+    function list(items){ if(!items?.length) return; const ul=document.createElement('ul'); items.forEach(it=>{ const li=document.createElement('li'); li.textContent=String(it); ul.appendChild(li); }); sheetContent.appendChild(ul); }
+    function buildTOC(sections){ const L=t[spec.meta?.lang||getLang()]||t.fr; const box=document.createElement('div'); box.className='toc'; box.innerHTML=`<b>${L.toc}</b>`; sections.forEach(s=>{ if(s.present){ const a=document.createElement('a'); a.href='#'+s.id; a.textContent=s.title; box.appendChild(a);} }); sheetContent.appendChild(box); }
 
     function renderSpec(){
-      if(!spec){ sheet.innerHTML='<p class="muted">Aucune donnée.</p>'; return; }
+      // 1) Style tokens -> thème aperçu
+      applyStyleTokens(spec?.meta?.style || null);
+
+      // 2) Contenu
       const L=t[spec.meta?.lang||getLang()]||t.fr;
-      sheet.innerHTML='';
+      sheetContent.innerHTML='';
 
       const header=document.createElement('div'); header.className='doc-header';
       const logoBox=document.createElement('div'); logoBox.className='logo-box';
@@ -473,14 +621,14 @@
       const company=safeStr(spec.meta?.company || spec.meta?.brand?.company,'Votre société');
       const contact=safeStr(spec.meta?.brand?.contact_name,''), website=safeStr(spec.meta?.brand?.website,''), email=safeStr(spec.meta?.brand?.email,''), phone=safeStr(spec.meta?.brand?.phone,'');
       bi.innerHTML=`<div class="company">${company}</div><div class="muted">${[contact,website,email,phone].filter(Boolean).join(' • ')}</div>`;
-      header.appendChild(logoBox); header.appendChild(bi); sheet.appendChild(header);
+      header.appendChild(logoBox); header.appendChild(bi); sheetContent.appendChild(header);
 
       const title=safeStr(spec.meta?.title,L.title); const client=safeStr(spec.meta?.client,'Client'); const date=safeStr(spec.meta?.date, fmtDate());
       const head=document.createElement('div');
       head.innerHTML = `<div class="h1">${title}</div>
         <div class="meta">${L.to}: <span class="tag">${client}</span> &nbsp;•&nbsp; ${L.from}: <span class="tag">${company}</span> &nbsp;•&nbsp; ${L.date}: ${date}</div>`;
-      sheet.appendChild(head);
-      sheet.appendChild(Object.assign(document.createElement('div'),{className:'hr'}));
+      sheetContent.appendChild(head);
+      sheetContent.appendChild(Object.assign(document.createElement('div'),{className:'hr'}));
 
       const tocSections=[
         { id:'s_letter', title:L.letter, present:safeArr(spec.letter?.body_paragraphs||spec.letter?.paragraphs).length || spec.letter?.greeting||spec.letter?.closing||spec.letter?.signature },
@@ -492,7 +640,7 @@
         { id:'s_pricing', title:L.pricing, present:(spec.pricing && (spec.pricing.items?.length || spec.pricing.price!=null)) },
         { id:'s_assumptions', title:L.assumptions, present:safeArr(spec.assumptions?.paragraphs).length },
         { id:'s_next', title:L.next, present:safeArr(spec.next_steps?.paragraphs).length },
-      ];
+      };
       buildTOC(tocSections);
 
       if (tocSections[0].present){
@@ -511,10 +659,10 @@
           c.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center">
             <strong>Phase ${i+1} — ${safeStr(ph.title,'À confirmer')}</strong>
             <span class="pill">${safeStr(ph.duration||'','')}</span></div>`;
-          sheet.appendChild(c);
+          sheetContent.appendChild(c);
           if(ph.description) para(ph.description);
           const acts=safeArr(ph.activities?.length?ph.activities:ph.steps); if(acts.length) list(acts);
-          const outs=safeArr(ph.outcomes); if(outs.length){ const p=document.createElement('p'); p.innerHTML='<em>Résultats attendus :</em>'; sheet.appendChild(p); list(outs); }
+          const outs=safeArr(ph.outcomes); if(outs.length){ const p=document.createElement('p'); p.innerHTML='<em>Résultats attendus :</em>'; sheetContent.appendChild(p); list(outs); }
         });
       }
       if (tocSections[4].present){
@@ -522,7 +670,7 @@
         const grid=document.createElement('div'); grid.className='grid2';
         const a=document.createElement('div'); a.className='card'; a.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.in_scope}</div>`;
         const b=document.createElement('div'); b.className='card'; b.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.out_scope}</div>`;
-        grid.appendChild(a); grid.appendChild(b); sheet.appendChild(grid);
+        grid.appendChild(a); grid.appendChild(b); sheetContent.appendChild(grid);
         const ulA=document.createElement('ul'); safeArr(spec.deliverables.in).forEach(x=>{const li=document.createElement('li'); li.textContent=x; ulA.appendChild(li);});
         const ulB=document.createElement('ul'); safeArr(spec.deliverables.out).forEach(x=>{const li=document.createElement('li'); li.textContent=x; ulB.appendChild(li);});
         a.appendChild(ulA); b.appendChild(ulB);
@@ -536,12 +684,12 @@
           if(ms.notes){ const p=document.createElement('p'); p.textContent=ms.notes; c.appendChild(p); }
           grid.appendChild(c);
         });
-        sheet.appendChild(grid);
+        sheetContent.appendChild(grid);
       }
       if (tocSections[6].present){
         section(L.pricing,'s_pricing');
         const pr=spec.pricing||{}; const currency=pr.currency||spec.meta?.currency||'EUR';
-        const m=document.createElement('div'); m.className='muted'; m.style.margin='-6px 0 8px'; m.innerHTML = `${L.price_model}: <span class="pill">${safeStr(pr.model,'forfait')}</span>`; sheet.appendChild(m);
+        const m=document.createElement('div'); m.className='muted'; m.style.margin='-6px 0 8px'; m.innerHTML = `${L.price_model}: <span class="pill">${safeStr(pr.model,'forfait')}</span>`; sheetContent.appendChild(m);
         if(Array.isArray(pr.items)&&pr.items.length){
           const table=document.createElement('table');
           table.innerHTML=`<thead><tr><th>Item</th><th>Qté</th><th>Unité</th><th>PU</th><th>Sous-total</th></tr></thead><tbody></tbody><tfoot>
@@ -555,17 +703,17 @@
             tr.innerHTML=`<td>${safeStr(it.name,'—')}</td><td>${Number.isFinite(qty)?qty:1}</td><td>${safeStr(it.unit||'—')}</td><td>${money(up,currency)}</td><td>${money(st,currency)}</td>`;
             tb.appendChild(tr);
           });
-          sheet.appendChild(table);
+          sheetContent.appendChild(table);
           const subtotal=Array.from(tb.children).reduce((s,tr)=>{ const v=(tr.children[4]?.textContent||'0').replace(/[^\d.,-]/g,'').replace(',','.'); return s + (parseFloat(v)||0); },0);
           const taxRate=Number(pr.tax_rate||0); const taxes=subtotal*(taxRate/100); const total=subtotal+taxes;
-          sheet.querySelector('#ft_subtotal').textContent=money(subtotal,currency);
-          sheet.querySelector('#ft_tax').textContent=`${money(taxes,currency)} ${taxRate?`(${taxRate}%)`:''}`;
-          sheet.querySelector('#ft_total').textContent=money(total,currency);
-          if((pr.terms||[]).length){ const terms=document.createElement('div'); terms.className='card'; terms.style.marginTop='8px'; terms.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.terms}</div><ul>${(pr.terms||[]).map(x=>`<li>${x}</li>`).join('')}</ul>`; sheet.appendChild(terms); }
+          sheetContent.querySelector('#ft_subtotal').textContent=money(subtotal,currency);
+          sheetContent.querySelector('#ft_tax').textContent=`${money(taxes,currency)} ${taxRate?`(${taxRate}%)`:''}`;
+          sheetContent.querySelector('#ft_total').textContent=money(total,currency);
+          if((pr.terms||[]).length){ const terms=document.createElement('div'); terms.className='card'; terms.style.marginTop='8px'; terms.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.terms}</div><ul>${(pr.terms||[]).map(x=>`<li>${x}</li>`).join('')}</ul>`; sheetContent.appendChild(terms); }
         }else{
           const priceBox=document.createElement('div'); priceBox.className='card'; const price=pr.price!=null?String(pr.price):'—';
           priceBox.innerHTML=`<div class="price">${money(price,currency)}</div><div class="muted" style="margin-top:4px">${L.price_model}: <span>${safeStr(pr.model,'forfait')}</span></div>`;
-          sheet.appendChild(priceBox);
+          sheetContent.appendChild(priceBox);
         }
       }
       if (tocSections[7].present){ section(L.assumptions,'s_assumptions'); safeArr(spec.assumptions.paragraphs).forEach(p=>para(p)); }
