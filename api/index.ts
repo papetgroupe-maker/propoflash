@@ -1,203 +1,127 @@
 // supabase/functions/chat/index.ts
-// Deno Edge Function — PropoFlash "chat"
-// Permet à studio.html d'appeler l'IA et de recevoir {reply, proposalSpec}
+// Deno Edge Function — "chat" : mode "style" => renvoie un designSpecDiff JSON
+// Secrets requis : OPENAI_API_KEY
 
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import OpenAI from "npm:openai";
+import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
-// ⚠️ En prod, remplace "*" par ton domaine (ex: "https://propoflash.vercel.app")
-const corsHeaders = {
-  "access-control-allow-origin": "*",
-  "access-control-allow-headers":
-    "authorization, x-client-info, apikey, content-type",
-  "access-control-allow-methods": "POST, OPTIONS",
+type DesignSpec = {
+  palette?: {
+    primary?: string;
+    secondary?: string;
+    surface?: string;
+    ink?: string;
+    muted?: string;
+    stroke?: string;
+  };
+  typography?: {
+    title?: { family?: string; weight?: number; case?: "normal" | "upper" };
+    body?: { family?: string; weight?: number; lineHeight?: number };
+  };
+  layout?: { radius?: { panel?: number; card?: number; bubble?: number }; density?: "compact" | "comfortable" | "spacious" };
+  texture?: { kind?: "none" | "mesh" | "blob"; intensity?: number };
+  brand?: { company?: string; tone?: string[] };
 };
 
-const SYSTEM_PROMPT = `
-ROLE: Senior B2B Proposal Strategist & Bid Writer (FR/EN).
-OBJECTIF: transformer chaque échange en une proposition commerciale exploitable,
-structurée dans un schéma "proposalSpec" et un message "reply" clair, orienté décision.
+type StylePayload = {
+  mode?: "style";
+  userText: string;
+  currentDesign?: DesignSpec;
+  // facultatifs :
+  proposalSpec?: unknown;
+  history?: Array<{ role: "user" | "assistant"; content: string }>;
+};
 
-OUTPUT JSON STRICT:
-{
-  "reply": "<texte lisible pour l'utilisateur>",
-  "proposalSpec": {
-    "meta": { "lang":"fr|en", "title": "", "company":"", "client":"", "date":"", "currency":"EUR",
-              "style": { "primary":"#hex", "secondary":"#hex", "logoDataUrl":"" } },
-    "letter": { "subject":"", "preheader":"", "greeting":"", "body_paragraphs":[""], "closing":"", "signature":"" },
-    "executive_summary": { "paragraphs":[""] },
-    "objectives": { "bullets":[""] },
-    "approach": { "phases":[{ "title":"", "duration":"", "activities":[""], "outcomes":[""] }] },
-    "deliverables": { "in":[""], "out":[""] },
-    "timeline": { "milestones":[{ "title":"", "dateOrWeek":"", "notes":"" }] },
-    "pricing": { "model":"forfait|regie", "currency":"EUR",
-                 "items":[{ "name":"", "qty":1, "unit":"jour|mois|forfait", "unit_price":0, "subtotal":0 }],
-                 "tax_rate":20, "terms":[""], "price": null },
-    "assumptions": { "paragraphs":[""] },
-    "next_steps": { "paragraphs":[""] }
-  },
-  "actions": [{ "type":"preview" } | { "type":"ask", "field":"meta.client", "hint":"Quel est le client ?" }]
+const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY") ?? "";
+
+function asJson<T>(txt: string): T | null {
+  try {
+    // extrait un bloc JSON même si le modèle a parlé autour
+    const start = txt.indexOf("{");
+    const end = txt.lastIndexOf("}");
+    if (start >= 0 && end > start) {
+      return JSON.parse(txt.slice(start, end + 1)) as T;
+    }
+  } catch {}
+  return null;
 }
 
-PRINCIPES:
-- FR/EN selon meta.lang (déduire du contexte; FR par défaut).
-- Toujours produire une proposalSpec cohérente; si info manquante → "actions: ask".
-- Pricing: si incertain → items + hypothèses + marquer "à confirmer". Calculer subtotal si manquant.
-- Ne pas inventer de références; proposer micro-échantillon si aucune preuve.
-- Ne renvoyer que le JSON demandé.
+const STYLE_SYSTEM_PROMPT = `
+Tu es un "Style Interpreter" pour une proposition commerciale (type Canva).
+Objectif : convertir une description libre (ex: "super pro, noir et or, très lisible")
+en un diff JSON strict nommé "designSpecDiff" (PAS de prose, PAS de CSS).
+
+Règles :
+- Retourne UNIQUEMENT du JSON.
+- Respecte ce schema souple :
+{
+  "designSpecDiff": {
+    "palette": { "primary": "#111827", "secondary": "#E5B344", "surface": "#FFFFFF", "ink":"#0A1020", "muted":"#7A8195", "stroke":"#E5EAF3" },
+    "typography": {
+      "title": { "family": "Inter", "weight": 800, "case": "normal" },
+      "body": { "family":"Inter", "weight": 500, "lineHeight": 1.5 }
+    },
+    "layout": { "radius": { "panel": 16, "card": 12 }, "density": "comfortable" },
+    "texture": { "kind": "none | mesh | blob", "intensity": 0.06 },
+    "brand": { "tone": ["premium","sobre"] }
+  }
+}
+- Si l’utilisateur mentionne : "luxe", "premium", "noir et or" -> noir (#111827) + or (#E5B344/#CFB06A), texture faible.
+- "super pro / corporate / sobre" -> contrastes élevés, couleurs froides, texture très faible, Inter.
+- "magazine / éditorial / serif" -> title serif (Playfair/Source Serif), body humanist, interlignage plus grand.
+- "startup / vibrant / fun" -> secondaires saturées, radius ↑, texture légère.
+- Toujours privilégier la LISIBILITÉ (contrast, lineHeight >= 1.35). 
+- Pas d’URL, pas d’HTML, pas de commentaires en dehors du JSON.
 `;
 
-const FEWSHOTS = [
-  {
-    role: "user",
-    content:
-      "Brief: refonte site vitrine 8 pages, deadline 6 semaines, budget cible 8-12 k€, FR.",
-  },
-  {
-    role: "assistant",
-    content: JSON.stringify({
-      reply:
-        "Je prépare une proposition structurée (cadrage, design, dev, recette) avec tarifs au forfait et prochaines étapes.",
-      proposalSpec: {
-        meta: {
-          lang: "fr",
-          title: "Proposition — Refonte site vitrine",
-          currency: "EUR",
-        },
-        executive_summary: {
-          paragraphs: [
-            "Objectif: moderniser l’image, améliorer conversions, autonomie CMS.",
-          ],
-        },
-        approach: {
-          phases: [
-            {
-              title: "Cadrage & ateliers",
-              duration: "1 semaine",
-              activities: ["Atelier objectifs", "Arborescence"],
-              outcomes: ["Backlog validé"],
-            },
-            {
-              title: "Design UI",
-              duration: "2 semaines",
-              activities: ["Maquettes", "Design system"],
-              outcomes: ["UI validée"],
-            },
-            {
-              title: "Développement",
-              duration: "2 semaines",
-              activities: ["Intégration", "CMS"],
-              outcomes: ["Site prêt à recetter"],
-            },
-            {
-              title: "Recette & mise en ligne",
-              duration: "1 semaine",
-              activities: ["Tests", "Corrections", "Go-live"],
-              outcomes: ["Prod en ligne"],
-            },
-          ],
-        },
-        pricing: {
-          model: "forfait",
-          currency: "EUR",
-          tax_rate: 20,
-          items: [
-            {
-              name: "Cadrage & ateliers",
-              qty: 1,
-              unit: "forfait",
-              unit_price: 1800,
-              subtotal: 1800,
-            },
-            {
-              name: "Design UI (8 pages)",
-              qty: 1,
-              unit: "forfait",
-              unit_price: 3200,
-              subtotal: 3200,
-            },
-            {
-              name: "Développement & intégration",
-              qty: 1,
-              unit: "forfait",
-              unit_price: 4200,
-              subtotal: 4200,
-            },
-          ],
-          terms: ["40% commande, 40% design, 20% livraison", "Validité: 30 jours"],
-        },
-        next_steps: {
-          paragraphs: ["Point 30 min pour valider périmètre & planning."],
-        },
-      },
-      actions: [{ type: "preview" }],
-    }),
-  },
-];
-
-Deno.serve(async (req) => {
-  // CORS preflight
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+async function callOpenAI(messages: Array<{ role: "system" | "user"; content: string }>) {
+  if (!OPENAI_API_KEY) {
+    return { ok: false, text: `{"designSpecDiff":{}}` };
   }
-
-  try {
-    const { message, proposalSpec, history = [] } = await req.json();
-
-    const openai = new OpenAI({
-      apiKey: Deno.env.get("OPENAI_API_KEY") ?? "",
-    });
-
-    const msgs = [
-      { role: "system", content: SYSTEM_PROMPT },
-      ...FEWSHOTS,
-      ...history.map((m: any) => ({
-        role: m.role === "assistant" ? "assistant" : "user",
-        content: String(m.content ?? ""),
-      })),
-      proposalSpec
-        ? {
-            role: "user",
-            content: `Spec actuelle:\n${JSON.stringify(proposalSpec)}`,
-          }
-        : null,
-      { role: "user", content: String(message ?? "") },
-    ].filter(Boolean) as Array<{ role: "system" | "user" | "assistant"; content: string }>;
-
-    const resp = await openai.chat.completions.create({
+  const r = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
       model: "gpt-4o-mini",
+      messages,
       temperature: 0.3,
-      response_format: { type: "json_object" },
-      messages: msgs,
-    });
+    }),
+  });
+  const data = await r.json().catch(() => null);
+  const text = data?.choices?.[0]?.message?.content ?? `{"designSpecDiff":{}}`;
+  return { ok: true, text };
+}
 
-    let out: any = {};
-    try {
-      out = JSON.parse(resp.choices?.[0]?.message?.content ?? "{}");
-    } catch {
-      out = {
-        reply:
-          "Je n’ai pas pu structurer la proposition. Reformulez ou précisez le contexte.",
-        actions: [],
-      };
+serve(async (req) => {
+  try {
+    const body = await req.json().catch(() => ({}));
+    const { mode, userText, currentDesign } = body as StylePayload;
+
+    // MODE STYLE => retourne un designSpecDiff
+    if (mode === "style") {
+      const userPrompt = `
+Texte utilisateur:
+"""${userText}"""
+
+Style courant (pour contexte, à respecter si non contredit):
+${JSON.stringify(currentDesign ?? {}, null, 2)}
+
+Exigence: réponds UNIQUEMENT avec un objet JSON { "designSpecDiff": { ... } }.
+`;
+      const res = await callOpenAI([
+        { role: "system", content: STYLE_SYSTEM_PROMPT },
+        { role: "user", content: userPrompt },
+      ]);
+
+      const json = asJson<{ designSpecDiff?: DesignSpec }>(res.text) ?? { designSpecDiff: {} };
+      return new Response(JSON.stringify(json), { headers: { "Content-Type": "application/json" } });
     }
 
-    if (out.proposalSpec) {
-      // Conserver les meta existantes côté client
-      out.proposalSpec.meta = {
-        ...(proposalSpec?.meta ?? {}),
-        ...(out.proposalSpec.meta ?? {}),
-      };
-    }
-
-    return new Response(JSON.stringify(out), {
-      headers: { "content-type": "application/json", ...corsHeaders },
-      status: 200,
+    // Fallback : mini echo / health
+    const msg = (body?.message ?? body?.userText ?? "").toString();
+    return new Response(JSON.stringify({ reply: msg ? `OK reçu: ${msg}` : "Hello undefined!" }), {
+      headers: { "Content-Type": "application/json" },
     });
   } catch (e) {
-    return new Response(
-      JSON.stringify({ error: e?.message ?? "Edge function error" }),
-      { headers: { "content-type": "application/json", ...corsHeaders }, status: 500 },
-    );
+    return new Response(JSON.stringify({ error: String(e) }), { status: 500, headers: { "Content-Type": "application/json" } });
   }
 });
