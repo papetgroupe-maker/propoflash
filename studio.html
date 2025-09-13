@@ -303,8 +303,8 @@
       h.forEach(item=>{
         const d=new Date(item.date);
         const div=document.createElement('div'); div.className='row-item';
-        div.innerHTML = `<strong>${item.title||'Sans titre'}</strong><br><span class="muted">${d.toLocaleString()}</span>`;
         div.onclick=()=>{ spec=item.spec; messages=item.messages||[]; localStorage.setItem('pf_proposal', JSON.stringify(spec)); renderSpec(); renderChat(); drawer.classList.remove('open'); };
+        div.innerHTML = `<strong>${item.title||'Sans titre'}</strong><br><span class="muted">${d.toLocaleString()}</span>`;
         histList.appendChild(div);
       });
     }
@@ -391,12 +391,12 @@
       try{
         showTyping();
 
-        /* ==== MODIFICATION UNIQUE : on appelle l’Edge Function Supabase au lieu de /api/chat ==== */
+        /* Appel Edge Function avec Authorization: Bearer ANON */
         const { data: replyPayload, error } = await sb.functions.invoke('chat', {
-          body: { message: content, proposalSpec: spec, history: messages.slice(-10) }
+          body: { message: content, proposalSpec: spec, history: messages.slice(-10) },
+          headers: { Authorization: `Bearer ${SUPABASE_ANON}` }
         });
         if (error) throw error;
-        /* ======================================================================================== */
 
         hideTyping();
 
