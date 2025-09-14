@@ -11,8 +11,6 @@
       --accent:#3b82f6; --accent2:#8b5cf6; --accent-ink:#fff;
       --paper-w:210mm; --paper-h:297mm;
       --elev:0 18px 48px rgba(10,16,32,.10), inset 0 1px 0 #ffffffaa;
-
-      /* Chat themes */
       --assistant-bubble: color-mix(in hsl, var(--panel) 86%, transparent);
       --user-bubble: linear-gradient(135deg, var(--accent), var(--accent2));
       --user-ink: #ffffff;
@@ -20,9 +18,7 @@
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0;
-      height:100vh;
-      overflow:hidden; /* pas de scroll de page */
+      margin:0;height:100vh;overflow:hidden;
       background:linear-gradient(180deg,var(--bg),#eef3ff);
       font-family:Inter,system-ui,sans-serif;color:var(--ink)
     }
@@ -40,162 +36,101 @@
     .menu a,.menu button{display:block;width:100%;text-align:left;padding:10px 12px;border:none;background:var(--panel);cursor:pointer;font-weight:600;color:var(--ink)}
     .menu a:hover,.menu button:hover{background:color-mix(in hsl, var(--panel) 80%, transparent)}
 
-    /* Layout principal : chat élargi & éléments étirés */
+    /* Main split: chat (left) + preview (right) */
     .main{
       height:calc(100vh - 64px);
       display:grid;
-      grid-template-columns: clamp(520px, 38vw, 640px) 1fr; /* chat élargi */
-      gap:18px;
-      padding:18px 24px;
-      align-items:stretch;
-      min-height:0;
+      grid-template-columns: clamp(520px, 38vw, 640px) 1fr;
+      gap:18px;padding:18px 24px;align-items:stretch;min-height:0;
     }
-    .panel{
-      background:var(--panel);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--elev);
-      display:flex;flex-direction:column;
-      min-height:0;
-    }
+    .panel{background:var(--panel);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--elev);display:flex;flex-direction:column;min-height:0}
 
     /* Chat */
-    .chat{min-height:0; display:flex;flex-direction:column;}
+    .chat{min-height:0;display:flex;flex-direction:column}
     .chat-head{display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--stroke)}
     .chat-title{font-weight:800}
-    .chat-body{
-      padding:12px;
-      overflow:auto; /* scroll interne chat */
-      flex:1; min-height:0;
-    }
+    .chat-body{padding:12px;overflow:auto;flex:1;min-height:0}
 
-    /* Lignes de message + avatars + bulles */
-    .msg{
-      display:flex;
-      gap:10px;
-      margin:10px 0;
-      align-items:flex-end;
-      width:100%;
-    }
+    .msg{display:flex;gap:10px;margin:10px 0;align-items:flex-end;width:100%}
     .msg.assistant{justify-content:flex-start}
     .msg.user{justify-content:flex-end}
+    .avatar-badge{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:11px;border:1px solid var(--stroke);box-shadow:var(--elev);background:var(--panel);color:var(--ink);user-select:none}
+    .avatar-badge.bot{background:#111827;color:#fff;border-color:#111827}
+    .avatar-badge.you{background:var(--accent);color:#fff;border-color:transparent}
+    .bubble{max-width:min(100%,560px);padding:10px 12px;border-radius:14px;border:1px solid var(--stroke);box-shadow:var(--elev);word-wrap:break-word;overflow-wrap:anywhere}
+    .bubble-assistant{background:var(--assistant-bubble);color:var(--ink)}
+    .bubble-user{background:var(--user-bubble);color:var(--user-ink);border-color:transparent}
 
-    .avatar-badge{
-      width:28px;height:28px;border-radius:50%;
-      display:grid;place-items:center;
-      font-weight:800;font-size:11px;
-      border:1px solid var(--stroke);
-      box-shadow:var(--elev);
-      background:var(--panel); color:var(--ink);
-      user-select:none;
-    }
-    .avatar-badge.bot{background:#111827; color:#fff; border-color:#111827}
-    .avatar-badge.you{background:var(--accent); color:#fff; border-color:transparent}
-
-    .bubble{
-      max-width:min(100%, 560px);
-      padding:10px 12px;border-radius:14px;border:1px solid var(--stroke);
-      box-shadow:var(--elev);
-      word-wrap:break-word;overflow-wrap:anywhere;
-    }
-    .bubble-assistant{ background:var(--assistant-bubble); color:var(--ink); }
-    .bubble-user{ background:var(--user-bubble); color:var(--user-ink); border-color:transparent; }
-
-    /* Composer + upload logo */
-    .chat-compose{
-      position:relative;
-      padding:12px;
-      border-top:1px solid var(--stroke);
-      display:flex;align-items:flex-end;gap:16px;
-    }
-    .logo-wrap{ position:relative; flex:0 0 auto; }
-    .input{
-      display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--stroke);
-      border-radius:14px;padding:8px;box-shadow:var(--elev);
-      flex:1;
-    }
+    .chat-compose{position:relative;padding:12px;border-top:1px solid var(--stroke);display:flex;align-items:flex-end;gap:16px}
+    .logo-wrap{position:relative;flex:0 0 auto}
+    .input{display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--stroke);border-radius:14px;padding:8px;box-shadow:var(--elev);flex:1}
     .input textarea{flex:1;resize:vertical;min-height:72px;border:none;outline:none;background:transparent;font:500 14px/1.4 Inter;color:var(--ink)}
     .send{width:40px;height:40px;border-radius:12px;border:1px solid var(--stroke);background:#0a1020;color:#fff;display:grid;place-items:center;cursor:pointer}
-    .logo-btn{width:34px;height:34px;border-radius:10px;border:1px solid #0002;
-      background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd);
-      box-shadow:var(--elev);display:grid;place-items:center;cursor:pointer}
+    .logo-btn{width:34px;height:34px;border-radius:10px;border:1px solid #0002;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd);box-shadow:var(--elev);display:grid;place-items:center;cursor:pointer}
     .logo-btn input{display:none}
-    .logo-tip{ position:absolute;left:0;bottom:44px;background:#111;color:#fff;font-size:12px;padding:6px 8px;border-radius:8px;display:none;white-space:nowrap }
+    .logo-tip{position:absolute;left:0;bottom:44px;background:#111;color:#fff;font-size:12px;padding:6px 8px;border-radius:8px;display:none;white-space:nowrap}
     .logo-wrap:hover .logo-tip{display:block}
 
-    /* Indicateur de frappe */
     .typing{display:inline-flex;gap:5px;align-items:center}
     .dot{width:6px;height:6px;border-radius:50%;background:#8aa0c6;opacity:.7;animation:bounce 1.2s infinite}
     .dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
     @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
 
-    /* Aperçu : centré horizontalement + scroll interne */
-    .sheet-wrap{
-      flex:1; min-height:0; overflow:auto;
-      display:flex;justify-content:center;align-items:flex-start;
-      padding:12px 24px;
-    }
-    .sheet{
-      position:relative; /* décor global */
-      overflow:visible;
-      width:var(--paper-w);
-      max-width:100%;
-      background:transparent; /* on gère page par page */
-      border:none; box-shadow:none;
-      color:var(--ink);
-      font-family: var(--font-body, Inter), system-ui, sans-serif;
-    }
-    .decor{position:fixed; inset:0; pointer-events:none; z-index:0} /* léger décor global */
-    .content{position:relative; z-index:1}
-
-    /* Pages A4 empilées */
-    .page{
-      position:relative;
-      width:var(--paper-w);
-      min-height:var(--paper-h);
-      background:var(--panel);
-      border:1px solid var(--stroke);
-      border-radius:var(--radius, 12px);
-      box-shadow:var(--elev);
-      margin:0 0 16mm 0;
-      overflow:hidden;
-    }
+    /* Preview */
+    .sheet-wrap{flex:1;min-height:0;overflow:auto;display:flex;justify-content:center;align-items:flex-start;padding:12px 24px}
+    .sheet{position:relative;overflow:visible;width:var(--paper-w);max-width:100%;background:transparent;border:none;box-shadow:none;color:var(--ink);font-family:var(--font-body,Inter),system-ui,sans-serif}
+    .decor{position:fixed;inset:0;pointer-events:none;z-index:0}
+    .content{position:relative;z-index:1}
+    .page{position:relative;width:var(--paper-w);min-height:var(--paper-h);background:var(--panel);border:1px solid var(--stroke);border-radius:var(--radius,12px);box-shadow:var(--elev);margin:0 0 16mm 0;overflow:hidden}
     .page:last-child{margin-bottom:0}
-    .inner{ padding:22mm 18mm; position:relative; z-index:1; }
-    .page .page-decor{ position:absolute; inset:0; pointer-events:none; z-index:0 }
+    .inner{padding:22mm 18mm;position:relative;z-index:1}
+    .page .page-decor{position:absolute;inset:0;pointer-events:none;z-index:0}
 
-    /* Éléments de doc */
     .doc-header{display:grid;grid-template-columns:100px 1fr;gap:16px;align-items:center;margin-bottom:16px}
-    .logo-box{width:100px;height:100px;border:1px solid var(--stroke);border-radius:var(--radius, 12px);display:grid;place-items:center;overflow:hidden;background:var(--panel)}
+    .logo-box{width:100px;height:100px;border:1px solid var(--stroke);border-radius:var(--radius,12px);display:grid;place-items:center;overflow:hidden;background:var(--panel)}
     .logo-box img{width:100%;height:100%;object-fit:contain}
-    .brand-info .company{font-weight:800;font-size:18px; font-family: var(--font-heading, Inter), system-ui, sans-serif;}
+    .brand-info .company{font-weight:800;font-size:18px;font-family:var(--font-heading,Inter),system-ui,sans-serif}
     .brand-info .muted{color:var(--muted);font-size:12px}
-    .toc{border:1px solid var(--stroke);border-radius:var(--radius, 12px);padding:10px 12px;background:color-mix(in hsl, var(--panel) 85%, transparent);margin:10px 0 14px}
+    .toc{border:1px solid var(--stroke);border-radius:var(--radius,12px);padding:10px 12px;background:color-mix(in hsl,var(--panel) 85%,transparent);margin:10px 0 14px}
     .toc b{display:block;margin-bottom:6px}
     .toc a{display:block;text-decoration:none;color:var(--ink);font-size:13px;margin:4px 0}
     .toc a:hover{text-decoration:underline}
-    .h1{font-size:34px;line-height:1.05;margin:0 0 10px;font-weight:900;letter-spacing:-.01em; font-family: var(--font-heading, Inter), system-ui, sans-serif;}
-    .h2{margin:0 0 10px;font-size:22px;font-weight:800;letter-spacing:.2px; font-family: var(--font-heading, Inter), system-ui, sans-serif;}
+    .h1{font-size:34px;line-height:1.05;margin:0 0 10px;font-weight:900;letter-spacing:-.01em;font-family:var(--font-heading,Inter),system-ui,sans-serif}
+    .h2{margin:0 0 10px;font-size:22px;font-weight:800;letter-spacing:.2px;font-family:var(--font-heading,Inter),system-ui,sans-serif}
     .meta{color:var(--muted);font-size:14px;margin-bottom:18px}
-    .band{border-radius:var(--radius, 12px);padding:14px 16px;background:color-mix(in hsl, var(--accent) 12%, var(--panel));border:1px solid var(--stroke);margin:10px 0}
+    .band{border-radius:var(--radius,12px);padding:14px 16px;background:color-mix(in hsl,var(--accent) 12%, var(--panel));border:1px solid var(--stroke);margin:10px 0}
     .hr{height:1px;background:var(--stroke);margin:12px 0}
     p{margin:8px 0 10px}
     ul{margin:8px 0 10px 18px}
-    .tag{display:inline-block;padding:3px 8px;border-radius:999px;background:color-mix(in hsl, var(--accent) 16%, transparent);border:1px solid var(--stroke);font-size:12px;color:var(--ink)}
+    .tag{display:inline-block;padding:3px 8px;border-radius:999px;background:color-mix(in hsl,var(--accent) 16%,transparent);border:1px solid var(--stroke);font-size:12px;color:var(--ink)}
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .card{border:1px solid var(--stroke);border-radius:var(--radius, 12px);padding:12px;background:var(--panel);box-shadow:var(--elev)}
+    .card{border:1px solid var(--stroke);border-radius:var(--radius,12px);padding:12px;background:var(--panel);box-shadow:var(--elev)}
     .price{font-weight:800;font-size:18px}
     .muted{color:var(--muted)}
     .pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--stroke);font-size:12px;background:var(--panel)}
     table{border-collapse:collapse;width:100%;font-size:14px}
     th,td{border:1px solid var(--stroke);padding:8px;text-align:left}
-    th{background:color-mix(in hsl, var(--panel) 85%, transparent)}
+    th{background:color-mix(in hsl,var(--panel) 85%,transparent)}
     tfoot td{font-weight:800}
 
-    /* Impression */
+    /* Drawer + overlay (HISTORY CACHÉ PAR DÉFAUT) */
+    .drawer{position:fixed;top:0;left:0;height:100vh;width:320px;background:var(--panel);border-right:1px solid var(--stroke);
+      box-shadow:var(--elev);transform:translateX(-100%);transition:transform .28s ease;z-index:40;display:flex;flex-direction:column}
+    .drawer.open{transform:translateX(0)}
+    .drawer h3{margin:0;padding:14px;border-bottom:1px solid var(--stroke)}
+    .drawer-list{padding:10px;overflow:auto;flex:1}
+    .row-item{padding:10px;border:1px solid var(--stroke);border-radius:10px;margin-bottom:8px;cursor:pointer}
+    .row-item:hover{background:color-mix(in hsl,var(--panel) 85%,transparent)}
+    .overlay{position:fixed;inset:0;background:rgba(10,16,32,.35);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .28s;z-index:30}
+    .overlay.show{opacity:1;pointer-events:auto}
+
+    /* Print */
     @media print{
       .bar{display:none}
       body{overflow:visible;height:auto;background:#fff}
       .main{height:auto}
       .sheet-wrap{overflow:visible;flex:auto;min-height:auto;padding:0}
-      .page{page-break-after:always; box-shadow:none; margin:0; border:0; border-radius:0}
+      .page{page-break-after:always;box-shadow:none;margin:0;border:0;border-radius:0}
       .page:last-child{page-break-after:auto}
       .inner{padding:18mm 16mm}
       a[href]:after{content:""}
@@ -205,26 +140,6 @@
       .main{grid-template-columns:1fr}
       .page{width:100%;min-height:auto}
     }
-
-    /* ---------- Drawer Historique (caché par défaut) ---------- */
-    .drawer{ position:fixed; inset:0; z-index:60; display:none; }
-    .drawer.open{ display:block; }
-    .drawer-overlay{ position:absolute; inset:0; background:rgba(0,0,0,.42); backdrop-filter:blur(2px); }
-    .drawer-panel{
-      position:absolute; top:0; right:0; height:100%; width:380px; max-width:90vw;
-      background:var(--panel); border-left:1px solid var(--stroke); box-shadow:var(--elev);
-      transform:translateX(100%); transition:transform .25s ease;
-      display:flex; flex-direction:column;
-    }
-    .drawer.open .drawer-panel{ transform:translateX(0); }
-    .drawer-head{ display:flex; align-items:center; justify-content:space-between; padding:12px; border-bottom:1px solid var(--stroke); }
-    .drawer-list{ padding:10px; height:calc(100% - 50px); overflow:auto; }
-    .row-item{
-      margin:6px 0; padding:10px; border:1px solid var(--stroke); border-radius:12px;
-      background:var(--panel); box-shadow:var(--elev); cursor:pointer;
-    }
-    .row-item:hover{ background:color-mix(in hsl, var(--panel) 92%, transparent); }
-    .btn.small{ padding:6px 10px; border-radius:10px; }
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -250,17 +165,12 @@
     </div>
   </div>
 
-  <!-- History drawer (caché par défaut) -->
-  <div class="drawer" id="drawer" aria-hidden="true">
-    <div class="drawer-overlay" id="drawerOverlay"></div>
-    <aside class="drawer-panel" role="dialog" aria-label="Historique">
-      <div class="drawer-head">
-        <strong>Historique</strong>
-        <button class="btn small" id="closeHistory">Fermer</button>
-      </div>
-      <div class="drawer-list" id="histList"></div>
-    </aside>
+  <!-- History drawer (hidden by default) -->
+  <div class="drawer" id="drawer">
+    <h3>Historique</h3>
+    <div class="drawer-list" id="histList"></div>
   </div>
+  <div class="overlay" id="overlay"></div>
 
   <!-- Main -->
   <div class="main">
@@ -323,20 +233,18 @@
     /* Nav */
     document.getElementById('homeBtn').onclick=()=>location.href='index.html';
 
-    /* ----------------- Historique (drawer) ----------------- */
-    const drawer = document.getElementById('drawer');
-    const histList = document.getElementById('histList');
-    const openHistoryBtn = document.getElementById('openHistory');
-    const closeHistoryBtn = document.getElementById('closeHistory');
-    const drawerOverlay = document.getElementById('drawerOverlay');
+    /* Historique (drawer caché + overlay + Esc) */
+    const drawer=document.getElementById('drawer');
+    const overlay=document.getElementById('overlay');
+    const histList=document.getElementById('histList');
 
-    function openHistory(){ drawer.classList.add('open'); drawer.setAttribute('aria-hidden','false'); }
-    function closeHistory(){ drawer.classList.remove('open'); drawer.setAttribute('aria-hidden','true'); }
-
-    openHistoryBtn.onclick = openHistory;
-    closeHistoryBtn.onclick = closeHistory;
-    drawerOverlay.onclick = closeHistory;
-    document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeHistory(); });
+    function openDrawer(open){
+      drawer.classList.toggle('open', open);
+      overlay.classList.toggle('show', open);
+    }
+    document.getElementById('openHistory').onclick = ()=> openDrawer(true);
+    overlay.onclick = ()=> openDrawer(false);
+    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') openDrawer(false); });
 
     function saveHistory(title, spec, messages){
       const h=JSON.parse(localStorage.getItem('pf_history')||'[]');
@@ -352,7 +260,7 @@
         const d=new Date(item.date);
         const div=document.createElement('div'); div.className='row-item';
         div.innerHTML = `<strong>${item.title||'Sans titre'}</strong><br><span class="muted">${d.toLocaleString()}</span>`;
-        div.onclick=()=>{ spec=item.spec; messages=item.messages||[]; localStorage.setItem('pf_proposal', JSON.stringify(spec)); renderSpec(); renderChat(); closeHistory(); };
+        div.onclick=()=>{ spec=item.spec; messages=item.messages||[]; localStorage.setItem('pf_proposal', JSON.stringify(spec)); renderSpec(); renderChat(); openDrawer(false); };
         histList.appendChild(div);
       });
     }
@@ -385,41 +293,30 @@
     function scrollChat(){ chatBody.scrollTop = chatBody.scrollHeight; }
     function escapeHTML(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[m])); }
 
-    /* Bulle avec avatars & alignement */
     function bubble(role, html){
       const row=document.createElement('div');
       row.className='msg '+(role==='assistant'?'assistant':'user');
-
       const ava=document.createElement('div');
       ava.className='avatar-badge '+(role==='assistant'?'bot':'you');
       ava.textContent = (role==='assistant') ? 'PF' : 'ME';
-
       const bub=document.createElement('div');
       bub.className='bubble '+(role==='assistant'?'bubble-assistant':'bubble-user');
       bub.innerHTML=html;
-
       if(role==='assistant'){ row.appendChild(ava); row.appendChild(bub); }
       else { row.appendChild(bub); row.appendChild(ava); }
-
-      chatBody.appendChild(row);
-      scrollChat();
-      return row;
+      chatBody.appendChild(row); scrollChat(); return row;
     }
 
-    /* Indicateur de frappe */
     let typingRow=null;
     function showTyping(){
       if(typingRow) return;
       typingRow = document.createElement('div');
       typingRow.className='msg assistant';
-      const ava=document.createElement('div');
-      ava.className='avatar-badge bot'; ava.textContent='PF';
-      const bub=document.createElement('div');
-      bub.className='bubble bubble-assistant';
+      const ava=document.createElement('div'); ava.className='avatar-badge bot'; ava.textContent='PF';
+      const bub=document.createElement('div'); bub.className='bubble bubble-assistant';
       bub.innerHTML=`<span class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
       typingRow.appendChild(ava); typingRow.appendChild(bub);
-      chatBody.appendChild(typingRow);
-      scrollChat();
+      chatBody.appendChild(typingRow); scrollChat();
     }
     function hideTyping(){ if(typingRow){ typingRow.remove(); typingRow=null; } }
 
@@ -433,41 +330,44 @@
       const content=text.trim(); if(!content) return;
       messages.push({ role:'user', content }); localStorage.setItem('pf_chat', JSON.stringify(messages));
       bubble('user', escapeHTML(content).replace(/\n/g,'<br/>'));
-      composer.value='';
-      statusEl.textContent='Rédaction…';
+      composer.value=''; statusEl.textContent='Rédaction…';
 
       try{
         showTyping();
 
         const resp = await fetch('/api/chat', {
-          method:'POST', headers:{'Content-Type':'application/json'},
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ message: content, proposalSpec: spec, history: messages.slice(-10) })
         });
-        const data = await resp.json();
+
+        let data = null;
+        const txt = await resp.text().catch(()=> '');
+        try{ data = txt ? JSON.parse(txt) : null; }catch{ /* pas JSON */ }
+
+        if(!resp.ok){
+          const msg = data?.error || `HTTP ${resp.status}${txt ? ' — '+txt : ''}`;
+          throw new Error(msg);
+        }
 
         hideTyping();
 
-        const reply = data.reply || (getLang()==='en'?'I could not structure the proposal.':'Je n’ai pas pu structurer la proposition.');
+        const reply = (data && data.reply) ? data.reply : (getLang()==='en'?'I could not structure the proposal.':'Je n’ai pas pu structurer la proposition.');
         messages.push({ role:'assistant', content: reply }); localStorage.setItem('pf_chat', JSON.stringify(messages));
         bubble('assistant', escapeHTML(reply).replace(/\n/g,'<br/>'));
 
-        if(data.proposalSpec){
-          // merge superficiel + style prioritaire
+        if(data && data.proposalSpec){
           const next = { ...(spec||{}), ...(data.proposalSpec||{}) };
           next.meta = { ...(spec?.meta||{}), ...((data.proposalSpec||{}).meta||{}) };
-          if(next.meta){
-            next.meta.style = { ...((spec?.meta||{}).style||{}), ...((next.meta||{}).style||{}) };
-          }
-          spec = next;
-          localStorage.setItem('pf_proposal', JSON.stringify(spec));
-          renderSpec();
+          if(next.meta){ next.meta.style = { ...((spec?.meta||{}).style||{}), ...((next.meta||{}).style||{}) }; }
+          spec = next; localStorage.setItem('pf_proposal', JSON.stringify(spec)); renderSpec();
         }
         saveHistory(spec?.meta?.title || 'Proposition', spec, messages);
         statusEl.textContent='Prêt';
       }catch(e){
         hideTyping();
         statusEl.textContent='Erreur réseau';
-        bubble('assistant', '<em>Erreur réseau. Réessayez.</em>');
+        bubble('assistant', `<em>Erreur réseau : ${escapeHTML(e.message||'inconnue')}</em>`);
       }
     }
 
@@ -503,7 +403,7 @@
     function fmtDate(d){ try{ const dt=d?new Date(d):new Date(); return dt.toLocaleDateString(document.documentElement.lang||getLang(), {year:'numeric',month:'short',day:'2-digit'});}catch{return ''} }
     function money(n,c){ try{ return new Intl.NumberFormat(document.documentElement.lang||getLang(),{style:'currency',currency:c||'EUR'}).format(Number(n||0)); }catch{ return String(n||0)+' '+(c||'€') } }
 
-    /* === THEME: applique meta.style à l’aperçu (variables CSS + décor global) === */
+    /* THEME: applique meta.style à l’aperçu (variables CSS + décor global) */
     function applyStyleTokens(style){
       const palette = {
         primary: "#3B82F6", secondary: "#8B5CF6", surface: "#FFFFFF",
@@ -514,7 +414,6 @@
       const shapes = { radius:"12px", shadow:"0 18px 48px rgba(10,16,32,.12)", ...(style?.shapes||{}) };
       const typo   = { heading:"Inter", body:"Inter", accent:"Inter", ...(style?.typography||{}) };
 
-      // Scope sur #sheet
       sheet.style.setProperty('--panel', palette.surface);
       sheet.style.setProperty('--ink', palette.ink);
       sheet.style.setProperty('--muted', palette.muted);
@@ -540,14 +439,12 @@
       };
       return map[pos] || map.center;
     }
-    function renderDecorLayers(layers, palette){
+    function renderDecorLayers(layers){
       decor.innerHTML = '';
       if(!layers?.length) return;
       layers.forEach((L,i)=>{
         const layer = document.createElement('div');
-        layer.style.position='absolute';
-        layer.style.pointerEvents='none';
-        layer.style.mixBlendMode = (L.blend||'normal');
+        layer.style.position='absolute'; layer.style.pointerEvents='none'; layer.style.mixBlendMode = (L.blend||'normal');
         const pos = pickCorner(L.position);
         Object.assign(layer.style, pos);
         const rot = Number(L.rotate||0);
@@ -555,34 +452,26 @@
         const color = hsla(L.h ?? 220, L.s ?? 60, L.l ?? 55, L.opacity ?? 0.18);
 
         switch((L.type||'').toLowerCase()){
-          case 'glow': {
+          case 'glow':{
             const size = 900*scale;
             layer.style.width = layer.style.height = size+'px';
-            layer.style.borderRadius='50%';
-            layer.style.filter='blur(48px)';
+            layer.style.borderRadius='50%'; layer.style.filter='blur(48px)';
             layer.style.background = `radial-gradient(closest-side, ${color} 0%, transparent 70%)`;
-            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
-            break;
+            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`; break;
           }
-          case 'gradient_blob': {
+          case 'gradient_blob':{
             const w = 1000*scale, h = 700*scale;
             layer.style.width = w+'px'; layer.style.height = h+'px';
-            layer.style.borderRadius='40%';
-            layer.style.filter='blur(24px)';
+            layer.style.borderRadius='40%'; layer.style.filter='blur(24px)';
             layer.style.background = `conic-gradient(from 180deg, ${color}, transparent 60%)`;
-            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
-            break;
+            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`; break;
           }
-          case 'diagonal': {
+          case 'diagonal':{
             const size = 1600*scale;
             layer.style.width = size+'px'; layer.style.height = size+'px';
-            layer.style.background = `
-              repeating-linear-gradient(${rot}deg,
-                ${color} 0px, ${color} 4px,
-                transparent 4px, transparent 22px)`;
-            break;
+            layer.style.background = `repeating-linear-gradient(${rot}deg, ${color} 0px, ${color} 4px, transparent 4px, transparent 22px)`; break;
           }
-          case 'grid': {
+          case 'grid':{
             const size = 1400*scale;
             layer.style.width = size+'px'; layer.style.height = size+'px';
             const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
@@ -591,17 +480,15 @@
             const pat = document.createElementNS(svg.namespaceURI,'pattern');
             pat.setAttribute('id',`p-${i}`); pat.setAttribute('width','10'); pat.setAttribute('height','10'); pat.setAttribute('patternUnits','userSpaceOnUse');
             const path = document.createElementNS(svg.namespaceURI,'path');
-            path.setAttribute('d','M10 0 L0 0 0 10');
-            path.setAttribute('fill','none'); path.setAttribute('stroke', color); path.setAttribute('stroke-width','0.4');
+            path.setAttribute('d','M10 0 L0 0 0 10'); path.setAttribute('fill','none');
+            path.setAttribute('stroke', color); path.setAttribute('stroke-width','0.4');
             pat.appendChild(path); defs.appendChild(pat); svg.appendChild(defs);
             const rect = document.createElementNS(svg.namespaceURI,'rect');
             rect.setAttribute('width','100%'); rect.setAttribute('height','100%'); rect.setAttribute('fill',`url(#p-${i})`);
-            svg.appendChild(rect);
-            layer.appendChild(svg);
-            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
-            break;
+            svg.appendChild(rect); layer.appendChild(svg);
+            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`; break;
           }
-          case 'dots': {
+          case 'dots':{
             const size = 1400*scale;
             layer.style.width = size+'px'; layer.style.height = size+'px';
             const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
@@ -614,16 +501,13 @@
             pat.appendChild(circle); defs.appendChild(pat); svg.appendChild(defs);
             const rect = document.createElementNS(svg.namespaceURI,'rect');
             rect.setAttribute('width','100%'); rect.setAttribute('height','100%'); rect.setAttribute('fill',`url(#d-${i})`);
-            svg.appendChild(rect);
-            layer.appendChild(svg);
-            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
-            break;
+            svg.appendChild(rect); layer.appendChild(svg);
+            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`; break;
           }
-          default: {
+          default:{
             const size = 1000*scale;
             layer.style.width = layer.style.height = size+'px';
-            layer.style.borderRadius='50%';
-            layer.style.filter='blur(40px)';
+            layer.style.borderRadius='50%'; layer.style.filter='blur(40px)';
             layer.style.background = `radial-gradient(closest-side, ${color} 0%, transparent 70%)`;
             layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
           }
@@ -632,32 +516,27 @@
       });
     }
 
-    /* ——— MOTEUR DE PAGES ——— */
+    /* Pages */
     const sheetPages = [];
     function clearPages(){ sheetContent.innerHTML=''; sheetPages.length=0; }
     function makePage(kind='default'){
       const page = document.createElement('div'); page.className='page'; page.dataset.kind=kind;
       const pageDecor = document.createElement('div'); pageDecor.className='page-decor';
       const inner = document.createElement('div'); inner.className='inner';
-      page.appendChild(pageDecor); page.appendChild(inner);
-      sheetContent.appendChild(page); sheetPages.push({page, inner, pageDecor});
+      page.appendChild(pageDecor); page.appendChild(inner); sheetContent.appendChild(page); sheetPages.push({page, inner, pageDecor});
       return {page, inner, pageDecor};
     }
 
-    // Helpers pour écrire dans un conteneur "inner"
     function H1(inner, text){ const el=document.createElement('div'); el.className='h1'; el.textContent=text; inner.appendChild(el); }
     function H2(inner, text){ const el=document.createElement('div'); el.className='h2'; el.textContent=text; inner.appendChild(el); }
     function HR(inner){ inner.appendChild(Object.assign(document.createElement('div'),{className:'hr'})); }
     function P(inner, text){ const p=document.createElement('p'); p.textContent=text; inner.appendChild(p); }
     function UL(inner, arr){ if(!arr?.length) return; const ul=document.createElement('ul'); arr.forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ul.appendChild(li); }); inner.appendChild(ul); }
 
-    // Page décor locale (bandeau diagonal / accent)
     function pageAccentBar(pageDecor, colorA, colorB){
       const band = document.createElement('div');
       band.style.position='absolute'; band.style.inset='-10% -10% auto -10%'; band.style.height='40%';
-      band.style.background = `linear-gradient(135deg, ${colorA}, ${colorB})`;
-      band.style.opacity = .25;
-      band.style.transform = 'skewY(-8deg)';
+      band.style.background = `linear-gradient(135deg, ${colorA}, ${colorB})`; band.style.opacity = .25; band.style.transform = 'skewY(-8deg)';
       pageDecor.appendChild(band);
     }
 
@@ -667,19 +546,15 @@
       const pB = getComputedStyle(sheet).getPropertyValue('--accent2').trim() || '#8B5CF6';
       pageAccentBar(pageDecor, pA, pB);
 
-      // Header (logo + brand)
       const head=document.createElement('div'); head.className='doc-header';
       const logoBox=document.createElement('div'); logoBox.className='logo-box';
       if(style?.logoDataUrl){ const im=new Image(); im.src=style.logoDataUrl; logoBox.appendChild(im); } else { logoBox.textContent='LOGO'; logoBox.style.color='#9aa6bf'; }
       const bi=document.createElement('div'); bi.className='brand-info';
       bi.innerHTML=`<div class="company">${company}</div><div class="muted">${date}</div>`;
-      head.appendChild(logoBox); head.appendChild(bi);
-      inner.appendChild(head);
+      head.appendChild(logoBox); head.appendChild(bi); inner.appendChild(head);
 
-      // Grand titre
       H1(inner, title);
-      const meta=document.createElement('div');
-      meta.className='meta';
+      const meta=document.createElement('div'); meta.className='meta';
       meta.innerHTML = `${L.to}: <span class="tag">${client}</span> &nbsp;•&nbsp; ${L.from}: <span class="tag">${company}</span>`;
       inner.appendChild(meta);
 
@@ -690,7 +565,7 @@
 
     function renderTOC(L, sections){
       const present = sections.filter(s=>s.present);
-      if(present.length<3) return; // TOC si suffisamment de contenu
+      if(present.length<3) return;
       const { inner } = makePage('toc');
       H2(inner, L.toc);
       const toc=document.createElement('div'); toc.className='toc';
@@ -703,69 +578,49 @@
       const { inner } = makePage('letter');
       H2(inner, L.letter);
       if(letter?.greeting) P(inner, letter.greeting);
-      safeArr(letter?.body_paragraphs?.length?letter.body_paragraphs:letter?.paragraphs).forEach(p=>P(inner, p));
+      (Array.isArray(letter?.body_paragraphs) && letter.body_paragraphs.length ? letter.body_paragraphs : (letter?.paragraphs||[])).forEach(p=>P(inner, p));
       if(letter?.closing) P(inner, letter.closing);
       if(letter?.signature) P(inner, letter.signature);
     }
-
-    function renderExecutive(L, exec){
-      const { inner } = makePage('executive');
-      H2(inner, L.executive);
-      safeArr(exec?.paragraphs).forEach(p=>P(inner, p));
-    }
-
-    function renderObjectives(L, obj){
-      const { inner } = makePage('objectives');
-      H2(inner, L.objectives);
-      UL(inner, obj?.bullets||[]);
-    }
-
+    function renderExecutive(L, exec){ const { inner } = makePage('executive'); H2(inner, L.executive); (exec?.paragraphs||[]).forEach(p=>P(inner,p)); }
+    function renderObjectives(L, obj){ const { inner } = makePage('objectives'); H2(inner, L.objectives); UL(inner, obj?.bullets||[]); }
     function renderApproach(L, approach){
-      const { inner } = makePage('approach');
-      H2(inner, L.approach);
-      safeArr(approach?.phases).forEach((ph,i)=>{
+      const { inner } = makePage('approach'); H2(inner, L.approach);
+      (approach?.phases||[]).forEach((ph,i)=>{
         const card=document.createElement('div'); card.className='card';
         card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center">
-          <strong>Phase ${i+1} — ${safeStr(ph.title,'À confirmer')}</strong>
-          <span class="pill">${safeStr(ph.duration||'','')}</span></div>`;
+          <strong>Phase ${i+1} — ${ph.title||'À confirmer'}</strong><span class="pill">${ph.duration||''}</span></div>`;
         inner.appendChild(card);
         if(ph.description) P(inner, ph.description);
-        const acts=safeArr(ph.activities?.length?ph.activities:ph.steps); if(acts.length){ const p=document.createElement('p'); p.innerHTML='<em>Activités :</em>'; inner.appendChild(p); UL(inner, acts); }
-        const outs=safeArr(ph.outcomes); if(outs.length){ const p=document.createElement('p'); p.innerHTML='<em>Résultats attendus :</em>'; inner.appendChild(p); UL(inner, outs); }
+        const acts=(ph.activities && ph.activities.length?ph.activities:ph.steps)||[]; if(acts.length){ const p=document.createElement('p'); p.innerHTML='<em>Activités :</em>'; inner.appendChild(p); UL(inner, acts); }
+        const outs=ph.outcomes||[]; if(outs.length){ const p=document.createElement('p'); p.innerHTML='<em>Résultats attendus :</em>'; inner.appendChild(p); UL(inner, outs); }
       });
     }
-
     function renderDeliverables(L, deliv){
-      const { inner } = makePage('deliverables');
-      H2(inner, L.deliverables);
+      const { inner } = makePage('deliverables'); H2(inner, L.deliverables);
       const grid=document.createElement('div'); grid.className='grid2';
       const a=document.createElement('div'); a.className='card'; a.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.in_scope}</div>`;
       const b=document.createElement('div'); b.className='card'; b.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.out_scope}</div>`;
-      const ulA=document.createElement('ul'); safeArr(deliv?.in).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulA.appendChild(li); });
-      const ulB=document.createElement('ul'); safeArr(deliv?.out).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulB.appendChild(li); });
+      const ulA=document.createElement('ul'); (deliv?.in||[]).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulA.appendChild(li); });
+      const ulB=document.createElement('ul'); (deliv?.out||[]).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulB.appendChild(li); });
       a.appendChild(ulA); b.appendChild(ulB); grid.appendChild(a); grid.appendChild(b); inner.appendChild(grid);
     }
-
     function renderTimeline(L, timeline){
-      const { inner } = makePage('timeline');
-      H2(inner, L.timeline);
+      const { inner } = makePage('timeline'); H2(inner, L.timeline);
       const grid=document.createElement('div'); grid.className='grid2';
-      safeArr(timeline?.milestones).forEach(ms=>{
+      (timeline?.milestones||[]).forEach(ms=>{
         const c=document.createElement('div'); c.className='card';
-        c.innerHTML = `<div><strong>${safeStr(ms.title,'Étape')}</strong></div><div class="muted">${safeStr(ms.dateOrWeek || ms.date || ms.duration || '', '')}</div>`;
+        c.innerHTML = `<div><strong>${ms.title||'Étape'}</strong></div><div class="muted">${ms.dateOrWeek || ms.date || ms.duration || ''}</div>`;
         if(ms.notes){ const p=document.createElement('p'); p.textContent=ms.notes; c.appendChild(p); }
         grid.appendChild(c);
       });
       inner.appendChild(grid);
     }
-
     function renderPricing(L, pr, currencyFallback){
-      const { inner } = makePage('pricing');
-      H2(inner, L.pricing);
+      const { inner } = makePage('pricing'); H2(inner, L.pricing);
       const currency=pr?.currency||currencyFallback||'EUR';
       const meta=document.createElement('div'); meta.className='muted'; meta.style.margin='-6px 0 8px';
-      meta.innerHTML = `${L.price_model}: <span class="pill">${safeStr(pr?.model,'forfait')}</span>`;
-      inner.appendChild(meta);
+      meta.innerHTML = `${L.price_model}: <span class="pill">${pr?.model||'forfait'}</span>`; inner.appendChild(meta);
 
       if(Array.isArray(pr?.items) && pr.items.length){
         const table=document.createElement('table');
@@ -777,11 +632,11 @@
         pr.items.forEach(it=>{
           const tr=document.createElement('tr');
           const qty=Number(it.qty||1), up=Number(it.unit_price||0), st=(it.subtotal!=null)?Number(it.subtotal):qty*up;
-          tr.innerHTML=`<td>${safeStr(it.name,'—')}</td><td>${Number.isFinite(qty)?qty:1}</td><td>${safeStr(it.unit||'—')}</td><td>${money(up,currency)}</td><td>${money(st,currency)}</td>`;
+          tr.innerHTML=`<td>${it.name||'—'}</td><td>${Number.isFinite(qty)?qty:1}</td><td>${it.unit||'—'}</td><td>${money(up,currency)}</td><td>${money(st,currency)}</td>`;
           tb.appendChild(tr);
         });
         inner.appendChild(table);
-        const subtotal=Array.from(tb.children).reduce((s,tr)=>{ const v=(tr.children[4]?.textContent||'0').replace(/[^\d.,-]/g,'').replace(',','.'); return s + (parseFloat(v)||0); },0);
+        const subtotal = (pr.items||[]).reduce((s,it)=> s + ( (it.subtotal!=null?Number(it.subtotal):(Number(it.qty||1)*Number(it.unit_price||0))) || 0 ), 0);
         const taxRate=Number(pr.tax_rate||0); const taxes=subtotal*(taxRate/100); const total=subtotal+taxes;
         table.querySelector('#ft_subtotal').textContent=money(subtotal,currency);
         table.querySelector('#ft_tax').textContent=`${money(taxes,currency)} ${taxRate?`(${taxRate}%)`:''}`;
@@ -794,57 +649,42 @@
       }else{
         const priceBox=document.createElement('div'); priceBox.className='card';
         const price=pr?.price!=null?String(pr.price):'—';
-        priceBox.innerHTML=`<div class="price">${money(price,currency)}</div><div class="muted" style="margin-top:4px">${L.price_model}: <span>${safeStr(pr?.model,'forfait')}</span></div>`;
+        priceBox.innerHTML=`<div class="price">${money(price,currency)}</div><div class="muted" style="margin-top:4px">${L.price_model}: <span>${pr?.model||'forfait'}</span></div>`;
         inner.appendChild(priceBox);
       }
     }
-
-    function renderAssumptions(L, asmp){
-      const { inner } = makePage('assumptions');
-      H2(inner, L.assumptions);
-      safeArr(asmp?.paragraphs).forEach(p=>P(inner, p));
-    }
-    function renderNext(L, next){
-      const { inner } = makePage('next');
-      H2(inner, L.next);
-      safeArr(next?.paragraphs).forEach(p=>P(inner, p));
-    }
+    function renderAssumptions(L, asmp){ const { inner } = makePage('assumptions'); H2(inner, L.assumptions); (asmp?.paragraphs||[]).forEach(p=>P(inner,p)); }
+    function renderNext(L, next){ const { inner } = makePage('next'); H2(inner, L.next); (next?.paragraphs||[]).forEach(p=>P(inner,p)); }
 
     function buildTOCList(L){
       return [
-        { id:'s_letter', title:L.letter, present: safeArr(spec.letter?.body_paragraphs||spec.letter?.paragraphs).length || spec.letter?.greeting||spec.letter?.closing||spec.letter?.signature },
-        { id:'s_executive', title:L.executive, present: safeArr(spec.executive_summary?.paragraphs).length },
-        { id:'s_objectives', title:L.objectives, present: safeArr(spec.objectives?.bullets).length },
-        { id:'s_approach', title:L.approach, present: safeArr(spec.approach?.phases).length },
-        { id:'s_deliverables', title:L.deliverables, present: (spec.deliverables && (safeArr(spec.deliverables.in).length || safeArr(spec.deliverables.out).length)) },
-        { id:'s_timeline', title:L.timeline, present: safeArr(spec.timeline?.milestones).length },
-        { id:'s_pricing', title:L.pricing, present: (spec.pricing && (spec.pricing.items?.length || spec.pricing.price!=null)) },
-        { id:'s_assumptions', title:L.assumptions, present: safeArr(spec.assumptions?.paragraphs).length },
-        { id:'s_next', title:L.next, present: safeArr(spec.next_steps?.paragraphs).length },
+        { id:'s_letter', title:L.letter, present: (spec.letter && ((spec.letter.body_paragraphs||spec.letter.paragraphs||[]).length || spec.letter.greeting||spec.letter.closing||spec.letter.signature)) },
+        { id:'s_executive', title:L.executive, present: (spec.executive_summary && (spec.executive_summary.paragraphs||[]).length) },
+        { id:'s_objectives', title:L.objectives, present: (spec.objectives && (spec.objectives.bullets||[]).length) },
+        { id:'s_approach', title:L.approach, present: (spec.approach && (spec.approach.phases||[]).length) },
+        { id:'s_deliverables', title:L.deliverables, present: (spec.deliverables && ((spec.deliverables.in||[]).length || (spec.deliverables.out||[]).length)) },
+        { id:'s_timeline', title:L.timeline, present: (spec.timeline && (spec.timeline.milestones||[]).length) },
+        { id:'s_pricing', title:L.pricing, present: (spec.pricing && ((spec.pricing.items||[]).length || spec.pricing.price!=null)) },
+        { id:'s_assumptions', title:L.assumptions, present: (spec.assumptions && (spec.assumptions.paragraphs||[]).length) },
+        { id:'s_next', title:L.next, present: (spec.next_steps && (spec.next_steps.paragraphs||[]).length) },
       ];
     }
 
     function renderSpec(){
-      // 1) Style tokens & décor global
       applyStyleTokens(spec?.meta?.style || null);
-
-      // 2) Nettoyage + pages
       clearPages();
 
       const L=t[spec.meta?.lang||getLang()]||t.fr;
-      const title=safeStr(spec.meta?.title, L.title);
-      const company=safeStr(spec.meta?.company || spec.meta?.brand?.company,'Votre société');
-      const client=safeStr(spec.meta?.client,'Client');
-      const date=safeStr(spec.meta?.date, fmtDate());
+      const title = (spec.meta?.title || L.title).trim();
+      const company = (spec.meta?.company || spec.meta?.brand?.company || 'Votre société').trim();
+      const client = (spec.meta?.client || 'Client').trim();
+      const date = spec.meta?.date || fmtDate();
 
-      // Page de couverture
       renderCover(spec?.meta?.style, L, title, company, client, date);
 
-      // TOC si contenu riche
       const tocList = buildTOCList(L);
       renderTOC(L, tocList);
 
-      // Corps (1 section = 1 page pour simplicité)
       if (tocList[0].present) renderLetter(L, spec.letter);
       if (tocList[1].present) renderExecutive(L, spec.executive_summary);
       if (tocList[2].present) renderObjectives(L, spec.objectives);
@@ -866,11 +706,10 @@
     window.addEventListener('langchange', ()=>{
       spec.meta = { ...(spec.meta||{}), lang:getLang() };
       localStorage.setItem('pf_proposal', JSON.stringify(spec));
-      applyChatLang();
-      renderSpec();
+      applyChatLang(); renderSpec();
     });
 
-    /* Si dernier message user est sans réponse → relance */
+    /* Relance si dernier message sans réponse */
     if(messages.length && messages[messages.length-1].role==='user' && !chatBody.querySelector('.bubble-assistant')){
       sendMessage(messages[messages.length-1].content);
     }
