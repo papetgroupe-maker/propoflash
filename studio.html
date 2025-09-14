@@ -17,15 +17,8 @@
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{
-      margin:0;height:100vh;overflow:hidden;
-      background:linear-gradient(180deg,var(--bg),#eef3ff);
-      font-family:Inter,system-ui,sans-serif;color:var(--ink)
-    }
-
-    /* Top bar */
-    .bar{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--stroke);
-      display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px;box-shadow:var(--elev)}
+    body{margin:0;height:100vh;overflow:hidden;background:linear-gradient(180deg,var(--bg),#eef3ff);font-family:Inter,system-ui,sans-serif;color:var(--ink)}
+    .bar{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--stroke);display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px;box-shadow:var(--elev)}
     .left,.right{display:flex;gap:10px;align-items:center}
     .brand{display:flex;gap:10px;align-items:center;font-weight:800;cursor:pointer}
     .spark{width:22px;height:22px;border-radius:6px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd)}
@@ -35,22 +28,12 @@
     .menu{position:absolute;top:54px;right:14px;background:var(--panel);border:1px solid var(--stroke);border-radius:12px;box-shadow:var(--elev);display:none;overflow:hidden}
     .menu a,.menu button{display:block;width:100%;text-align:left;padding:10px 12px;border:none;background:var(--panel);cursor:pointer;font-weight:600;color:var(--ink)}
     .menu a:hover,.menu button:hover{background:color-mix(in hsl, var(--panel) 80%, transparent)}
-
-    /* Main split: chat (left) + preview (right) */
-    .main{
-      height:calc(100vh - 64px);
-      display:grid;
-      grid-template-columns: clamp(520px, 38vw, 640px) 1fr;
-      gap:18px;padding:18px 24px;align-items:stretch;min-height:0;
-    }
+    .main{height:calc(100vh - 64px);display:grid;grid-template-columns: clamp(520px, 38vw, 640px) 1fr;gap:18px;padding:18px 24px;align-items:stretch;min-height:0}
     .panel{background:var(--panel);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--elev);display:flex;flex-direction:column;min-height:0}
-
-    /* Chat */
     .chat{min-height:0;display:flex;flex-direction:column}
     .chat-head{display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--stroke)}
     .chat-title{font-weight:800}
     .chat-body{padding:12px;overflow:auto;flex:1;min-height:0}
-
     .msg{display:flex;gap:10px;margin:10px 0;align-items:flex-end;width:100%}
     .msg.assistant{justify-content:flex-start}
     .msg.user{justify-content:flex-end}
@@ -60,7 +43,6 @@
     .bubble{max-width:min(100%,560px);padding:10px 12px;border-radius:14px;border:1px solid var(--stroke);box-shadow:var(--elev);word-wrap:break-word;overflow-wrap:anywhere}
     .bubble-assistant{background:var(--assistant-bubble);color:var(--ink)}
     .bubble-user{background:var(--user-bubble);color:var(--user-ink);border-color:transparent}
-
     .chat-compose{position:relative;padding:12px;border-top:1px solid var(--stroke);display:flex;align-items:flex-end;gap:16px}
     .logo-wrap{position:relative;flex:0 0 auto}
     .input{display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--stroke);border-radius:14px;padding:8px;box-shadow:var(--elev);flex:1}
@@ -70,13 +52,10 @@
     .logo-btn input{display:none}
     .logo-tip{position:absolute;left:0;bottom:44px;background:#111;color:#fff;font-size:12px;padding:6px 8px;border-radius:8px;display:none;white-space:nowrap}
     .logo-wrap:hover .logo-tip{display:block}
-
     .typing{display:inline-flex;gap:5px;align-items:center}
     .dot{width:6px;height:6px;border-radius:50%;background:#8aa0c6;opacity:.7;animation:bounce 1.2s infinite}
     .dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
     @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
-
-    /* Preview */
     .sheet-wrap{flex:1;min-height:0;overflow:auto;display:flex;justify-content:center;align-items:flex-start;padding:12px 24px}
     .sheet{position:relative;overflow:visible;width:var(--paper-w);max-width:100%;background:transparent;border:none;box-shadow:none;color:var(--ink);font-family:var(--font-body,Inter),system-ui,sans-serif}
     .decor{position:fixed;inset:0;pointer-events:none;z-index:0}
@@ -85,7 +64,6 @@
     .page:last-child{margin-bottom:0}
     .inner{padding:22mm 18mm;position:relative;z-index:1}
     .page .page-decor{position:absolute;inset:0;pointer-events:none;z-index:0}
-
     .doc-header{display:grid;grid-template-columns:100px 1fr;gap:16px;align-items:center;margin-bottom:16px}
     .logo-box{width:100px;height:100px;border:1px solid var(--stroke);border-radius:var(--radius,12px);display:grid;place-items:center;overflow:hidden;background:var(--panel)}
     .logo-box img{width:100%;height:100%;object-fit:contain}
@@ -112,10 +90,7 @@
     th,td{border:1px solid var(--stroke);padding:8px;text-align:left}
     th{background:color-mix(in hsl,var(--panel) 85%,transparent)}
     tfoot td{font-weight:800}
-
-    /* Drawer + overlay (HISTORY CACHÉ PAR DÉFAUT) */
-    .drawer{position:fixed;top:0;left:0;height:100vh;width:320px;background:var(--panel);border-right:1px solid var(--stroke);
-      box-shadow:var(--elev);transform:translateX(-100%);transition:transform .28s ease;z-index:40;display:flex;flex-direction:column}
+    .drawer{position:fixed;top:0;left:0;height:100vh;width:320px;background:var(--panel);border-right:1px solid var(--stroke);box-shadow:var(--elev);transform:translateX(-100%);transition:transform .28s ease;z-index:40;display:flex;flex-direction:column}
     .drawer.open{transform:translateX(0)}
     .drawer h3{margin:0;padding:14px;border-bottom:1px solid var(--stroke)}
     .drawer-list{padding:10px;overflow:auto;flex:1}
@@ -123,30 +98,13 @@
     .row-item:hover{background:color-mix(in hsl,var(--panel) 85%,transparent)}
     .overlay{position:fixed;inset:0;background:rgba(10,16,32,.35);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .28s;z-index:30}
     .overlay.show{opacity:1;pointer-events:auto}
-
-    /* Print */
-    @media print{
-      .bar{display:none}
-      body{overflow:visible;height:auto;background:#fff}
-      .main{height:auto}
-      .sheet-wrap{overflow:visible;flex:auto;min-height:auto;padding:0}
-      .page{page-break-after:always;box-shadow:none;margin:0;border:0;border-radius:0}
-      .page:last-child{page-break-after:auto}
-      .inner{padding:18mm 16mm}
-      a[href]:after{content:""}
-    }
-
-    @media (max-width:1100px){
-      .main{grid-template-columns:1fr}
-      .page{width:100%;min-height:auto}
-    }
+    @media print{.bar{display:none}body{overflow:visible;height:auto;background:#fff}.main{height:auto}.sheet-wrap{overflow:visible;flex:auto;min-height:auto;padding:0}.page{page-break-after:always;box-shadow:none;margin:0;border:0;border-radius:0}.page:last-child{page-break-after:auto}.inner{padding:18mm 16mm}a[href]:after{content:""}}
+    @media (max-width:1100px){.main{grid-template-columns:1fr}.page{width:100%;min-height:auto}}
   </style>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="lang.js"></script>
 </head>
 <body>
-  <!-- Top bar -->
   <div class="bar">
     <div class="left">
       <div class="brand" id="homeBtn"><div class="spark" aria-hidden="true"></div>PropoFlash</div>
@@ -165,20 +123,16 @@
     </div>
   </div>
 
-  <!-- History drawer (hidden by default) -->
   <div class="drawer" id="drawer">
     <h3>Historique</h3>
     <div class="drawer-list" id="histList"></div>
   </div>
   <div class="overlay" id="overlay"></div>
 
-  <!-- Main -->
   <div class="main">
-    <!-- Chat -->
     <div class="panel chat">
       <div class="chat-head"><strong class="chat-title">Chat</strong></div>
       <div class="chat-body" id="chatBody" aria-live="polite"></div>
-
       <div class="chat-compose">
         <div class="logo-wrap">
           <label class="logo-btn" title="Ajouter un logo (PNG/JPG/SVG)">
@@ -195,7 +149,6 @@
       </div>
     </div>
 
-    <!-- Aperçu -->
     <div class="panel sheet-wrap">
       <div class="sheet" id="sheet">
         <div class="decor" id="decor"></div>
@@ -205,7 +158,6 @@
   </div>
 
   <script>
-    /* Supabase guard */
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -220,28 +172,15 @@
     }
     guard();
 
-    /* Profil menu */
     const avatar=document.getElementById('avatar'), menu=document.getElementById('menu'), logoutBtn=document.getElementById('logoutBtn');
-    (async ()=>{
-      const { data:{ session } } = await sb.auth.getSession();
-      avatar.textContent = session?.user ? (session.user.email||'?')[0].toUpperCase() : 'U';
-    })();
+    (async ()=>{ const { data:{ session } } = await sb.auth.getSession(); avatar.textContent = session?.user ? (session.user.email||'?')[0].toUpperCase() : 'U'; })();
     avatar.onclick = (e)=>{ e.stopPropagation(); menu.style.display = menu.style.display==='block'?'none':'block'; };
     document.addEventListener('click', ()=> menu.style.display='none');
     logoutBtn.onclick = async ()=>{ await sb.auth.signOut(); location.reload(); };
-
-    /* Nav */
     document.getElementById('homeBtn').onclick=()=>location.href='index.html';
 
-    /* Historique (drawer caché + overlay + Esc) */
-    const drawer=document.getElementById('drawer');
-    const overlay=document.getElementById('overlay');
-    const histList=document.getElementById('histList');
-
-    function openDrawer(open){
-      drawer.classList.toggle('open', open);
-      overlay.classList.toggle('show', open);
-    }
+    const drawer=document.getElementById('drawer'); const overlay=document.getElementById('overlay'); const histList=document.getElementById('histList');
+    function openDrawer(open){ drawer.classList.toggle('open', open); overlay.classList.toggle('show', open); }
     document.getElementById('openHistory').onclick = ()=> openDrawer(true);
     overlay.onclick = ()=> openDrawer(false);
     document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') openDrawer(false); });
@@ -266,7 +205,6 @@
     }
     renderHistory();
 
-    /* Chat + Spec */
     const chatBody=document.getElementById('chatBody');
     const composer=document.getElementById('composer');
     const sendBtn=document.getElementById('sendBtn');
@@ -285,45 +223,31 @@
     }
     loadSpec();
 
-    (function consumeWelcome(){
-      const w = localStorage.getItem('pf_welcome_msg');
-      if(w){ messages.push({ role:'user', content:w }); localStorage.removeItem('pf_welcome_msg'); }
-    })();
+    (function consumeWelcome(){ const w = localStorage.getItem('pf_welcome_msg'); if(w){ messages.push({ role:'user', content:w }); localStorage.removeItem('pf_welcome_msg'); } })();
 
     function scrollChat(){ chatBody.scrollTop = chatBody.scrollHeight; }
     function escapeHTML(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[m])); }
 
     function bubble(role, html){
-      const row=document.createElement('div');
-      row.className='msg '+(role==='assistant'?'assistant':'user');
-      const ava=document.createElement('div');
-      ava.className='avatar-badge '+(role==='assistant'?'bot':'you');
-      ava.textContent = (role==='assistant') ? 'PF' : 'ME';
-      const bub=document.createElement('div');
-      bub.className='bubble '+(role==='assistant'?'bubble-assistant':'bubble-user');
-      bub.innerHTML=html;
-      if(role==='assistant'){ row.appendChild(ava); row.appendChild(bub); }
-      else { row.appendChild(bub); row.appendChild(ava); }
+      const row=document.createElement('div'); row.className='msg '+(role==='assistant'?'assistant':'user');
+      const ava=document.createElement('div'); ava.className='avatar-badge '+(role==='assistant'?'bot':'you'); ava.textContent = (role==='assistant') ? 'PF' : 'ME';
+      const bub=document.createElement('div'); bub.className='bubble '+(role==='assistant'?'bubble-assistant':'bubble-user'); bub.innerHTML=html;
+      if(role==='assistant'){ row.appendChild(ava); row.appendChild(bub); } else { row.appendChild(bub); row.appendChild(ava); }
       chatBody.appendChild(row); scrollChat(); return row;
     }
 
     let typingRow=null;
     function showTyping(){
       if(typingRow) return;
-      typingRow = document.createElement('div');
-      typingRow.className='msg assistant';
+      typingRow = document.createElement('div'); typingRow.className='msg assistant';
       const ava=document.createElement('div'); ava.className='avatar-badge bot'; ava.textContent='PF';
       const bub=document.createElement('div'); bub.className='bubble bubble-assistant';
       bub.innerHTML=`<span class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
-      typingRow.appendChild(ava); typingRow.appendChild(bub);
-      chatBody.appendChild(typingRow); scrollChat();
+      typingRow.appendChild(ava); typingRow.appendChild(bub); chatBody.appendChild(typingRow); scrollChat();
     }
     function hideTyping(){ if(typingRow){ typingRow.remove(); typingRow=null; } }
 
-    function renderChat(){
-      chatBody.innerHTML='';
-      messages.forEach(m=> bubble(m.role, escapeHTML(m.content).replace(/\n/g,'<br/>')));
-    }
+    function renderChat(){ chatBody.innerHTML=''; messages.forEach(m=> bubble(m.role, escapeHTML(m.content).replace(/\n/g,'<br/>'))); }
     renderChat();
 
     async function sendMessage(text){
@@ -335,28 +259,22 @@
       try{
         showTyping();
 
-        const resp = await fetch('/api/chat', {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ message: content, proposalSpec: spec, history: messages.slice(-10) })
+        // ⬇️  APPEL SUPABASE EDGE FUNCTION "proposal"
+        const { data, error } = await sb.functions.invoke('proposal', {
+          body: { message: content, proposalSpec: spec, history: messages.slice(-10) }
         });
-
-        let data = null;
-        const txt = await resp.text().catch(()=> '');
-        try{ data = txt ? JSON.parse(txt) : null; }catch{ /* pas JSON */ }
-
-        if(!resp.ok){
-          const msg = data?.error || `HTTP ${resp.status}${txt ? ' — '+txt : ''}`;
-          throw new Error(msg);
-        }
 
         hideTyping();
 
-        const reply = (data && data.reply) ? data.reply : (getLang()==='en'?'I could not structure the proposal.':'Je n’ai pas pu structurer la proposition.');
+        if(error){
+          throw new Error(error.message || 'Edge function error');
+        }
+
+        const reply = data?.reply || (getLang()==='en'?'I could not structure the proposal.':'Je n’ai pas pu structurer la proposition.');
         messages.push({ role:'assistant', content: reply }); localStorage.setItem('pf_chat', JSON.stringify(messages));
         bubble('assistant', escapeHTML(reply).replace(/\n/g,'<br/>'));
 
-        if(data && data.proposalSpec){
+        if(data?.proposalSpec){
           const next = { ...(spec||{}), ...(data.proposalSpec||{}) };
           next.meta = { ...(spec?.meta||{}), ...((data.proposalSpec||{}).meta||{}) };
           if(next.meta){ next.meta.style = { ...((spec?.meta||{}).style||{}), ...((next.meta||{}).style||{}) }; }
@@ -371,49 +289,30 @@
       }
     }
 
-    composer.addEventListener('keydown', (e)=>{
-      if(e.isComposing || e.keyCode===229) return;
-      if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(composer.value); }
-    });
+    composer.addEventListener('keydown', (e)=>{ if(e.isComposing || e.keyCode===229) return; if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(composer.value); }});
     sendBtn.onclick = ()=> sendMessage(composer.value);
 
-    /* Upload logo */
     const logoInput = document.getElementById('logoInput');
     logoInput.addEventListener('change', async (e)=>{
       const file = e.target.files?.[0]; if(!file) return;
       const reader = new FileReader();
-      reader.onload = ()=>{
-        const url = reader.result;
-        spec.meta = { ...(spec.meta||{}), style:{ ...(spec.meta?.style||{}), logoDataUrl: url } };
-        localStorage.setItem('pf_proposal', JSON.stringify(spec));
-        renderSpec();
-      };
-      reader.readAsDataURL(file);
-      e.target.value='';
+      reader.onload = ()=>{ const url = reader.result; spec.meta = { ...(spec.meta||{}), style:{ ...(spec.meta?.style||{}), logoDataUrl: url } }; localStorage.setItem('pf_proposal', JSON.stringify(spec)); renderSpec(); };
+      reader.readAsDataURL(file); e.target.value='';
     });
 
-    /* Libellés */
     const t = {
       fr:{ title:"Proposition commerciale", to:"Pour", from:"Émis par", date:"Date", letter:"Lettre d’introduction", executive:"Résumé exécutif", objectives:"Objectifs", approach:"Approche & phasage", deliverables:"Livrables", in_scope:"Inclus", out_scope:"Hors-périmètre", timeline:"Planning", pricing:"Tarification", assumptions:"Hypothèses / Risques", next:"Prochaines étapes", price_model:"Modèle", terms:"Conditions", toc:"Sommaire" },
       en:{ title:"Business Proposal", to:"To", from:"Issued by", date:"Date", letter:"Cover Letter", executive:"Executive Summary", objectives:"Objectives", approach:"Approach & Phasing", deliverables:"Deliverables", in_scope:"In scope", out_scope:"Out of scope", timeline:"Timeline", pricing:"Pricing", assumptions:"Assumptions / Risks", next:"Next Steps", price_model:"Model", terms:"Terms", toc:"Table of Contents" }
     };
 
     function safeArr(v){ return Array.isArray(v)?v:[]; }
-    function safeStr(v,fb=''){ return (v==null?'':String(v)).trim() || fb; }
     function fmtDate(d){ try{ const dt=d?new Date(d):new Date(); return dt.toLocaleDateString(document.documentElement.lang||getLang(), {year:'numeric',month:'short',day:'2-digit'});}catch{return ''} }
     function money(n,c){ try{ return new Intl.NumberFormat(document.documentElement.lang||getLang(),{style:'currency',currency:c||'EUR'}).format(Number(n||0)); }catch{ return String(n||0)+' '+(c||'€') } }
 
-    /* THEME: applique meta.style à l’aperçu (variables CSS + décor global) */
     function applyStyleTokens(style){
-      const palette = {
-        primary: "#3B82F6", secondary: "#8B5CF6", surface: "#FFFFFF",
-        ink: "#0A1020", muted: "#5C667A", stroke: "#E0E6F4",
-        accentA: "#60A5FA", accentB: "#93C5FD",
-        ...(style?.palette||{})
-      };
+      const palette = { primary:"#3B82F6", secondary:"#8B5CF6", surface:"#FFFFFF", ink:"#0A1020", muted:"#5C667A", stroke:"#E0E6F4", accentA:"#60A5FA", accentB:"#93C5FD", ...(style?.palette||{}) };
       const shapes = { radius:"12px", shadow:"0 18px 48px rgba(10,16,32,.12)", ...(style?.shapes||{}) };
       const typo   = { heading:"Inter", body:"Inter", accent:"Inter", ...(style?.typography||{}) };
-
       sheet.style.setProperty('--panel', palette.surface);
       sheet.style.setProperty('--ink', palette.ink);
       sheet.style.setProperty('--muted', palette.muted);
@@ -424,267 +323,71 @@
       sheet.style.setProperty('--radius', shapes.radius);
       sheet.style.setProperty('--font-body', typo.body);
       sheet.style.setProperty('--font-heading', typo.heading);
-
-      renderDecorLayers(style?.decor_layers||[], palette);
+      renderDecorLayers(style?.decor_layers||[]);
     }
 
     function hsla(h,s,l,a){ return `hsla(${Number(h||0)},${Number(s||0)}%,${Number(l||0)}%,${Number(a||1)})`; }
-    function pickCorner(pos){
-      const map = {
-        top: {top:'-15vh', left:'50%', transform:'translateX(-50%)'},
-        bottom: {bottom:'-15vh', left:'50%', transform:'translateX(-50%)'},
-        left: {left:'-15vw', top:'50%', transform:'translateY(-50%)'},
-        right:{right:'-15vw', top:'50%', transform:'translateY(-50%)'},
-        center:{top:'50%', left:'50%', transform:'translate(-50%,-50%)'}
-      };
-      return map[pos] || map.center;
-    }
+    function pickCorner(pos){ const map={ top:{top:'-15vh',left:'50%',transform:'translateX(-50%)'}, bottom:{bottom:'-15vh',left:'50%',transform:'translateX(-50%)'}, left:{left:'-15vw',top:'50%',transform:'translateY(-50%)'}, right:{right:'-15vw',top:'50%',transform:'translateY(-50%)'}, center:{top:'50%',left:'50%',transform:'translate(-50%,-50%)'} }; return map[pos]||map.center; }
+    const decor=document.getElementById('decor');
     function renderDecorLayers(layers){
-      decor.innerHTML = '';
-      if(!layers?.length) return;
-      layers.forEach((L,i)=>{
-        const layer = document.createElement('div');
-        layer.style.position='absolute'; layer.style.pointerEvents='none'; layer.style.mixBlendMode = (L.blend||'normal');
-        const pos = pickCorner(L.position);
-        Object.assign(layer.style, pos);
-        const rot = Number(L.rotate||0);
-        const scale = Math.max(0.25, Number(L.scale||1));
-        const color = hsla(L.h ?? 220, L.s ?? 60, L.l ?? 55, L.opacity ?? 0.18);
-
+      decor.innerHTML=''; if(!layers?.length) return;
+      layers.forEach((L,i)=>{ const layer=document.createElement('div'); layer.style.position='absolute'; layer.style.pointerEvents='none'; layer.style.mixBlendMode=(L.blend||'normal'); const pos=pickCorner(L.position); Object.assign(layer.style,pos); const rot=Number(L.rotate||0); const scale=Math.max(0.25, Number(L.scale||1)); const color=hsla(L.h??220, L.s??60, L.l??55, L.opacity??0.18);
         switch((L.type||'').toLowerCase()){
-          case 'glow':{
-            const size = 900*scale;
-            layer.style.width = layer.style.height = size+'px';
-            layer.style.borderRadius='50%'; layer.style.filter='blur(48px)';
-            layer.style.background = `radial-gradient(closest-side, ${color} 0%, transparent 70%)`;
-            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`; break;
-          }
-          case 'gradient_blob':{
-            const w = 1000*scale, h = 700*scale;
-            layer.style.width = w+'px'; layer.style.height = h+'px';
-            layer.style.borderRadius='40%'; layer.style.filter='blur(24px)';
-            layer.style.background = `conic-gradient(from 180deg, ${color}, transparent 60%)`;
-            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`; break;
-          }
-          case 'diagonal':{
-            const size = 1600*scale;
-            layer.style.width = size+'px'; layer.style.height = size+'px';
-            layer.style.background = `repeating-linear-gradient(${rot}deg, ${color} 0px, ${color} 4px, transparent 4px, transparent 22px)`; break;
-          }
-          case 'grid':{
-            const size = 1400*scale;
-            layer.style.width = size+'px'; layer.style.height = size+'px';
-            const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-            svg.setAttribute('viewBox','0 0 100 100'); svg.setAttribute('width','100%'); svg.setAttribute('height','100%');
-            const defs = document.createElementNS(svg.namespaceURI,'defs');
-            const pat = document.createElementNS(svg.namespaceURI,'pattern');
-            pat.setAttribute('id',`p-${i}`); pat.setAttribute('width','10'); pat.setAttribute('height','10'); pat.setAttribute('patternUnits','userSpaceOnUse');
-            const path = document.createElementNS(svg.namespaceURI,'path');
-            path.setAttribute('d','M10 0 L0 0 0 10'); path.setAttribute('fill','none');
-            path.setAttribute('stroke', color); path.setAttribute('stroke-width','0.4');
-            pat.appendChild(path); defs.appendChild(pat); svg.appendChild(defs);
-            const rect = document.createElementNS(svg.namespaceURI,'rect');
-            rect.setAttribute('width','100%'); rect.setAttribute('height','100%'); rect.setAttribute('fill',`url(#p-${i})`);
-            svg.appendChild(rect); layer.appendChild(svg);
-            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`; break;
-          }
-          case 'dots':{
-            const size = 1400*scale;
-            layer.style.width = size+'px'; layer.style.height = size+'px';
-            const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-            svg.setAttribute('viewBox','0 0 100 100'); svg.setAttribute('width','100%'); svg.setAttribute('height','100%');
-            const defs = document.createElementNS(svg.namespaceURI,'defs');
-            const pat = document.createElementNS(svg.namespaceURI,'pattern');
-            pat.setAttribute('id',`d-${i}`); pat.setAttribute('width','6'); pat.setAttribute('height','6'); pat.setAttribute('patternUnits','userSpaceOnUse');
-            const circle = document.createElementNS(svg.namespaceURI,'circle');
-            circle.setAttribute('cx','1.5'); circle.setAttribute('cy','1.5'); circle.setAttribute('r','0.6'); circle.setAttribute('fill', color);
-            pat.appendChild(circle); defs.appendChild(pat); svg.appendChild(defs);
-            const rect = document.createElementNS(svg.namespaceURI,'rect');
-            rect.setAttribute('width','100%'); rect.setAttribute('height','100%'); rect.setAttribute('fill',`url(#d-${i})`);
-            svg.appendChild(rect); layer.appendChild(svg);
-            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`; break;
-          }
-          default:{
-            const size = 1000*scale;
-            layer.style.width = layer.style.height = size+'px';
-            layer.style.borderRadius='50%'; layer.style.filter='blur(40px)';
-            layer.style.background = `radial-gradient(closest-side, ${color} 0%, transparent 70%)`;
-            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
-          }
+          case 'glow':{ const size=900*scale; layer.style.width=layer.style.height=size+'px'; layer.style.borderRadius='50%'; layer.style.filter='blur(48px)'; layer.style.background=`radial-gradient(closest-side, ${color} 0%, transparent 70%)`; layer.style.transform=(pos.transform?pos.transform+' ':'')+`rotate(${rot}deg)`; break; }
+          case 'gradient_blob':{ const w=1000*scale,h=700*scale; layer.style.width=w+'px'; layer.style.height=h+'px'; layer.style.borderRadius='40%'; layer.style.filter='blur(24px)'; layer.style.background=`conic-gradient(from 180deg, ${color}, transparent 60%)`; layer.style.transform=(pos.transform?pos.transform+' ':'')+`rotate(${rot}deg)`; break; }
+          case 'diagonal':{ const size=1600*scale; layer.style.width=size+'px'; layer.style.height=size+'px'; layer.style.background=`repeating-linear-gradient(${rot}deg, ${color} 0px, ${color} 4px, transparent 4px, transparent 22px)`; break; }
+          case 'grid':{ const size=1400*scale; layer.style.width=size+'px'; layer.style.height=size+'px'; const svg=document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.setAttribute('viewBox','0 0 100 100'); svg.setAttribute('width','100%'); svg.setAttribute('height','100%'); const defs=document.createElementNS(svg.namespaceURI,'defs'); const pat=document.createElementNS(svg.namespaceURI,'pattern'); pat.setAttribute('id',`p-${i}`); pat.setAttribute('width','10'); pat.setAttribute('height','10'); pat.setAttribute('patternUnits','userSpaceOnUse'); const path=document.createElementNS(svg.namespaceURI,'path'); path.setAttribute('d','M10 0 L0 0 0 10'); path.setAttribute('fill','none'); path.setAttribute('stroke',color); path.setAttribute('stroke-width','0.4'); pat.appendChild(path); defs.appendChild(pat); svg.appendChild(defs); const rect=document.createElementNS(svg.namespaceURI,'rect'); rect.setAttribute('width','100%'); rect.setAttribute('height','100%'); rect.setAttribute('fill',`url(#p-${i})`); svg.appendChild(rect); layer.appendChild(svg); layer.style.transform=(pos.transform?pos.transform+' ':'')+`rotate(${rot}deg)`; break; }
+          case 'dots':{ const size=1400*scale; layer.style.width=size+'px'; layer.style.height=size+'px'; const svg=document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.setAttribute('viewBox','0 0 100 100'); svg.setAttribute('width','100%'); svg.setAttribute('height','100%'); const defs=document.createElementNS(svg.namespaceURI,'defs'); const pat=document.createElementNS(svg.namespaceURI,'pattern'); pat.setAttribute('id',`d-${i}`); pat.setAttribute('width','6'); pat.setAttribute('height','6'); pat.setAttribute('patternUnits','userSpaceOnUse'); const circle=document.createElementNS(svg.namespaceURI,'circle'); circle.setAttribute('cx','1.5'); circle.setAttribute('cy','1.5'); circle.setAttribute('r','0.6'); circle.setAttribute('fill', color); pat.appendChild(circle); defs.appendChild(pat); svg.appendChild(defs); const rect=document.createElementNS(svg.namespaceURI,'rect'); rect.setAttribute('width','100%'); rect.setAttribute('height','100%'); rect.setAttribute('fill',`url(#d-${i})`); svg.appendChild(rect); layer.appendChild(svg); layer.style.transform=(pos.transform?pos.transform+' ':'')+`rotate(${rot}deg)`; break; }
+          default:{ const size=1000*scale; layer.style.width=layer.style.height=size+'px'; layer.style.borderRadius='50%'; layer.style.filter='blur(40px)'; layer.style.background=`radial-gradient(closest-side, ${color} 0%, transparent 70%)`; layer.style.transform=(pos.transform?pos.transform+' ':'')+`rotate(${rot}deg)`; }
         }
         decor.appendChild(layer);
       });
     }
 
-    /* Pages */
-    const sheetPages = [];
-    function clearPages(){ sheetContent.innerHTML=''; sheetPages.length=0; }
-    function makePage(kind='default'){
-      const page = document.createElement('div'); page.className='page'; page.dataset.kind=kind;
-      const pageDecor = document.createElement('div'); pageDecor.className='page-decor';
-      const inner = document.createElement('div'); inner.className='inner';
-      page.appendChild(pageDecor); page.appendChild(inner); sheetContent.appendChild(page); sheetPages.push({page, inner, pageDecor});
-      return {page, inner, pageDecor};
-    }
+    const sheetPages=[]; function clearPages(){ sheetContent.innerHTML=''; sheetPages.length=0; }
+    function makePage(kind='default'){ const page=document.createElement('div'); page.className='page'; page.dataset.kind=kind; const pageDecor=document.createElement('div'); pageDecor.className='page-decor'; const inner=document.createElement('div'); inner.className='inner'; page.appendChild(pageDecor); page.appendChild(inner); sheetContent.appendChild(page); sheetPages.push({page,inner,pageDecor}); return {page,inner,pageDecor}; }
 
     function H1(inner, text){ const el=document.createElement('div'); el.className='h1'; el.textContent=text; inner.appendChild(el); }
     function H2(inner, text){ const el=document.createElement('div'); el.className='h2'; el.textContent=text; inner.appendChild(el); }
-    function HR(inner){ inner.appendChild(Object.assign(document.createElement('div'),{className:'hr'})); }
     function P(inner, text){ const p=document.createElement('p'); p.textContent=text; inner.appendChild(p); }
     function UL(inner, arr){ if(!arr?.length) return; const ul=document.createElement('ul'); arr.forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ul.appendChild(li); }); inner.appendChild(ul); }
-
-    function pageAccentBar(pageDecor, colorA, colorB){
-      const band = document.createElement('div');
-      band.style.position='absolute'; band.style.inset='-10% -10% auto -10%'; band.style.height='40%';
-      band.style.background = `linear-gradient(135deg, ${colorA}, ${colorB})`; band.style.opacity = .25; band.style.transform = 'skewY(-8deg)';
-      pageDecor.appendChild(band);
-    }
-
-    function renderCover(style, L, title, company, client, date){
-      const { inner, pageDecor } = makePage('cover');
-      const pA = getComputedStyle(sheet).getPropertyValue('--accent').trim() || '#3B82F6';
-      const pB = getComputedStyle(sheet).getPropertyValue('--accent2').trim() || '#8B5CF6';
-      pageAccentBar(pageDecor, pA, pB);
-
-      const head=document.createElement('div'); head.className='doc-header';
-      const logoBox=document.createElement('div'); logoBox.className='logo-box';
-      if(style?.logoDataUrl){ const im=new Image(); im.src=style.logoDataUrl; logoBox.appendChild(im); } else { logoBox.textContent='LOGO'; logoBox.style.color='#9aa6bf'; }
-      const bi=document.createElement('div'); bi.className='brand-info';
-      bi.innerHTML=`<div class="company">${company}</div><div class="muted">${date}</div>`;
-      head.appendChild(logoBox); head.appendChild(bi); inner.appendChild(head);
-
-      H1(inner, title);
-      const meta=document.createElement('div'); meta.className='meta';
-      meta.innerHTML = `${L.to}: <span class="tag">${client}</span> &nbsp;•&nbsp; ${L.from}: <span class="tag">${company}</span>`;
-      inner.appendChild(meta);
-
-      const band=document.createElement('div'); band.className='band';
-      band.textContent = (L===t.fr) ? "Aperçu généré automatiquement selon votre brief." : "Preview auto-generated from your brief.";
-      inner.appendChild(band);
-    }
-
-    function renderTOC(L, sections){
-      const present = sections.filter(s=>s.present);
-      if(present.length<3) return;
-      const { inner } = makePage('toc');
-      H2(inner, L.toc);
-      const toc=document.createElement('div'); toc.className='toc';
-      toc.innerHTML = `<b>${L.toc}</b>`;
-      present.forEach(s=>{ const a=document.createElement('a'); a.textContent=s.title; a.href='#'+s.id; toc.appendChild(a); });
-      inner.appendChild(toc);
-    }
-
-    function renderLetter(L, letter){
-      const { inner } = makePage('letter');
-      H2(inner, L.letter);
-      if(letter?.greeting) P(inner, letter.greeting);
-      (Array.isArray(letter?.body_paragraphs) && letter.body_paragraphs.length ? letter.body_paragraphs : (letter?.paragraphs||[])).forEach(p=>P(inner, p));
-      if(letter?.closing) P(inner, letter.closing);
-      if(letter?.signature) P(inner, letter.signature);
-    }
-    function renderExecutive(L, exec){ const { inner } = makePage('executive'); H2(inner, L.executive); (exec?.paragraphs||[]).forEach(p=>P(inner,p)); }
-    function renderObjectives(L, obj){ const { inner } = makePage('objectives'); H2(inner, L.objectives); UL(inner, obj?.bullets||[]); }
-    function renderApproach(L, approach){
-      const { inner } = makePage('approach'); H2(inner, L.approach);
-      (approach?.phases||[]).forEach((ph,i)=>{
-        const card=document.createElement('div'); card.className='card';
-        card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center">
-          <strong>Phase ${i+1} — ${ph.title||'À confirmer'}</strong><span class="pill">${ph.duration||''}</span></div>`;
-        inner.appendChild(card);
-        if(ph.description) P(inner, ph.description);
-        const acts=(ph.activities && ph.activities.length?ph.activities:ph.steps)||[]; if(acts.length){ const p=document.createElement('p'); p.innerHTML='<em>Activités :</em>'; inner.appendChild(p); UL(inner, acts); }
-        const outs=ph.outcomes||[]; if(outs.length){ const p=document.createElement('p'); p.innerHTML='<em>Résultats attendus :</em>'; inner.appendChild(p); UL(inner, outs); }
-      });
-    }
-    function renderDeliverables(L, deliv){
-      const { inner } = makePage('deliverables'); H2(inner, L.deliverables);
-      const grid=document.createElement('div'); grid.className='grid2';
-      const a=document.createElement('div'); a.className='card'; a.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.in_scope}</div>`;
-      const b=document.createElement('div'); b.className='card'; b.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.out_scope}</div>`;
-      const ulA=document.createElement('ul'); (deliv?.in||[]).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulA.appendChild(li); });
-      const ulB=document.createElement('ul'); (deliv?.out||[]).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulB.appendChild(li); });
-      a.appendChild(ulA); b.appendChild(ulB); grid.appendChild(a); grid.appendChild(b); inner.appendChild(grid);
-    }
-    function renderTimeline(L, timeline){
-      const { inner } = makePage('timeline'); H2(inner, L.timeline);
-      const grid=document.createElement('div'); grid.className='grid2';
-      (timeline?.milestones||[]).forEach(ms=>{
-        const c=document.createElement('div'); c.className='card';
-        c.innerHTML = `<div><strong>${ms.title||'Étape'}</strong></div><div class="muted">${ms.dateOrWeek || ms.date || ms.duration || ''}</div>`;
-        if(ms.notes){ const p=document.createElement('p'); p.textContent=ms.notes; c.appendChild(p); }
-        grid.appendChild(c);
-      });
-      inner.appendChild(grid);
-    }
-    function renderPricing(L, pr, currencyFallback){
-      const { inner } = makePage('pricing'); H2(inner, L.pricing);
-      const currency=pr?.currency||currencyFallback||'EUR';
-      const meta=document.createElement('div'); meta.className='muted'; meta.style.margin='-6px 0 8px';
-      meta.innerHTML = `${L.price_model}: <span class="pill">${pr?.model||'forfait'}</span>`; inner.appendChild(meta);
-
-      if(Array.isArray(pr?.items) && pr.items.length){
-        const table=document.createElement('table');
-        table.innerHTML=`<thead><tr><th>Item</th><th>Qté</th><th>Unité</th><th>PU</th><th>Sous-total</th></tr></thead><tbody></tbody><tfoot>
-          <tr><td colspan="4" style="text-align:right">Sous-total</td><td id="ft_subtotal"></td></tr>
-          <tr><td colspan="4" style="text-align:right">Taxes</td><td id="ft_tax"></td></tr>
-          <tr><td colspan="4" style="text-align:right">Total</td><td id="ft_total"></td></tr></tfoot>`;
-        const tb=table.querySelector('tbody');
-        pr.items.forEach(it=>{
-          const tr=document.createElement('tr');
-          const qty=Number(it.qty||1), up=Number(it.unit_price||0), st=(it.subtotal!=null)?Number(it.subtotal):qty*up;
-          tr.innerHTML=`<td>${it.name||'—'}</td><td>${Number.isFinite(qty)?qty:1}</td><td>${it.unit||'—'}</td><td>${money(up,currency)}</td><td>${money(st,currency)}</td>`;
-          tb.appendChild(tr);
-        });
-        inner.appendChild(table);
-        const subtotal = (pr.items||[]).reduce((s,it)=> s + ( (it.subtotal!=null?Number(it.subtotal):(Number(it.qty||1)*Number(it.unit_price||0))) || 0 ), 0);
-        const taxRate=Number(pr.tax_rate||0); const taxes=subtotal*(taxRate/100); const total=subtotal+taxes;
-        table.querySelector('#ft_subtotal').textContent=money(subtotal,currency);
-        table.querySelector('#ft_tax').textContent=`${money(taxes,currency)} ${taxRate?`(${taxRate}%)`:''}`;
-        table.querySelector('#ft_total').textContent=money(total,currency);
-        if((pr.terms||[]).length){
-          const terms=document.createElement('div'); terms.className='card'; terms.style.marginTop='8px';
-          terms.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.terms}</div><ul>${(pr.terms||[]).map(x=>`<li>${x}</li>`).join('')}</ul>`;
-          inner.appendChild(terms);
-        }
-      }else{
-        const priceBox=document.createElement('div'); priceBox.className='card';
-        const price=pr?.price!=null?String(pr.price):'—';
-        priceBox.innerHTML=`<div class="price">${money(price,currency)}</div><div class="muted" style="margin-top:4px">${L.price_model}: <span>${pr?.model||'forfait'}</span></div>`;
-        inner.appendChild(priceBox);
-      }
-    }
-    function renderAssumptions(L, asmp){ const { inner } = makePage('assumptions'); H2(inner, L.assumptions); (asmp?.paragraphs||[]).forEach(p=>P(inner,p)); }
-    function renderNext(L, next){ const { inner } = makePage('next'); H2(inner, L.next); (next?.paragraphs||[]).forEach(p=>P(inner,p)); }
+    function pageAccentBar(pageDecor, colorA, colorB){ const band=document.createElement('div'); band.style.position='absolute'; band.style.inset='-10% -10% auto -10%'; band.style.height='40%'; band.style.background=`linear-gradient(135deg, ${colorA}, ${colorB})`; band.style.opacity=.25; band.style.transform='skewY(-8deg)'; pageDecor.appendChild(band); }
+    function renderCover(style, L, title, company, client, date){ const { inner, pageDecor } = makePage('cover'); const pA=getComputedStyle(sheet).getPropertyValue('--accent').trim()||'#3B82F6'; const pB=getComputedStyle(sheet).getPropertyValue('--accent2').trim()||'#8B5CF6'; pageAccentBar(pageDecor,pA,pB); const head=document.createElement('div'); head.className='doc-header'; const logoBox=document.createElement('div'); logoBox.className='logo-box'; if(style?.logoDataUrl){ const im=new Image(); im.src=style.logoDataUrl; logoBox.appendChild(im); } else { logoBox.textContent='LOGO'; logoBox.style.color='#9aa6bf'; } const bi=document.createElement('div'); bi.className='brand-info'; bi.innerHTML=`<div class="company">${company}</div><div class="muted">${date}</div>`; head.appendChild(logoBox); head.appendChild(bi); inner.appendChild(head); H1(inner, title); const meta=document.createElement('div'); meta.className='meta'; meta.innerHTML = `${(L===t.en)?'To':'Pour'}: <span class="tag">${client}</span> &nbsp;•&nbsp; ${(L===t.en)?'Issued by':'Émis par'}: <span class="tag">${company}</span>`; inner.appendChild(meta); const band=document.createElement('div'); band.className='band'; band.textContent = (L===t.en) ? "Preview auto-generated from your brief." : "Aperçu généré automatiquement selon votre brief."; inner.appendChild(band); }
+    function renderTOC(L, sections){ const present=sections.filter(s=>s.present); if(present.length<3) return; const { inner }=makePage('toc'); H2(inner, (L===t.en)?'Table of Contents':'Sommaire'); const toc=document.createElement('div'); toc.className='toc'; toc.innerHTML=`<b>${(L===t.en)?'Table of Contents':'Sommaire'}</b>`; present.forEach(s=>{ const a=document.createElement('a'); a.textContent=s.title; a.href='#'+s.id; toc.appendChild(a); }); inner.appendChild(toc); }
+    function renderLetter(L, letter){ const { inner }=makePage('letter'); H2(inner, (L===t.en)?'Cover Letter':'Lettre d’introduction'); if(letter?.greeting) P(inner, letter.greeting); ((letter?.body_paragraphs?.length?letter.body_paragraphs:letter?.paragraphs)||[]).forEach(p=>P(inner,p)); if(letter?.closing) P(inner, letter.closing); if(letter?.signature) P(inner, letter.signature); }
+    function renderExecutive(L, exec){ const { inner }=makePage('executive'); H2(inner, (L===t.en)?'Executive Summary':'Résumé exécutif'); (exec?.paragraphs||[]).forEach(p=>P(inner,p)); }
+    function renderObjectives(L, obj){ const { inner }=makePage('objectives'); H2(inner, (L===t.en)?'Objectives':'Objectifs'); UL(inner, obj?.bullets||[]); }
+    function renderApproach(L, approach){ const { inner }=makePage('approach'); H2(inner, (L===t.en)?'Approach & Phasing':'Approche & phasage'); (approach?.phases||[]).forEach((ph,i)=>{ const card=document.createElement('div'); card.className='card'; card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><strong>Phase ${i+1} — ${ph.title||'À confirmer'}</strong><span class="pill">${ph.duration||''}</span></div>`; inner.appendChild(card); if(ph.description) P(inner, ph.description); const acts=(ph.activities && ph.activities.length?ph.activities:ph.steps)||[]; if(acts.length){ const p=document.createElement('p'); p.innerHTML='<em>Activités :</em>'; inner.appendChild(p); UL(inner, acts); } const outs=ph.outcomes||[]; if(outs.length){ const p=document.createElement('p'); p.innerHTML='<em>Résultats attendus :</em>'; inner.appendChild(p); UL(inner, outs); } }); }
+    function renderDeliverables(L, deliv){ const { inner }=makePage('deliverables'); H2(inner, (L===t.en)?'Deliverables':'Livrables'); const grid=document.createElement('div'); grid.className='grid2'; const a=document.createElement('div'); a.className='card'; a.innerHTML=`<div class="muted" style="margin-bottom:6px">${(L===t.en)?'In scope':'Inclus'}</div>`; const b=document.createElement('div'); b.className='card'; b.innerHTML=`<div class="muted" style="margin-bottom:6px">${(L===t.en)?'Out of scope':'Hors-périmètre'}</div>`; const ulA=document.createElement('ul'); (deliv?.in||[]).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulA.appendChild(li); }); const ulB=document.createElement('ul'); (deliv?.out||[]).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulB.appendChild(li); }); a.appendChild(ulA); b.appendChild(ulB); grid.appendChild(a); grid.appendChild(b); inner.appendChild(grid); }
+    function renderTimeline(L, timeline){ const { inner }=makePage('timeline'); H2(inner, (L===t.en)?'Timeline':'Planning'); const grid=document.createElement('div'); grid.className='grid2'; (timeline?.milestones||[]).forEach(ms=>{ const c=document.createElement('div'); c.className='card'; c.innerHTML=`<div><strong>${ms.title||'Étape'}</strong></div><div class="muted">${ms.dateOrWeek || ms.date || ms.duration || ''}</div>`; if(ms.notes){ const p=document.createElement('p'); p.textContent=ms.notes; c.appendChild(p); } grid.appendChild(c); }); inner.appendChild(grid); }
+    function renderPricing(L, pr, currencyFallback){ const { inner }=makePage('pricing'); H2(inner, (L===t.en)?'Pricing':'Tarification'); const currency=pr?.currency||currencyFallback||'EUR'; const meta=document.createElement('div'); meta.className='muted'; meta.style.margin='-6px 0 8px'; meta.innerHTML = `${(L===t.en)?'Model':'Modèle'}: <span class="pill">${pr?.model||'forfait'}</span>`; inner.appendChild(meta); if(Array.isArray(pr?.items) && pr.items.length){ const table=document.createElement('table'); table.innerHTML=`<thead><tr><th>Item</th><th>Qté</th><th>Unité</th><th>PU</th><th>Sous-total</th></tr></thead><tbody></tbody><tfoot><tr><td colspan="4" style="text-align:right">Sous-total</td><td id="ft_subtotal"></td></tr><tr><td colspan="4" style="text-align:right">Taxes</td><td id="ft_tax"></td></tr><tr><td colspan="4" style="text-align:right">Total</td><td id="ft_total"></td></tr></tfoot>`; const tb=table.querySelector('tbody'); pr.items.forEach(it=>{ const tr=document.createElement('tr'); const qty=Number(it.qty||1), up=Number(it.unit_price||0), st=(it.subtotal!=null)?Number(it.subtotal):qty*up; tr.innerHTML=`<td>${it.name||'—'}</td><td>${Number.isFinite(qty)?qty:1}</td><td>${it.unit||'—'}</td><td>${money(up,currency)}</td><td>${money(st,currency)}</td>`; tb.appendChild(tr); }); inner.appendChild(table); const subtotal=(pr.items||[]).reduce((s,it)=> s + ((it.subtotal!=null?Number(it.subtotal):(Number(it.qty||1)*Number(it.unit_price||0)))||0), 0); const taxRate=Number(pr.tax_rate||0); const taxes=subtotal*(taxRate/100); const total=subtotal+taxes; table.querySelector('#ft_subtotal').textContent=money(subtotal,currency); table.querySelector('#ft_tax').textContent=`${money(taxes,currency)} ${taxRate?`(${taxRate}%)`:''}`; table.querySelector('#ft_total').textContent=money(total,currency); if((pr.terms||[]).length){ const terms=document.createElement('div'); terms.className='card'; terms.style.marginTop='8px'; terms.innerHTML=`<div class="muted" style="margin-bottom:6px">${(L===t.en)?'Terms':'Conditions'}</div><ul>${(pr.terms||[]).map(x=>`<li>${x}</li>`).join('')}</ul>`; inner.appendChild(terms); } } else { const priceBox=document.createElement('div'); priceBox.className='card'; const price=pr?.price!=null?String(pr.price):'—'; priceBox.innerHTML=`<div class="price">${money(price,currency)}</div><div class="muted" style="margin-top:4px">${(L===t.en)?'Model':'Modèle'}: <span>${pr?.model||'forfait'}</span></div>`; inner.appendChild(priceBox); } }
+    function renderAssumptions(L, asmp){ const { inner }=makePage('assumptions'); H2(inner, (L===t.en)?'Assumptions / Risks':'Hypothèses / Risques'); (asmp?.paragraphs||[]).forEach(p=>P(inner,p)); }
+    function renderNext(L, next){ const { inner }=makePage('next'); H2(inner, (L===t.en)?'Next Steps':'Prochaines étapes'); (next?.paragraphs||[]).forEach(p=>P(inner,p)); }
 
     function buildTOCList(L){
       return [
-        { id:'s_letter', title:L.letter, present: (spec.letter && ((spec.letter.body_paragraphs||spec.letter.paragraphs||[]).length || spec.letter.greeting||spec.letter.closing||spec.letter.signature)) },
-        { id:'s_executive', title:L.executive, present: (spec.executive_summary && (spec.executive_summary.paragraphs||[]).length) },
-        { id:'s_objectives', title:L.objectives, present: (spec.objectives && (spec.objectives.bullets||[]).length) },
-        { id:'s_approach', title:L.approach, present: (spec.approach && (spec.approach.phases||[]).length) },
-        { id:'s_deliverables', title:L.deliverables, present: (spec.deliverables && ((spec.deliverables.in||[]).length || (spec.deliverables.out||[]).length)) },
-        { id:'s_timeline', title:L.timeline, present: (spec.timeline && (spec.timeline.milestones||[]).length) },
-        { id:'s_pricing', title:L.pricing, present: (spec.pricing && ((spec.pricing.items||[]).length || spec.pricing.price!=null)) },
-        { id:'s_assumptions', title:L.assumptions, present: (spec.assumptions && (spec.assumptions.paragraphs||[]).length) },
-        { id:'s_next', title:L.next, present: (spec.next_steps && (spec.next_steps.paragraphs||[]).length) },
+        { id:'s_letter', title:(L===t.en)?'Cover Letter':'Lettre d’introduction', present: (spec.letter && ((spec.letter.body_paragraphs||spec.letter.paragraphs||[]).length || spec.letter.greeting||spec.letter.closing||spec.letter.signature)) },
+        { id:'s_executive', title:(L===t.en)?'Executive Summary':'Résumé exécutif', present: (spec.executive_summary && (spec.executive_summary.paragraphs||[]).length) },
+        { id:'s_objectives', title:(L===t.en)?'Objectives':'Objectifs', present: (spec.objectives && (spec.objectives.bullets||[]).length) },
+        { id:'s_approach', title:(L===t.en)?'Approach & Phasing':'Approche & phasage', present: (spec.approach && (spec.approach.phases||[]).length) },
+        { id:'s_deliverables', title:(L===t.en)?'Deliverables':'Livrables', present: (spec.deliverables && ((spec.deliverables.in||[]).length || (spec.deliverables.out||[]).length)) },
+        { id:'s_timeline', title:(L===t.en)?'Timeline':'Planning', present: (spec.timeline && (spec.timeline.milestones||[]).length) },
+        { id:'s_pricing', title:(L===t.en)?'Pricing':'Tarification', present: (spec.pricing && ((spec.pricing.items||[]).length || spec.pricing.price!=null)) },
+        { id:'s_assumptions', title:(L===t.en)?'Assumptions / Risks':'Hypothèses / Risques', present: (spec.assumptions && (spec.assumptions.paragraphs||[]).length) },
+        { id:'s_next', title:(L===t.en)?'Next Steps':'Prochaines étapes', present: (spec.next_steps && (spec.next_steps.paragraphs||[]).length) },
       ];
     }
 
     function renderSpec(){
       applyStyleTokens(spec?.meta?.style || null);
       clearPages();
-
-      const L=t[spec.meta?.lang||getLang()]||t.fr;
-      const title = (spec.meta?.title || L.title).trim();
-      const company = (spec.meta?.company || spec.meta?.brand?.company || 'Votre société').trim();
-      const client = (spec.meta?.client || 'Client').trim();
-      const date = spec.meta?.date || fmtDate();
-
+      const L = t[spec.meta?.lang||getLang()]||t.fr;
+      const title=(spec.meta?.title || ((L===t.en)?'Business Proposal':'Proposition commerciale')).trim();
+      const company=(spec.meta?.company || spec.meta?.brand?.company || 'Votre société').trim();
+      const client=(spec.meta?.client || 'Client').trim();
+      const date=spec.meta?.date || fmtDate();
       renderCover(spec?.meta?.style, L, title, company, client, date);
-
-      const tocList = buildTOCList(L);
-      renderTOC(L, tocList);
-
+      const tocList=buildTOCList(L); renderTOC(L, tocList);
       if (tocList[0].present) renderLetter(L, spec.letter);
       if (tocList[1].present) renderExecutive(L, spec.executive_summary);
       if (tocList[2].present) renderObjectives(L, spec.objectives);
@@ -697,22 +400,11 @@
     }
     renderSpec();
 
-    /* Lang */
-    function applyChatLang(){
-      const en=(getLang()==='en');
-      document.getElementById('composer').placeholder = en?'Type your message':'Écrivez votre message';
-    }
+    function applyChatLang(){ const en=(getLang()==='en'); document.getElementById('composer').placeholder = en?'Type your message':'Écrivez votre message'; }
     applyChatLang();
-    window.addEventListener('langchange', ()=>{
-      spec.meta = { ...(spec.meta||{}), lang:getLang() };
-      localStorage.setItem('pf_proposal', JSON.stringify(spec));
-      applyChatLang(); renderSpec();
-    });
+    window.addEventListener('langchange', ()=>{ spec.meta = { ...(spec.meta||{}), lang:getLang() }; localStorage.setItem('pf_proposal', JSON.stringify(spec)); applyChatLang(); renderSpec(); });
 
-    /* Relance si dernier message sans réponse */
-    if(messages.length && messages[messages.length-1].role==='user' && !chatBody.querySelector('.bubble-assistant')){
-      sendMessage(messages[messages.length-1].content);
-    }
+    if(messages.length && messages[messages.length-1].role==='user' && !chatBody.querySelector('.bubble-assistant')){ sendMessage(messages[messages.length-1].content); }
   </script>
 </body>
 </html>
