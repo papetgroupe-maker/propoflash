@@ -1,7 +1,6 @@
+// Vercel/Next Serverless Function (ESM)
 // /api/chat.js
 import OpenAI from "openai";
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const SYSTEM_PROMPT = `
 ROLE: Senior B2B Proposal Strategist, Brand Designer & Layout Artist (FR/EN).
@@ -46,8 +45,8 @@ RÈGLES:
 - Langue: déduire; FR par défaut si ambigu.
 - Ne JAMAIS inventer d'entités critiques; si info manque → "actions: ask".
 - Si budget incertain: items + hypothèses + marquer "à confirmer".
-- STYLE: toujours raisonnable et pro. Palette accessible (contraste suffisant: texte vs surface).
-  Couleurs: extraire du brief si mention ("noir & jaune", "vert sapin", "bleu pétrole + violet").
+- STYLE: toujours raisonnable et pro. Palette accessible (contraste suffisant).
+  Couleurs: extraire du brief si mention.
   Décor: rester subtil (2-4 layers max).
 - Respecter le schéma, JSON strict uniquement.
 `;
@@ -100,5 +99,66 @@ const FEWSHOTS = [
           terms:["40% commande, 40% design, 20% livraison","Validité: 30 jours"]
         },
         next_steps:{ paragraphs:["Point 30 min pour verrouiller le périmètre et le planning."] }
-      },
-     
+      }
+    })
+  }
+];
+
+function pickJson(txt){
+  try{
+    const s = txt.indexOf("{"); const e = txt.lastIndexOf("}");
+    if(s>=0 && e>s) return JSON.parse(txt.slice(s, e+1));
+  }catch{/* ignore */}
+  return null;
+}
+
+export default async function handler(req, res){
+  // CORS safe par défaut (utile en local)
+  res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.setHeader("Access-Control-Allow-Methods","POST,GET,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers","Content-Type");
+  if(req.method === "OPTIONS") return res.status(200).end();
+
+  if(req.method === "GET"){
+    return res.status(200).json({ ok:true, health:"/api/chat up" });
+  }
+
+  if(req.method !== "POST"){
+    return res.status(405).json({ error:"Method not allowed" });
+  }
+
+  try{
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const { message, proposalSpec, history } = req.body || {};
+
+    const messages = [
+      { role:"system", content: SYSTEM_PROMPT },
+      ...FEWSHOTS,
+      ...(Array.isArray(history) ? history.map(m=>({ role: m.role, content: String(m.content||"") })) : []),
+      { role:"user", content: String(message||"") }
+    ];
+
+    const r = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      temperature: 0.3,
+      messages
+    });
+
+    const text = r.choices?.[0]?.message?.content?.trim() || "";
+    const parsed = pickJson(text) || { reply: text || "(vide)", proposalSpec: null, actions: [] };
+
+    // Merge très léger si tu renvoies déjà un proposalSpec de base
+    if(proposalSpec && parsed.proposalSpec){
+      parsed.proposalSpec = {
+        ...proposalSpec,
+        ...parsed.proposalSpec,
+        meta: { ...(proposalSpec.meta||{}), ...(parsed.proposalSpec.meta||{}) }
+      };
+    }
+
+    return res.status(200).json(parsed);
+  }catch(err){
+    console.error("API /api/chat error:", err);
+    return res.status(500).json({ error: String(err?.message || err) });
+  }
+}
