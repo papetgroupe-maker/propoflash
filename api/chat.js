@@ -1,7 +1,11 @@
-// /api/chat.js — Vercel/Next Serverless Function (ESM)
-import OpenAI from "openai";
+// supabase/functions/proposal/index.ts
+// Edge Function "proposal" — génère { reply, proposalSpec, actions }
+// Secrets requis: OPENAI_API_KEY
 
-// === PROMPT SYSTÈME TEL QUE DANS TA VERSION ===
+import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+
+const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY") ?? "";
+
 const SYSTEM_PROMPT = `
 ROLE: Senior B2B Proposal Strategist, Brand Designer & Layout Artist (FR/EN).
 OBJECTIF: transformer chaque échange en une proposition exploitable ET stylée.
@@ -42,16 +46,12 @@ SCHEMA DE SORTIE (JSON STRICT):
 }
 
 RÈGLES:
-- Langue: déduire; FR par défaut si ambigu.
-- Ne JAMAIS inventer d'entités critiques; si info manque → "actions: ask".
-- Si budget incertain: items + hypothèses + marquer "à confirmer".
-- STYLE: toujours raisonnable et pro. Palette accessible (contraste suffisant: texte vs surface).
-  Couleurs: extraire du brief si mention ("noir & jaune", "vert sapin", "bleu pétrole + violet").
-  Décor: rester subtil (2-4 layers max).
-- Respecter le schéma, JSON strict uniquement.
+- FR par défaut si ambigu.
+- Ne pas inventer d’entités critiques → "actions: ask".
+- STYLE pro + accessible; décor subtil (2–4 layers).
+- JSON strict uniquement.
 `;
 
-// === FEWSHOTS CONSERVÉS ===
 const FEWSHOTS = [
   {
     role: "user",
@@ -161,8 +161,7 @@ const FEWSHOTS = [
   },
 ];
 
-// ——— Helpers ———
-function pickJson(txt) {
+function pickJson(txt: string) {
   try {
     const s = txt.indexOf("{");
     const e = txt.lastIndexOf("}");
@@ -171,51 +170,84 @@ function pickJson(txt) {
   return null;
 }
 
-// ——— HTTP handler ———
-export default async function handler(req, res) {
-  // CORS “safe”
-  res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST,GET,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  if (req.method === "OPTIONS") return res.status(200).end();
+async function callOpenAI(messages: Array<{ role: "system" | "user" | "assistant"; content: string }>) {
+  if (!OPENAI_API_KEY) {
+    return { ok: false, text: '{"reply":"Clé OpenAI manquante côté serveur.","proposalSpec":null,"actions":[]}' };
+  }
+  const r = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${OPENAI_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ model: "gpt-4o-mini", temperature: 0.3, messages }),
+  });
+  const data = await r.json().catch(() => ({}));
+  const text = data?.choices?.[0]?.message?.content ?? "";
+  return { ok: true, text };
+}
 
-  if (req.method === "GET") return res.status(200).json({ ok: true, health: "/api/chat up" });
-  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+serve(async (req: Request) => {
+  // CORS
+  if (req.method === "OPTIONS") {
+    return new Response(null, {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+        "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+      },
+    });
+  }
 
   try {
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    const { message, proposalSpec, history } = req.body || {};
+    if (req.method === "GET") {
+      return new Response(JSON.stringify({ ok: true, health: "proposal edge up" }), {
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      });
+    }
+
+    if (req.method !== "POST") {
+      return new Response(JSON.stringify({ error: "Method not allowed" }), {
+        status: 405,
+        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      });
+    }
+
+    const { message, proposalSpec, history } = (await req.json().catch(() => ({}))) as {
+      message?: string;
+      proposalSpec?: unknown;
+      history?: Array<{ role: "user" | "assistant"; content: string }>;
+    };
 
     const messages = [
-      { role: "system", content: SYSTEM_PROMPT },
+      { role: "system" as const, content: SYSTEM_PROMPT },
       ...FEWSHOTS,
-      ...(Array.isArray(history)
-        ? history.map((m) => ({ role: m.role, content: String(m.content || "") }))
-        : []),
-      { role: "user", content: String(message || "") },
+      ...(Array.isArray(history) ? history : []).map((m) => ({ role: m.role, content: String(m.content || "") })),
+      { role: "user" as const, content: String(message || "") },
     ];
 
-    const r = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      temperature: 0.3,
-      messages,
-    });
-
-    const text = r.choices?.[0]?.message?.content?.trim() || "";
-    const parsed = pickJson(text) || { reply: text || "(vide)", proposalSpec: null, actions: [] };
+    const ai = await callOpenAI(messages);
+    const parsed =
+      pickJson(ai.text) ||
+      { reply: ai.text || "(vide)", proposalSpec: null, actions: [] };
 
     // Merge léger si le client envoie déjà une spec
     if (proposalSpec && parsed.proposalSpec) {
       parsed.proposalSpec = {
-        ...proposalSpec,
-        ...parsed.proposalSpec,
-        meta: { ...(proposalSpec.meta || {}), ...(parsed.proposalSpec.meta || {}) },
+        ...(proposalSpec as any),
+        ...(parsed.proposalSpec as any),
+        meta: { ...((proposalSpec as any)?.meta || {}), ...((parsed.proposalSpec as any)?.meta || {}) },
       };
     }
 
-    res.status(200).json(parsed);
-  } catch (err) {
-    console.error("API /api/chat error:", err);
-    res.status(500).json({ error: String(err?.message || err) });
+    return new Response(JSON.stringify(parsed), {
+      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+    });
+  } catch (e) {
+    console.error("proposal edge error:", e);
+    return new Response(JSON.stringify({ error: String(e?.message || e) }), {
+      status: 500,
+      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+    });
   }
-}
+});
