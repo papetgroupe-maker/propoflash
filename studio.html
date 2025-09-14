@@ -130,6 +130,7 @@
   <div class="overlay" id="overlay"></div>
 
   <div class="main">
+    <!-- Chat -->
     <div class="panel chat">
       <div class="chat-head"><strong class="chat-title">Chat</strong></div>
       <div class="chat-body" id="chatBody" aria-live="polite"></div>
@@ -149,6 +150,7 @@
       </div>
     </div>
 
+    <!-- Aperçu -->
     <div class="panel sheet-wrap">
       <div class="sheet" id="sheet">
         <div class="decor" id="decor"></div>
@@ -158,6 +160,7 @@
   </div>
 
   <script>
+    /* Supabase guard */
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -172,13 +175,20 @@
     }
     guard();
 
+    /* Profil menu */
     const avatar=document.getElementById('avatar'), menu=document.getElementById('menu'), logoutBtn=document.getElementById('logoutBtn');
-    (async ()=>{ const { data:{ session } } = await sb.auth.getSession(); avatar.textContent = session?.user ? (session.user.email||'?')[0].toUpperCase() : 'U'; })();
+    (async ()=>{
+      const { data:{ session } } = await sb.auth.getSession();
+      avatar.textContent = session?.user ? (session.user.email||'?')[0].toUpperCase() : 'U';
+    })();
     avatar.onclick = (e)=>{ e.stopPropagation(); menu.style.display = menu.style.display==='block'?'none':'block'; };
     document.addEventListener('click', ()=> menu.style.display='none');
     logoutBtn.onclick = async ()=>{ await sb.auth.signOut(); location.reload(); };
+
+    /* Nav */
     document.getElementById('homeBtn').onclick=()=>location.href='index.html';
 
+    /* Historique (drawer + overlay) */
     const drawer=document.getElementById('drawer'); const overlay=document.getElementById('overlay'); const histList=document.getElementById('histList');
     function openDrawer(open){ drawer.classList.toggle('open', open); overlay.classList.toggle('show', open); }
     document.getElementById('openHistory').onclick = ()=> openDrawer(true);
@@ -205,12 +215,13 @@
     }
     renderHistory();
 
+    /* Chat + Spec */
     const chatBody=document.getElementById('chatBody');
     const composer=document.getElementById('composer');
     const sendBtn=document.getElementById('sendBtn');
     const statusEl=document.getElementById('status');
     const sheet=document.getElementById('sheet');
-    const decor=document.getElementById('decor');
+    const decor=document.getElementById('decor');           /* ✅ unique déclaration */
     const sheetContent=document.getElementById('sheetContent');
 
     let messages = JSON.parse(localStorage.getItem('pf_chat')||'[]');
@@ -223,7 +234,10 @@
     }
     loadSpec();
 
-    (function consumeWelcome(){ const w = localStorage.getItem('pf_welcome_msg'); if(w){ messages.push({ role:'user', content:w }); localStorage.removeItem('pf_welcome_msg'); } })();
+    (function consumeWelcome(){
+      const w = localStorage.getItem('pf_welcome_msg');
+      if(w){ messages.push({ role:'user', content:w }); localStorage.removeItem('pf_welcome_msg'); }
+    })();
 
     function scrollChat(){ chatBody.scrollTop = chatBody.scrollHeight; }
     function escapeHTML(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[m])); }
@@ -247,7 +261,10 @@
     }
     function hideTyping(){ if(typingRow){ typingRow.remove(); typingRow=null; } }
 
-    function renderChat(){ chatBody.innerHTML=''; messages.forEach(m=> bubble(m.role, escapeHTML(m.content).replace(/\n/g,'<br/>'))); }
+    function renderChat(){
+      chatBody.innerHTML='';
+      messages.forEach(m=> bubble(m.role, escapeHTML(m.content).replace(/\n/g,'<br/>')));
+    }
     renderChat();
 
     async function sendMessage(text){
@@ -258,17 +275,12 @@
 
       try{
         showTyping();
-
-        // ⬇️  APPEL SUPABASE EDGE FUNCTION "proposal"
         const { data, error } = await sb.functions.invoke('proposal', {
           body: { message: content, proposalSpec: spec, history: messages.slice(-10) }
         });
-
         hideTyping();
 
-        if(error){
-          throw new Error(error.message || 'Edge function error');
-        }
+        if(error){ throw new Error(error.message || 'Edge function error'); }
 
         const reply = data?.reply || (getLang()==='en'?'I could not structure the proposal.':'Je n’ai pas pu structurer la proposition.');
         messages.push({ role:'assistant', content: reply }); localStorage.setItem('pf_chat', JSON.stringify(messages));
@@ -292,6 +304,7 @@
     composer.addEventListener('keydown', (e)=>{ if(e.isComposing || e.keyCode===229) return; if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(composer.value); }});
     sendBtn.onclick = ()=> sendMessage(composer.value);
 
+    /* Upload logo */
     const logoInput = document.getElementById('logoInput');
     logoInput.addEventListener('change', async (e)=>{
       const file = e.target.files?.[0]; if(!file) return;
@@ -300,19 +313,20 @@
       reader.readAsDataURL(file); e.target.value='';
     });
 
+    /* Libellés */
     const t = {
       fr:{ title:"Proposition commerciale", to:"Pour", from:"Émis par", date:"Date", letter:"Lettre d’introduction", executive:"Résumé exécutif", objectives:"Objectifs", approach:"Approche & phasage", deliverables:"Livrables", in_scope:"Inclus", out_scope:"Hors-périmètre", timeline:"Planning", pricing:"Tarification", assumptions:"Hypothèses / Risques", next:"Prochaines étapes", price_model:"Modèle", terms:"Conditions", toc:"Sommaire" },
       en:{ title:"Business Proposal", to:"To", from:"Issued by", date:"Date", letter:"Cover Letter", executive:"Executive Summary", objectives:"Objectives", approach:"Approach & Phasing", deliverables:"Deliverables", in_scope:"In scope", out_scope:"Out of scope", timeline:"Timeline", pricing:"Pricing", assumptions:"Assumptions / Risks", next:"Next Steps", price_model:"Model", terms:"Terms", toc:"Table of Contents" }
     };
 
-    function safeArr(v){ return Array.isArray(v)?v:[]; }
     function fmtDate(d){ try{ const dt=d?new Date(d):new Date(); return dt.toLocaleDateString(document.documentElement.lang||getLang(), {year:'numeric',month:'short',day:'2-digit'});}catch{return ''} }
     function money(n,c){ try{ return new Intl.NumberFormat(document.documentElement.lang||getLang(),{style:'currency',currency:c||'EUR'}).format(Number(n||0)); }catch{ return String(n||0)+' '+(c||'€') } }
 
+    /* === THEME tokens + décor global === */
     function applyStyleTokens(style){
       const palette = { primary:"#3B82F6", secondary:"#8B5CF6", surface:"#FFFFFF", ink:"#0A1020", muted:"#5C667A", stroke:"#E0E6F4", accentA:"#60A5FA", accentB:"#93C5FD", ...(style?.palette||{}) };
-      const shapes = { radius:"12px", shadow:"0 18px 48px rgba(10,16,32,.12)", ...(style?.shapes||{}) };
-      const typo   = { heading:"Inter", body:"Inter", accent:"Inter", ...(style?.typography||{}) };
+      const shapes  = { radius:"12px", shadow:"0 18px 48px rgba(10,16,32,.12)", ...(style?.shapes||{}) };
+      const typo    = { heading:"Inter", body:"Inter", accent:"Inter", ...(style?.typography||{}) };
       sheet.style.setProperty('--panel', palette.surface);
       sheet.style.setProperty('--ink', palette.ink);
       sheet.style.setProperty('--muted', palette.muted);
@@ -328,10 +342,20 @@
 
     function hsla(h,s,l,a){ return `hsla(${Number(h||0)},${Number(s||0)}%,${Number(l||0)}%,${Number(a||1)})`; }
     function pickCorner(pos){ const map={ top:{top:'-15vh',left:'50%',transform:'translateX(-50%)'}, bottom:{bottom:'-15vh',left:'50%',transform:'translateX(-50%)'}, left:{left:'-15vw',top:'50%',transform:'translateY(-50%)'}, right:{right:'-15vw',top:'50%',transform:'translateY(-50%)'}, center:{top:'50%',left:'50%',transform:'translate(-50%,-50%)'} }; return map[pos]||map.center; }
-    const decor=document.getElementById('decor');
+
     function renderDecorLayers(layers){
       decor.innerHTML=''; if(!layers?.length) return;
-      layers.forEach((L,i)=>{ const layer=document.createElement('div'); layer.style.position='absolute'; layer.style.pointerEvents='none'; layer.style.mixBlendMode=(L.blend||'normal'); const pos=pickCorner(L.position); Object.assign(layer.style,pos); const rot=Number(L.rotate||0); const scale=Math.max(0.25, Number(L.scale||1)); const color=hsla(L.h??220, L.s??60, L.l??55, L.opacity??0.18);
+      layers.forEach((L,i)=>{
+        const layer=document.createElement('div');
+        layer.style.position='absolute';
+        layer.style.pointerEvents='none';
+        layer.style.mixBlendMode=(L.blend||'normal');
+        const pos=pickCorner(L.position);
+        Object.assign(layer.style,pos);
+        const rot=Number(L.rotate||0);
+        const scale=Math.max(0.25, Number(L.scale||1));
+        const color=hsla(L.h??220, L.s??60, L.l??55, L.opacity??0.18);
+
         switch((L.type||'').toLowerCase()){
           case 'glow':{ const size=900*scale; layer.style.width=layer.style.height=size+'px'; layer.style.borderRadius='50%'; layer.style.filter='blur(48px)'; layer.style.background=`radial-gradient(closest-side, ${color} 0%, transparent 70%)`; layer.style.transform=(pos.transform?pos.transform+' ':'')+`rotate(${rot}deg)`; break; }
           case 'gradient_blob':{ const w=1000*scale,h=700*scale; layer.style.width=w+'px'; layer.style.height=h+'px'; layer.style.borderRadius='40%'; layer.style.filter='blur(24px)'; layer.style.background=`conic-gradient(from 180deg, ${color}, transparent 60%)`; layer.style.transform=(pos.transform?pos.transform+' ':'')+`rotate(${rot}deg)`; break; }
@@ -344,6 +368,7 @@
       });
     }
 
+    /* Pages */
     const sheetPages=[]; function clearPages(){ sheetContent.innerHTML=''; sheetPages.length=0; }
     function makePage(kind='default'){ const page=document.createElement('div'); page.className='page'; page.dataset.kind=kind; const pageDecor=document.createElement('div'); pageDecor.className='page-decor'; const inner=document.createElement('div'); inner.className='inner'; page.appendChild(pageDecor); page.appendChild(inner); sheetContent.appendChild(page); sheetPages.push({page,inner,pageDecor}); return {page,inner,pageDecor}; }
 
@@ -352,8 +377,41 @@
     function P(inner, text){ const p=document.createElement('p'); p.textContent=text; inner.appendChild(p); }
     function UL(inner, arr){ if(!arr?.length) return; const ul=document.createElement('ul'); arr.forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ul.appendChild(li); }); inner.appendChild(ul); }
     function pageAccentBar(pageDecor, colorA, colorB){ const band=document.createElement('div'); band.style.position='absolute'; band.style.inset='-10% -10% auto -10%'; band.style.height='40%'; band.style.background=`linear-gradient(135deg, ${colorA}, ${colorB})`; band.style.opacity=.25; band.style.transform='skewY(-8deg)'; pageDecor.appendChild(band); }
-    function renderCover(style, L, title, company, client, date){ const { inner, pageDecor } = makePage('cover'); const pA=getComputedStyle(sheet).getPropertyValue('--accent').trim()||'#3B82F6'; const pB=getComputedStyle(sheet).getPropertyValue('--accent2').trim()||'#8B5CF6'; pageAccentBar(pageDecor,pA,pB); const head=document.createElement('div'); head.className='doc-header'; const logoBox=document.createElement('div'); logoBox.className='logo-box'; if(style?.logoDataUrl){ const im=new Image(); im.src=style.logoDataUrl; logoBox.appendChild(im); } else { logoBox.textContent='LOGO'; logoBox.style.color='#9aa6bf'; } const bi=document.createElement('div'); bi.className='brand-info'; bi.innerHTML=`<div class="company">${company}</div><div class="muted">${date}</div>`; head.appendChild(logoBox); head.appendChild(bi); inner.appendChild(head); H1(inner, title); const meta=document.createElement('div'); meta.className='meta'; meta.innerHTML = `${(L===t.en)?'To':'Pour'}: <span class="tag">${client}</span> &nbsp;•&nbsp; ${(L===t.en)?'Issued by':'Émis par'}: <span class="tag">${company}</span>`; inner.appendChild(meta); const band=document.createElement('div'); band.className='band'; band.textContent = (L===t.en) ? "Preview auto-generated from your brief." : "Aperçu généré automatiquement selon votre brief."; inner.appendChild(band); }
-    function renderTOC(L, sections){ const present=sections.filter(s=>s.present); if(present.length<3) return; const { inner }=makePage('toc'); H2(inner, (L===t.en)?'Table of Contents':'Sommaire'); const toc=document.createElement('div'); toc.className='toc'; toc.innerHTML=`<b>${(L===t.en)?'Table of Contents':'Sommaire'}</b>`; present.forEach(s=>{ const a=document.createElement('a'); a.textContent=s.title; a.href='#'+s.id; toc.appendChild(a); }); inner.appendChild(toc); }
+
+    function renderCover(style, L, title, company, client, date){
+      const { inner, pageDecor } = makePage('cover');
+      const pA=getComputedStyle(sheet).getPropertyValue('--accent').trim()||'#3B82F6';
+      const pB=getComputedStyle(sheet).getPropertyValue('--accent2').trim()||'#8B5CF6';
+      pageAccentBar(pageDecor,pA,pB);
+
+      const head=document.createElement('div'); head.className='doc-header';
+      const logoBox=document.createElement('div'); logoBox.className='logo-box';
+      if(style?.logoDataUrl){ const im=new Image(); im.src=style.logoDataUrl; logoBox.appendChild(im); } else { logoBox.textContent='LOGO'; logoBox.style.color='#9aa6bf'; }
+      const bi=document.createElement('div'); bi.className='brand-info';
+      bi.innerHTML=`<div class="company">${company}</div><div class="muted">${date}</div>`;
+      head.appendChild(logoBox); head.appendChild(bi); inner.appendChild(head);
+
+      H1(inner, title);
+      const meta=document.createElement('div'); meta.className='meta';
+      meta.innerHTML = `${(L===t.en)?'To':'Pour'}: <span class="tag">${client}</span> &nbsp;•&nbsp; ${(L===t.en)?'Issued by':'Émis par'}: <span class="tag">${company}</span>`;
+      inner.appendChild(meta);
+
+      const band=document.createElement('div'); band.className='band';
+      band.textContent = (L===t.en) ? "Preview auto-generated from your brief." : "Aperçu généré automatiquement selon votre brief.";
+      inner.appendChild(band);
+    }
+
+    function renderTOC(L, sections){
+      const present=sections.filter(s=>s.present);
+      if(present.length<3) return;
+      const { inner }=makePage('toc');
+      H2(inner, (L===t.en)?'Table of Contents':'Sommaire');
+      const toc=document.createElement('div'); toc.className='toc';
+      toc.innerHTML=`<b>${(L===t.en)?'Table of Contents':'Sommaire'}</b>`;
+      present.forEach(s=>{ const a=document.createElement('a'); a.textContent=s.title; a.href='#'+s.id; toc.appendChild(a); });
+      inner.appendChild(toc);
+    }
+
     function renderLetter(L, letter){ const { inner }=makePage('letter'); H2(inner, (L===t.en)?'Cover Letter':'Lettre d’introduction'); if(letter?.greeting) P(inner, letter.greeting); ((letter?.body_paragraphs?.length?letter.body_paragraphs:letter?.paragraphs)||[]).forEach(p=>P(inner,p)); if(letter?.closing) P(inner, letter.closing); if(letter?.signature) P(inner, letter.signature); }
     function renderExecutive(L, exec){ const { inner }=makePage('executive'); H2(inner, (L===t.en)?'Executive Summary':'Résumé exécutif'); (exec?.paragraphs||[]).forEach(p=>P(inner,p)); }
     function renderObjectives(L, obj){ const { inner }=makePage('objectives'); H2(inner, (L===t.en)?'Objectives':'Objectifs'); UL(inner, obj?.bullets||[]); }
@@ -386,8 +444,12 @@
       const company=(spec.meta?.company || spec.meta?.brand?.company || 'Votre société').trim();
       const client=(spec.meta?.client || 'Client').trim();
       const date=spec.meta?.date || fmtDate();
+
       renderCover(spec?.meta?.style, L, title, company, client, date);
-      const tocList=buildTOCList(L); renderTOC(L, tocList);
+
+      const tocList=buildTOCList(L);
+      renderTOC(L, tocList);
+
       if (tocList[0].present) renderLetter(L, spec.letter);
       if (tocList[1].present) renderExecutive(L, spec.executive_summary);
       if (tocList[2].present) renderObjectives(L, spec.objectives);
@@ -400,10 +462,12 @@
     }
     renderSpec();
 
+    /* Lang */
     function applyChatLang(){ const en=(getLang()==='en'); document.getElementById('composer').placeholder = en?'Type your message':'Écrivez votre message'; }
     applyChatLang();
     window.addEventListener('langchange', ()=>{ spec.meta = { ...(spec.meta||{}), lang:getLang() }; localStorage.setItem('pf_proposal', JSON.stringify(spec)); applyChatLang(); renderSpec(); });
 
+    /* Auto relance si dernier message user sans réponse */
     if(messages.length && messages[messages.length-1].role==='user' && !chatBody.querySelector('.bubble-assistant')){ sendMessage(messages[messages.length-1].content); }
   </script>
 </body>
