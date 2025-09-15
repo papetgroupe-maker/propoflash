@@ -50,6 +50,7 @@
     .row-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
     .row-actions{display:flex;gap:6px}
     .row-actions button{border:1px solid var(--stroke);background:var(--panel);border-radius:8px;padding:4px 8px;font-weight:600;cursor:pointer}
+    .row-item.active{outline:2px solid var(--accent);}
 
     /* Layout principal */
     .main{
@@ -217,11 +218,10 @@
   </div>
 
   <script>
-    /* Supabase (auth guard léger, inchangé) */
+    /* ========= Auth (léger) ========= */
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-
     async function guard(){
       const { data:{ session } } = await sb.auth.getSession();
       if(session?.user) return true;
@@ -232,7 +232,7 @@
     }
     guard();
 
-    /* Profil */
+    /* ========= Profil ========= */
     const avatar=document.getElementById('avatar'), menu=document.getElementById('menu'), logoutBtn=document.getElementById('logoutBtn');
     (async ()=>{ const { data:{ session } } = await sb.auth.getSession(); avatar.textContent = session?.user ? (session.user.email||'?')[0].toUpperCase() : 'U'; })();
     avatar.onclick = (e)=>{ e.stopPropagation(); menu.style.display = menu.style.display==='block'?'none':'block'; };
@@ -240,47 +240,37 @@
     logoutBtn.onclick = async ()=>{ await sb.auth.signOut(); location.reload(); };
     document.getElementById('homeBtn').onclick=()=>location.href='index.html';
 
-    /* Historique de discussions (par conversation) */
+    /* ========= Historique (conversations complètes) ========= */
     const drawer=document.getElementById('drawer'); const histList=document.getElementById('histList');
     const openHistory=document.getElementById('openHistory'); const newChatBtn=document.getElementById('newChatBtn');
     const renameInput=document.getElementById('renameInput'); const applyRenameBtn=document.getElementById('applyRenameBtn'); const deleteChatBtn=document.getElementById('deleteChatBtn');
 
-    openHistory.onclick = ()=> { drawer.classList.toggle('open'); renderHistory(); if(activeChat) renameInput.value = activeChat.title||''; };
-    function loadAllChats(){ try{ return JSON.parse(localStorage.getItem('pf_convos')||'[]'); }catch{return []} }
-    function saveAllChats(list){ localStorage.setItem('pf_convos', JSON.stringify(list)); }
-    function newConversation(){
-      const id=Date.now();
-      const title='Nouvelle proposition';
-      const convo={ id, title, date:new Date().toISOString(), spec: baseSpec(), messages:[], memory:{} };
-      const all=loadAllChats(); all.unshift(convo); saveAllChats(all);
-      activeChat=convo; hydrateFromActive(); renderHistory();
-    }
-    function renderHistory(){
-      const all=loadAllChats(); histList.innerHTML='';
-      if(!all.length){ histList.innerHTML='<div class="muted" style="padding:8px">Aucune discussion</div>'; return; }
-      all.forEach(item=>{
-        const d=new Date(item.date);
-        const row=document.createElement('div'); row.className='row-item';
-        row.innerHTML = `
-          <div class="row-top">
-            <strong>${item.title||'Sans titre'}</strong>
-            <div class="row-actions">
-              <button data-act="select">Ouvrir</button>
-              <button data-act="rename">Renommer</button>
-              <button data-act="delete">Supprimer</button>
-            </div>
-          </div>
-          <span class="muted">${d.toLocaleString()}</span>`;
-        row.querySelector('[data-act="select"]').onclick=()=>{ activeChat=item; hydrateFromActive(); drawer.classList.remove('open'); };
-        row.querySelector('[data-act="rename"]').onclick=()=>{ const v=prompt('Nouveau titre', item.title||''); if(v!=null){ item.title=v.trim()||'Sans titre'; saveAllChats(all); if(activeChat?.id===item.id) activeChat.title=item.title; renderHistory(); updateTitleUI(); } };
-        row.querySelector('[data-act="delete"]').onclick=()=>{ if(confirm('Supprimer cette discussion ?')){ const idx=all.findIndex(x=>x.id===item.id); if(idx>=0){ all.splice(idx,1); saveAllChats(all); if(activeChat?.id===item.id){ activeChat=null; newConversation(); } renderHistory(); } } };
-        histList.appendChild(row);
-      });
-    }
-    newChatBtn.onclick = ()=>{ newConversation(); drawer.classList.remove('open'); };
-    applyRenameBtn.onclick = ()=>{ if(!activeChat) return; const all=loadAllChats(); const it=all.find(x=>x.id===activeChat.id); if(!it) return;
-      it.title = renameInput.value.trim() || it.title; saveAllChats(all); activeChat.title=it.title; updateTitleUI(); renderHistory(); };
-    deleteChatBtn.onclick = ()=>{ if(!activeChat) return; const all=loadAllChats(); const idx=all.findIndex(x=>x.id===activeChat.id); if(idx>=0){ if(confirm('Supprimer cette discussion ?')){ all.splice(idx,1); saveAllChats(all); activeChat=null; newConversation(); renderHistory(); } } };
+    const LS_KEY='pf_convos'; const LS_ACTIVE='pf_active_convo_id';
+
+    // Migration depuis anciens stockages
+    (function migrateLegacy(){
+      try{
+        const convos = JSON.parse(localStorage.getItem(LS_KEY)||'[]');
+        if(convos.length) return;
+        const legacyHist = JSON.parse(localStorage.getItem('pf_history')||'[]');
+        const legacyChat = JSON.parse(localStorage.getItem('pf_chat')||'[]');
+        const legacySpec = JSON.parse(localStorage.getItem('pf_proposal')||'null');
+        const acc=[];
+        if(legacyHist.length){
+          legacyHist.forEach(h=>{
+            acc.push({ id:h.id||Date.now(), title:h.title||'Ancienne proposition', date:h.date||new Date().toISOString(), spec:h.spec||baseSpec(), messages:h.messages||[], memory:{} });
+          });
+        }else if(legacyChat?.length || legacySpec){
+          acc.push({ id:Date.now(), title:'Session locale', date:new Date().toISOString(), spec: legacySpec||baseSpec(), messages: legacyChat||[], memory:{} });
+        }
+        if(acc.length){ localStorage.setItem(LS_KEY, JSON.stringify(acc)); }
+      }catch{}
+    })();
+
+    function loadAllChats(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||'[]'); }catch{return []} }
+    function saveAllChats(list){ localStorage.setItem(LS_KEY, JSON.stringify(list)); }
+    function saveActiveId(id){ localStorage.setItem(LS_ACTIVE, String(id)); }
+    function getActiveId(){ return localStorage.getItem(LS_ACTIVE); }
 
     let activeChat=null;
 
@@ -295,29 +285,102 @@
       };
     }
 
+    function newConversation(){
+      const id=Date.now();
+      const title='Nouvelle proposition';
+      const convo={ id, title, date:new Date().toISOString(), spec: baseSpec(), messages:[], memory:{} };
+      const all=loadAllChats(); all.unshift(convo); saveAllChats(all); saveActiveId(id);
+      setActiveFromStorage();
+      renderHistory();
+    }
+
+    function setActiveFromStorage(){
+      const all=loadAllChats(); let id=getActiveId();
+      if(!all.length){ newConversation(); return; }
+      if(!id){ id=String(all[0].id); saveActiveId(id); }
+      const found = all.find(x=>String(x.id)===String(id)) || all[0];
+      activeChat = JSON.parse(JSON.stringify(found));
+      hydrateFromActive();
+    }
+
     function hydrateFromActive(){
       if(!activeChat) return;
-      spec = JSON.parse(JSON.stringify(activeChat.spec||baseSpec()));
+      spec = activeChat.spec||baseSpec();
       messages = Array.isArray(activeChat.messages)?activeChat.messages.slice():[];
       memory = activeChat.memory||{};
       renderChat(); renderSpec(); updateTitleUI();
+      renameInput.value = activeChat.title||'';
     }
-    function saveCurrent(){
+
+    function persistActive(){
       if(!activeChat) return;
-      activeChat.spec = spec; activeChat.messages = messages; activeChat.memory = memory; activeChat.date = new Date().toISOString();
-      const all=loadAllChats(); const idx=all.findIndex(x=>x.id===activeChat.id); if(idx>=0) all[idx]=activeChat; else all.unshift(activeChat);
+      const all=loadAllChats(); const idx=all.findIndex(x=>String(x.id)===String(activeChat.id));
+      const now = new Date().toISOString();
+      const snapshot = { ...activeChat, spec, messages, memory, date: now };
+      if(idx>=0) all[idx]=snapshot; else all.unshift(snapshot);
       saveAllChats(all);
+      saveActiveId(activeChat.id);
     }
+
+    function renderHistory(){
+      const all=loadAllChats(); histList.innerHTML='';
+      if(!all.length){ histList.innerHTML='<div class="muted" style="padding:8px">Aucune discussion</div>'; return; }
+      const activeId = getActiveId();
+      all.forEach(item=>{
+        const d=new Date(item.date);
+        const row=document.createElement('div'); row.className='row-item'+(String(item.id)===String(activeId)?' active':'');
+        row.innerHTML = `
+          <div class="row-top">
+            <strong>${item.title||'Sans titre'}</strong>
+            <div class="row-actions">
+              <button data-act="open">Ouvrir</button>
+              <button data-act="rename">Renommer</button>
+              <button data-act="delete">Supprimer</button>
+            </div>
+          </div>
+          <span class="muted">${d.toLocaleString()}</span>`;
+        row.querySelector('[data-act="open"]').onclick=()=>{ saveActiveId(item.id); setActiveFromStorage(); drawer.classList.remove('open'); };
+        row.querySelector('[data-act="rename"]').onclick=()=>{ const v=prompt('Nouveau titre', item.title||''); if(v!=null){ item.title=v.trim()||'Sans titre'; const all2=loadAllChats(); const i=all2.findIndex(x=>x.id===item.id); if(i>=0){ all2[i]=item; saveAllChats(all2); if(String(activeChat?.id)===String(item.id)){ activeChat.title=item.title; updateTitleUI(); renameInput.value=item.title; } renderHistory(); } } };
+        row.querySelector('[data-act="delete"]').onclick=()=>{
+          if(confirm('Supprimer cette discussion ?')){
+            const all2=loadAllChats(); const i=all2.findIndex(x=>x.id===item.id);
+            if(i>=0){ all2.splice(i,1); saveAllChats(all2); const actId=getActiveId();
+              if(String(actId)===String(item.id)){ // on supprime l’actif → bascule
+                if(all2.length){ saveActiveId(all2[0].id); } else { localStorage.removeItem(LS_ACTIVE); }
+                setActiveFromStorage();
+              }
+              renderHistory();
+            }
+          }
+        };
+        histList.appendChild(row);
+      });
+    }
+
+    openHistory.onclick = ()=> { drawer.classList.toggle('open'); renderHistory(); if(activeChat) renameInput.value = activeChat.title||''; };
+    newChatBtn.onclick = ()=>{ newConversation(); drawer.classList.remove('open'); };
+    document.getElementById('applyRenameBtn').onclick = ()=>{
+      if(!activeChat) return;
+      const v = (renameInput.value||'').trim();
+      if(!v) return;
+      activeChat.title = v; updateTitleUI(); persistActive(); renderHistory();
+    };
+    document.getElementById('deleteChatBtn').onclick = ()=>{
+      if(!activeChat) return;
+      const all=loadAllChats(); const idx=all.findIndex(x=>String(x.id)===String(activeChat.id));
+      if(idx>=0 && confirm('Supprimer cette discussion ?')){
+        all.splice(idx,1); saveAllChats(all);
+        if(all.length){ saveActiveId(all[0].id); } else { localStorage.removeItem(LS_ACTIVE); }
+        setActiveFromStorage(); renderHistory();
+      }
+    };
+
     function updateTitleUI(){ document.getElementById('chatTitle').textContent = activeChat?.title || 'Chat'; }
 
-    // Init premier démarrage
-    (function initConvo(){
-      const all=loadAllChats();
-      if(all.length){ activeChat=all[0]; hydrateFromActive(); }
-      else { newConversation(); }
-    })();
+    // Init
+    setActiveFromStorage();
 
-    /* Chat */
+    /* ========= Chat ========= */
     const chatBody=document.getElementById('chatBody');
     const composer=document.getElementById('composer');
     const sendBtn=document.getElementById('sendBtn');
@@ -326,7 +389,9 @@
     const decor=document.getElementById('decor');
     const sheetContent=document.getElementById('sheetContent');
 
-    let messages = []; let spec = baseSpec(); let memory = {};
+    let messages = activeChat?.messages || [];
+    let spec = activeChat?.spec || baseSpec();
+    let memory = activeChat?.memory || {};
 
     function scrollChat(){ chatBody.scrollTop = chatBody.scrollHeight; }
     function escapeHTML(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[m])); }
@@ -348,10 +413,25 @@
     function hideTyping(){ if(typingRow){ typingRow.remove(); typingRow=null; } }
 
     function renderChat(){ chatBody.innerHTML=''; messages.forEach(m=> bubble(m.role, escapeHTML(m.content).replace(/\n/g,'<br/>'))); scrollChat(); }
+    renderChat();
 
+    // ======= FIX ENTRÉE (envoi) =======
+    let isComposing=false;
+    composer.addEventListener('compositionstart', ()=>{ isComposing=true; });
+    composer.addEventListener('compositionend',   ()=>{ isComposing=false; });
     composer.addEventListener('keydown', (e)=>{
-      if(e.isComposing || e.keyCode===229) return;
-      if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(composer.value); }
+      if(isComposing) return;
+      if(e.key==='Enter' && !e.shiftKey){
+        e.preventDefault();
+        sendMessage(composer.value);
+      }
+    });
+    // Sécurité : capter Enter même si un autre listener capte avant
+    document.addEventListener('keydown', (e)=>{
+      if(document.activeElement===composer && !isComposing && e.key==='Enter' && !e.shiftKey){
+        e.preventDefault();
+        sendMessage(composer.value);
+      }
     });
     sendBtn.onclick = ()=> sendMessage(composer.value);
 
@@ -378,16 +458,13 @@
 
     async function sendMessage(text){
       const content=text.trim(); if(!content) return;
-      messages.push({ role:'user', content }); saveCurrent();
-      bubble('user', escapeHTML(content).replace(/\n/g,'<br/>'));
-      composer.value=''; statusEl.textContent='Rédaction…'; showTyping();
+      messages.push({ role:'user', content }); bubble('user', escapeHTML(content).replace(/\n/g,'<br/>'));
+      composer.value=''; statusEl.textContent='Rédaction…'; showTyping(); persistActive();
 
       try{
-        // Lance chat & style en parallèle
         const [chatRes, styleRes] = await Promise.allSettled([ callChatAPI(content), callStyleAPI(content) ]);
         hideTyping();
 
-        // CHAT
         if(chatRes.status==='fulfilled'){
           const data = chatRes.value;
           const reply = data.reply || (getLang()==='en'?'I could not structure the proposal.':'Je n’ai pas pu structurer la proposition.');
@@ -399,10 +476,7 @@
             if(next.meta){ next.meta.style = { ...((spec?.meta||{}).style||{}), ...((next.meta||{}).style||{}) }; }
             spec = next;
           }
-          if(data.designSpecDiff){
-            spec.meta = spec.meta || {};
-            spec.meta.style = { ...(spec.meta.style||{}), ...(data.designSpecDiff||{}) };
-          }
+          if(data.designSpecDiff){ spec.meta = spec.meta || {}; spec.meta.style = { ...(spec.meta.style||{}), ...(data.designSpecDiff||{}) }; }
           if(data.memoryUpdate){
             memory = {
               design_prefs: { ...(memory.design_prefs||{}), ...(data.memoryUpdate.design_prefs||{}) },
@@ -414,7 +488,6 @@
           bubble('assistant', `<em>Erreur API chat: ${escapeHTML(chatRes.reason?.message||chatRes.reason)}</em>`);
         }
 
-        // STYLE
         if(styleRes.status==='fulfilled'){
           const s = styleRes.value;
           if(s?.designSpecDiff){
@@ -425,7 +498,8 @@
           console.warn('Style API error:', styleRes.reason);
         }
 
-        saveCurrent(); renderSpec();
+        persistActive();
+        renderSpec();
         statusEl.textContent='Prêt';
       }catch(e){
         hideTyping(); statusEl.textContent='Erreur réseau';
@@ -439,22 +513,21 @@
     logoInput.addEventListener('change', async (e)=>{
       const file = e.target.files?.[0]; if(!file) return;
       const reader = new FileReader();
-      reader.onload = ()=>{ const url = reader.result; spec.meta = { ...(spec.meta||{}), style:{ ...(spec.meta?.style||{}), logoDataUrl: url } }; saveCurrent(); renderSpec(); };
+      reader.onload = ()=>{ const url = reader.result; spec.meta = { ...(spec.meta||{}), style:{ ...(spec.meta?.style||{}), logoDataUrl: url } }; persistActive(); renderSpec(); };
       reader.readAsDataURL(file); e.target.value='';
     });
 
-    /* Libellés */
+    /* ========= Libellés & utilitaires ========= */
     const t = {
       fr:{ title:"Proposition commerciale", to:"Pour", from:"Émis par", date:"Date", letter:"Lettre d’introduction", executive:"Résumé exécutif", objectives:"Objectifs", approach:"Approche & phasage", deliverables:"Livrables", in_scope:"Inclus", out_scope:"Hors-périmètre", timeline:"Planning", pricing:"Tarification", assumptions:"Hypothèses / Risques", next:"Prochaines étapes", price_model:"Modèle", terms:"Conditions", toc:"Sommaire" },
       en:{ title:"Business Proposal", to:"To", from:"Issued by", date:"Date", letter:"Cover Letter", executive:"Executive Summary", objectives:"Objectives", approach:"Approach & Phasing", deliverables:"Deliverables", in_scope:"In scope", out_scope:"Out of scope", timeline:"Timeline", pricing:"Pricing", assumptions:"Assumptions / Risks", next:"Next Steps", price_model:"Model", terms:"Terms", toc:"Table of Contents" }
     };
-
     function safeArr(v){ return Array.isArray(v)?v:[]; }
     function safeStr(v,fb=''){ return (v==null?'':String(v)).trim() || fb; }
     function fmtDate(d){ try{ const dt=d?new Date(d):new Date(); return dt.toLocaleDateString(document.documentElement.lang||getLang(), {year:'numeric',month:'short',day:'2-digit'});}catch{return ''} }
     function money(n,c){ try{ return new Intl.NumberFormat(document.documentElement.lang||getLang(),{style:'currency',currency:c||'EUR'}).format(Number(n||0)); }catch{ return String(n||0)+' '+(c||'€') } }
 
-    /* THEME */
+    /* ========= Thème & décor ========= */
     function applyStyleTokens(style){
       const palette = {
         primary: "#3B82F6", secondary: "#8B5CF6", surface: "#FFFFFF",
@@ -491,6 +564,7 @@
       return map[pos] || map.center;
     }
     function renderDecorLayers(layers, palette){
+      const decor=document.getElementById('decor');
       decor.innerHTML = '';
       if(!layers?.length) return;
       layers.forEach((L,i)=>{
@@ -552,7 +626,7 @@
       });
     }
 
-    /* Pages */
+    /* ========= Pages & rendu ========= */
     const sheetPages = [];
     function clearPages(){ sheetContent.innerHTML=''; sheetPages.length=0; }
     function makePage(kind='default'){
@@ -612,7 +686,7 @@
       const { inner } = makePage('letter'); H2(inner, L.letter);
       if(letter?.greeting || letter?.body_paragraphs?.length || letter?.paragraphs?.length || letter?.closing || letter?.signature){
         if(letter?.greeting) P(inner, letter.greeting);
-        safeArr(letter?.body_paragraphs?.length?letter.body_paragraphs:letter?.paragraphs).forEach(p=>P(inner, p));
+        (letter?.body_paragraphs?.length?letter.body_paragraphs:letter?.paragraphs||[]).forEach(p=>P(inner, p));
         if(letter?.closing) P(inner, letter.closing);
         if(letter?.signature) P(inner, letter.signature);
       }else{
@@ -622,28 +696,28 @@
 
     function renderExecutive(L, exec){
       const { inner } = makePage('executive'); H2(inner, L.executive);
-      if(safeArr(exec?.paragraphs).length){ safeArr(exec?.paragraphs).forEach(p=>P(inner, p)); }
+      if((exec?.paragraphs||[]).length){ exec.paragraphs.forEach(p=>P(inner, p)); }
       else { P(inner, (document.documentElement.lang==='en') ? "Summarize the value proposition…" : "Résumez la proposition de valeur…"); }
     }
 
     function renderObjectives(L, obj){
       const { inner } = makePage('objectives'); H2(inner, L.objectives);
-      if(safeArr(obj?.bullets).length) UL(inner, obj?.bullets||[]);
+      if((obj?.bullets||[]).length) UL(inner, obj.bullets);
       else P(inner, (document.documentElement.lang==='en') ? "List key objectives…" : "Listez les objectifs clés…");
     }
 
     function renderApproach(L, approach){
       const { inner } = makePage('approach'); H2(inner, L.approach);
-      if(safeArr(approach?.phases).length){
-        safeArr(approach?.phases).forEach((ph,i)=>{
+      if((approach?.phases||[]).length){
+        approach.phases.forEach((ph,i)=>{
           const card=document.createElement('div'); card.className='card';
           card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center">
             <strong>Phase ${i+1} — ${safeStr(ph.title,'À confirmer')}</strong>
             <span class="pill">${safeStr(ph.duration||'','')}</span></div>`;
           inner.appendChild(card);
           if(ph.description) P(inner, ph.description);
-          const acts=safeArr(ph.activities?.length?ph.activities:ph.steps); if(acts.length){ const p=document.createElement('p'); p.innerHTML='<em>Activités :</em>'; inner.appendChild(p); UL(inner, acts); }
-          const outs=safeArr(ph.outcomes); if(outs.length){ const p=document.createElement('p'); p.innerHTML='<em>Résultats attendus :</em>'; inner.appendChild(p); UL(inner, outs); }
+          const acts=ph.activities?.length?ph.activities:ph.steps; if(acts?.length){ const p=document.createElement('p'); p.innerHTML='<em>Activités :</em>'; inner.appendChild(p); UL(inner, acts); }
+          const outs=ph.outcomes; if(outs?.length){ const p=document.createElement('p'); p.innerHTML='<em>Résultats attendus :</em>'; inner.appendChild(p); UL(inner, outs); }
         });
       }else{
         P(inner, (document.documentElement.lang==='en') ? "Break the work into phases…" : "Découpez le travail en phases…");
@@ -655,17 +729,17 @@
       const grid=document.createElement('div'); grid.className='grid2';
       const a=document.createElement('div'); a.className='card'; a.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.in_scope}</div>`;
       const b=document.createElement('div'); b.className='card'; b.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.out_scope}</div>`;
-      const ulA=document.createElement('ul'); safeArr(deliv?.in).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulA.appendChild(li); });
-      const ulB=document.createElement('ul'); safeArr(deliv?.out).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulB.appendChild(li); });
+      const ulA=document.createElement('ul'); (deliv?.in||[]).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulA.appendChild(li); });
+      const ulB=document.createElement('ul'); (deliv?.out||[]).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulB.appendChild(li); });
       a.appendChild(ulA); b.appendChild(ulB); grid.appendChild(a); grid.appendChild(b); inner.appendChild(grid);
-      if(!safeArr(deliv?.in).length && !safeArr(deliv?.out).length) P(inner, (document.documentElement.lang==='en') ? "Detail inclusions/exclusions…" : "Détaillez l’inclus et le hors-périmètre…");
+      if(!(deliv?.in||[]).length && !(deliv?.out||[]).length) P(inner, (document.documentElement.lang==='en') ? "Detail inclusions/exclusions…" : "Détaillez l’inclus et le hors-périmètre…");
     }
 
     function renderTimeline(L, timeline){
       const { inner } = makePage('timeline'); H2(inner, L.timeline);
-      if(safeArr(timeline?.milestones).length){
+      if((timeline?.milestones||[]).length){
         const grid=document.createElement('div'); grid.className='grid2';
-        safeArr(timeline?.milestones).forEach(ms=>{
+        timeline.milestones.forEach(ms=>{
           const c=document.createElement('div'); c.className='card';
           c.innerHTML = `<div><strong>${safeStr(ms.title,'Étape')}</strong></div><div class="muted">${safeStr(ms.dateOrWeek || ms.date || ms.duration || '', '')}</div>`;
           if(ms.notes){ const p=document.createElement('p'); p.textContent=ms.notes; c.appendChild(p); }
@@ -717,12 +791,12 @@
 
     function renderAssumptions(L, asmp){
       const { inner } = makePage('assumptions'); H2(inner, L.assumptions);
-      if(safeArr(asmp?.paragraphs).length) safeArr(asmp?.paragraphs).forEach(p=>P(inner,p));
+      if((asmp?.paragraphs||[]).length) asmp.paragraphs.forEach(p=>P(inner,p));
       else P(inner, (document.documentElement.lang==='en') ? "List assumptions/risks…" : "Listez les hypothèses/risques…");
     }
     function renderNext(L, next){
       const { inner } = makePage('next'); H2(inner, L.next);
-      if(safeArr(next?.paragraphs).length) safeArr(next?.paragraphs).forEach(p=>P(inner,p));
+      if((next?.paragraphs||[]).length) next.paragraphs.forEach(p=>P(inner,p));
       else P(inner, (document.documentElement.lang==='en') ? "Suggest next steps…" : "Suggérez les prochaines étapes…");
     }
 
@@ -759,6 +833,7 @@
     }
     renderSpec();
 
+    // Lang
     function applyChatLang(){
       const en=(getLang()==='en');
       document.getElementById('composer').placeholder = en?'Type your message':'Écrivez votre message';
@@ -766,8 +841,11 @@
     applyChatLang();
     window.addEventListener('langchange', ()=>{
       spec.meta = { ...(spec.meta||{}), lang:getLang() };
-      saveCurrent(); applyChatLang(); renderSpec();
+      persistActive(); applyChatLang(); renderSpec();
     });
+
+    // Sauvegarde de sécurité quand on quitte
+    window.addEventListener('beforeunload', persistActive);
   </script>
 </body>
 </html>
