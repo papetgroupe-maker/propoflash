@@ -1,29 +1,168 @@
-// /api/chat.js  — Serverless route Vercel / Next (Node)
-// Nécessite process.env.OPENAI_API_KEY
+// /api/chat.js
+// Vercel/Next API function — renvoie TOUJOURS du JSON { reply, proposalSpec, actions }
+// Prérequis : variable d'environnement OPENAI_API_KEY définie sur Vercel
 
 import OpenAI from "openai";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// ---------- PROMPT ----------
+const SYSTEM_PROMPT = `
+ROLE: Senior B2B Proposal Strategist, Brand Designer & Layout Artist (FR/EN).
+OBJECTIF: transformer chaque échange en une proposition exploitable ET stylée.
+Produire un "proposalSpec" cohérent + un "reply" clair. DÉDUIRE un STYLE complet
+à partir des indices utilisateur (couleurs, ambiance, industrie, sobriété vs fun),
+et proposer des couches décoratives subtiles.
 
-/** Util: extrait un bloc JSON même si le modèle bavarde autour */
-function asJson(txt) {
+SCHEMA DE SORTIE (JSON STRICT):
+{
+  "reply": "<texte lisible pour l'utilisateur>",
+  "proposalSpec": {
+    "meta": {
+      "lang":"fr|en",
+      "title": "", "company":"", "client":"", "date":"", "currency":"EUR",
+      "style": {
+        "palette": { "primary":"#hex", "secondary":"#hex", "surface":"#hex", "ink":"#hex", "muted":"#hex", "stroke":"#hex", "accentA":"#hex", "accentB":"#hex" },
+        "shapes": { "radius":"12px|16px", "shadow":"0 18px 48px rgba(...)" },
+        "typography": { "heading":"Inter|Montserrat|Poppins|...","body":"Inter|..." },
+        "logoDataUrl": "",
+        "decor_layers": [
+          { "type":"glow|gradient_blob|grid|dots|diagonal", "position":"top|bottom|left|right|center", "opacity":0.18, "h":220, "s":60, "l":55, "rotate":0, "scale":1, "blend":"normal|screen|overlay" }
+        ]
+      }
+    },
+    "letter": { "subject":"", "preheader":"", "greeting":"", "body_paragraphs":[""], "closing":"", "signature":"" },
+    "executive_summary": { "paragraphs":[""] },
+    "objectives": { "bullets":[""] },
+    "approach": { "phases":[{ "title":"", "duration":"", "activities":[""], "outcomes":[""] }] },
+    "deliverables": { "in":[""], "out":[""] },
+    "timeline": { "milestones":[{ "title":"", "dateOrWeek":"", "notes":"" }] },
+    "pricing": { "model":"forfait|regie", "currency":"EUR",
+                 "items":[{ "name":"", "qty":1, "unit":"jour|mois|forfait", "unit_price":0, "subtotal":0 }],
+                 "tax_rate":20, "terms":[""], "price": null },
+    "assumptions": { "paragraphs":[""] },
+    "next_steps": { "paragraphs":[""] }
+  },
+  "actions": [{ "type":"preview" } | { "type":"ask", "field":"meta.client", "hint":"Quel est le client ?" }]
+}
+
+RÈGLES:
+- Langue: déduire; FR par défaut si ambigu.
+- Ne JAMAIS inventer d'entités critiques; si info manque → "actions: ask".
+- Si budget incertain: items + hypothèses + marquer "à confirmer".
+- STYLE: toujours raisonnable et pro. Palette accessible (contraste suffisant: texte vs surface).
+  Couleurs: extraire du brief si mention ("noir & jaune", "vert sapin", "bleu pétrole + violet").
+  Décor: rester subtil (2-4 layers max).
+- Respecter le schéma, JSON strict uniquement.
+`;
+
+// (facultatif) quelques few-shots pour ancrer le format
+const FEWSHOTS = [
+  {
+    role: "user",
+    content:
+      "Brief: Identité 'indus' noir & jaune, style énergique, diagonales, tech B2B FR. Offre: refonte site vitrine 6 pages. Deadline 5 semaines. Budget 8–10k.",
+  },
+  {
+    role: "assistant",
+    content: JSON.stringify({
+      reply:
+        "Je prépare une proposition structurée (cadrage, design, dev) avec un style noir/jaune industriel et des diagonales subtiles.",
+      proposalSpec: {
+        meta: {
+          lang: "fr",
+          title: "Proposition — Refonte site vitrine",
+          currency: "EUR",
+          style: {
+            palette: {
+              primary: "#111827",
+              secondary: "#F59E0B",
+              surface: "#FFFFFF",
+              ink: "#0A1020",
+              muted: "#5C667A",
+              stroke: "#E5E7EB",
+              accentA: "#FCD34D",
+              accentB: "#F59E0B",
+            },
+            shapes: { radius: "12px", shadow: "0 18px 48px rgba(10,16,32,.16)" },
+            typography: { heading: "Montserrat", body: "Inter" },
+            decor_layers: [
+              {
+                type: "diagonal",
+                position: "top",
+                opacity: 0.18,
+                h: 45,
+                s: 95,
+                l: 50,
+                rotate: -20,
+                scale: 1.1,
+                blend: "overlay",
+              },
+              {
+                type: "dots",
+                position: "right",
+                opacity: 0.2,
+                h: 220,
+                s: 15,
+                l: 70,
+                rotate: 0,
+                scale: 1,
+              },
+            ],
+          },
+        },
+        executive_summary: {
+          paragraphs: [
+            "Refonte pour crédibiliser l’offre, améliorer la conversion et l’autonomie CMS.",
+          ],
+        },
+        objectives: { bullets: ["Moderniser l’image", "Accroître les leads", "Optimiser SEO de base"] },
+        approach: {
+          phases: [
+            { title: "Cadrage", duration: "1 semaine", activities: ["Atelier objectifs", "Arborescence"], outcomes: ["Backlog validé"] },
+            { title: "Design UI", duration: "2 semaines", activities: ["Maquettes", "Design system"], outcomes: ["UI validée"] },
+            { title: "Développement", duration: "1.5 semaine", activities: ["Intégration", "CMS"], outcomes: ["Site prêt"] },
+            { title: "Recette & Go-live", duration: "0.5 semaine", activities: ["Tests", "Corrections", "Mise en ligne"], outcomes: ["Prod en ligne"] }
+          ]
+        },
+        pricing: {
+          model: "forfait",
+          currency: "EUR",
+          tax_rate: 20,
+          items: [
+            { name: "Cadrage", qty: 1, unit: "forfait", unit_price: 1500, subtotal: 1500 },
+            { name: "Design (6 pages)", qty: 1, unit: "forfait", unit_price: 2800, subtotal: 2800 },
+            { name: "Dév & intégration", qty: 1, unit: "forfait", unit_price: 3600, subtotal: 3600 },
+          ],
+          terms: ["40% commande, 40% design, 20% livraison", "Validité: 30 jours"],
+        },
+        next_steps: { paragraphs: ["Point 30 min pour verrouiller le périmètre et le planning."] },
+      },
+      actions: [{ type: "preview" }],
+    }),
+  },
+];
+
+// ---------- UTILS ----------
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+function extractJson(text) {
   try {
-    const start = txt.indexOf("{");
-    const end = txt.lastIndexOf("}");
+    // Si le modèle ajoute de la prose autour, on tente d'extraire le plus grand bloc JSON
+    const start = text.indexOf("{");
+    const end = text.lastIndexOf("}");
     if (start >= 0 && end > start) {
-      return JSON.parse(txt.slice(start, end + 1));
+      return JSON.parse(text.slice(start, end + 1));
     }
-  } catch (_) {}
+  } catch {
+    // ignore
+  }
   return null;
 }
 
-/** Util: crée une spec minimale si absente */
-function minimalSpec(prev, lang = "fr") {
-  const L = lang === "en" ? "en" : "fr";
-  const base = {
+function minimalSpec(lang = "fr") {
+  return {
     meta: {
-      lang: L,
-      title: L === "en" ? "Business Proposal" : "Proposition commerciale",
+      lang,
+      title: lang === "en" ? "Business Proposal" : "Proposition commerciale",
       currency: "EUR",
       style: {
         palette: {
@@ -34,205 +173,125 @@ function minimalSpec(prev, lang = "fr") {
           muted: "#5C667A",
           stroke: "#E0E6F4",
           accentA: "#60A5FA",
-          accentB: "#93C5FD"
+          accentB: "#93C5FD",
         },
         shapes: { radius: "12px", shadow: "0 18px 48px rgba(10,16,32,.12)" },
         typography: { heading: "Inter", body: "Inter" },
         decor_layers: [
-          { type: "glow", position: "top", opacity: 0.20, h: 220, s: 60, l: 55, rotate: 0, scale: 1.1, blend: "screen" },
-          { type: "dots", position: "right", opacity: 0.18, h: 220, s: 12, l: 70, rotate: 0, scale: 1.0, blend: "normal" }
-        ]
-      }
+          { type: "glow", position: "top", opacity: 0.18, h: 220, s: 60, l: 55, rotate: 0, scale: 1, blend: "screen" },
+        ],
+      },
     },
-    letter: { greeting: "", body_paragraphs: [], closing: "", signature: "" },
     executive_summary: { paragraphs: [] },
     objectives: { bullets: [] },
     approach: { phases: [] },
     deliverables: { in: [], out: [] },
     timeline: { milestones: [] },
-    pricing: { model: "forfait", currency: "EUR", items: [], tax_rate: 20, terms: [], price: 0 },
+    pricing: { model: "forfait", currency: "EUR", items: [], tax_rate: 20, terms: [], price: null },
     assumptions: { paragraphs: [] },
-    next_steps: { paragraphs: [] }
+    next_steps: { paragraphs: [] },
   };
-  return { ...(prev || {}), ...base, meta: { ...(base.meta), ...((prev || {}).meta || {}) } };
 }
 
-/** SYSTEM PROMPT — oblige JSON strict */
-const SYSTEM_PROMPT = `
-ROLE: Senior B2B Proposal Strategist + Brand/Layout Designer.
-OBJECTIF: À CHAQUE TOUR, retourner UNIQUEMENT du JSON strict:
-
-{
-  "reply": "<texte pour l'utilisateur>",
-  "proposalSpec": { ... (voir schema) ... },
-  "actions": []
-}
-
-SCHEMA (résumé):
-proposalSpec.meta.lang ("fr"|"en"), title, company, client, date, currency
-proposalSpec.meta.style: palette(primary,secondary,surface,ink,muted,stroke,accentA,accentB),
-  shapes(radius,shadow), typography(heading,body), logoDataUrl(optional),
-  decor_layers[] (type:"glow|gradient_blob|grid|dots|diagonal", position:"top|bottom|left|right|center",
-    opacity,h,s,l,rotate,scale,blend)
-Sections: letter, executive_summary, objectives, approach(phases[]), deliverables, timeline, pricing, assumptions, next_steps.
-
-RÈGLES:
-- Toujours renvoyer un proposalSpec COMPLÉTÉ (au minimum: meta + pricing + quelques sections vides) — même si la réponse est une question.
-- Respecter/étendre le proposalSpec précédent fourni dans l'entrée (ne jamais l'écraser sans raison).
-- Si l'utilisateur mentionne le STYLE (sobre, premium, noir/or, bleu corporate, 3D, diagonal, dots, mesh, etc.)
-  => METTRE À JOUR meta.style (palette/typography/decor_layers) avec des valeurs raisonnables et lisibles.
-- Si des infos manquent (client, contenu précis, budget), poser la question DANS "reply" et laisser des placeholders dans proposalSpec.
-- Langue par défaut: FR si ambigu.
-- PAS DE PROSE HORS JSON. PAS d'URL. PAS de markdown. JSON strict uniquement.
-`;
-
-/** FEW-SHOTS concis forcent le format */
-const FEWSHOTS = [
-  {
-    role: "user",
-    content:
-      "Brief: Identité 'indus' noir & or, diagonales subtiles, tech B2B. Offre: refonte site vitrine 6 pages. Deadline 5 semaines. Budget 8–10k."
-  },
-  {
-    role: "assistant",
-    content: JSON.stringify({
-      reply:
-        "Je structure la proposition (cadrage, design, dev) en style industriel noir/or avec diagonales discrètes. Dites-moi le nom de votre client.",
-      proposalSpec: {
-        meta: {
-          lang: "fr",
-          title: "Proposition — Refonte site vitrine",
-          currency: "EUR",
-          style: {
-            palette: {
-              primary: "#111827",
-              secondary: "#CFB06A",
-              surface: "#FFFFFF",
-              ink: "#0A1020",
-              muted: "#6B7280",
-              stroke: "#E5E7EB",
-              accentA: "#F5E6B3",
-              accentB: "#CFB06A"
-            },
-            shapes: { radius: "12px", shadow: "0 18px 48px rgba(10,16,32,.16)" },
-            typography: { heading: "Montserrat", body: "Inter" },
-            decor_layers: [
-              { type: "diagonal", position: "top", opacity: 0.16, h: 45, s: 90, l: 50, rotate: -18, scale: 1.1, blend: "overlay" },
-              { type: "dots", position: "right", opacity: 0.22, h: 45, s: 10, l: 70, rotate: 0, scale: 1, blend: "normal" }
-            ]
-          }
-        },
-        executive_summary: { paragraphs: ["Refonte pour crédibiliser l’offre et augmenter les leads."] },
-        objectives: { bullets: ["Moderniser l’image", "Optimiser conversion", "SEO de base"] },
-        approach: {
-          phases: [
-            {
-              title: "Cadrage",
-              duration: "1 semaine",
-              activities: ["Atelier objectifs", "Arborescence"],
-              outcomes: ["Backlog validé"]
-            }
-          ]
-        },
-        pricing: {
-          model: "forfait",
-          currency: "EUR",
-          tax_rate: 20,
-          items: [{ name: "Cadrage", qty: 1, unit: "forfait", unit_price: 1500, subtotal: 1500 }],
-          terms: ["40% commande, 40% design, 20% livraison"]
-        }
-      },
-      actions: [{ type: "preview" }]
-    })
-  }
-];
-
+// ---------- HANDLER ----------
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    res.status(405).json({ error: "Method not allowed" });
-    return;
+    res.setHeader("Allow", "POST");
+    return res.status(405).json({ error: "Method Not Allowed" });
   }
 
   try {
-    const body = await (async () => {
-      try {
-        return typeof req.body === "string" ? JSON.parse(req.body) : req.body;
-      } catch {
-        return {};
-      }
-    })();
+    const { message, proposalSpec, history } = await parseBody(req);
 
-    const userMsg = (body?.message || "").toString();
-    const prevSpec = body?.proposalSpec || null;
-    const history = Array.isArray(body?.history) ? body.history : [];
-
-    const seed = minimalSpec(prevSpec, prevSpec?.meta?.lang || "fr");
-
+    // Messages OpenAI
     const messages = [
       { role: "system", content: SYSTEM_PROMPT },
       ...FEWSHOTS,
       {
         role: "user",
         content:
-          `Contexte — proposalSpec précédent:\n` +
+          `Contexte (proposalSpec actuel, si présent) :\n` +
           "```json\n" +
-          JSON.stringify(seed, null, 2) +
-          "\n```\n\n" +
-          `Dernier message utilisateur:\n"""${userMsg}"""\n\n` +
-          `Exigence: réponds **UNIQUEMENT** avec un JSON strict { "reply": "...", "proposalSpec": { ... }, "actions": [] }`
-      }
+          JSON.stringify(proposalSpec || {}, null, 2) +
+          "\n```\n" +
+          `Derniers messages (user/assistant) :\n` +
+          "```json\n" +
+          JSON.stringify(history || [], null, 2) +
+          "\n```\n" +
+          `Nouveau message utilisateur : """${message || ""}"""\n` +
+          `RENVOIE STRICTEMENT le JSON du schéma (pas de prose).`,
+      },
     ];
 
-    // (Optionnel) on ajoute un bout de l'historique récent (sans dépasser ~3-4 tours pour rester léger)
-    const recent = history.slice(-6).map((m) => ({
-      role: m.role === "assistant" ? "assistant" : "user",
-      content: m.content?.toString().slice(0, 2000) || ""
-    }));
-    messages.push(...recent);
-
-    const completion = await openai.chat.completions.create({
+    // Appel modèle en JSON Mode pour garantir un objet JSON
+    const completion = await client.chat.completions.create({
       model: "gpt-4o-mini",
       temperature: 0.3,
-      messages
+      response_format: { type: "json_object" },
+      messages,
     });
 
-    const raw = completion?.choices?.[0]?.message?.content || "";
-    const parsed = asJson(raw);
+    let raw = completion.choices?.[0]?.message?.content || "";
+    let data = null;
 
-    if (!parsed || typeof parsed !== "object") {
-      // Fallback robuste: on renvoie au moins le reply + spec seed
-      return res.status(200).json({
-        reply:
-          "J’ai bien reçu. Peux-tu préciser le client, l’objectif et le style désiré (ex: sobre, premium, couleurs) ?",
-        proposalSpec: seed,
-        actions: [{ type: "ask", field: "meta.client", hint: "Quel est le client ?" }]
-      });
+    // Sécurité: si jamais JSON Mode ne s'applique pas
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      data = extractJson(raw);
     }
 
-    // Merge doux: on part du seed, puis on applique la proposition du modèle
-    const nextSpec = (() => {
-      const prop = parsed.proposalSpec || {};
-      const merged = {
-        ...seed,
-        ...prop,
-        meta: {
-          ...(seed.meta || {}),
-          ...(prop.meta || {}),
-          style: { ...((seed.meta || {}).style || {}), ...(((prop.meta || {}).style) || {}) }
-        }
-      };
-      return merged;
-    })();
+    // Filets de sécurité pour toujours renvoyer la bonne structure
+    if (!data || typeof data !== "object") {
+      data = { reply: raw || "Ok.", proposalSpec: minimalSpec() };
+    }
+    if (!data.proposalSpec) {
+      data.proposalSpec = minimalSpec();
+    }
+    if (!data.reply) {
+      data.reply = "Ok.";
+    }
+    if (!Array.isArray(data.actions)) {
+      data.actions = [{ type: "preview" }];
+    }
 
-    return res.status(200).json({
-      reply: parsed.reply || "",
-      proposalSpec: nextSpec,
-      actions: Array.isArray(parsed.actions) ? parsed.actions : []
-    });
+    // Nettoyage léger: s'assurer que meta.lang existe
+    const lang =
+      data?.proposalSpec?.meta?.lang ||
+      guessLangFromHistory(history) ||
+      "fr";
+    data.proposalSpec.meta = { ...(data.proposalSpec.meta || {}), lang };
+
+    res.status(200).json(data);
   } catch (err) {
-    console.error("API /api/chat error:", err);
-    res
-      .status(500)
-      .json({ error: "SERVER_ERROR", message: (err && err.message) || "Unexpected error" });
+    console.error("[/api/chat] error:", err);
+    res.status(500).json({ error: String(err?.message || err) });
   }
+}
+
+// ---------- helpers ----------
+async function parseBody(req) {
+  // Vercel/Next fournit déjà req.body quand bodyParser est actif; sinon on lit le stream
+  if (req.body && typeof req.body === "object") return req.body;
+  const chunks = [];
+  for await (const c of req) chunks.push(c);
+  const txt = Buffer.concat(chunks).toString("utf8");
+  try {
+    return JSON.parse(txt);
+  } catch {
+    return {};
+  }
+}
+
+function guessLangFromHistory(history = []) {
+  const lastUser = [...history].reverse().find((m) => m.role === "user");
+  const s = (lastUser?.content || "").toLowerCase();
+  if (!s) return null;
+  const frHints = [" bonjour ", " proposition ", " devis ", " merci ", " client ", " objectif ", " livrables "];
+  const enHints = [" proposal ", " quote ", " thanks ", " client ", " objective ", " deliverables "];
+  const frScore = frHints.reduce((n, h) => n + (s.includes(h) ? 1 : 0), 0);
+  const enScore = enHints.reduce((n, h) => n + (s.includes(h) ? 1 : 0), 0);
+  if (frScore >= enScore) return "fr";
+  if (enScore > frScore) return "en";
+  return null;
 }
