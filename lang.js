@@ -39,12 +39,10 @@
   const ph   = (el, fr, en) => { if (!el) return; el.placeholder  = (getLang()==='en') ? en : fr; };
   const attr = (el, name, fr, en) => { if (!el) return; el.setAttribute(name, (getLang()==='en') ? en : fr); };
 
-  // Synchronise tous les sélecteurs de langue
   function syncLangPickers() {
     const lang = getLang();
     $$('select[data-lang-picker]').forEach((sel) => {
       sel.value = lang;
-      // évite les doublons d'écouteurs
       if (!sel._pfBound) {
         sel.addEventListener('change', (e) => setLang(e.target.value));
         sel._pfBound = true;
@@ -52,9 +50,8 @@
     });
   }
 
-  // === Traductions par page (selectors existants dans tes fichiers) ===
+  /* === Index page === */
   function applyIndex() {
-    // NAV
     txt($('.menu a[href="#why"]'),     'Pourquoi nous',   'Why us');
     txt($('.menu a[href="#use"]'),     'Cas d’usage',     'Use cases');
     txt($('.menu a[href="#pricing"]'), 'Tarifs',          'Pricing');
@@ -62,7 +59,6 @@
     txt($('#authBtn'), 'Se connecter', 'Sign in');
     txt($('#startBtn'),'Commencer',    'Start');
 
-    // HERO
     html($('.lead h1'),
       'Donnez vie à vos propositions. <span class="accent-word">Maintenant.</span>',
       'Bring your proposals to life. <span class="accent-word">Now.</span>'
@@ -75,7 +71,6 @@
     attr($('#sendBrief'), 'title',      'Envoyer', 'Send');
     attr($('#sendBrief'), 'aria-label', 'Envoyer', 'Send');
 
-    // SECTION Pourquoi
     const why = $('#why');
     if (why) {
       txt($('#why .h2'), 'Pourquoi PropoFlash ?', 'Why PropoFlash?');
@@ -89,7 +84,6 @@
       if (cards[2]) { txt(cards[2].querySelector('h3'), 'Aperçu instantané',  'Instant preview'); txt(cards[2].querySelector('p'), 'Vous collez le brief, vous prévisualisez, vous peaufinez — puis PDF en 1 clic.', 'Paste your brief, preview, refine — then one-click PDF.'); }
     }
 
-    // SECTION Cas d’usage
     const use = $('#use');
     if (use) {
       txt($('#use .h2'), 'Cas d’usage fréquents', 'Common use cases');
@@ -103,7 +97,6 @@
       if (cards[2]) { txt(cards[2].querySelector('h3'), 'E-commerce','E-commerce');     txt(cards[2].querySelector('p'), 'Fiches produits, bundles et offres saisonnières structurées.', 'Product sheets, bundles and structured seasonal offers.'); }
     }
 
-    // SECTION Pricing
     const pricing = $('#pricing');
     if (pricing) {
       txt($('#pricing .h2'), 'Des plans clairs pour chaque besoin', 'Clear plans for every need');
@@ -111,7 +104,6 @@
 
       const tiers = $$('.price-grid .pcard');
 
-      // Gratuit
       if (tiers[0]) {
         txt(tiers[0].querySelector('.tier'),   'Gratuit', 'Free');
         txt(tiers[0].querySelector('.badge'),  '3/mois',  '3/mo');
@@ -120,11 +112,8 @@
         if (l1[1]) l1[1].textContent = (getLang()==='en') ? '• Guided AI chat'       : '• Chat IA guidé';
         if (l1[2]) l1[2].textContent = (getLang()==='en') ? '• Watermarked PDF export': '• Export PDF verrouillé';
         txt(tiers[0].querySelector('a.btn'), 'Essayer', 'Try');
-        attr(tiers[0].querySelector('a.btn'), 'title',
-          'L’export est réservé aux offres payantes', 'Export is for paid plans'
-        );
+        attr(tiers[0].querySelector('a.btn'), 'title', 'L’export est réservé aux offres payantes', 'Export is for paid plans');
       }
-      // Starter
       if (tiers[1]) {
         txt(tiers[1].querySelector('.tier'),  'Starter', 'Starter');
         txt(tiers[1].querySelector('.badge'), 'Populaire', 'Popular');
@@ -134,7 +123,6 @@
         if (l2[2]) l2[2].textContent = (getLang()==='en') ? '• Up to 3 embedded proof points' : '• Jusqu’à 3 preuves intégrées';
         txt(tiers[1].querySelector('a.btn'), 'Choisir Starter', 'Choose Starter');
       }
-      // Pro
       if (tiers[2]) {
         txt(tiers[2].querySelector('.tier'),  'Pro', 'Pro');
         txt(tiers[2].querySelector('.badge'), 'Équipes', 'Teams');
@@ -146,7 +134,6 @@
       }
     }
 
-    // FOOTER
     const f1 = $('footer .container > div:first-child');
     if (f1) f1.innerHTML = (getLang()==='en')
       ? `© <span id="y">${new Date().getFullYear()}</span> PropoFlash. All rights reserved.`
@@ -174,6 +161,7 @@
 
   function applyStudio() {
     txt($('#openHistory'), 'Historique', 'History');
+    txt($('#newChatBtn'),  'Nouvelle discussion', 'New chat');
     txt($('#status'),       'Prêt', 'Ready');
     txt($('#logoutBtn'),    'Se déconnecter', 'Sign out');
     txt($('#chatTitle'),    'Chat', 'Chat');
@@ -185,6 +173,7 @@
     if (comp) comp.placeholder = (getLang()==='en')
       ? 'Type your message'
       : 'Écrivez votre message';
+    txt($('#histTitle'), 'Discussions', 'Discussions');
   }
 
   function applyPreview() {
@@ -203,7 +192,6 @@
     if (path.endsWith('/preview.html'))  applyPreview();
   }
 
-  // Lancer au chargement et à chaque changement de langue
   document.addEventListener('DOMContentLoaded', applyPerPage);
   window.addEventListener('langchange', applyPerPage);
 })();
