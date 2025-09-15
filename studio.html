@@ -11,23 +11,15 @@
       --accent:#3b82f6; --accent2:#8b5cf6; --accent-ink:#fff;
       --paper-w:210mm; --paper-h:297mm;
       --elev:0 18px 48px rgba(10,16,32,.10), inset 0 1px 0 #ffffffaa;
-
-      /* Chat themes */
       --assistant-bubble: color-mix(in hsl, var(--panel) 86%, transparent);
       --user-bubble: linear-gradient(135deg, var(--accent), var(--accent2));
       --user-ink: #ffffff;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{
-      margin:0;
-      height:100vh;
-      overflow:hidden; /* pas de scroll de page */
-      background:linear-gradient(180deg,var(--bg),#eef3ff);
-      font-family:Inter,system-ui,sans-serif;color:var(--ink)
-    }
+    body{ margin:0; height:100vh; overflow:hidden; background:linear-gradient(180deg,var(--bg),#eef3ff); font-family:Inter,system-ui,sans-serif; color:var(--ink) }
 
-    /* Top bar */
+    /* Bar */
     .bar{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--stroke);
       display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px;box-shadow:var(--elev)}
     .left,.right{display:flex;gap:10px;align-items:center}
@@ -40,115 +32,49 @@
     .menu a,.menu button{display:block;width:100%;text-align:left;padding:10px 12px;border:none;background:var(--panel);cursor:pointer;font-weight:600;color:var(--ink)}
     .menu a:hover,.menu button:hover{background:color-mix(in hsl, var(--panel) 80%, transparent)}
 
-    /* Layout principal : chat élargi & éléments étirés */
+    /* Layout */
     .main{
       height:calc(100vh - 64px);
       display:grid;
-      grid-template-columns: clamp(520px, 38vw, 640px) 1fr; /* chat élargi */
-      gap:18px;
-      padding:18px 24px;
-      align-items:stretch;
-      min-height:0;
+      grid-template-columns: clamp(520px, 38vw, 640px) 1fr;
+      gap:18px; padding:18px 24px; align-items:stretch; min-height:0;
     }
-    .panel{
-      background:var(--panel);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--elev);
-      display:flex;flex-direction:column;
-      min-height:0;
-    }
+    .panel{ background:var(--panel); border:1px solid var(--stroke); border-radius:16px; box-shadow:var(--elev); display:flex; flex-direction:column; min-height:0; }
 
     /* Chat */
-    .chat{min-height:0; display:flex;flex-direction:column;}
+    .chat{min-height:0; display:flex; flex-direction:column;}
     .chat-head{display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--stroke)}
     .chat-title{font-weight:800}
-    .chat-body{
-      padding:12px;
-      overflow:auto; /* scroll interne chat */
-      flex:1; min-height:0;
-    }
-
-    /* Lignes de message + avatars + bulles */
-    .msg{
-      display:flex;
-      gap:10px;
-      margin:10px 0;
-      align-items:flex-end;
-      width:100%;
-    }
+    .chat-body{ padding:12px; overflow:auto; flex:1; min-height:0; }
+    .msg{ display:flex; gap:10px; margin:10px 0; align-items:flex-end; width:100%; }
     .msg.assistant{justify-content:flex-start}
     .msg.user{justify-content:flex-end}
-
-    .avatar-badge{
-      width:28px;height:28px;border-radius:50%;
-      display:grid;place-items:center;
-      font-weight:800;font-size:11px;
-      border:1px solid var(--stroke);
-      box-shadow:var(--elev);
-      background:var(--panel); color:var(--ink);
-      user-select:none;
-    }
+    .avatar-badge{ width:28px;height:28px;border-radius:50%; display:grid;place-items:center; font-weight:800;font-size:11px; border:1px solid var(--stroke); box-shadow:var(--elev); background:var(--panel); color:var(--ink); user-select:none; }
     .avatar-badge.bot{background:#111827; color:#fff; border-color:#111827}
     .avatar-badge.you{background:var(--accent); color:#fff; border-color:transparent}
-
-    .bubble{
-      max-width:min(100%, 560px);
-      padding:10px 12px;border-radius:14px;border:1px solid var(--stroke);
-      box-shadow:var(--elev);
-      word-wrap:break-word;overflow-wrap:anywhere;
-    }
+    .bubble{ max-width:min(100%, 560px); padding:10px 12px;border-radius:14px;border:1px solid var(--stroke); box-shadow:var(--elev); word-wrap:break-word;overflow-wrap:anywhere; }
     .bubble-assistant{ background:var(--assistant-bubble); color:var(--ink); }
     .bubble-user{ background:var(--user-bubble); color:var(--user-ink); border-color:transparent; }
-
-    /* Composer */
-    .chat-compose{
-      position:relative;
-      padding:12px;
-      border-top:1px solid var(--stroke);
-      display:flex;align-items:flex-end;gap:16px;
-    }
-    .input{
-      display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--stroke);
-      border-radius:14px;padding:8px;box-shadow:var(--elev);
-      flex:1;
-    }
+    .chat-compose{ position:relative; padding:12px; border-top:1px solid var(--stroke); display:flex;align-items:flex-end;gap:16px; }
+    .input{ display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--stroke); border-radius:14px;padding:8px;box-shadow:var(--elev); flex:1; }
     .input textarea{flex:1;resize:vertical;min-height:72px;border:none;outline:none;background:transparent;font:500 14px/1.4 Inter;color:var(--ink)}
     .send{width:40px;height:40px;border-radius:12px;border:1px solid var(--stroke);background:#0a1020;color:#fff;display:grid;place-items:center;cursor:pointer}
+    .typing{display:inline-flex;gap:5px;align-items:center}
+    .dot{width:6px;height:6px;border-radius:50%;background:#8aa0c6;opacity:.7;animation:bounce 1.2s infinite}
+    .dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
+    @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
 
-    /* Aperçu : centré horizontalement + scroll interne */
-    .sheet-wrap{
-      flex:1; min-height:0; overflow:auto;
-      display:flex;justify-content:center;align-items:flex-start;
-      padding:12px 24px;
-    }
-    .sheet{
-      position:relative; /* décor global */
-      overflow:visible;
-      width:var(--paper-w);
-      max-width:100%;
-      background:transparent; /* on gère page par page */
-      border:none; box-shadow:none;
-      color:var(--ink);
-      font-family: var(--font-body, Inter), system-ui, sans-serif;
-    }
-    .decor{position:fixed; inset:0; pointer-events:none; z-index:0} /* léger décor global */
+    /* Preview */
+    .sheet-wrap{ flex:1; min-height:0; overflow:auto; display:flex;justify-content:center;align-items:flex-start; padding:12px 24px; }
+    .sheet{ position:relative; overflow:visible; width:var(--paper-w); max-width:100%; background:transparent; border:none; box-shadow:none; color:var(--ink); font-family: var(--font-body, Inter), system-ui, sans-serif; }
+    .decor{position:fixed; inset:0; pointer-events:none; z-index:0}
     .content{position:relative; z-index:1}
-
-    /* Pages A4 empilées */
-    .page{
-      position:relative;
-      width:var(--paper-w);
-      min-height:var(--paper-h);
-      background:var(--panel);
-      border:1px solid var(--stroke);
-      border-radius:var(--radius, 12px);
-      box-shadow:var(--elev);
-      margin:0 0 16mm 0;
-      overflow:hidden;
-    }
+    .page{ position:relative; width:var(--paper-w); min-height:var(--paper-h); background:var(--panel); border:1px solid var(--stroke); border-radius:var(--radius, 12px); box-shadow:var(--elev); margin:0 0 16mm 0; overflow:hidden; }
     .page:last-child{margin-bottom:0}
     .inner{ padding:22mm 18mm; position:relative; z-index:1; }
     .page .page-decor{ position:absolute; inset:0; pointer-events:none; z-index:0 }
 
-    /* Éléments de doc */
+    /* Doc elements */
     .doc-header{display:grid;grid-template-columns:100px 1fr;gap:16px;align-items:center;margin-bottom:16px}
     .logo-box{width:100px;height:100px;border:1px solid var(--stroke);border-radius:var(--radius, 12px);display:grid;place-items:center;overflow:hidden;background:var(--panel)}
     .logo-box img{width:100%;height:100%;object-fit:contain}
@@ -176,21 +102,19 @@
     th{background:color-mix(in hsl, var(--panel) 85%, transparent)}
     tfoot td{font-weight:800}
 
-    /* Drawer Historique (MASQUÉ par défaut) */
-    .drawer{
-      position:fixed; top:64px; bottom:0; left:0; width:320px; max-width:90vw;
-      background:var(--panel); border-right:1px solid var(--stroke); box-shadow:var(--elev);
-      padding:12px; z-index:30;
-      transform: translateX(-100%); transition: transform .25s ease;
-      display:flex; flex-direction:column; gap:10px; overflow:auto;
-    }
+    /* Drawer Historique (masqué par défaut) */
+    .drawer{ position:fixed; top:64px; bottom:0; left:0; width:320px; max-width:90vw; background:var(--panel); border-right:1px solid var(--stroke); box-shadow:var(--elev); padding:12px; z-index:30; transform: translateX(-100%); transition: transform .25s ease; display:flex; flex-direction:column; gap:10px; overflow:auto; }
     .drawer.open{ transform: translateX(0); }
     .drawer h3{ margin:0 0 6px; }
     .drawer-list{ display:grid; gap:8px; }
     .row-item{ border:1px solid var(--stroke); border-radius:10px; padding:8px; cursor:pointer; background:var(--panel); }
     .row-item:hover{ background:color-mix(in hsl, var(--panel) 90%, transparent); }
 
-    /* Impression */
+    /* Editables */
+    .editable{ outline: none; border-radius:8px; transition: box-shadow .15s ease, background .15s ease; }
+    .editable:focus{ background: #f7fbff; box-shadow: 0 0 0 3px #bfdbfe; }
+    .hint-edit{ font-size:12px; color:var(--muted); margin:6px 0 0 }
+
     @media print{
       .bar{display:none}
       body{overflow:visible;height:auto;background:#fff}
@@ -201,7 +125,6 @@
       .inner{padding:18mm 16mm}
       a[href]:after{content:""}
     }
-
     @media (max-width:1100px){
       .main{grid-template-columns:1fr}
       .page{width:100%;min-height:auto}
@@ -231,7 +154,7 @@
     </div>
   </div>
 
-  <!-- History drawer (masqué par défaut, s’ouvre via .open) -->
+  <!-- Tiroir Historique (masqué par défaut) -->
   <div class="drawer" id="drawer" aria-hidden="true">
     <h3>Historique</h3>
     <div class="drawer-list" id="histList"></div>
@@ -243,7 +166,6 @@
     <div class="panel chat">
       <div class="chat-head"><strong class="chat-title">Chat</strong></div>
       <div class="chat-body" id="chatBody" aria-live="polite"></div>
-
       <div class="chat-compose">
         <div class="input">
           <textarea id="composer" placeholder="Écrivez votre message"></textarea>
@@ -292,15 +214,15 @@
     /* Nav */
     document.getElementById('homeBtn').onclick=()=>location.href='index.html';
 
-    /* Historique (Tiroir) */
+    /* Historique */
     const drawer=document.getElementById('drawer'); const histList=document.getElementById('histList');
     document.getElementById('openHistory').onclick = ()=>{
       drawer.classList.toggle('open');
       drawer.setAttribute('aria-hidden', drawer.classList.contains('open') ? 'false' : 'true');
     };
-    function saveHistory(title, spec, messages){
+    function saveHistory(title, spec, messages, memory){
       const h=JSON.parse(localStorage.getItem('pf_history')||'[]');
-      h.unshift({ id:Date.now(), title, date:new Date().toISOString(), spec, messages });
+      h.unshift({ id:Date.now(), title, date:new Date().toISOString(), spec, messages, memory });
       localStorage.setItem('pf_history', JSON.stringify(h.slice(0,100)));
       renderHistory();
     }
@@ -312,13 +234,13 @@
         const d=new Date(item.date);
         const div=document.createElement('div'); div.className='row-item';
         div.innerHTML = `<strong>${item.title||'Sans titre'}</strong><br><span class="muted">${d.toLocaleString()}</span>`;
-        div.onclick=()=>{ spec=item.spec; messages=item.messages||[]; localStorage.setItem('pf_proposal', JSON.stringify(spec)); renderSpec(); renderChat(); drawer.classList.remove('open'); drawer.setAttribute('aria-hidden','true'); };
+        div.onclick=()=>{ spec=item.spec; messages=item.messages||[]; memory=item.memory||{}; localStorage.setItem('pf_proposal', JSON.stringify(spec)); localStorage.setItem('pf_chat', JSON.stringify(messages)); localStorage.setItem('pf_memory', JSON.stringify(memory)); renderSpec(); renderChat(); drawer.classList.remove('open'); drawer.setAttribute('aria-hidden','true'); };
         histList.appendChild(div);
       });
     }
     renderHistory();
 
-    /* Chat + Spec */
+    /* ETAT local */
     const chatBody=document.getElementById('chatBody');
     const composer=document.getElementById('composer');
     const sendBtn=document.getElementById('sendBtn');
@@ -329,13 +251,18 @@
 
     let messages = JSON.parse(localStorage.getItem('pf_chat')||'[]');
     let spec = null;
+    let memory = null;
 
     function loadSpec(){
       try{ spec = JSON.parse(localStorage.getItem('pf_proposal')||'null'); }catch{ spec=null; }
       if(!spec){ spec = { meta:{ lang:getLang(), title:(getLang()==='en'?'Business Proposal':'Proposition commerciale'), currency:'EUR' }, sections:[] }; }
       if(!spec.meta) spec.meta = { lang:getLang() };
     }
-    loadSpec();
+    function loadMemory(){
+      try{ memory = JSON.parse(localStorage.getItem('pf_memory')||'null'); }catch{ memory=null; }
+      if(!memory) memory = { design_prefs:{}, facts:{}, pending_questions:[] };
+    }
+    loadSpec(); loadMemory();
 
     (function consumeWelcome(){
       const w = localStorage.getItem('pf_welcome_msg');
@@ -345,41 +272,25 @@
     function scrollChat(){ chatBody.scrollTop = chatBody.scrollHeight; }
     function escapeHTML(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[m])); }
 
-    /* Bulle avec avatars & alignement */
+    /* Bulle chat */
     function bubble(role, html){
       const row=document.createElement('div');
       row.className='msg '+(role==='assistant'?'assistant':'user');
-
-      const ava=document.createElement('div');
-      ava.className='avatar-badge '+(role==='assistant'?'bot':'you');
-      ava.textContent = (role==='assistant') ? 'PF' : 'ME';
-
-      const bub=document.createElement('div');
-      bub.className='bubble '+(role==='assistant'?'bubble-assistant':'bubble-user');
-      bub.innerHTML=html;
-
-      if(role==='assistant'){ row.appendChild(ava); row.appendChild(bub); }
-      else { row.appendChild(bub); row.appendChild(ava); }
-
-      chatBody.appendChild(row);
-      scrollChat();
-      return row;
+      const ava=document.createElement('div'); ava.className='avatar-badge '+(role==='assistant'?'bot':'you'); ava.textContent = (role==='assistant') ? 'PF' : 'ME';
+      const bub=document.createElement('div'); bub.className='bubble '+(role==='assistant'?'bubble-assistant':'bubble-user'); bub.innerHTML=html;
+      if(role==='assistant'){ row.appendChild(ava); row.appendChild(bub); } else { row.appendChild(bub); row.appendChild(ava); }
+      chatBody.appendChild(row); scrollChat(); return row;
     }
 
-    /* Indicateur de frappe */
+    /* Typing */
     let typingRow=null;
     function showTyping(){
       if(typingRow) return;
-      typingRow = document.createElement('div');
-      typingRow.className='msg assistant';
-      const ava=document.createElement('div');
-      ava.className='avatar-badge bot'; ava.textContent='PF';
-      const bub=document.createElement('div');
-      bub.className='bubble bubble-assistant';
+      typingRow = document.createElement('div'); typingRow.className='msg assistant';
+      const ava=document.createElement('div'); ava.className='avatar-badge bot'; ava.textContent='PF';
+      const bub=document.createElement('div'); bub.className='bubble bubble-assistant';
       bub.innerHTML=`<span class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
-      typingRow.appendChild(ava); typingRow.appendChild(bub);
-      chatBody.appendChild(typingRow);
-      scrollChat();
+      typingRow.appendChild(ava); typingRow.appendChild(bub); chatBody.appendChild(typingRow); scrollChat();
     }
     function hideTyping(){ if(typingRow){ typingRow.remove(); typingRow=null; } }
 
@@ -389,30 +300,28 @@
     }
     renderChat();
 
+    /* === Envoi message → API === */
     async function sendMessage(text){
       const content=text.trim(); if(!content) return;
       messages.push({ role:'user', content }); localStorage.setItem('pf_chat', JSON.stringify(messages));
       bubble('user', escapeHTML(content).replace(/\n/g,'<br/>'));
-      composer.value='';
-      statusEl.textContent='Rédaction…';
+      composer.value=''; statusEl.textContent='Rédaction…';
 
       try{
         showTyping();
-
         const resp = await fetch('/api/chat', {
           method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ message: content, proposalSpec: spec, history: messages.slice(-10) })
+          body: JSON.stringify({ message: content, proposalSpec: spec, history: messages.slice(-12), memory })
         });
         const data = await resp.json();
-
         hideTyping();
 
         const reply = data.reply || (getLang()==='en'?'I could not structure the proposal.':'Je n’ai pas pu structurer la proposition.');
         messages.push({ role:'assistant', content: reply }); localStorage.setItem('pf_chat', JSON.stringify(messages));
         bubble('assistant', escapeHTML(reply).replace(/\n/g,'<br/>'));
 
+        // 1) Fusionner proposalSpec
         if(data.proposalSpec){
-          // merge superficiel + style prioritaire
           const next = { ...(spec||{}), ...(data.proposalSpec||{}) };
           next.meta = { ...(spec?.meta||{}), ...((data.proposalSpec||{}).meta||{}) };
           if(next.meta){
@@ -420,9 +329,27 @@
           }
           spec = next;
           localStorage.setItem('pf_proposal', JSON.stringify(spec));
-          renderSpec();
         }
-        saveHistory(spec?.meta?.title || 'Proposition', spec, messages);
+
+        // 2) Fusionner designSpecDiff → meta.style
+        if(data.designSpecDiff){
+          spec.meta = spec.meta || {};
+          spec.meta.style = { ...(spec.meta.style||{}), ...(data.designSpecDiff||{}) };
+          localStorage.setItem('pf_proposal', JSON.stringify(spec));
+        }
+
+        // 3) Mémoire ↑
+        if(data.memoryUpdate){
+          memory = {
+            design_prefs: { ...(memory.design_prefs||{}), ...(data.memoryUpdate.design_prefs||{}) },
+            facts: { ...(memory.facts||{}), ...(data.memoryUpdate.facts||{}) },
+            pending_questions: Array.from(new Set([ ...(memory.pending_questions||[]), ...((data.memoryUpdate.pending_questions||[]).filter(Boolean)) ]))
+          };
+          localStorage.setItem('pf_memory', JSON.stringify(memory));
+        }
+
+        renderSpec();
+        saveHistory(spec?.meta?.title || 'Proposition', spec, messages, memory);
         statusEl.textContent='Prêt';
       }catch(e){
         hideTyping();
@@ -437,19 +364,20 @@
     });
     sendBtn.onclick = ()=> sendMessage(composer.value);
 
-    /* Libellés */
-    const t = {
-      fr:{ title:"Proposition commerciale", to:"Pour", from:"Émis par", date:"Date", letter:"Lettre d’introduction", executive:"Résumé exécutif", objectives:"Objectifs", approach:"Approche & phasage", deliverables:"Livrables", in_scope:"Inclus", out_scope:"Hors-périmètre", timeline:"Planning", pricing:"Tarification", assumptions:"Hypothèses / Risques", next:"Prochaines étapes", price_model:"Modèle", terms:"Conditions", toc:"Sommaire" },
-      en:{ title:"Business Proposal", to:"To", from:"Issued by", date:"Date", letter:"Cover Letter", executive:"Executive Summary", objectives:"Objectives", approach:"Approach & Phasing", deliverables:"Deliverables", in_scope:"In scope", out_scope:"Out of scope", timeline:"Timeline", pricing:"Pricing", assumptions:"Assumptions / Risks", next:"Next Steps", price_model:"Model", terms:"Terms", toc:"Table of Contents" }
-    };
+    /* i18n chat placeholders */
+    function applyChatLang(){
+      const en=(getLang()==='en');
+      composer.placeholder = en?'Type your message':'Écrivez votre message';
+    }
+    applyChatLang();
+    window.addEventListener('langchange', ()=>{
+      spec.meta = { ...(spec.meta||{}), lang:getLang() };
+      localStorage.setItem('pf_proposal', JSON.stringify(spec));
+      applyChatLang();
+      renderSpec();
+    });
 
-    function safeArr(v){ return Array.isArray(v)?v:[]; }
-    function safeStr(v,fb=''){ return (v==null?'':String(v)).trim() || fb; }
-    function fmtDate(d){ try{ const dt=d?new Date(d):new Date(); return dt.toLocaleDateString(document.documentElement.lang||getLang(), {year:'numeric',month:'short',day:'2-digit'});}catch{return ''} }
-    function money(n,c){ try{ return new Intl.NumberFormat(document.documentElement.lang||getLang(),{style:'currency',currency:c||'EUR'}).format(Number(n||0)); }catch{ return String(n||0)+' '+(c||'€') } }
-
-    /* === THEME: applique meta.style à l’aperçu (variables CSS + décor global) === */
-    const sheetEl=document.getElementById('sheet');
+    /* ====== THEME (tokens → CSS variables + décor) ====== */
     function applyStyleTokens(style){
       const palette = {
         primary: "#3B82F6", secondary: "#8B5CF6", surface: "#FFFFFF",
@@ -458,21 +386,20 @@
         ...(style?.palette||{})
       };
       const shapes = { radius:"12px", shadow:"0 18px 48px rgba(10,16,32,.12)", ...(style?.shapes||{}) };
-      const typo   = { heading:"Inter", body:"Inter", accent:"Inter", ...(style?.typography||{}) };
+      const typo   = { heading:"Inter", body:"Inter", ...(style?.typography||{}) };
 
-      // Scope sur #sheet
-      sheetEl.style.setProperty('--panel', palette.surface);
-      sheetEl.style.setProperty('--ink', palette.ink);
-      sheetEl.style.setProperty('--muted', palette.muted);
-      sheetEl.style.setProperty('--stroke', palette.stroke);
-      sheetEl.style.setProperty('--accent', palette.primary);
-      sheetEl.style.setProperty('--accent2', palette.secondary);
-      sheetEl.style.setProperty('--elev', shapes.shadow);
-      sheetEl.style.setProperty('--radius', shapes.radius);
-      sheetEl.style.setProperty('--font-body', typo.body);
-      sheetEl.style.setProperty('--font-heading', typo.heading);
+      sheet.style.setProperty('--panel', palette.surface);
+      sheet.style.setProperty('--ink', palette.ink);
+      sheet.style.setProperty('--muted', palette.muted);
+      sheet.style.setProperty('--stroke', palette.stroke);
+      sheet.style.setProperty('--accent', palette.primary);
+      sheet.style.setProperty('--accent2', palette.secondary);
+      sheet.style.setProperty('--elev', shapes.shadow);
+      sheet.style.setProperty('--radius', shapes.radius);
+      sheet.style.setProperty('--font-body', typo.body);
+      sheet.style.setProperty('--font-heading', typo.heading);
 
-      renderDecorLayers(style?.decor_layers||[], palette);
+      renderDecorLayers(style?.decor_layers||[]);
     }
 
     function hsla(h,s,l,a){ return `hsla(${Number(h||0)},${Number(s||0)}%,${Number(l||0)}%,${Number(a||1)})`; }
@@ -486,7 +413,7 @@
       };
       return map[pos] || map.center;
     }
-    function renderDecorLayers(layers, palette){
+    function renderDecorLayers(layers){
       decor.innerHTML = '';
       if(!layers?.length) return;
       layers.forEach((L,i)=>{
@@ -499,57 +426,39 @@
         const rot = Number(L.rotate||0);
         const scale = Math.max(0.25, Number(L.scale||1));
         const color = hsla(L.h ?? 220, L.s ?? 60, L.l ?? 55, L.opacity ?? 0.18);
-
         switch((L.type||'').toLowerCase()){
           case 'glow': {
-            const size = 900*scale;
-            layer.style.width = layer.style.height = size+'px';
-            layer.style.borderRadius='50%';
-            layer.style.filter='blur(48px)';
+            const size = 900*scale; layer.style.width = layer.style.height = size+'px';
+            layer.style.borderRadius='50%'; layer.style.filter='blur(48px)';
             layer.style.background = `radial-gradient(closest-side, ${color} 0%, transparent 70%)`;
-            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
-            break;
+            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`; break;
           }
           case 'gradient_blob': {
             const w = 1000*scale, h = 700*scale;
-            layer.style.width = w+'px'; layer.style.height = h+'px';
-            layer.style.borderRadius='40%';
-            layer.style.filter='blur(24px)';
+            layer.style.width = w+'px'; layer.style.height = h+'px'; layer.style.borderRadius='40%'; layer.style.filter='blur(24px)';
             layer.style.background = `conic-gradient(from 180deg, ${color}, transparent 60%)`;
-            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
-            break;
+            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`; break;
           }
           case 'diagonal': {
-            const size = 1600*scale;
-            layer.style.width = size+'px'; layer.style.height = size+'px';
-            layer.style.background = `
-              repeating-linear-gradient(${rot}deg,
-                ${color} 0px, ${color} 4px,
-                transparent 4px, transparent 22px)`;
-            break;
+            const size = 1600*scale; layer.style.width = size+'px'; layer.style.height = size+'px';
+            layer.style.background = `repeating-linear-gradient(${rot}deg, ${color} 0px, ${color} 4px, transparent 4px, transparent 22px)`; break;
           }
           case 'grid': {
-            const size = 1400*scale;
-            layer.style.width = size+'px'; layer.style.height = size+'px';
+            const size = 1400*scale; layer.style.width = size+'px'; layer.style.height = size+'px';
             const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
             svg.setAttribute('viewBox','0 0 100 100'); svg.setAttribute('width','100%'); svg.setAttribute('height','100%');
             const defs = document.createElementNS(svg.namespaceURI,'defs');
             const pat = document.createElementNS(svg.namespaceURI,'pattern');
             pat.setAttribute('id',`p-${i}`); pat.setAttribute('width','10'); pat.setAttribute('height','10'); pat.setAttribute('patternUnits','userSpaceOnUse');
-            const path = document.createElementNS(svg.namespaceURI,'path');
-            path.setAttribute('d','M10 0 L0 0 0 10');
+            const path = document.createElementNS(svg.namespaceURI,'path'); path.setAttribute('d','M10 0 L0 0 0 10');
             path.setAttribute('fill','none'); path.setAttribute('stroke', color); path.setAttribute('stroke-width','0.4');
             pat.appendChild(path); defs.appendChild(pat); svg.appendChild(defs);
-            const rect = document.createElementNS(svg.namespaceURI,'rect');
-            rect.setAttribute('width','100%'); rect.setAttribute('height','100%'); rect.setAttribute('fill',`url(#p-${i})`);
-            svg.appendChild(rect);
-            layer.appendChild(svg);
-            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
-            break;
+            const rect = document.createElementNS(svg.namespaceURI,'rect'); rect.setAttribute('width','100%'); rect.setAttribute('height','100%'); rect.setAttribute('fill',`url(#p-${i})`);
+            svg.appendChild(rect); layer.appendChild(svg);
+            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`; break;
           }
           case 'dots': {
-            const size = 1400*scale;
-            layer.style.width = size+'px'; layer.style.height = size+'px';
+            const size = 1400*scale; layer.style.width = size+'px'; layer.style.height = size+'px';
             const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
             svg.setAttribute('viewBox','0 0 100 100'); svg.setAttribute('width','100%'); svg.setAttribute('height','100%');
             const defs = document.createElementNS(svg.namespaceURI,'defs');
@@ -560,16 +469,12 @@
             pat.appendChild(circle); defs.appendChild(pat); svg.appendChild(defs);
             const rect = document.createElementNS(svg.namespaceURI,'rect');
             rect.setAttribute('width','100%'); rect.setAttribute('height','100%'); rect.setAttribute('fill',`url(#d-${i})`);
-            svg.appendChild(rect);
-            layer.appendChild(svg);
-            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
-            break;
+            svg.appendChild(rect); layer.appendChild(svg);
+            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`; break;
           }
           default: {
-            const size = 1000*scale;
-            layer.style.width = layer.style.height = size+'px';
-            layer.style.borderRadius='50%';
-            layer.style.filter='blur(40px)';
+            const size = 1000*scale; layer.style.width = layer.style.height = size+'px';
+            layer.style.borderRadius='50%'; layer.style.filter='blur(40px)';
             layer.style.background = `radial-gradient(closest-side, ${color} 0%, transparent 70%)`;
             layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
           }
@@ -578,7 +483,7 @@
       });
     }
 
-    /* ——— MOTEUR DE PAGES ——— */
+    /* Pages */
     const sheetPages = [];
     function clearPages(){ sheetContent.innerHTML=''; sheetPages.length=0; }
     function makePage(kind='default'){
@@ -590,30 +495,52 @@
       return {page, inner, pageDecor};
     }
 
-    // Helpers pour écrire dans un conteneur "inner"
-    function H1(inner, text){ const el=document.createElement('div'); el.className='h1'; el.textContent=text; inner.appendChild(el); }
-    function H2(inner, text){ const el=document.createElement('div'); el.className='h2'; el.textContent=text; inner.appendChild(el); }
+    // Helpers
+    function H1(inner, text){ const el=document.createElement('div'); el.className='h1'; el.textContent=text; inner.appendChild(el); return el; }
+    function H2(inner, text){ const el=document.createElement('div'); el.className='h2'; el.textContent=text; inner.appendChild(el); return el; }
     function HR(inner){ inner.appendChild(Object.assign(document.createElement('div'),{className:'hr'})); }
-    function P(inner, text){ const p=document.createElement('p'); p.textContent=text; inner.appendChild(p); }
-    function UL(inner, arr){ if(!arr?.length) return; const ul=document.createElement('ul'); arr.forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ul.appendChild(li); }); inner.appendChild(ul); }
+    function P(inner, text){ const p=document.createElement('p'); p.textContent=text; inner.appendChild(p); return p; }
+    function UL(inner, arr){ if(!arr?.length) return; const ul=document.createElement('ul'); arr.forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ul.appendChild(li); }); inner.appendChild(ul); return ul; }
+    function safeArr(v){ return Array.isArray(v)?v:[]; }
+    function safeStr(v,fb=''){ return (v==null?'':String(v)).trim() || fb; }
+    function fmtDate(d){ try{ const dt=d?new Date(d):new Date(); return dt.toLocaleDateString(document.documentElement.lang||getLang(), {year:'numeric',month:'short',day:'2-digit'});}catch{return ''} }
+    function money(n,c){ try{ return new Intl.NumberFormat(document.documentElement.lang||getLang(),{style:'currency',currency:c||'EUR'}).format(Number(n||0)); }catch{ return String(n||0)+' '+(c||'€') } }
 
-    // Page décor locale (bandeau diagonal / accent)
+    const t = {
+      fr:{ title:"Proposition commerciale", to:"Pour", from:"Émis par", date:"Date", letter:"Lettre d’introduction", executive:"Résumé exécutif", objectives:"Objectifs", approach:"Approche & phasage", deliverables:"Livrables", in_scope:"Inclus", out_scope:"Hors-périmètre", timeline:"Planning", pricing:"Tarification", assumptions:"Hypothèses / Risques", next:"Prochaines étapes", price_model:"Modèle", terms:"Conditions", toc:"Sommaire" },
+      en:{ title:"Business Proposal", to:"To", from:"Issued by", date:"Date", letter:"Cover Letter", executive:"Executive Summary", objectives:"Objectives", approach:"Approach & Phasing", deliverables:"Deliverables", in_scope:"In scope", out_scope:"Out of scope", timeline:"Timeline", pricing:"Pricing", assumptions:"Assumptions / Risks", next:"Next Steps", price_model:"Model", terms:"Terms", toc:"Table of Contents" }
+    };
+
+    /* EDITABLES — liaison DOM → spec */
+    function bindEditable(el, getter, setter){
+      el.classList.add('editable');
+      el.contentEditable = "true";
+      el.addEventListener('blur', ()=>{
+        const val = (el.textContent||'').trim();
+        setter(val);
+        localStorage.setItem('pf_proposal', JSON.stringify(spec));
+        renderSpec(); // re-render pour cohérence
+      });
+      // init display
+      const init = getter();
+      if(init) el.textContent = init;
+    }
+
+    /* Rendu de pages */
     function pageAccentBar(pageDecor, colorA, colorB){
       const band = document.createElement('div');
       band.style.position='absolute'; band.style.inset='-10% -10% auto -10%'; band.style.height='40%';
       band.style.background = `linear-gradient(135deg, ${colorA}, ${colorB})`;
-      band.style.opacity = .25;
-      band.style.transform = 'skewY(-8deg)';
+      band.style.opacity = .25; band.style.transform = 'skewY(-8deg)';
       pageDecor.appendChild(band);
     }
 
-    function renderCover(style, L, title, company, client, date){
+    function renderCover(style, L, title, company, client, date, allowEdit=false){
       const { inner, pageDecor } = makePage('cover');
-      const pA = getComputedStyle(sheetEl).getPropertyValue('--accent').trim() || '#3B82F6';
-      const pB = getComputedStyle(sheetEl).getPropertyValue('--accent2').trim() || '#8B5CF6';
+      const pA = getComputedStyle(sheet).getPropertyValue('--accent').trim() || '#3B82F6';
+      const pB = getComputedStyle(sheet).getPropertyValue('--accent2').trim() || '#8B5CF6';
       pageAccentBar(pageDecor, pA, pB);
 
-      // Header (logo + brand)
       const head=document.createElement('div'); head.className='doc-header';
       const logoBox=document.createElement('div'); logoBox.className='logo-box';
       if(style?.logoDataUrl){ const im=new Image(); im.src=style.logoDataUrl; logoBox.appendChild(im); } else { logoBox.textContent='LOGO'; logoBox.style.color='#9aa6bf'; }
@@ -621,21 +548,30 @@
       bi.innerHTML=`<div class="company">${company}</div><div class="muted">${date}</div>`;
       head.appendChild(logoBox); head.appendChild(bi); inner.appendChild(head);
 
-      // Grand titre
-      H1(inner, title);
-      const meta=document.createElement('div');
-      meta.className='meta';
-      meta.innerHTML = `${L.to}: <span class="tag">${client}</span> &nbsp;•&nbsp; ${L.from}: <span class="tag">${company}</span>`;
+      const h1 = H1(inner, title);
+      const meta=document.createElement('div'); meta.className='meta';
+      meta.innerHTML = `${L.to}: <span class="tag" id="clTag">${client}</span> &nbsp;•&nbsp; ${L.from}: <span class="tag" id="coTag">${company}</span>`;
       inner.appendChild(meta);
 
+      if(allowEdit){
+        bindEditable(h1, ()=>spec.meta?.title||'', v=>{ spec.meta = {...(spec.meta||{}), title: v||L.title }; });
+        const cl = meta.querySelector('#clTag');
+        const co = meta.querySelector('#coTag');
+        bindEditable(cl, ()=>spec.meta?.client||'Client', v=>{ spec.meta = {...(spec.meta||{}), client: v||'Client' }; });
+        bindEditable(co, ()=>spec.meta?.company||'Votre société', v=>{ spec.meta = {...(spec.meta||{}), company: v||'Votre société' }; });
+        const hint = document.createElement('div'); hint.className='hint-edit';
+        hint.textContent = 'Astuce: cliquez pour éditer le titre / client / société.';
+        inner.appendChild(hint);
+      }
+
       const band=document.createElement('div'); band.className='band';
-      band.textContent = (L===t.fr) ? "Aperçu généré automatiquement selon votre brief." : "Preview auto-generated from your brief.";
+      band.textContent = (L===t.fr) ? "Aperçu généré automatiquement. Complétez via le chat ou en éditant les zones." : "Auto-generated preview. Complete via chat or inline edits.";
       inner.appendChild(band);
     }
 
     function renderTOC(L, sections){
       const present = sections.filter(s=>s.present);
-      if(present.length<3) return; // TOC si suffisamment de contenu
+      if(present.length<3) return;
       const { inner } = makePage('toc');
       H2(inner, L.toc);
       const toc=document.createElement('div'); toc.className='toc';
@@ -644,19 +580,30 @@
       inner.appendChild(toc);
     }
 
-    function renderLetter(L, letter){
+    function renderLetter(L, letter, allowEdit=false){
       const { inner } = makePage('letter');
-      H2(inner, L.letter);
-      if(letter?.greeting) P(inner, letter.greeting);
-      safeArr(letter?.body_paragraphs?.length?letter.body_paragraphs:letter?.paragraphs).forEach(p=>P(inner, p));
+      const h = H2(inner, L.letter);
+      if(allowEdit) bindEditable(h, ()=>L.letter, ()=>{});
+      const g = P(inner, safeStr(letter?.greeting,''));
+      const arr = letter?.body_paragraphs?.length ? letter.body_paragraphs : (letter?.paragraphs||[]);
+      if(arr?.length){ arr.forEach(p=>P(inner, p)); }
+      else {
+        const p = P(inner, (L===t.fr)?'Cliquez pour rédiger votre intro…':'Click to write your intro…');
+        if(allowEdit) bindEditable(p, ()=>'', v=>{ const a = (spec.letter?.body_paragraphs)||[]; const next = a.slice(); next[0]=v; spec.letter = {...(spec.letter||{}), body_paragraphs: next }; });
+      }
       if(letter?.closing) P(inner, letter.closing);
       if(letter?.signature) P(inner, letter.signature);
     }
 
-    function renderExecutive(L, exec){
+    function renderExecutive(L, exec, allowEdit=false){
       const { inner } = makePage('executive');
-      H2(inner, L.executive);
-      safeArr(exec?.paragraphs).forEach(p=>P(inner, p));
+      const h = H2(inner, L.executive); if(allowEdit) bindEditable(h, ()=>L.executive, ()=>{});
+      const arr = safeArr(exec?.paragraphs);
+      if(arr.length){ arr.forEach(p=>P(inner, p)); }
+      else {
+        const p = P(inner, (L===t.fr)?'Résumé: bénéfices, preuves, approche en 3–4 lignes…':'Summary: benefits, proof, approach in 3–4 lines…');
+        if(allowEdit) bindEditable(p, ()=>'', v=>{ spec.executive_summary = { paragraphs: [v] }; });
+      }
     }
 
     function renderObjectives(L, obj){
@@ -744,17 +691,6 @@
       }
     }
 
-    function renderAssumptions(L, asmp){
-      const { inner } = makePage('assumptions');
-      H2(inner, L.assumptions);
-      safeArr(asmp?.paragraphs).forEach(p=>P(inner, p));
-    }
-    function renderNext(L, next){
-      const { inner } = makePage('next');
-      H2(inner, L.next);
-      safeArr(next?.paragraphs).forEach(p=>P(inner, p));
-    }
-
     function buildTOCList(L){
       return [
         { id:'s_letter', title:L.letter, present: safeArr(spec.letter?.body_paragraphs||spec.letter?.paragraphs).length || spec.letter?.greeting||spec.letter?.closing||spec.letter?.signature },
@@ -769,11 +705,29 @@
       ];
     }
 
-    function renderSpec(){
-      // 1) Style tokens & décor global
-      applyStyleTokens(spec?.meta?.style || null);
+    /* === SQUELETTE si spec vide (pages vierges éditables) === */
+    function renderSkeleton(L){
+      const title=safeStr(spec.meta?.title, L.title);
+      const company=safeStr(spec.meta?.company,'Votre société');
+      const client=safeStr(spec.meta?.client,'Client');
+      const date=safeStr(spec.meta?.date, fmtDate());
 
-      // 2) Nettoyage + pages
+      renderCover(spec?.meta?.style, L, title, company, client, date, true);
+
+      // Lettre
+      renderLetter(L, spec.letter, true);
+      // Résumé
+      renderExecutive(L, spec.executive_summary, true);
+
+      const { inner } = makePage('hints');
+      H2(inner, (L===t.fr)?'Complétez via le chat':'Complete via chat');
+      P(inner, (L===t.fr)?'Dites par ex. « style premium noir & or, ton sobre, serif pour les titres » ou « Ajoute une phase de recette ».' :
+                           'Say e.g. “premium black & gold, sober tone, serif titles” or “Add a testing phase”.');
+    }
+
+    /* === RENDER SPEC === */
+    function renderSpec(){
+      applyStyleTokens(spec?.meta?.style || null);
       clearPages();
 
       const L=t[spec.meta?.lang||getLang()]||t.fr;
@@ -782,14 +736,19 @@
       const client=safeStr(spec.meta?.client,'Client');
       const date=safeStr(spec.meta?.date, fmtDate());
 
-      // Page de couverture
-      renderCover(spec?.meta?.style, L, title, company, client, date);
-
-      // TOC si contenu riche
+      // Évalue si contenu quasi-vide
       const tocList = buildTOCList(L);
-      renderTOC(L, tocList);
+      const isEmpty = tocList.every(s=>!s.present);
 
-      // Corps (1 section = 1 page pour simplicité)
+      if(isEmpty){
+        renderSkeleton(L);
+        statusEl.textContent = (spec.meta?.lang==='en') ? 'Live skeleton ready' : 'Squelette prêt';
+        return;
+      }
+
+      // Sinon, rendu complet
+      renderCover(spec?.meta?.style, L, title, company, client, date, false);
+      renderTOC(L, tocList);
       if (tocList[0].present) renderLetter(L, spec.letter);
       if (tocList[1].present) renderExecutive(L, spec.executive_summary);
       if (tocList[2].present) renderObjectives(L, spec.objectives);
@@ -804,20 +763,7 @@
     }
     renderSpec();
 
-    /* Lang */
-    function applyChatLang(){
-      const en=(getLang()==='en');
-      document.getElementById('composer').placeholder = en?'Type your message':'Écrivez votre message';
-    }
-    applyChatLang();
-    window.addEventListener('langchange', ()=>{
-      spec.meta = { ...(spec.meta||{}), lang:getLang() };
-      localStorage.setItem('pf_proposal', JSON.stringify(spec));
-      applyChatLang();
-      renderSpec();
-    });
-
-    /* Si dernier message user est sans réponse → relance */
+    /* Auto relance si dernier msg user non répondu (au cas où) */
     if(messages.length && messages[messages.length-1].role==='user' && !chatBody.querySelector('.bubble-assistant')){
       sendMessage(messages[messages.length-1].content);
     }
