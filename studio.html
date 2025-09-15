@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="fr">
 <head>
+  <!-- PF_STUDIO_BUILD: 2025-09-15 11:02 (v1102) -->
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>PropoFlash — Studio</title>
@@ -30,6 +31,7 @@
     .left,.right{display:flex;gap:10px;align-items:center}
     .brand{display:flex;gap:10px;align-items:center;font-weight:800;cursor:pointer}
     .spark{width:22px;height:22px;border-radius:6px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd)}
+    .build-badge{font-size:12px;color:var(--muted);border:1px solid var(--stroke);border-radius:999px;padding:4px 8px}
     .btn{border:1px solid var(--stroke);background:var(--panel);border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow:var(--elev)}
     .btn.primary{background:var(--ink);color:#fff;border-color:#0000}
     .sel{border:1px solid var(--stroke);border-radius:10px;padding:7px 10px;background:var(--panel);color:var(--ink)}
@@ -59,10 +61,7 @@
       grid-template-columns: clamp(520px, 38vw, 640px) 1fr;
       gap:18px; padding:18px 24px; align-items:stretch; min-height:0;
     }
-    .panel{
-      background:var(--panel);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--elev);
-      display:flex;flex-direction:column;min-height:0;
-    }
+    .panel{background:var(--panel);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--elev);display:flex;flex-direction:column;min-height:0;}
 
     /* Chat */
     .chat{min-height:0; display:flex;flex-direction:column;}
@@ -149,13 +148,14 @@
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="lang.js"></script>
+  <script src="lang.js?v=1102"></script>
 </head>
 <body>
   <!-- Top bar -->
   <div class="bar">
     <div class="left">
       <div class="brand" id="homeBtn"><div class="spark" aria-hidden="true"></div>PropoFlash</div>
+      <span class="build-badge">build 2025-09-15 11:02</span>
       <button class="btn" id="openHistory">Historique</button>
       <button class="btn primary" id="newChatBtn">Nouvelle discussion</button>
       <span class="muted" id="status">Prêt</span>
@@ -218,6 +218,8 @@
   </div>
 
   <script>
+    console.log("PF_STUDIO_BUILD:", "2025-09-15 11:02 / v1102");
+
     /* ========= Auth (léger) ========= */
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
@@ -247,7 +249,6 @@
 
     const LS_KEY='pf_convos'; const LS_ACTIVE='pf_active_convo_id';
 
-    // Migration depuis anciens stockages
     (function migrateLegacy(){
       try{
         const convos = JSON.parse(localStorage.getItem(LS_KEY)||'[]');
@@ -290,8 +291,7 @@
       const title='Nouvelle proposition';
       const convo={ id, title, date:new Date().toISOString(), spec: baseSpec(), messages:[], memory:{} };
       const all=loadAllChats(); all.unshift(convo); saveAllChats(all); saveActiveId(id);
-      setActiveFromStorage();
-      renderHistory();
+      setActiveFromStorage(); renderHistory();
     }
 
     function setActiveFromStorage(){
@@ -318,8 +318,7 @@
       const now = new Date().toISOString();
       const snapshot = { ...activeChat, spec, messages, memory, date: now };
       if(idx>=0) all[idx]=snapshot; else all.unshift(snapshot);
-      saveAllChats(all);
-      saveActiveId(activeChat.id);
+      saveAllChats(all); saveActiveId(activeChat.id);
     }
 
     function renderHistory(){
@@ -345,7 +344,7 @@
           if(confirm('Supprimer cette discussion ?')){
             const all2=loadAllChats(); const i=all2.findIndex(x=>x.id===item.id);
             if(i>=0){ all2.splice(i,1); saveAllChats(all2); const actId=getActiveId();
-              if(String(actId)===String(item.id)){ // on supprime l’actif → bascule
+              if(String(actId)===String(item.id)){
                 if(all2.length){ saveActiveId(all2[0].id); } else { localStorage.removeItem(LS_ACTIVE); }
                 setActiveFromStorage();
               }
@@ -377,7 +376,6 @@
 
     function updateTitleUI(){ document.getElementById('chatTitle').textContent = activeChat?.title || 'Chat'; }
 
-    // Init
     setActiveFromStorage();
 
     /* ========= Chat ========= */
@@ -415,7 +413,7 @@
     function renderChat(){ chatBody.innerHTML=''; messages.forEach(m=> bubble(m.role, escapeHTML(m.content).replace(/\n/g,'<br/>'))); scrollChat(); }
     renderChat();
 
-    // ======= FIX ENTRÉE (envoi) =======
+    /* ======= ENTRÉE = ENVOI (compatible IME) ======= */
     let isComposing=false;
     composer.addEventListener('compositionstart', ()=>{ isComposing=true; });
     composer.addEventListener('compositionend',   ()=>{ isComposing=false; });
@@ -426,7 +424,6 @@
         sendMessage(composer.value);
       }
     });
-    // Sécurité : capter Enter même si un autre listener capte avant
     document.addEventListener('keydown', (e)=>{
       if(document.activeElement===composer && !isComposing && e.key==='Enter' && !e.shiftKey){
         e.preventDefault();
@@ -446,6 +443,7 @@
       return data;
     }
     async function callStyleAPI(content){
+      // Si vous n’avez pas encore /api/style, ce call échouera silencieusement dans Promise.allSettled.
       const resp = await fetch('/api/style', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ userText: content, currentDesign: (spec?.meta?.style||{}) })
@@ -494,9 +492,7 @@
             spec.meta = spec.meta || {};
             spec.meta.style = { ...(spec.meta.style||{}), ...(s.designSpecDiff||{}) };
           }
-        }else{
-          console.warn('Style API error:', styleRes.reason);
-        }
+        } // else: ignore
 
         persistActive();
         renderSpec();
@@ -520,7 +516,7 @@
     /* ========= Libellés & utilitaires ========= */
     const t = {
       fr:{ title:"Proposition commerciale", to:"Pour", from:"Émis par", date:"Date", letter:"Lettre d’introduction", executive:"Résumé exécutif", objectives:"Objectifs", approach:"Approche & phasage", deliverables:"Livrables", in_scope:"Inclus", out_scope:"Hors-périmètre", timeline:"Planning", pricing:"Tarification", assumptions:"Hypothèses / Risques", next:"Prochaines étapes", price_model:"Modèle", terms:"Conditions", toc:"Sommaire" },
-      en:{ title:"Business Proposal", to:"To", from:"Issued by", date:"Date", letter:"Cover Letter", executive:"Executive Summary", objectives:"Objectives", approach:"Approach & Phasing", deliverables:"Deliverables", in_scope:"In scope", out_scope:"Out of scope", timeline:"Timeline", pricing:"Pricing", assumptions:"Assumptions / Risks", next:"Next Steps", price_model:"Model", terms:"Terms", toc:"Table of Contents" }
+      en:{ title:"Business Proposal", to:"To", from:"Issued by", date:"Date", letter:"Cover Letter", executive:"Executive Summary", objectives:"Objectives", approach:"Approach & Phasing", deliverables:"Deliverables", in_scope:"In scope", out_of_scope:"Out of scope", timeline:"Timeline", pricing:"Pricing", assumptions:"Assumptions / Risks", next:"Next Steps", price_model:"Model", terms:"Terms", toc:"Table of Contents" }
     };
     function safeArr(v){ return Array.isArray(v)?v:[]; }
     function safeStr(v,fb=''){ return (v==null?'':String(v)).trim() || fb; }
@@ -551,7 +547,6 @@
 
       renderDecorLayers(style?.decor_layers||[], palette);
     }
-
     function hsla(h,s,l,a){ return `hsla(${Number(h||0)},${Number(s||0)}%,${Number(l||0)}%,${Number(a||1)})`; }
     function pickCorner(pos){
       const map = {
@@ -563,7 +558,7 @@
       };
       return map[pos] || map.center;
     }
-    function renderDecorLayers(layers, palette){
+    function renderDecorLayers(layers){
       const decor=document.getElementById('decor');
       decor.innerHTML = '';
       if(!layers?.length) return;
@@ -728,7 +723,7 @@
       const { inner } = makePage('deliverables'); H2(inner, L.deliverables);
       const grid=document.createElement('div'); grid.className='grid2';
       const a=document.createElement('div'); a.className='card'; a.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.in_scope}</div>`;
-      const b=document.createElement('div'); b.className='card'; b.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.out_scope}</div>`;
+      const b=document.createElement('div'); b.className='card'; b.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.out_scope || L.out_of_scope || 'Hors-périmètre'}</div>`;
       const ulA=document.createElement('ul'); (deliv?.in||[]).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulA.appendChild(li); });
       const ulB=document.createElement('ul'); (deliv?.out||[]).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulB.appendChild(li); });
       a.appendChild(ulA); b.appendChild(ulB); grid.appendChild(a); grid.appendChild(b); inner.appendChild(grid);
@@ -827,13 +822,12 @@
       renderCover(spec?.meta?.style, L, title, company, client, date);
 
       const sections = allSections(L);
-      renderTOC(L, sections); // TOC toujours visible
+      renderTOC(L, sections);
       sections.forEach(s => s.render());
       statusEl.textContent = (spec.meta?.lang==='en') ? 'Preview ready' : 'Aperçu prêt';
     }
     renderSpec();
 
-    // Lang
     function applyChatLang(){
       const en=(getLang()==='en');
       document.getElementById('composer').placeholder = en?'Type your message':'Écrivez votre message';
@@ -844,8 +838,12 @@
       persistActive(); applyChatLang(); renderSpec();
     });
 
-    // Sauvegarde de sécurité quand on quitte
     window.addEventListener('beforeunload', persistActive);
+
+    /* Raccourcis */
+    document.addEventListener('keydown', (e)=>{
+      if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='n'){ e.preventDefault(); newConversation(); }
+    });
   </script>
 </body>
 </html>
