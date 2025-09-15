@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <!-- PF_STUDIO_BUILD: 2025-09-15 11:02 (v1102) -->
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>PropoFlash — Studio</title>
@@ -13,14 +12,17 @@
       --paper-w:210mm; --paper-h:297mm;
       --elev:0 18px 48px rgba(10,16,32,.10), inset 0 1px 0 #ffffffaa;
 
+      /* Chat themes */
       --assistant-bubble: color-mix(in hsl, var(--panel) 86%, transparent);
       --user-bubble: linear-gradient(135deg, var(--accent), var(--accent2));
-      --user-ink:#fff;
+      --user-ink: #ffffff;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0; height:100vh; overflow:hidden;
+      margin:0;
+      height:100vh;
+      overflow:hidden; /* pas de scroll de page */
       background:linear-gradient(180deg,var(--bg),#eef3ff);
       font-family:Inter,system-ui,sans-serif;color:var(--ink)
     }
@@ -31,81 +33,147 @@
     .left,.right{display:flex;gap:10px;align-items:center}
     .brand{display:flex;gap:10px;align-items:center;font-weight:800;cursor:pointer}
     .spark{width:22px;height:22px;border-radius:6px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd)}
-    .build-badge{font-size:12px;color:var(--muted);border:1px solid var(--stroke);border-radius:999px;padding:4px 8px}
     .btn{border:1px solid var(--stroke);background:var(--panel);border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow:var(--elev)}
-    .btn.primary{background:var(--ink);color:#fff;border-color:#0000}
     .sel{border:1px solid var(--stroke);border-radius:10px;padding:7px 10px;background:var(--panel);color:var(--ink)}
     .avatar{width:32px;height:32px;border-radius:50%;border:1px solid var(--stroke);display:grid;place-items:center;font-weight:800;background:var(--panel);cursor:pointer;box-shadow:var(--elev)}
     .menu{position:absolute;top:54px;right:14px;background:var(--panel);border:1px solid var(--stroke);border-radius:12px;box-shadow:var(--elev);display:none;overflow:hidden}
     .menu a,.menu button{display:block;width:100%;text-align:left;padding:10px 12px;border:none;background:var(--panel);cursor:pointer;font-weight:600;color:var(--ink)}
     .menu a:hover,.menu button:hover{background:color-mix(in hsl, var(--panel) 80%, transparent)}
 
-    /* Drawer historique (conversations) */
-    .drawer{position:fixed;left:0;top:64px;bottom:0;width:320px;background:var(--panel);
-      border-right:1px solid var(--stroke);box-shadow:var(--elev);
-      transform:translateX(-100%);transition:transform .25s ease;z-index:30;display:flex;flex-direction:column}
-    .drawer.open{transform:translateX(0)}
+    /* Drawer (historique) */
+    .drawer{position:fixed;top:56px;left:12px;width:380px;max-width:90vw;max-height:calc(100vh - 72px);
+      background:var(--panel);border:1px solid var(--stroke);border-radius:14px;box-shadow:var(--elev);
+      display:none;flex-direction:column;overflow:hidden;z-index:30}
+    .drawer.open{display:flex}
     .drawer h3{margin:0;padding:12px;border-bottom:1px solid var(--stroke)}
-    .drawer-tools{display:flex;gap:8px;align-items:center;padding:10px;border-bottom:1px solid var(--stroke)}
-    .drawer-list{flex:1;overflow:auto;padding:8px}
-    .row-item{border:1px solid var(--stroke);border-radius:10px;padding:8px;margin:8px 0;display:flex;flex-direction:column;gap:6px;background:var(--panel)}
-    .row-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
-    .row-actions{display:flex;gap:6px}
-    .row-actions button{border:1px solid var(--stroke);background:var(--panel);border-radius:8px;padding:4px 8px;font-weight:600;cursor:pointer}
-    .row-item.active{outline:2px solid var(--accent);}
+    .drawer-list{padding:12px;overflow:auto}
+    .row-item{border:1px solid var(--stroke);border-radius:12px;padding:10px;margin:10px 0;background:color-mix(in hsl, var(--panel) 95%, transparent)}
+    .row-item .muted{color:var(--muted);font-size:12px}
+    .row-item .actions{display:flex;gap:8px;margin-top:8px}
+    .row-item .actions .btn{padding:6px 8px;font-weight:700}
 
-    /* Layout principal */
+    /* Layout principal : chat élargi & éléments étirés */
     .main{
       height:calc(100vh - 64px);
       display:grid;
-      grid-template-columns: clamp(520px, 38vw, 640px) 1fr;
-      gap:18px; padding:18px 24px; align-items:stretch; min-height:0;
+      grid-template-columns: clamp(520px, 38vw, 640px) 1fr; /* chat élargi */
+      gap:18px;
+      padding:18px 24px;
+      align-items:stretch;
+      min-height:0;
     }
-    .panel{background:var(--panel);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--elev);display:flex;flex-direction:column;min-height:0;}
+    .panel{
+      background:var(--panel);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--elev);
+      display:flex;flex-direction:column;
+      min-height:0;
+    }
 
     /* Chat */
     .chat{min-height:0; display:flex;flex-direction:column;}
     .chat-head{display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--stroke)}
     .chat-title{font-weight:800}
-    .chat-head .btn{padding:6px 10px}
-    .chat-body{padding:12px; overflow:auto; flex:1; min-height:0;}
-    .msg{display:flex; gap:10px; margin:10px 0; align-items:flex-end; width:100%;}
+    .chat-body{
+      padding:12px;
+      overflow:auto; /* scroll interne chat */
+      flex:1; min-height:0;
+    }
+
+    /* Lignes de message + avatars + bulles */
+    .msg{
+      display:flex;
+      gap:10px;
+      margin:10px 0;
+      align-items:flex-end;
+      width:100%;
+    }
     .msg.assistant{justify-content:flex-start}
     .msg.user{justify-content:flex-end}
-    .avatar-badge{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:11px;border:1px solid var(--stroke);box-shadow:var(--elev);background:var(--panel); color:var(--ink); user-select:none;}
+
+    .avatar-badge{
+      width:28px;height:28px;border-radius:50%;
+      display:grid;place-items:center;
+      font-weight:800;font-size:11px;
+      border:1px solid var(--stroke);
+      box-shadow:var(--elev);
+      background:var(--panel); color:var(--ink);
+      user-select:none;
+    }
     .avatar-badge.bot{background:#111827; color:#fff; border-color:#111827}
     .avatar-badge.you{background:var(--accent); color:#fff; border-color:transparent}
-    .bubble{max-width:min(100%, 560px); padding:10px 12px;border-radius:14px;border:1px solid var(--stroke); box-shadow:var(--elev); word-wrap:break-word;overflow-wrap:anywhere;}
+
+    .bubble{
+      max-width:min(100%, 560px);
+      padding:10px 12px;border-radius:14px;border:1px solid var(--stroke);
+      box-shadow:var(--elev);
+      word-wrap:break-word;overflow-wrap:anywhere;
+    }
     .bubble-assistant{ background:var(--assistant-bubble); color:var(--ink); }
     .bubble-user{ background:var(--user-bubble); color:var(--user-ink); border-color:transparent; }
-    .chat-compose{position:relative;padding:12px;border-top:1px solid var(--stroke);display:flex;align-items:flex-end;gap:16px;}
+
+    /* Composer + upload logo */
+    .chat-compose{
+      position:relative;
+      padding:12px;
+      border-top:1px solid var(--stroke);
+      display:flex;align-items:flex-end;gap:16px;
+    }
     .logo-wrap{ position:relative; flex:0 0 auto; }
-    .input{display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--stroke); border-radius:14px;padding:8px;box-shadow:var(--elev); flex:1;}
+    .input{
+      display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--stroke);
+      border-radius:14px;padding:8px;box-shadow:var(--elev);
+      flex:1;
+    }
     .input textarea{flex:1;resize:vertical;min-height:72px;border:none;outline:none;background:transparent;font:500 14px/1.4 Inter;color:var(--ink)}
     .send{width:40px;height:40px;border-radius:12px;border:1px solid var(--stroke);background:#0a1020;color:#fff;display:grid;place-items:center;cursor:pointer}
-    .logo-btn{width:34px;height:34px;border-radius:10px;border:1px solid #0002;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd); box-shadow:var(--elev);display:grid;place-items:center;cursor:pointer}
+    .logo-btn{width:34px;height:34px;border-radius:10px;border:1px solid #0002;
+      background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd);
+      box-shadow:var(--elev);display:grid;place-items:center;cursor:pointer}
     .logo-btn input{display:none}
     .logo-tip{ position:absolute;left:0;bottom:44px;background:#111;color:#fff;font-size:12px;padding:6px 8px;border-radius:8px;display:none;white-space:nowrap }
     .logo-wrap:hover .logo-tip{display:block}
+
+    /* Indicateur de frappe */
     .typing{display:inline-flex;gap:5px;align-items:center}
     .dot{width:6px;height:6px;border-radius:50%;background:#8aa0c6;opacity:.7;animation:bounce 1.2s infinite}
     .dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
     @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
 
-    /* Aperçu */
-    .sheet-wrap{flex:1; min-height:0; overflow:auto; display:flex;justify-content:center;align-items:flex-start; padding:12px 24px;}
-    .sheet{position:relative; overflow:visible; width:var(--paper-w); max-width:100%; background:transparent; border:none; box-shadow:none; color:var(--ink); font-family: var(--font-body, Inter), system-ui, sans-serif;}
-    .decor{position:fixed; inset:0; pointer-events:none; z-index:0}
+    /* Aperçu : centré horizontalement + scroll interne */
+    .sheet-wrap{
+      flex:1; min-height:0; overflow:auto;
+      display:flex;justify-content:center;align-items:flex-start;
+      padding:12px 24px;
+    }
+    .sheet{
+      position:relative; /* décor global */
+      overflow:visible;
+      width:var(--paper-w);
+      max-width:100%;
+      background:transparent; /* on gère page par page */
+      border:none; box-shadow:none;
+      color:var(--ink);
+      font-family: var(--font-body, Inter), system-ui, sans-serif;
+    }
+    .decor{position:fixed; inset:0; pointer-events:none; z-index:0} /* léger décor global */
     .content{position:relative; z-index:1}
 
+    /* Pages A4 empilées */
     .page{
-      position:relative; width:var(--paper-w); min-height:var(--paper-h);
-      background:var(--panel); border:1px solid var(--stroke); border-radius:var(--radius, 12px); box-shadow:var(--elev);
-      margin:0 0 16mm 0; overflow:hidden; transform-style:preserve-3d; transition:transform .35s ease, box-shadow .35s ease;
+      position:relative;
+      width:var(--paper-w);
+      min-height:var(--paper-h);
+      background:var(--panel);
+      border:1px solid var(--stroke);
+      border-radius:var(--radius, 12px);
+      box-shadow:var(--elev);
+      margin:0 0 16mm 0;
+      overflow:hidden;
     }
-    .page:hover{ transform:translateZ(18px) rotateX(1.2deg) rotateY(-1.2deg); box-shadow:0 30px 60px rgba(10,16,32,.2); }
+    .page:last-child{margin-bottom:0}
     .inner{ padding:22mm 18mm; position:relative; z-index:1; }
     .page .page-decor{ position:absolute; inset:0; pointer-events:none; z-index:0 }
+
+    /* Éléments de doc */
     .doc-header{display:grid;grid-template-columns:100px 1fr;gap:16px;align-items:center;margin-bottom:16px}
     .logo-box{width:100px;height:100px;border:1px solid var(--stroke);border-radius:var(--radius, 12px);display:grid;place-items:center;overflow:hidden;background:var(--panel)}
     .logo-box img{width:100%;height:100%;object-fit:contain}
@@ -133,11 +201,15 @@
     th{background:color-mix(in hsl, var(--panel) 85%, transparent)}
     tfoot td{font-weight:800}
 
+    /* Impression */
     @media print{
-      .bar{display:none} body{overflow:visible;height:auto;background:#fff}
-      .main{height:auto} .sheet-wrap{overflow:visible;flex:auto;min-height:auto;padding:0}
+      .bar{display:none}
+      body{overflow:visible;height:auto;background:#fff}
+      .main{height:auto}
+      .sheet-wrap{overflow:visible;flex:auto;min-height:auto;padding:0}
       .page{page-break-after:always; box-shadow:none; margin:0; border:0; border-radius:0}
-      .page:last-child{page-break-after:auto} .inner{padding:18mm 16mm}
+      .page:last-child{page-break-after:auto}
+      .inner{padding:18mm 16mm}
       a[href]:after{content:""}
     }
 
@@ -148,16 +220,15 @@
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="lang.js?v=1102"></script>
+  <script src="lang.js"></script>
 </head>
 <body>
   <!-- Top bar -->
   <div class="bar">
     <div class="left">
       <div class="brand" id="homeBtn"><div class="spark" aria-hidden="true"></div>PropoFlash</div>
-      <span class="build-badge">build 2025-09-15 11:02</span>
       <button class="btn" id="openHistory">Historique</button>
-      <button class="btn primary" id="newChatBtn">Nouvelle discussion</button>
+      <button class="btn" id="newChatBtn">Nouvelle discussion</button>
       <span class="muted" id="status">Prêt</span>
     </div>
     <div class="right">
@@ -172,13 +243,13 @@
     </div>
   </div>
 
-  <!-- Drawer Historique -->
+  <!-- History drawer -->
   <div class="drawer" id="drawer">
     <h3>Historique</h3>
-    <div class="drawer-tools">
-      <input id="renameInput" placeholder="Renommer la discussion…" style="flex:1;padding:8px;border:1px solid var(--stroke);border-radius:8px"/>
-      <button class="btn" id="applyRenameBtn">Renommer</button>
-      <button class="btn" id="deleteChatBtn">Supprimer</button>
+    <div style="display:flex;gap:8px;padding:0 12px 8px">
+      <button class="btn" id="createSession">Nouvelle proposition</button>
+      <button class="btn" id="renameSession">Renommer</button>
+      <button class="btn" id="deleteSession">Supprimer</button>
     </div>
     <div class="drawer-list" id="histList"></div>
   </div>
@@ -187,9 +258,7 @@
   <div class="main">
     <!-- Chat -->
     <div class="panel chat">
-      <div class="chat-head">
-        <strong class="chat-title" id="chatTitle">Chat</strong>
-      </div>
+      <div class="chat-head"><strong class="chat-title">Chat</strong></div>
       <div class="chat-body" id="chatBody" aria-live="polite"></div>
 
       <div class="chat-compose">
@@ -218,12 +287,30 @@
   </div>
 
   <script>
-    console.log("PF_STUDIO_BUILD:", "2025-09-15 11:02 / v1102");
+    /* ============================================================
+       Fallback léger si lang.js n'est pas chargé (ne casse pas si présent)
+    ============================================================ */
+    if (typeof window.getLang !== "function") {
+      window.getLang = () => {
+        try { return localStorage.getItem("pf_lang") || "fr"; } catch { return "fr"; }
+      };
+      window.setLang = (v) => {
+        try { localStorage.setItem("pf_lang", v || "fr"); } catch {}
+        document.documentElement.lang = v || "fr";
+        window.dispatchEvent(new Event("langchange"));
+      };
+      document.documentElement.lang = getLang();
+      queueMicrotask(() => {
+        const sel = document.querySelector('[data-lang-picker]');
+        if (sel) { sel.value = getLang(); sel.onchange = () => setLang(sel.value); }
+      });
+    }
 
-    /* ========= Auth (léger) ========= */
+    /* Supabase guard */
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
     async function guard(){
       const { data:{ session } } = await sb.auth.getSession();
       if(session?.user) return true;
@@ -234,151 +321,101 @@
     }
     guard();
 
-    /* ========= Profil ========= */
+    /* Profil menu */
     const avatar=document.getElementById('avatar'), menu=document.getElementById('menu'), logoutBtn=document.getElementById('logoutBtn');
-    (async ()=>{ const { data:{ session } } = await sb.auth.getSession(); avatar.textContent = session?.user ? (session.user.email||'?')[0].toUpperCase() : 'U'; })();
+    (async ()=>{
+      const { data:{ session } } = await sb.auth.getSession();
+      avatar.textContent = session?.user ? (session.user.email||'?')[0].toUpperCase() : 'U';
+    })();
     avatar.onclick = (e)=>{ e.stopPropagation(); menu.style.display = menu.style.display==='block'?'none':'block'; };
     document.addEventListener('click', ()=> menu.style.display='none');
     logoutBtn.onclick = async ()=>{ await sb.auth.signOut(); location.reload(); };
+
+    /* Nav */
     document.getElementById('homeBtn').onclick=()=>location.href='index.html';
 
-    /* ========= Historique (conversations complètes) ========= */
-    const drawer=document.getElementById('drawer'); const histList=document.getElementById('histList');
-    const openHistory=document.getElementById('openHistory'); const newChatBtn=document.getElementById('newChatBtn');
-    const renameInput=document.getElementById('renameInput'); const applyRenameBtn=document.getElementById('applyRenameBtn'); const deleteChatBtn=document.getElementById('deleteChatBtn');
+    /* Historique (sessions de discussion) */
+    const drawer=document.getElementById('drawer');
+    const histList=document.getElementById('histList');
+    const openHistoryBtn=document.getElementById('openHistory');
+    const newChatBtn=document.getElementById('newChatBtn');
 
-    const LS_KEY='pf_convos'; const LS_ACTIVE='pf_active_convo_id';
+    openHistoryBtn.onclick = ()=> drawer.classList.toggle('open');
 
-    (function migrateLegacy(){
-      try{
-        const convos = JSON.parse(localStorage.getItem(LS_KEY)||'[]');
-        if(convos.length) return;
-        const legacyHist = JSON.parse(localStorage.getItem('pf_history')||'[]');
-        const legacyChat = JSON.parse(localStorage.getItem('pf_chat')||'[]');
-        const legacySpec = JSON.parse(localStorage.getItem('pf_proposal')||'null');
-        const acc=[];
-        if(legacyHist.length){
-          legacyHist.forEach(h=>{
-            acc.push({ id:h.id||Date.now(), title:h.title||'Ancienne proposition', date:h.date||new Date().toISOString(), spec:h.spec||baseSpec(), messages:h.messages||[], memory:{} });
-          });
-        }else if(legacyChat?.length || legacySpec){
-          acc.push({ id:Date.now(), title:'Session locale', date:new Date().toISOString(), spec: legacySpec||baseSpec(), messages: legacyChat||[], memory:{} });
-        }
-        if(acc.length){ localStorage.setItem(LS_KEY, JSON.stringify(acc)); }
-      }catch{}
-    })();
+    function sessions(){ return JSON.parse(localStorage.getItem('pf_sessions')||'[]'); }
+    function saveSessions(arr){ localStorage.setItem('pf_sessions', JSON.stringify(arr)); }
 
-    function loadAllChats(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||'[]'); }catch{return []} }
-    function saveAllChats(list){ localStorage.setItem(LS_KEY, JSON.stringify(list)); }
-    function saveActiveId(id){ localStorage.setItem(LS_ACTIVE, String(id)); }
-    function getActiveId(){ return localStorage.getItem(LS_ACTIVE); }
+    function currentSessionId(){ return localStorage.getItem('pf_session_id'); }
+    function setCurrentSession(id){ localStorage.setItem('pf_session_id', String(id)); }
 
-    let activeChat=null;
-
-    function baseSpec(){
+    function createSessionObj(){
+      const now = new Date();
       return {
-        meta:{ lang:getLang(), title:(getLang()==='en'?'Business Proposal':'Proposition commerciale'), currency:'EUR',
-          style:{ palette:{ primary:"#3B82F6", secondary:"#8B5CF6", surface:"#FFFFFF", ink:"#0A1020", muted:"#5C667A", stroke:"#E0E6F4", accentA:"#93C5FD", accentB:"#8B5CF6" },
-                  shapes:{ radius:"12px", shadow:"0 18px 48px rgba(10,16,32,.12)" },
-                  typography:{ heading:"Inter", body:"Inter" },
-                  decor_layers:[ {type:"glow", position:"top", opacity:.18, h:220, s:60, l:55, rotate:0, scale:1, blend:"normal"} ] } },
-        letter:{}, executive_summary:{}, objectives:{}, approach:{}, deliverables:{}, timeline:{}, pricing:{currency:'EUR'}, assumptions:{}, next_steps:{}
+        id: Date.now(),
+        title: 'Nouvelle proposition',
+        createdAt: now.toISOString(),
+        messages: [],
+        spec: {
+          meta:{ lang:getLang(), title:(getLang()==='en'?'Business Proposal':'Proposition commerciale'), currency:'EUR' },
+          sections:[]
+        }
       };
     }
 
-    function newConversation(){
-      const id=Date.now();
-      const title='Nouvelle proposition';
-      const convo={ id, title, date:new Date().toISOString(), spec: baseSpec(), messages:[], memory:{} };
-      const all=loadAllChats(); all.unshift(convo); saveAllChats(all); saveActiveId(id);
-      setActiveFromStorage(); renderHistory();
-    }
-
-    function setActiveFromStorage(){
-      const all=loadAllChats(); let id=getActiveId();
-      if(!all.length){ newConversation(); return; }
-      if(!id){ id=String(all[0].id); saveActiveId(id); }
-      const found = all.find(x=>String(x.id)===String(id)) || all[0];
-      activeChat = JSON.parse(JSON.stringify(found));
-      hydrateFromActive();
-    }
-
-    function hydrateFromActive(){
-      if(!activeChat) return;
-      spec = activeChat.spec||baseSpec();
-      messages = Array.isArray(activeChat.messages)?activeChat.messages.slice():[];
-      memory = activeChat.memory||{};
-      renderChat(); renderSpec(); updateTitleUI();
-      renameInput.value = activeChat.title||'';
-    }
-
-    function persistActive(){
-      if(!activeChat) return;
-      const all=loadAllChats(); const idx=all.findIndex(x=>String(x.id)===String(activeChat.id));
-      const now = new Date().toISOString();
-      const snapshot = { ...activeChat, spec, messages, memory, date: now };
-      if(idx>=0) all[idx]=snapshot; else all.unshift(snapshot);
-      saveAllChats(all); saveActiveId(activeChat.id);
+    function ensureSession(){
+      let all = sessions();
+      let id = currentSessionId();
+      if(!id || !all.some(s=> String(s.id)===String(id))){
+        const sess = createSessionObj();
+        all.unshift(sess); saveSessions(all); setCurrentSession(sess.id);
+      }
+      renderHistory();
     }
 
     function renderHistory(){
-      const all=loadAllChats(); histList.innerHTML='';
-      if(!all.length){ histList.innerHTML='<div class="muted" style="padding:8px">Aucune discussion</div>'; return; }
-      const activeId = getActiveId();
+      const all = sessions();
+      histList.innerHTML='';
+      if(!all.length){ histList.innerHTML='<div class="muted" style="padding:8px">Aucun élément</div>'; return; }
       all.forEach(item=>{
-        const d=new Date(item.date);
-        const row=document.createElement('div'); row.className='row-item'+(String(item.id)===String(activeId)?' active':'');
-        row.innerHTML = `
-          <div class="row-top">
-            <strong>${item.title||'Sans titre'}</strong>
-            <div class="row-actions">
-              <button data-act="open">Ouvrir</button>
-              <button data-act="rename">Renommer</button>
-              <button data-act="delete">Supprimer</button>
-            </div>
-          </div>
-          <span class="muted">${d.toLocaleString()}</span>`;
-        row.querySelector('[data-act="open"]').onclick=()=>{ saveActiveId(item.id); setActiveFromStorage(); drawer.classList.remove('open'); };
-        row.querySelector('[data-act="rename"]').onclick=()=>{ const v=prompt('Nouveau titre', item.title||''); if(v!=null){ item.title=v.trim()||'Sans titre'; const all2=loadAllChats(); const i=all2.findIndex(x=>x.id===item.id); if(i>=0){ all2[i]=item; saveAllChats(all2); if(String(activeChat?.id)===String(item.id)){ activeChat.title=item.title; updateTitleUI(); renameInput.value=item.title; } renderHistory(); } } };
-        row.querySelector('[data-act="delete"]').onclick=()=>{
-          if(confirm('Supprimer cette discussion ?')){
-            const all2=loadAllChats(); const i=all2.findIndex(x=>x.id===item.id);
-            if(i>=0){ all2.splice(i,1); saveAllChats(all2); const actId=getActiveId();
-              if(String(actId)===String(item.id)){
-                if(all2.length){ saveActiveId(all2[0].id); } else { localStorage.removeItem(LS_ACTIVE); }
-                setActiveFromStorage();
-              }
-              renderHistory();
-            }
-          }
-        };
-        histList.appendChild(row);
+        const d=new Date(item.createdAt);
+        const div=document.createElement('div'); div.className='row-item';
+        div.innerHTML = `<strong>${item.title||'Sans titre'}</strong><br><span class="muted">${d.toLocaleString()}</span>`;
+        const actions=document.createElement('div'); actions.className='actions';
+        const open=document.createElement('button'); open.className='btn'; open.textContent='Ouvrir';
+        const ren=document.createElement('button'); ren.className='btn'; ren.textContent='Renommer';
+        const del=document.createElement('button'); del.className='btn'; del.textContent='Supprimer';
+        open.onclick=()=>{ setCurrentSession(item.id); spec=item.spec; messages=item.messages; localStorage.setItem('pf_proposal', JSON.stringify(spec)); localStorage.setItem('pf_chat', JSON.stringify(messages)); renderSpec(); renderChat(); drawer.classList.remove('open'); };
+        ren.onclick=()=>renameSessionById(item.id);
+        del.onclick=()=>deleteSessionById(item.id);
+        actions.append(open,ren,del);
+        div.appendChild(actions);
+        histList.appendChild(div);
       });
     }
 
-    openHistory.onclick = ()=> { drawer.classList.toggle('open'); renderHistory(); if(activeChat) renameInput.value = activeChat.title||''; };
-    newChatBtn.onclick = ()=>{ newConversation(); drawer.classList.remove('open'); };
-    document.getElementById('applyRenameBtn').onclick = ()=>{
-      if(!activeChat) return;
-      const v = (renameInput.value||'').trim();
-      if(!v) return;
-      activeChat.title = v; updateTitleUI(); persistActive(); renderHistory();
-    };
-    document.getElementById('deleteChatBtn').onclick = ()=>{
-      if(!activeChat) return;
-      const all=loadAllChats(); const idx=all.findIndex(x=>String(x.id)===String(activeChat.id));
-      if(idx>=0 && confirm('Supprimer cette discussion ?')){
-        all.splice(idx,1); saveAllChats(all);
-        if(all.length){ saveActiveId(all[0].id); } else { localStorage.removeItem(LS_ACTIVE); }
-        setActiveFromStorage(); renderHistory();
-      }
-    };
+    function createSession(){ const all=sessions(); const sess=createSessionObj(); all.unshift(sess); saveSessions(all); setCurrentSession(sess.id); messages=sess.messages; spec=sess.spec; localStorage.setItem('pf_chat', JSON.stringify(messages)); localStorage.setItem('pf_proposal', JSON.stringify(spec)); renderSpec(); renderChat(); renderHistory(); }
+    function renameSessionById(id){
+      const all=sessions();
+      const i=all.findIndex(s=> String(s.id)===String(id)); if(i<0) return;
+      const nv=prompt('Nouveau nom', all[i].title||''); if(nv==null) return;
+      all[i].title=nv.trim()||all[i].title; saveSessions(all); renderHistory();
+    }
+    function deleteSessionById(id){
+      if(!confirm('Supprimer cette discussion ?')) return;
+      let all=sessions().filter(s=> String(s.id)!==String(id)); saveSessions(all);
+      if(String(currentSessionId())===String(id)){ if(all.length){ setCurrentSession(all[0].id); messages=all[0].messages; spec=all[0].spec; } else { createSession(); return; } }
+      localStorage.setItem('pf_chat', JSON.stringify(messages||[])); localStorage.setItem('pf_proposal', JSON.stringify(spec||{}));
+      renderHistory(); renderSpec(); renderChat();
+    }
 
-    function updateTitleUI(){ document.getElementById('chatTitle').textContent = activeChat?.title || 'Chat'; }
+    document.getElementById('createSession').onclick = createSession;
+    document.getElementById('renameSession').onclick = ()=>{ const id=currentSessionId(); if(id) renameSessionById(id); };
+    document.getElementById('deleteSession').onclick = ()=>{ const id=currentSessionId(); if(id) deleteSessionById(id); };
+    newChatBtn.onclick = createSession;
 
-    setActiveFromStorage();
+    ensureSession();
 
-    /* ========= Chat ========= */
+    /* Chat + Spec */
     const chatBody=document.getElementById('chatBody');
     const composer=document.getElementById('composer');
     const sendBtn=document.getElementById('sendBtn');
@@ -387,153 +424,167 @@
     const decor=document.getElementById('decor');
     const sheetContent=document.getElementById('sheetContent');
 
-    let messages = activeChat?.messages || [];
-    let spec = activeChat?.spec || baseSpec();
-    let memory = activeChat?.memory || {};
+    let messages = JSON.parse(localStorage.getItem('pf_chat')||'[]');
+    let spec = null;
+
+    function loadSpec(){
+      try{ spec = JSON.parse(localStorage.getItem('pf_proposal')||'null'); }catch{ spec=null; }
+      if(!spec){ spec = { meta:{ lang:getLang(), title:(getLang()==='en'?'Business Proposal':'Proposition commerciale'), currency:'EUR' }, sections:[] }; }
+      if(!spec.meta) spec.meta = { lang:getLang() };
+    }
+    loadSpec();
+
+    (function consumeWelcome(){
+      const w = localStorage.getItem('pf_welcome_msg');
+      if(w){ messages.push({ role:'user', content:w }); localStorage.removeItem('pf_welcome_msg'); }
+    })();
+
+    function persistSession(){
+      const id=currentSessionId(); if(!id) return;
+      const all=sessions(); const i=all.findIndex(s=> String(s.id)===String(id)); if(i<0) return;
+      all[i].messages = messages;
+      all[i].spec = spec;
+      // titre auto si vide : prend meta.title
+      if(!all[i].title || all[i].title==='Nouvelle proposition'){
+        all[i].title = spec?.meta?.title || 'Nouvelle proposition';
+      }
+      saveSessions(all);
+    }
 
     function scrollChat(){ chatBody.scrollTop = chatBody.scrollHeight; }
     function escapeHTML(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[m])); }
 
+    /* Bulle avec avatars & alignement */
     function bubble(role, html){
-      const row=document.createElement('div'); row.className='msg '+(role==='assistant'?'assistant':'user');
-      const ava=document.createElement('div'); ava.className='avatar-badge '+(role==='assistant'?'bot':'you'); ava.textContent = (role==='assistant') ? 'PF' : 'ME';
-      const bub=document.createElement('div'); bub.className='bubble '+(role==='assistant'?'bubble-assistant':'bubble-user'); bub.innerHTML=html;
-      if(role==='assistant'){ row.appendChild(ava); row.appendChild(bub); } else { row.appendChild(bub); row.appendChild(ava); }
-      chatBody.appendChild(row); scrollChat(); return row;
+      const row=document.createElement('div');
+      row.className='msg '+(role==='assistant'?'assistant':'user');
+
+      const ava=document.createElement('div');
+      ava.className='avatar-badge '+(role==='assistant'?'bot':'you');
+      ava.textContent = (role==='assistant') ? 'PF' : 'ME';
+
+      const bub=document.createElement('div');
+      bub.className='bubble '+(role==='assistant'?'bubble-assistant':'bubble-user');
+      bub.innerHTML=html;
+
+      if(role==='assistant'){ row.appendChild(ava); row.appendChild(bub); }
+      else { row.appendChild(bub); row.appendChild(ava); }
+
+      chatBody.appendChild(row);
+      scrollChat();
+      return row;
     }
 
+    /* Indicateur de frappe */
     let typingRow=null;
-    function showTyping(){ if(typingRow) return; typingRow = document.createElement('div'); typingRow.className='msg assistant';
-      const ava=document.createElement('div'); ava.className='avatar-badge bot'; ava.textContent='PF';
-      const bub=document.createElement('div'); bub.className='bubble bubble-assistant'; bub.innerHTML=`<span class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
-      typingRow.appendChild(ava); typingRow.appendChild(bub); chatBody.appendChild(typingRow); scrollChat();
+    function showTyping(){
+      if(typingRow) return;
+      typingRow = document.createElement('div');
+      typingRow.className='msg assistant';
+      const ava=document.createElement('div');
+      ava.className='avatar-badge bot'; ava.textContent='PF';
+      const bub=document.createElement('div');
+      bub.className='bubble bubble-assistant';
+      bub.innerHTML=`<span class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
+      typingRow.appendChild(ava); typingRow.appendChild(bub);
+      chatBody.appendChild(typingRow);
+      scrollChat();
     }
     function hideTyping(){ if(typingRow){ typingRow.remove(); typingRow=null; } }
 
-    function renderChat(){ chatBody.innerHTML=''; messages.forEach(m=> bubble(m.role, escapeHTML(m.content).replace(/\n/g,'<br/>'))); scrollChat(); }
+    function renderChat(){
+      chatBody.innerHTML='';
+      messages.forEach(m=> bubble(m.role, escapeHTML(m.content).replace(/\n/g,'<br/>')));
+    }
     renderChat();
-
-    /* ======= ENTRÉE = ENVOI (compatible IME) ======= */
-    let isComposing=false;
-    composer.addEventListener('compositionstart', ()=>{ isComposing=true; });
-    composer.addEventListener('compositionend',   ()=>{ isComposing=false; });
-    composer.addEventListener('keydown', (e)=>{
-      if(isComposing) return;
-      if(e.key==='Enter' && !e.shiftKey){
-        e.preventDefault();
-        sendMessage(composer.value);
-      }
-    });
-    document.addEventListener('keydown', (e)=>{
-      if(document.activeElement===composer && !isComposing && e.key==='Enter' && !e.shiftKey){
-        e.preventDefault();
-        sendMessage(composer.value);
-      }
-    });
-    sendBtn.onclick = ()=> sendMessage(composer.value);
-
-    async function callChatAPI(content){
-      const resp = await fetch('/api/chat', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ message: content, proposalSpec: spec, history: messages.slice(-12), memory })
-      });
-      const raw = await resp.text(); let data = {};
-      try { data = JSON.parse(raw||'{}'); } catch { data = {}; }
-      if(!resp.ok) throw new Error(data?.error || `HTTP ${resp.status}`);
-      return data;
-    }
-    async function callStyleAPI(content){
-      // Si vous n’avez pas encore /api/style, ce call échouera silencieusement dans Promise.allSettled.
-      const resp = await fetch('/api/style', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ userText: content, currentDesign: (spec?.meta?.style||{}) })
-      });
-      const raw = await resp.text(); let data={};
-      try { data = JSON.parse(raw||'{}'); } catch { data={}; }
-      if(!resp.ok) throw new Error(data?.error || `HTTP ${resp.status}`);
-      return data;
-    }
 
     async function sendMessage(text){
       const content=text.trim(); if(!content) return;
-      messages.push({ role:'user', content }); bubble('user', escapeHTML(content).replace(/\n/g,'<br/>'));
-      composer.value=''; statusEl.textContent='Rédaction…'; showTyping(); persistActive();
+      messages.push({ role:'user', content }); localStorage.setItem('pf_chat', JSON.stringify(messages));
+      bubble('user', escapeHTML(content).replace(/\n/g,'<br/>'));
+      composer.value='';
+      statusEl.textContent='Rédaction…';
 
       try{
-        const [chatRes, styleRes] = await Promise.allSettled([ callChatAPI(content), callStyleAPI(content) ]);
+        showTyping();
+
+        const resp = await fetch('/api/chat', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ message: content, proposalSpec: spec, history: messages.slice(-10) })
+        });
+        const data = await resp.json();
+
         hideTyping();
 
-        if(chatRes.status==='fulfilled'){
-          const data = chatRes.value;
-          const reply = data.reply || (getLang()==='en'?'I could not structure the proposal.':'Je n’ai pas pu structurer la proposition.');
-          messages.push({ role:'assistant', content: reply }); bubble('assistant', escapeHTML(reply).replace(/\n/g,'<br/>'));
+        const reply = data.reply || (getLang()==='en'?'I could not structure the proposal.':'Je n’ai pas pu structurer la proposition.');
+        messages.push({ role:'assistant', content: reply }); localStorage.setItem('pf_chat', JSON.stringify(messages));
+        bubble('assistant', escapeHTML(reply).replace(/\n/g,'<br/>'));
 
-          if(data.proposalSpec){
-            const next = { ...(spec||{}), ...(data.proposalSpec||{}) };
-            next.meta = { ...(spec?.meta||{}), ...((data.proposalSpec||{}).meta||{}) };
-            if(next.meta){ next.meta.style = { ...((spec?.meta||{}).style||{}), ...((next.meta||{}).style||{}) }; }
-            spec = next;
+        if(data.proposalSpec){
+          // merge superficiel + style prioritaire
+          const next = { ...(spec||{}), ...(data.proposalSpec||{}) };
+          next.meta = { ...(spec?.meta||{}), ...((data.proposalSpec||{}).meta||{}) };
+          if(next.meta){
+            next.meta.style = { ...((spec?.meta||{}).style||{}), ...((next.meta||{}).style||{}) };
           }
-          if(data.designSpecDiff){ spec.meta = spec.meta || {}; spec.meta.style = { ...(spec.meta.style||{}), ...(data.designSpecDiff||{}) }; }
-          if(data.memoryUpdate){
-            memory = {
-              design_prefs: { ...(memory.design_prefs||{}), ...(data.memoryUpdate.design_prefs||{}) },
-              facts: { ...(memory.facts||{}), ...(data.memoryUpdate.facts||{}) },
-              pending_questions: Array.from(new Set([ ...(memory.pending_questions||[]), ...((data.memoryUpdate.pending_questions||[]).filter(Boolean)) ]))
-            };
-          }
-        }else{
-          bubble('assistant', `<em>Erreur API chat: ${escapeHTML(chatRes.reason?.message||chatRes.reason)}</em>`);
+          spec = next;
+          localStorage.setItem('pf_proposal', JSON.stringify(spec));
+          renderSpec();
         }
-
-        if(styleRes.status==='fulfilled'){
-          const s = styleRes.value;
-          if(s?.designSpecDiff){
-            spec.meta = spec.meta || {};
-            spec.meta.style = { ...(spec.meta.style||{}), ...(s.designSpecDiff||{}) };
-          }
-        } // else: ignore
-
-        persistActive();
-        renderSpec();
+        persistSession();
         statusEl.textContent='Prêt';
       }catch(e){
-        hideTyping(); statusEl.textContent='Erreur réseau';
-        bubble('assistant', `<em>Erreur: ${escapeHTML(String(e?.message||e))}</em>`);
-        console.error('sendMessage error:', e);
+        hideTyping();
+        statusEl.textContent='Erreur réseau';
+        bubble('assistant', '<em>Erreur réseau. Réessayez.</em>');
       }
     }
+
+    composer.addEventListener('keydown', (e)=>{
+      if(e.isComposing || e.keyCode===229) return;
+      if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(composer.value); }
+    });
+    sendBtn.onclick = ()=> sendMessage(composer.value);
 
     /* Upload logo */
     const logoInput = document.getElementById('logoInput');
     logoInput.addEventListener('change', async (e)=>{
       const file = e.target.files?.[0]; if(!file) return;
       const reader = new FileReader();
-      reader.onload = ()=>{ const url = reader.result; spec.meta = { ...(spec.meta||{}), style:{ ...(spec.meta?.style||{}), logoDataUrl: url } }; persistActive(); renderSpec(); };
-      reader.readAsDataURL(file); e.target.value='';
+      reader.onload = ()=>{
+        const url = reader.result;
+        spec.meta = { ...(spec.meta||{}), style:{ ...(spec.meta?.style||{}), logoDataUrl: url } };
+        localStorage.setItem('pf_proposal', JSON.stringify(spec));
+        renderSpec();
+        persistSession();
+      };
+      reader.readAsDataURL(file);
+      e.target.value='';
     });
 
-    /* ========= Libellés & utilitaires ========= */
+    /* Libellés */
     const t = {
       fr:{ title:"Proposition commerciale", to:"Pour", from:"Émis par", date:"Date", letter:"Lettre d’introduction", executive:"Résumé exécutif", objectives:"Objectifs", approach:"Approche & phasage", deliverables:"Livrables", in_scope:"Inclus", out_scope:"Hors-périmètre", timeline:"Planning", pricing:"Tarification", assumptions:"Hypothèses / Risques", next:"Prochaines étapes", price_model:"Modèle", terms:"Conditions", toc:"Sommaire" },
-      en:{ title:"Business Proposal", to:"To", from:"Issued by", date:"Date", letter:"Cover Letter", executive:"Executive Summary", objectives:"Objectives", approach:"Approach & Phasing", deliverables:"Deliverables", in_scope:"In scope", out_of_scope:"Out of scope", timeline:"Timeline", pricing:"Pricing", assumptions:"Assumptions / Risks", next:"Next Steps", price_model:"Model", terms:"Terms", toc:"Table of Contents" }
+      en:{ title:"Business Proposal", to:"To", from:"Issued by", date:"Date", letter:"Cover Letter", executive:"Executive Summary", objectives:"Objectives", approach:"Approach & Phasing", deliverables:"Deliverables", in_scope:"In scope", out_scope:"Out of scope", timeline:"Timeline", pricing:"Pricing", assumptions:"Assumptions / Risks", next:"Next Steps", price_model:"Model", terms:"Terms", toc:"Table of Contents" }
     };
+
     function safeArr(v){ return Array.isArray(v)?v:[]; }
     function safeStr(v,fb=''){ return (v==null?'':String(v)).trim() || fb; }
     function fmtDate(d){ try{ const dt=d?new Date(d):new Date(); return dt.toLocaleDateString(document.documentElement.lang||getLang(), {year:'numeric',month:'short',day:'2-digit'});}catch{return ''} }
     function money(n,c){ try{ return new Intl.NumberFormat(document.documentElement.lang||getLang(),{style:'currency',currency:c||'EUR'}).format(Number(n||0)); }catch{ return String(n||0)+' '+(c||'€') } }
 
-    /* ========= Thème & décor ========= */
+    /* === THEME: applique meta.style à l’aperçu (variables CSS + décor global) === */
     function applyStyleTokens(style){
       const palette = {
         primary: "#3B82F6", secondary: "#8B5CF6", surface: "#FFFFFF",
         ink: "#0A1020", muted: "#5C667A", stroke: "#E0E6F4",
-        accentA: "#93C5FD", accentB:"#8B5CF6",
+        accentA: "#60A5FA", accentB: "#93C5FD",
         ...(style?.palette||{})
       };
       const shapes = { radius:"12px", shadow:"0 18px 48px rgba(10,16,32,.12)", ...(style?.shapes||{}) };
-      const typo   = { heading:"Inter", body:"Inter", ...(style?.typography||{}) };
+      const typo   = { heading:"Inter", body:"Inter", accent:"Inter", ...(style?.typography||{}) };
 
+      // Scope sur #sheet
       sheet.style.setProperty('--panel', palette.surface);
       sheet.style.setProperty('--ink', palette.ink);
       sheet.style.setProperty('--muted', palette.muted);
@@ -547,6 +598,7 @@
 
       renderDecorLayers(style?.decor_layers||[], palette);
     }
+
     function hsla(h,s,l,a){ return `hsla(${Number(h||0)},${Number(s||0)}%,${Number(l||0)}%,${Number(a||1)})`; }
     function pickCorner(pos){
       const map = {
@@ -558,61 +610,90 @@
       };
       return map[pos] || map.center;
     }
-    function renderDecorLayers(layers){
-      const decor=document.getElementById('decor');
+    function renderDecorLayers(layers, palette){
       decor.innerHTML = '';
       if(!layers?.length) return;
       layers.forEach((L,i)=>{
         const layer = document.createElement('div');
-        layer.style.position='absolute'; layer.style.pointerEvents='none'; layer.style.mixBlendMode = (L.blend||'normal');
-        const pos = pickCorner(L.position); Object.assign(layer.style, pos);
-        const rot = Number(L.rotate||0); const scale = Math.max(0.25, Number(L.scale||1));
+        layer.style.position='absolute';
+        layer.style.pointerEvents='none';
+        layer.style.mixBlendMode = (L.blend||'normal');
+        const pos = pickCorner(L.position);
+        Object.assign(layer.style, pos);
+        const rot = Number(L.rotate||0);
+        const scale = Math.max(0.25, Number(L.scale||1));
         const color = hsla(L.h ?? 220, L.s ?? 60, L.l ?? 55, L.opacity ?? 0.18);
 
         switch((L.type||'').toLowerCase()){
           case 'glow': {
-            const size = 900*scale; layer.style.width = layer.style.height = size+'px';
-            layer.style.borderRadius='50%'; layer.style.filter='blur(48px)';
+            const size = 900*scale;
+            layer.style.width = layer.style.height = size+'px';
+            layer.style.borderRadius='50%';
+            layer.style.filter='blur(48px)';
             layer.style.background = `radial-gradient(closest-side, ${color} 0%, transparent 70%)`;
-            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`; break;
+            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
+            break;
           }
           case 'gradient_blob': {
-            const w = 1000*scale, h = 700*scale; layer.style.width = w+'px'; layer.style.height = h+'px';
-            layer.style.borderRadius='40%'; layer.style.filter='blur(24px)';
+            const w = 1000*scale, h = 700*scale;
+            layer.style.width = w+'px'; layer.style.height = h+'px';
+            layer.style.borderRadius='40%';
+            layer.style.filter='blur(24px)';
             layer.style.background = `conic-gradient(from 180deg, ${color}, transparent 60%)`;
-            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`; break;
+            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
+            break;
           }
           case 'diagonal': {
-            const size = 1600*scale; layer.style.width = size+'px'; layer.style.height = size+'px';
-            layer.style.background = `repeating-linear-gradient(${rot}deg, ${color} 0px, ${color} 4px, transparent 4px, transparent 22px)`; break;
+            const size = 1600*scale;
+            layer.style.width = size+'px'; layer.style.height = size+'px';
+            layer.style.background = `
+              repeating-linear-gradient(${rot}deg,
+                ${color} 0px, ${color} 4px,
+                transparent 4px, transparent 22px)`;
+            break;
           }
           case 'grid': {
-            const size = 1400*scale; layer.style.width = size+'px'; layer.style.height = size+'px';
+            const size = 1400*scale;
+            layer.style.width = size+'px'; layer.style.height = size+'px';
             const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
             svg.setAttribute('viewBox','0 0 100 100'); svg.setAttribute('width','100%'); svg.setAttribute('height','100%');
             const defs = document.createElementNS(svg.namespaceURI,'defs');
-            const pat = document.createElementNS(svg.namespaceURI,'pattern'); pat.setAttribute('id',`p-${i}`); pat.setAttribute('width','10'); pat.setAttribute('height','10'); pat.setAttribute('patternUnits','userSpaceOnUse');
-            const path = document.createElementNS(svg.namespaceURI,'path'); path.setAttribute('d','M10 0 L0 0 0 10');
+            const pat = document.createElementNS(svg.namespaceURI,'pattern');
+            pat.setAttribute('id',`p-${i}`); pat.setAttribute('width','10'); pat.setAttribute('height','10'); pat.setAttribute('patternUnits','userSpaceOnUse');
+            const path = document.createElementNS(svg.namespaceURI,'path');
+            path.setAttribute('d','M10 0 L0 0 0 10');
             path.setAttribute('fill','none'); path.setAttribute('stroke', color); path.setAttribute('stroke-width','0.4');
             pat.appendChild(path); defs.appendChild(pat); svg.appendChild(defs);
-            const rect = document.createElementNS(svg.namespaceURI,'rect'); rect.setAttribute('width','100%'); rect.setAttribute('height','100%'); rect.setAttribute('fill',`url(#p-${i})`);
-            svg.appendChild(rect); layer.appendChild(svg);
-            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`; break;
+            const rect = document.createElementNS(svg.namespaceURI,'rect');
+            rect.setAttribute('width','100%'); rect.setAttribute('height','100%'); rect.setAttribute('fill',`url(#p-${i})`);
+            svg.appendChild(rect);
+            layer.appendChild(svg);
+            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
+            break;
           }
           case 'dots': {
-            const size = 1400*scale; layer.style.width = size+'px'; layer.style.height = size+'px';
-            const svg = document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.setAttribute('viewBox','0 0 100 100'); svg.setAttribute('width','100%'); svg.setAttribute('height','100%');
+            const size = 1400*scale;
+            layer.style.width = size+'px'; layer.style.height = size+'px';
+            const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+            svg.setAttribute('viewBox','0 0 100 100'); svg.setAttribute('width','100%'); svg.setAttribute('height','100%');
             const defs = document.createElementNS(svg.namespaceURI,'defs');
-            const pat = document.createElementNS(svg.namespaceURI,'pattern'); pat.setAttribute('id',`d-${i}`); pat.setAttribute('width','6'); pat.setAttribute('height','6'); pat.setAttribute('patternUnits','userSpaceOnUse');
-            const circle = document.createElementNS(svg.namespaceURI,'circle'); circle.setAttribute('cx','1.5'); circle.setAttribute('cy','1.5'); circle.setAttribute('r','0.6'); circle.setAttribute('fill', color);
+            const pat = document.createElementNS(svg.namespaceURI,'pattern');
+            pat.setAttribute('id',`d-${i}`); pat.setAttribute('width','6'); pat.setAttribute('height','6'); pat.setAttribute('patternUnits','userSpaceOnUse');
+            const circle = document.createElementNS(svg.namespaceURI,'circle');
+            circle.setAttribute('cx','1.5'); circle.setAttribute('cy','1.5'); circle.setAttribute('r','0.6'); circle.setAttribute('fill', color);
             pat.appendChild(circle); defs.appendChild(pat); svg.appendChild(defs);
-            const rect = document.createElementNS(svg.namespaceURI,'rect'); rect.setAttribute('width','100%'); rect.setAttribute('height','100%'); rect.setAttribute('fill',`url(#d-${i})`);
-            svg.appendChild(rect); layer.appendChild(svg);
-            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`; break;
+            const rect = document.createElementNS(svg.namespaceURI,'rect');
+            rect.setAttribute('width','100%'); rect.setAttribute('height','100%'); rect.setAttribute('fill',`url(#d-${i})`);
+            svg.appendChild(rect);
+            layer.appendChild(svg);
+            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
+            break;
           }
           default: {
-            const size = 1000*scale; layer.style.width = layer.style.height = size+'px';
-            layer.style.borderRadius='50%'; layer.style.filter='blur(40px)';
+            const size = 1000*scale;
+            layer.style.width = layer.style.height = size+'px';
+            layer.style.borderRadius='50%';
+            layer.style.filter='blur(40px)';
             layer.style.background = `radial-gradient(closest-side, ${color} 0%, transparent 70%)`;
             layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
           }
@@ -621,7 +702,7 @@
       });
     }
 
-    /* ========= Pages & rendu ========= */
+    /* ——— MOTEUR DE PAGES ——— */
     const sheetPages = [];
     function clearPages(){ sheetContent.innerHTML=''; sheetPages.length=0; }
     function makePage(kind='default'){
@@ -632,17 +713,22 @@
       sheetContent.appendChild(page); sheetPages.push({page, inner, pageDecor});
       return {page, inner, pageDecor};
     }
+
+    // Helpers pour écrire dans un conteneur "inner"
     function H1(inner, text){ const el=document.createElement('div'); el.className='h1'; el.textContent=text; inner.appendChild(el); }
     function H2(inner, text){ const el=document.createElement('div'); el.className='h2'; el.textContent=text; inner.appendChild(el); }
     function HR(inner){ inner.appendChild(Object.assign(document.createElement('div'),{className:'hr'})); }
     function P(inner, text){ const p=document.createElement('p'); p.textContent=text; inner.appendChild(p); }
     function UL(inner, arr){ if(!arr?.length) return; const ul=document.createElement('ul'); arr.forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ul.appendChild(li); }); inner.appendChild(ul); }
 
+    // Page décor locale (bandeau diagonal / accent)
     function pageAccentBar(pageDecor, colorA, colorB){
       const band = document.createElement('div');
-      band.style.position='absolute'; band.style.inset='-12% -12% auto -12%'; band.style.height='42%';
+      band.style.position='absolute'; band.style.inset='-10% -10% auto -10%'; band.style.height='40%';
       band.style.background = `linear-gradient(135deg, ${colorA}, ${colorB})`;
-      band.style.opacity = .25; band.style.transform = 'skewY(-8deg)'; pageDecor.appendChild(band);
+      band.style.opacity = .25;
+      band.style.transform = 'skewY(-8deg)';
+      pageDecor.appendChild(band);
     }
 
     function renderCover(style, L, title, company, client, date){
@@ -651,15 +737,19 @@
       const pB = getComputedStyle(sheet).getPropertyValue('--accent2').trim() || '#8B5CF6';
       pageAccentBar(pageDecor, pA, pB);
 
+      // Header (logo + brand)
       const head=document.createElement('div'); head.className='doc-header';
       const logoBox=document.createElement('div'); logoBox.className='logo-box';
       if(style?.logoDataUrl){ const im=new Image(); im.src=style.logoDataUrl; logoBox.appendChild(im); } else { logoBox.textContent='LOGO'; logoBox.style.color='#9aa6bf'; }
       const bi=document.createElement('div'); bi.className='brand-info';
       bi.innerHTML=`<div class="company">${company}</div><div class="muted">${date}</div>`;
-      head.appendChild(logoBox); head.appendChild(bi); inner.appendChild(head);
+      head.appendChild(logoBox); head.appendChild(bi);
+      inner.appendChild(head);
 
+      // Grand titre
       H1(inner, title);
-      const meta=document.createElement('div'); meta.className='meta';
+      const meta=document.createElement('div');
+      meta.className='meta';
       meta.innerHTML = `${L.to}: <span class="tag">${client}</span> &nbsp;•&nbsp; ${L.from}: <span class="tag">${company}</span>`;
       inner.appendChild(meta);
 
@@ -669,88 +759,83 @@
     }
 
     function renderTOC(L, sections){
+      const present = sections.filter(s=>s.present);
+      if(present.length<3) return; // TOC si suffisamment de contenu
       const { inner } = makePage('toc');
       H2(inner, L.toc);
       const toc=document.createElement('div'); toc.className='toc';
       toc.innerHTML = `<b>${L.toc}</b>`;
-      sections.forEach(s=>{ const a=document.createElement('a'); a.textContent=s.title; a.href='#'+s.id; toc.appendChild(a); });
+      present.forEach(s=>{ const a=document.createElement('a'); a.textContent=s.title; a.href='#'+s.id; toc.appendChild(a); });
       inner.appendChild(toc);
     }
 
     function renderLetter(L, letter){
-      const { inner } = makePage('letter'); H2(inner, L.letter);
-      if(letter?.greeting || letter?.body_paragraphs?.length || letter?.paragraphs?.length || letter?.closing || letter?.signature){
-        if(letter?.greeting) P(inner, letter.greeting);
-        (letter?.body_paragraphs?.length?letter.body_paragraphs:letter?.paragraphs||[]).forEach(p=>P(inner, p));
-        if(letter?.closing) P(inner, letter.closing);
-        if(letter?.signature) P(inner, letter.signature);
-      }else{
-        P(inner, (document.documentElement.lang==='en') ? "Write a friendly opening letter…" : "Rédigez une lettre d’introduction…");
-      }
+      const { inner } = makePage('letter');
+      H2(inner, L.letter);
+      if(letter?.greeting) P(inner, letter.greeting);
+      safeArr(letter?.body_paragraphs?.length?letter.body_paragraphs:letter?.paragraphs).forEach(p=>P(inner, p));
+      if(letter?.closing) P(inner, letter.closing);
+      if(letter?.signature) P(inner, letter.signature);
     }
 
     function renderExecutive(L, exec){
-      const { inner } = makePage('executive'); H2(inner, L.executive);
-      if((exec?.paragraphs||[]).length){ exec.paragraphs.forEach(p=>P(inner, p)); }
-      else { P(inner, (document.documentElement.lang==='en') ? "Summarize the value proposition…" : "Résumez la proposition de valeur…"); }
+      const { inner } = makePage('executive');
+      H2(inner, L.executive);
+      safeArr(exec?.paragraphs).forEach(p=>P(inner, p));
     }
 
     function renderObjectives(L, obj){
-      const { inner } = makePage('objectives'); H2(inner, L.objectives);
-      if((obj?.bullets||[]).length) UL(inner, obj.bullets);
-      else P(inner, (document.documentElement.lang==='en') ? "List key objectives…" : "Listez les objectifs clés…");
+      const { inner } = makePage('objectives');
+      H2(inner, L.objectives);
+      UL(inner, obj?.bullets||[]);
     }
 
     function renderApproach(L, approach){
-      const { inner } = makePage('approach'); H2(inner, L.approach);
-      if((approach?.phases||[]).length){
-        approach.phases.forEach((ph,i)=>{
-          const card=document.createElement('div'); card.className='card';
-          card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center">
-            <strong>Phase ${i+1} — ${safeStr(ph.title,'À confirmer')}</strong>
-            <span class="pill">${safeStr(ph.duration||'','')}</span></div>`;
-          inner.appendChild(card);
-          if(ph.description) P(inner, ph.description);
-          const acts=ph.activities?.length?ph.activities:ph.steps; if(acts?.length){ const p=document.createElement('p'); p.innerHTML='<em>Activités :</em>'; inner.appendChild(p); UL(inner, acts); }
-          const outs=ph.outcomes; if(outs?.length){ const p=document.createElement('p'); p.innerHTML='<em>Résultats attendus :</em>'; inner.appendChild(p); UL(inner, outs); }
-        });
-      }else{
-        P(inner, (document.documentElement.lang==='en') ? "Break the work into phases…" : "Découpez le travail en phases…");
-      }
+      const { inner } = makePage('approach');
+      H2(inner, L.approach);
+      safeArr(approach?.phases).forEach((ph,i)=>{
+        const card=document.createElement('div'); card.className='card';
+        card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center">
+          <strong>Phase ${i+1} — ${safeStr(ph.title,'À confirmer')}</strong>
+          <span class="pill">${safeStr(ph.duration||'','')}</span></div>`;
+        inner.appendChild(card);
+        if(ph.description) P(inner, ph.description);
+        const acts=safeArr(ph.activities?.length?ph.activities:ph.steps); if(acts.length){ const p=document.createElement('p'); p.innerHTML='<em>Activités :</em>'; inner.appendChild(p); UL(inner, acts); }
+        const outs=safeArr(ph.outcomes); if(outs.length){ const p=document.createElement('p'); p.innerHTML='<em>Résultats attendus :</em>'; inner.appendChild(p); UL(inner, outs); }
+      });
     }
 
     function renderDeliverables(L, deliv){
-      const { inner } = makePage('deliverables'); H2(inner, L.deliverables);
+      const { inner } = makePage('deliverables');
+      H2(inner, L.deliverables);
       const grid=document.createElement('div'); grid.className='grid2';
       const a=document.createElement('div'); a.className='card'; a.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.in_scope}</div>`;
-      const b=document.createElement('div'); b.className='card'; b.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.out_scope || L.out_of_scope || 'Hors-périmètre'}</div>`;
-      const ulA=document.createElement('ul'); (deliv?.in||[]).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulA.appendChild(li); });
-      const ulB=document.createElement('ul'); (deliv?.out||[]).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulB.appendChild(li); });
+      const b=document.createElement('div'); b.className='card'; b.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.out_scope}</div>`;
+      const ulA=document.createElement('ul'); safeArr(deliv?.in).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulA.appendChild(li); });
+      const ulB=document.createElement('ul'); safeArr(deliv?.out).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulB.appendChild(li); });
       a.appendChild(ulA); b.appendChild(ulB); grid.appendChild(a); grid.appendChild(b); inner.appendChild(grid);
-      if(!(deliv?.in||[]).length && !(deliv?.out||[]).length) P(inner, (document.documentElement.lang==='en') ? "Detail inclusions/exclusions…" : "Détaillez l’inclus et le hors-périmètre…");
     }
 
     function renderTimeline(L, timeline){
-      const { inner } = makePage('timeline'); H2(inner, L.timeline);
-      if((timeline?.milestones||[]).length){
-        const grid=document.createElement('div'); grid.className='grid2';
-        timeline.milestones.forEach(ms=>{
-          const c=document.createElement('div'); c.className='card';
-          c.innerHTML = `<div><strong>${safeStr(ms.title,'Étape')}</strong></div><div class="muted">${safeStr(ms.dateOrWeek || ms.date || ms.duration || '', '')}</div>`;
-          if(ms.notes){ const p=document.createElement('p'); p.textContent=ms.notes; c.appendChild(p); }
-          grid.appendChild(c);
-        });
-        inner.appendChild(grid);
-      }else{
-        P(inner, (document.documentElement.lang==='en') ? "Sketch the timeline with key milestones…" : "Esquissez le planning avec les jalons clés…");
-      }
+      const { inner } = makePage('timeline');
+      H2(inner, L.timeline);
+      const grid=document.createElement('div'); grid.className='grid2';
+      safeArr(timeline?.milestones).forEach(ms=>{
+        const c=document.createElement('div'); c.className='card';
+        c.innerHTML = `<div><strong>${safeStr(ms.title,'Étape')}</strong></div><div class="muted">${safeStr(ms.dateOrWeek || ms.date || ms.duration || '', '')}</div>`;
+        if(ms.notes){ const p=document.createElement('p'); p.textContent=ms.notes; c.appendChild(p); }
+        grid.appendChild(c);
+      });
+      inner.appendChild(grid);
     }
 
     function renderPricing(L, pr, currencyFallback){
-      const { inner } = makePage('pricing'); H2(inner, L.pricing);
+      const { inner } = makePage('pricing');
+      H2(inner, L.pricing);
       const currency=pr?.currency||currencyFallback||'EUR';
       const meta=document.createElement('div'); meta.className='muted'; meta.style.margin='-6px 0 8px';
-      meta.innerHTML = `${L.price_model}: <span class="pill">${safeStr(pr?.model,'forfait')}</span>`; inner.appendChild(meta);
+      meta.innerHTML = `${L.price_model}: <span class="pill">${safeStr(pr?.model,'forfait')}</span>`;
+      inner.appendChild(meta);
 
       if(Array.isArray(pr?.items) && pr.items.length){
         const table=document.createElement('table');
@@ -785,32 +870,35 @@
     }
 
     function renderAssumptions(L, asmp){
-      const { inner } = makePage('assumptions'); H2(inner, L.assumptions);
-      if((asmp?.paragraphs||[]).length) asmp.paragraphs.forEach(p=>P(inner,p));
-      else P(inner, (document.documentElement.lang==='en') ? "List assumptions/risks…" : "Listez les hypothèses/risques…");
+      const { inner } = makePage('assumptions');
+      H2(inner, L.assumptions);
+      safeArr(asmp?.paragraphs).forEach(p=>P(inner, p));
     }
     function renderNext(L, next){
-      const { inner } = makePage('next'); H2(inner, L.next);
-      if((next?.paragraphs||[]).length) next.paragraphs.forEach(p=>P(inner,p));
-      else P(inner, (document.documentElement.lang==='en') ? "Suggest next steps…" : "Suggérez les prochaines étapes…");
+      const { inner } = makePage('next');
+      H2(inner, L.next);
+      safeArr(next?.paragraphs).forEach(p=>P(inner, p));
     }
 
-    function allSections(L){
+    function buildTOCList(L){
       return [
-        { id:'s_letter', title:L.letter, render:()=>renderLetter(L, spec.letter) },
-        { id:'s_executive', title:L.executive, render:()=>renderExecutive(L, spec.executive_summary) },
-        { id:'s_objectives', title:L.objectives, render:()=>renderObjectives(L, spec.objectives) },
-        { id:'s_approach', title:L.approach, render:()=>renderApproach(L, spec.approach) },
-        { id:'s_deliverables', title:L.deliverables, render:()=>renderDeliverables(L, spec.deliverables) },
-        { id:'s_timeline', title:L.timeline, render:()=>renderTimeline(L, spec.timeline) },
-        { id:'s_pricing', title:L.pricing, render:()=>renderPricing(L, spec.pricing, spec.meta?.currency) },
-        { id:'s_assumptions', title:L.assumptions, render:()=>renderAssumptions(L, spec.assumptions) },
-        { id:'s_next', title:L.next, render:()=>renderNext(L, spec.next_steps) },
+        { id:'s_letter', title:L.letter, present: safeArr(spec.letter?.body_paragraphs||spec.letter?.paragraphs).length || spec.letter?.greeting||spec.letter?.closing||spec.letter?.signature },
+        { id:'s_executive', title:L.executive, present: safeArr(spec.executive_summary?.paragraphs).length },
+        { id:'s_objectives', title:L.objectives, present: safeArr(spec.objectives?.bullets).length },
+        { id:'s_approach', title:L.approach, present: safeArr(spec.approach?.phases).length },
+        { id:'s_deliverables', title:L.deliverables, present: (spec.deliverables && (safeArr(spec.deliverables.in).length || safeArr(spec.deliverables.out).length)) },
+        { id:'s_timeline', title:L.timeline, present: safeArr(spec.timeline?.milestones).length },
+        { id:'s_pricing', title:L.pricing, present: (spec.pricing && (spec.pricing.items?.length || spec.pricing.price!=null)) },
+        { id:'s_assumptions', title:L.assumptions, present: safeArr(spec.assumptions?.paragraphs).length },
+        { id:'s_next', title:L.next, present: safeArr(spec.next_steps?.paragraphs).length },
       ];
     }
 
     function renderSpec(){
+      // 1) Style tokens & décor global
       applyStyleTokens(spec?.meta?.style || null);
+
+      // 2) Nettoyage + pages
       clearPages();
 
       const L=t[spec.meta?.lang||getLang()]||t.fr;
@@ -819,31 +907,47 @@
       const client=safeStr(spec.meta?.client,'Client');
       const date=safeStr(spec.meta?.date, fmtDate());
 
+      // Page de couverture
       renderCover(spec?.meta?.style, L, title, company, client, date);
 
-      const sections = allSections(L);
-      renderTOC(L, sections);
-      sections.forEach(s => s.render());
+      // TOC si contenu riche
+      const tocList = buildTOCList(L);
+      renderTOC(L, tocList);
+
+      // Corps (1 section = 1 page pour simplicité)
+      if (tocList[0].present) renderLetter(L, spec.letter);
+      if (tocList[1].present) renderExecutive(L, spec.executive_summary);
+      if (tocList[2].present) renderObjectives(L, spec.objectives);
+      if (tocList[3].present) renderApproach(L, spec.approach);
+      if (tocList[4].present) renderDeliverables(L, spec.deliverables);
+      if (tocList[5].present) renderTimeline(L, spec.timeline);
+      if (tocList[6].present) renderPricing(L, spec.pricing, spec.meta?.currency);
+      if (tocList[7].present) renderAssumptions(L, spec.assumptions);
+      if (tocList[8].present) renderNext(L, spec.next_steps);
+
       statusEl.textContent = (spec.meta?.lang==='en') ? 'Preview ready' : 'Aperçu prêt';
     }
     renderSpec();
 
+    /* Lang */
     function applyChatLang(){
       const en=(getLang()==='en');
       document.getElementById('composer').placeholder = en?'Type your message':'Écrivez votre message';
+      document.getElementById('openHistory').textContent = en?'History':'Historique';
+      document.getElementById('newChatBtn').textContent  = en?'New chat':'Nouvelle discussion';
     }
     applyChatLang();
     window.addEventListener('langchange', ()=>{
       spec.meta = { ...(spec.meta||{}), lang:getLang() };
-      persistActive(); applyChatLang(); renderSpec();
+      localStorage.setItem('pf_proposal', JSON.stringify(spec));
+      applyChatLang();
+      renderSpec();
     });
 
-    window.addEventListener('beforeunload', persistActive);
-
-    /* Raccourcis */
-    document.addEventListener('keydown', (e)=>{
-      if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='n'){ e.preventDefault(); newConversation(); }
-    });
+    /* Si dernier message user est sans réponse → relance */
+    if(messages.length && messages[messages.length-1].role==='user' && !chatBody.querySelector('.bubble-assistant')){
+      sendMessage(messages[messages.length-1].content);
+    }
   </script>
 </body>
 </html>
