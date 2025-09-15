@@ -14,12 +14,12 @@
 
       --assistant-bubble: color-mix(in hsl, var(--panel) 86%, transparent);
       --user-bubble: linear-gradient(135deg, var(--accent), var(--accent2));
-      --user-ink: #ffffff;
+      --user-ink:#fff;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0;height:100vh;overflow:hidden;
+      margin:0; height:100vh; overflow:hidden;
       background:linear-gradient(180deg,var(--bg),#eef3ff);
       font-family:Inter,system-ui,sans-serif;color:var(--ink)
     }
@@ -31,14 +31,27 @@
     .brand{display:flex;gap:10px;align-items:center;font-weight:800;cursor:pointer}
     .spark{width:22px;height:22px;border-radius:6px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd)}
     .btn{border:1px solid var(--stroke);background:var(--panel);border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow:var(--elev)}
-    .btn.danger{color:#b91c1c;border-color:#fecaca}
+    .btn.primary{background:var(--ink);color:#fff;border-color:#0000}
     .sel{border:1px solid var(--stroke);border-radius:10px;padding:7px 10px;background:var(--panel);color:var(--ink)}
     .avatar{width:32px;height:32px;border-radius:50%;border:1px solid var(--stroke);display:grid;place-items:center;font-weight:800;background:var(--panel);cursor:pointer;box-shadow:var(--elev)}
     .menu{position:absolute;top:54px;right:14px;background:var(--panel);border:1px solid var(--stroke);border-radius:12px;box-shadow:var(--elev);display:none;overflow:hidden}
     .menu a,.menu button{display:block;width:100%;text-align:left;padding:10px 12px;border:none;background:var(--panel);cursor:pointer;font-weight:600;color:var(--ink)}
     .menu a:hover,.menu button:hover{background:color-mix(in hsl, var(--panel) 80%, transparent)}
 
-    /* Layout */
+    /* Drawer historique (conversations) */
+    .drawer{position:fixed;left:0;top:64px;bottom:0;width:320px;background:var(--panel);
+      border-right:1px solid var(--stroke);box-shadow:var(--elev);
+      transform:translateX(-100%);transition:transform .25s ease;z-index:30;display:flex;flex-direction:column}
+    .drawer.open{transform:translateX(0)}
+    .drawer h3{margin:0;padding:12px;border-bottom:1px solid var(--stroke)}
+    .drawer-tools{display:flex;gap:8px;align-items:center;padding:10px;border-bottom:1px solid var(--stroke)}
+    .drawer-list{flex:1;overflow:auto;padding:8px}
+    .row-item{border:1px solid var(--stroke);border-radius:10px;padding:8px;margin:8px 0;display:flex;flex-direction:column;gap:6px;background:var(--panel)}
+    .row-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .row-actions{display:flex;gap:6px}
+    .row-actions button{border:1px solid var(--stroke);background:var(--panel);border-radius:8px;padding:4px 8px;font-weight:600;cursor:pointer}
+
+    /* Layout principal */
     .main{
       height:calc(100vh - 64px);
       display:grid;
@@ -54,37 +67,45 @@
     .chat{min-height:0; display:flex;flex-direction:column;}
     .chat-head{display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--stroke)}
     .chat-title{font-weight:800}
-    .chat-body{ padding:12px; overflow:auto; flex:1; min-height:0; }
-    .msg{ display:flex; gap:10px; margin:10px 0; align-items:flex-end; width:100%; }
+    .chat-head .btn{padding:6px 10px}
+    .chat-body{padding:12px; overflow:auto; flex:1; min-height:0;}
+    .msg{display:flex; gap:10px; margin:10px 0; align-items:flex-end; width:100%;}
     .msg.assistant{justify-content:flex-start}
     .msg.user{justify-content:flex-end}
-    .avatar-badge{ width:28px;height:28px;border-radius:50%; display:grid;place-items:center; font-weight:800;font-size:11px; border:1px solid var(--stroke); box-shadow:var(--elev); background:var(--panel); color:var(--ink); user-select:none; }
+    .avatar-badge{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:11px;border:1px solid var(--stroke);box-shadow:var(--elev);background:var(--panel); color:var(--ink); user-select:none;}
     .avatar-badge.bot{background:#111827; color:#fff; border-color:#111827}
     .avatar-badge.you{background:var(--accent); color:#fff; border-color:transparent}
-    .bubble{ max-width:min(100%, 560px); padding:10px 12px;border-radius:14px;border:1px solid var(--stroke); box-shadow:var(--elev); word-wrap:break-word;overflow-wrap:anywhere; }
+    .bubble{max-width:min(100%, 560px); padding:10px 12px;border-radius:14px;border:1px solid var(--stroke); box-shadow:var(--elev); word-wrap:break-word;overflow-wrap:anywhere;}
     .bubble-assistant{ background:var(--assistant-bubble); color:var(--ink); }
     .bubble-user{ background:var(--user-bubble); color:var(--user-ink); border-color:transparent; }
-    .chat-compose{ position:relative; padding:12px; border-top:1px solid var(--stroke); display:flex;align-items:flex-end;gap:16px; }
-    .input{ display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--stroke);
-      border-radius:14px;padding:8px;box-shadow:var(--elev); flex:1; }
+    .chat-compose{position:relative;padding:12px;border-top:1px solid var(--stroke);display:flex;align-items:flex-end;gap:16px;}
+    .logo-wrap{ position:relative; flex:0 0 auto; }
+    .input{display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--stroke); border-radius:14px;padding:8px;box-shadow:var(--elev); flex:1;}
     .input textarea{flex:1;resize:vertical;min-height:72px;border:none;outline:none;background:transparent;font:500 14px/1.4 Inter;color:var(--ink)}
     .send{width:40px;height:40px;border-radius:12px;border:1px solid var(--stroke);background:#0a1020;color:#fff;display:grid;place-items:center;cursor:pointer}
+    .logo-btn{width:34px;height:34px;border-radius:10px;border:1px solid #0002;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd); box-shadow:var(--elev);display:grid;place-items:center;cursor:pointer}
+    .logo-btn input{display:none}
+    .logo-tip{ position:absolute;left:0;bottom:44px;background:#111;color:#fff;font-size:12px;padding:6px 8px;border-radius:8px;display:none;white-space:nowrap }
+    .logo-wrap:hover .logo-tip{display:block}
     .typing{display:inline-flex;gap:5px;align-items:center}
     .dot{width:6px;height:6px;border-radius:50%;background:#8aa0c6;opacity:.7;animation:bounce 1.2s infinite}
     .dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
     @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
 
-    /* Preview */
-    .sheet-wrap{ flex:1; min-height:0; overflow:auto; display:flex;justify-content:center;align-items:flex-start; padding:12px 24px; }
-    .sheet{ position:relative; overflow:visible; width:var(--paper-w); max-width:100%; background:transparent; border:none; box-shadow:none; color:var(--ink); font-family: var(--font-body, Inter), system-ui, sans-serif; }
+    /* Aperçu */
+    .sheet-wrap{flex:1; min-height:0; overflow:auto; display:flex;justify-content:center;align-items:flex-start; padding:12px 24px;}
+    .sheet{position:relative; overflow:visible; width:var(--paper-w); max-width:100%; background:transparent; border:none; box-shadow:none; color:var(--ink); font-family: var(--font-body, Inter), system-ui, sans-serif;}
     .decor{position:fixed; inset:0; pointer-events:none; z-index:0}
     .content{position:relative; z-index:1}
-    .page{ position:relative; width:var(--paper-w); min-height:var(--paper-h); background:var(--panel); border:1px solid var(--stroke); border-radius:var(--radius, 12px); box-shadow:var(--elev); margin:0 0 16mm 0; overflow:hidden; }
-    .page:last-child{margin-bottom:0}
+
+    .page{
+      position:relative; width:var(--paper-w); min-height:var(--paper-h);
+      background:var(--panel); border:1px solid var(--stroke); border-radius:var(--radius, 12px); box-shadow:var(--elev);
+      margin:0 0 16mm 0; overflow:hidden; transform-style:preserve-3d; transition:transform .35s ease, box-shadow .35s ease;
+    }
+    .page:hover{ transform:translateZ(18px) rotateX(1.2deg) rotateY(-1.2deg); box-shadow:0 30px 60px rgba(10,16,32,.2); }
     .inner{ padding:22mm 18mm; position:relative; z-index:1; }
     .page .page-decor{ position:absolute; inset:0; pointer-events:none; z-index:0 }
-
-    /* Doc elements */
     .doc-header{display:grid;grid-template-columns:100px 1fr;gap:16px;align-items:center;margin-bottom:16px}
     .logo-box{width:100px;height:100px;border:1px solid var(--stroke);border-radius:var(--radius, 12px);display:grid;place-items:center;overflow:hidden;background:var(--panel)}
     .logo-box img{width:100%;height:100%;object-fit:contain}
@@ -112,34 +133,14 @@
     th{background:color-mix(in hsl, var(--panel) 85%, transparent)}
     tfoot td{font-weight:800}
 
-    /* Drawer Conversations */
-    .drawer{ position:fixed; top:64px; bottom:0; left:0; width:340px; max-width:90vw; background:var(--panel); border-right:1px solid var(--stroke); box-shadow:var(--elev); padding:12px; z-index:30; transform: translateX(-100%); transition: transform .25s ease; display:flex; flex-direction:column; gap:10px; overflow:auto; }
-    .drawer.open{ transform: translateX(0); }
-    .drawer h3{ margin:0 0 6px; }
-    .drawer-list{ display:grid; gap:8px; }
-    .row-item{ border:1px solid var(--stroke); border-radius:10px; padding:8px; background:var(--panel); display:flex; justify-content:space-between; gap:8px; align-items:flex-start; }
-    .row-main{flex:1; cursor:pointer}
-    .row-title{font-weight:700}
-    .row-sub{color:var(--muted); font-size:12px}
-    .row-actions{display:flex; gap:6px}
-    .tiny{border:1px solid var(--stroke); background:var(--panel); border-radius:8px; padding:6px 8px; cursor:pointer; font-weight:600; font-size:12px}
-    .tiny.danger{color:#b91c1c;border-color:#fecaca}
-    .row-item:hover{ background:color-mix(in hsl, var(--panel) 90%, transparent); }
-
-    /* Editables */
-    .editable{ outline: none; border-radius:8px; transition: box-shadow .15s ease, background .15s ease; }
-    .editable:focus{ background: #f7fbff; box-shadow: 0 0 0 3px #bfdbfe; }
-
     @media print{
-      .bar{display:none}
-      body{overflow:visible;height:auto;background:#fff}
-      .main{height:auto}
-      .sheet-wrap{overflow:visible;flex:auto;min-height:auto;padding:0}
+      .bar{display:none} body{overflow:visible;height:auto;background:#fff}
+      .main{height:auto} .sheet-wrap{overflow:visible;flex:auto;min-height:auto;padding:0}
       .page{page-break-after:always; box-shadow:none; margin:0; border:0; border-radius:0}
-      .page:last-child{page-break-after:auto}
-      .inner{padding:18mm 16mm}
+      .page:last-child{page-break-after:auto} .inner{padding:18mm 16mm}
       a[href]:after{content:""}
     }
+
     @media (max-width:1100px){
       .main{grid-template-columns:1fr}
       .page{width:100%;min-height:auto}
@@ -155,7 +156,7 @@
     <div class="left">
       <div class="brand" id="homeBtn"><div class="spark" aria-hidden="true"></div>PropoFlash</div>
       <button class="btn" id="openHistory">Historique</button>
-      <button class="btn" id="newConvBtn">Nouvelle discussion</button>
+      <button class="btn primary" id="newChatBtn">Nouvelle discussion</button>
       <span class="muted" id="status">Prêt</span>
     </div>
     <div class="right">
@@ -170,20 +171,33 @@
     </div>
   </div>
 
-  <!-- Drawer: conversations (masqué par défaut) -->
-  <div class="drawer" id="drawer" aria-hidden="true">
-    <h3>Discussions</h3>
-    <div class="drawer-list" id="convList"></div>
+  <!-- Drawer Historique -->
+  <div class="drawer" id="drawer">
+    <h3>Historique</h3>
+    <div class="drawer-tools">
+      <input id="renameInput" placeholder="Renommer la discussion…" style="flex:1;padding:8px;border:1px solid var(--stroke);border-radius:8px"/>
+      <button class="btn" id="applyRenameBtn">Renommer</button>
+      <button class="btn" id="deleteChatBtn">Supprimer</button>
+    </div>
+    <div class="drawer-list" id="histList"></div>
   </div>
 
   <!-- Main -->
   <div class="main">
     <!-- Chat -->
     <div class="panel chat">
-      <div class="chat-head"><strong class="chat-title">Chat</strong></div>
+      <div class="chat-head">
+        <strong class="chat-title" id="chatTitle">Chat</strong>
+      </div>
       <div class="chat-body" id="chatBody" aria-live="polite"></div>
 
       <div class="chat-compose">
+        <div class="logo-wrap">
+          <label class="logo-btn" title="Ajouter un logo (PNG/JPG/SVG)">
+            <input type="file" id="logoInput" accept="image/*,.svg"/>
+          </label>
+          <div class="logo-tip">Ajouter votre logo</div>
+        </div>
         <div class="input">
           <textarea id="composer" placeholder="Écrivez votre message"></textarea>
           <button class="send" id="sendBtn" title="Envoyer" aria-label="Envoyer">
@@ -203,7 +217,7 @@
   </div>
 
   <script>
-    /* ===== Supabase guard ===== */
+    /* Supabase (auth guard léger, inchangé) */
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -218,174 +232,92 @@
     }
     guard();
 
-    /* ===== Profil menu ===== */
+    /* Profil */
     const avatar=document.getElementById('avatar'), menu=document.getElementById('menu'), logoutBtn=document.getElementById('logoutBtn');
-    (async ()=>{
-      const { data:{ session } } = await sb.auth.getSession();
-      avatar.textContent = session?.user ? (session.user.email||'?')[0].toUpperCase() : 'U';
-    })();
+    (async ()=>{ const { data:{ session } } = await sb.auth.getSession(); avatar.textContent = session?.user ? (session.user.email||'?')[0].toUpperCase() : 'U'; })();
     avatar.onclick = (e)=>{ e.stopPropagation(); menu.style.display = menu.style.display==='block'?'none':'block'; };
     document.addEventListener('click', ()=> menu.style.display='none');
     logoutBtn.onclick = async ()=>{ await sb.auth.signOut(); location.reload(); };
-
-    /* ===== Nav ===== */
     document.getElementById('homeBtn').onclick=()=>location.href='index.html';
 
-    /* ===== Conversations store (localStorage) ===== */
-    const KEY_CONVS = 'pf_conversations';
-    const KEY_CURID = 'pf_current_cid';
+    /* Historique de discussions (par conversation) */
+    const drawer=document.getElementById('drawer'); const histList=document.getElementById('histList');
+    const openHistory=document.getElementById('openHistory'); const newChatBtn=document.getElementById('newChatBtn');
+    const renameInput=document.getElementById('renameInput'); const applyRenameBtn=document.getElementById('applyRenameBtn'); const deleteChatBtn=document.getElementById('deleteChatBtn');
 
-    function uid(){ return 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
-    function nowISO(){ return new Date().toISOString(); }
-
-    function getConvs(){ try{ return JSON.parse(localStorage.getItem(KEY_CONVS)||'[]'); }catch{return []} }
-    function setConvs(arr){ localStorage.setItem(KEY_CONVS, JSON.stringify(arr)); }
-    function getCurId(){ return localStorage.getItem(KEY_CURID)||null; }
-    function setCurId(id){ localStorage.setItem(KEY_CURID, id); }
-
-    function defaultSpec(){
-      return { meta:{ lang:getLang(), title:(getLang()==='en'?'Business Proposal':'Proposition commerciale'), currency:'EUR' }, sections:[] };
-    }
-    function defaultMemory(){ return { design_prefs:{}, facts:{}, pending_questions:[] }; }
-
-    // Migration depuis ancien stockage simple si aucun thread
-    (function migrateIfNeeded(){
-      const convs = getConvs();
-      if (convs.length) return;
-      let spec=null, messages=null, memory=null;
-      try{ spec = JSON.parse(localStorage.getItem('pf_proposal')||'null'); }catch{}
-      try{ messages = JSON.parse(localStorage.getItem('pf_chat')||'null'); }catch{}
-      try{ memory = JSON.parse(localStorage.getItem('pf_memory')||'null'); }catch{}
-      if (spec || messages || memory){
-        const id = uid();
-        const conv = {
-          id, title: (spec?.meta?.title)||'Proposition', createdAt: nowISO(), updatedAt: nowISO(),
-          spec: spec||defaultSpec(), memory: memory||defaultMemory(), messages: messages||[]
-        };
-        setConvs([conv]); setCurId(id);
-        // nettoyer anciens clés
-        localStorage.removeItem('pf_proposal'); localStorage.removeItem('pf_chat'); localStorage.removeItem('pf_memory'); localStorage.removeItem('pf_history');
-      } else {
-        // créer une conversation vierge
-        const id = uid();
-        const conv = { id, title:'Nouvelle discussion', createdAt: nowISO(), updatedAt: nowISO(), spec: defaultSpec(), memory: defaultMemory(), messages: [] };
-        setConvs([conv]); setCurId(id);
-      }
-    })();
-
-    // Etat courant (pointe sur la conversation active)
-    let spec, memory, messages, currentId;
-
-    function loadCurrent(){
-      const convs = getConvs(); currentId = getCurId() || (convs[0]?.id);
-      const cur = convs.find(c=>c.id===currentId) || convs[0];
-      if(!cur){ // sécurité
-        const id = uid(); const conv = { id, title:'Nouvelle discussion', createdAt: nowISO(), updatedAt: nowISO(), spec: defaultSpec(), memory: defaultMemory(), messages: [] };
-        setConvs([conv]); setCurId(id); return loadCurrent();
-      }
-      spec = JSON.parse(JSON.stringify(cur.spec||defaultSpec()));
-      memory = JSON.parse(JSON.stringify(cur.memory||defaultMemory()));
-      messages = JSON.parse(JSON.stringify(cur.messages||[]));
-      setCurId(cur.id);
-    }
-    function saveCurrent(){
-      const convs = getConvs();
-      const idx = convs.findIndex(c=>c.id===getCurId());
-      if (idx>=0){
-        convs[idx] = {
-          ...convs[idx],
-          title: spec?.meta?.title || convs[idx].title || 'Proposition',
-          spec, memory, messages, updatedAt: nowISO()
-        };
-        setConvs(convs);
-        renderConversations(); // refresh list
-      }
-    }
-
+    openHistory.onclick = ()=> { drawer.classList.toggle('open'); renderHistory(); if(activeChat) renameInput.value = activeChat.title||''; };
+    function loadAllChats(){ try{ return JSON.parse(localStorage.getItem('pf_convos')||'[]'); }catch{return []} }
+    function saveAllChats(list){ localStorage.setItem('pf_convos', JSON.stringify(list)); }
     function newConversation(){
-      const id = uid();
-      const title = (getLang()==='en'?'New conversation':'Nouvelle discussion');
-      const conv = { id, title, createdAt: nowISO(), updatedAt: nowISO(), spec: defaultSpec(), memory: defaultMemory(), messages: [] };
-      const convs = getConvs(); convs.unshift(conv); setConvs(convs); setCurId(id);
-      loadCurrent(); renderChat(); renderSpec(); renderConversations();
-      // focus composer
-      setTimeout(()=> document.getElementById('composer').focus(), 0);
+      const id=Date.now();
+      const title='Nouvelle proposition';
+      const convo={ id, title, date:new Date().toISOString(), spec: baseSpec(), messages:[], memory:{} };
+      const all=loadAllChats(); all.unshift(convo); saveAllChats(all);
+      activeChat=convo; hydrateFromActive(); renderHistory();
     }
-
-    function loadConversation(id){
-      setCurId(id); loadCurrent(); renderChat(); renderSpec(); renderConversations();
-    }
-
-    function renameConversation(id){
-      const convs = getConvs();
-      const c = convs.find(x=>x.id===id); if(!c) return;
-      const def = c.title || 'Proposition';
-      const label = (getLang()==='en'?'Rename conversation:':'Renommer la discussion :');
-      const nv = prompt(label, def);
-      if(nv && nv.trim()){
-        c.title = nv.trim();
-        // si on renomme la conversation courante, on peut aussi refléter dans spec.meta.title si vide
-        if (id===getCurId() && (!spec?.meta?.title || spec.meta.title===def)){
-          spec.meta = {...(spec.meta||{}), title: c.title };
-        }
-        c.updatedAt = nowISO();
-        setConvs(convs);
-        if(id===getCurId()){ saveCurrent(); renderSpec(); } else { renderConversations(); }
-      }
-    }
-
-    function deleteConversation(id){
-      const convs = getConvs();
-      const c = convs.find(x=>x.id===id); if(!c) return;
-      const label = (getLang()==='en'?'Delete this conversation? This cannot be undone.':'Supprimer cette discussion ? Action irréversible.');
-      if(!confirm(label)) return;
-      const next = convs.filter(x=>x.id!==id);
-      setConvs(next);
-      if(id===getCurId()){
-        if(next.length){ setCurId(next[0].id); }
-        else { newConversation(); return; }
-      }
-      loadCurrent(); renderChat(); renderSpec(); renderConversations();
-    }
-
-    /* ===== Drawer UI ===== */
-    const drawer=document.getElementById('drawer'); const convList=document.getElementById('convList');
-    document.getElementById('openHistory').onclick = ()=>{
-      drawer.classList.toggle('open');
-      drawer.setAttribute('aria-hidden', drawer.classList.contains('open') ? 'false' : 'true');
-    };
-    document.getElementById('newConvBtn').onclick = ()=> newConversation();
-
-    function renderConversations(){
-      const convs = getConvs();
-      convList.innerHTML='';
-      if(!convs.length){ convList.innerHTML='<div class="row-sub" style="padding:8px">Aucune discussion</div>'; return; }
-      convs.forEach(c=>{
-        const d = document.createElement('div'); d.className='row-item';
-        const main = document.createElement('div'); main.className='row-main';
-        const ttl  = document.createElement('div'); ttl.className='row-title'; ttl.textContent = c.title || 'Proposition';
-        if (c.id===getCurId()) ttl.style.textDecoration='underline';
-        const sub  = document.createElement('div'); sub.className='row-sub';
-        const dt   = new Date(c.updatedAt||c.createdAt||Date.now());
-        sub.textContent = dt.toLocaleString();
-        main.appendChild(ttl); main.appendChild(sub);
-        main.onclick = ()=> loadConversation(c.id);
-
-        const actions = document.createElement('div'); actions.className='row-actions';
-        const bRen = document.createElement('button'); bRen.className='tiny'; bRen.textContent='Renommer';
-        bRen.onclick = (e)=>{ e.stopPropagation(); renameConversation(c.id); };
-        const bDel = document.createElement('button'); bDel.className='tiny danger'; bDel.textContent='Supprimer';
-        bDel.onclick = (e)=>{ e.stopPropagation(); deleteConversation(c.id); };
-        actions.appendChild(bRen); actions.appendChild(bDel);
-
-        d.appendChild(main); d.appendChild(actions);
-        convList.appendChild(d);
+    function renderHistory(){
+      const all=loadAllChats(); histList.innerHTML='';
+      if(!all.length){ histList.innerHTML='<div class="muted" style="padding:8px">Aucune discussion</div>'; return; }
+      all.forEach(item=>{
+        const d=new Date(item.date);
+        const row=document.createElement('div'); row.className='row-item';
+        row.innerHTML = `
+          <div class="row-top">
+            <strong>${item.title||'Sans titre'}</strong>
+            <div class="row-actions">
+              <button data-act="select">Ouvrir</button>
+              <button data-act="rename">Renommer</button>
+              <button data-act="delete">Supprimer</button>
+            </div>
+          </div>
+          <span class="muted">${d.toLocaleString()}</span>`;
+        row.querySelector('[data-act="select"]').onclick=()=>{ activeChat=item; hydrateFromActive(); drawer.classList.remove('open'); };
+        row.querySelector('[data-act="rename"]').onclick=()=>{ const v=prompt('Nouveau titre', item.title||''); if(v!=null){ item.title=v.trim()||'Sans titre'; saveAllChats(all); if(activeChat?.id===item.id) activeChat.title=item.title; renderHistory(); updateTitleUI(); } };
+        row.querySelector('[data-act="delete"]').onclick=()=>{ if(confirm('Supprimer cette discussion ?')){ const idx=all.findIndex(x=>x.id===item.id); if(idx>=0){ all.splice(idx,1); saveAllChats(all); if(activeChat?.id===item.id){ activeChat=null; newConversation(); } renderHistory(); } } };
+        histList.appendChild(row);
       });
     }
+    newChatBtn.onclick = ()=>{ newConversation(); drawer.classList.remove('open'); };
+    applyRenameBtn.onclick = ()=>{ if(!activeChat) return; const all=loadAllChats(); const it=all.find(x=>x.id===activeChat.id); if(!it) return;
+      it.title = renameInput.value.trim() || it.title; saveAllChats(all); activeChat.title=it.title; updateTitleUI(); renderHistory(); };
+    deleteChatBtn.onclick = ()=>{ if(!activeChat) return; const all=loadAllChats(); const idx=all.findIndex(x=>x.id===activeChat.id); if(idx>=0){ if(confirm('Supprimer cette discussion ?')){ all.splice(idx,1); saveAllChats(all); activeChat=null; newConversation(); renderHistory(); } } };
 
-    /* ===== Etat courant init + rendu ===== */
-    loadCurrent(); renderConversations();
+    let activeChat=null;
 
+    function baseSpec(){
+      return {
+        meta:{ lang:getLang(), title:(getLang()==='en'?'Business Proposal':'Proposition commerciale'), currency:'EUR',
+          style:{ palette:{ primary:"#3B82F6", secondary:"#8B5CF6", surface:"#FFFFFF", ink:"#0A1020", muted:"#5C667A", stroke:"#E0E6F4", accentA:"#93C5FD", accentB:"#8B5CF6" },
+                  shapes:{ radius:"12px", shadow:"0 18px 48px rgba(10,16,32,.12)" },
+                  typography:{ heading:"Inter", body:"Inter" },
+                  decor_layers:[ {type:"glow", position:"top", opacity:.18, h:220, s:60, l:55, rotate:0, scale:1, blend:"normal"} ] } },
+        letter:{}, executive_summary:{}, objectives:{}, approach:{}, deliverables:{}, timeline:{}, pricing:{currency:'EUR'}, assumptions:{}, next_steps:{}
+      };
+    }
+
+    function hydrateFromActive(){
+      if(!activeChat) return;
+      spec = JSON.parse(JSON.stringify(activeChat.spec||baseSpec()));
+      messages = Array.isArray(activeChat.messages)?activeChat.messages.slice():[];
+      memory = activeChat.memory||{};
+      renderChat(); renderSpec(); updateTitleUI();
+    }
+    function saveCurrent(){
+      if(!activeChat) return;
+      activeChat.spec = spec; activeChat.messages = messages; activeChat.memory = memory; activeChat.date = new Date().toISOString();
+      const all=loadAllChats(); const idx=all.findIndex(x=>x.id===activeChat.id); if(idx>=0) all[idx]=activeChat; else all.unshift(activeChat);
+      saveAllChats(all);
+    }
+    function updateTitleUI(){ document.getElementById('chatTitle').textContent = activeChat?.title || 'Chat'; }
+
+    // Init premier démarrage
+    (function initConvo(){
+      const all=loadAllChats();
+      if(all.length){ activeChat=all[0]; hydrateFromActive(); }
+      else { newConversation(); }
+    })();
+
+    /* Chat */
     const chatBody=document.getElementById('chatBody');
     const composer=document.getElementById('composer');
     const sendBtn=document.getElementById('sendBtn');
@@ -394,102 +326,28 @@
     const decor=document.getElementById('decor');
     const sheetContent=document.getElementById('sheetContent');
 
-    // Consommer message d'accueil si présent (puis sauvegarder le thread)
-    (function consumeWelcome(){
-      const w = localStorage.getItem('pf_welcome_msg');
-      if(w){
-        messages.push({ role:'user', content:w });
-        localStorage.removeItem('pf_welcome_msg');
-        saveCurrent();
-      }
-    })();
+    let messages = []; let spec = baseSpec(); let memory = {};
 
     function scrollChat(){ chatBody.scrollTop = chatBody.scrollHeight; }
     function escapeHTML(s){ return String(s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[m])); }
 
-    /* Bulle chat */
     function bubble(role, html){
-      const row=document.createElement('div');
-      row.className='msg '+(role==='assistant'?'assistant':'user');
+      const row=document.createElement('div'); row.className='msg '+(role==='assistant'?'assistant':'user');
       const ava=document.createElement('div'); ava.className='avatar-badge '+(role==='assistant'?'bot':'you'); ava.textContent = (role==='assistant') ? 'PF' : 'ME';
       const bub=document.createElement('div'); bub.className='bubble '+(role==='assistant'?'bubble-assistant':'bubble-user'); bub.innerHTML=html;
       if(role==='assistant'){ row.appendChild(ava); row.appendChild(bub); } else { row.appendChild(bub); row.appendChild(ava); }
       chatBody.appendChild(row); scrollChat(); return row;
     }
 
-    /* Typing */
     let typingRow=null;
-    function showTyping(){
-      if(typingRow) return;
-      typingRow = document.createElement('div'); typingRow.className='msg assistant';
+    function showTyping(){ if(typingRow) return; typingRow = document.createElement('div'); typingRow.className='msg assistant';
       const ava=document.createElement('div'); ava.className='avatar-badge bot'; ava.textContent='PF';
-      const bub=document.createElement('div'); bub.className='bubble bubble-assistant';
-      bub.innerHTML=`<span class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
+      const bub=document.createElement('div'); bub.className='bubble bubble-assistant'; bub.innerHTML=`<span class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
       typingRow.appendChild(ava); typingRow.appendChild(bub); chatBody.appendChild(typingRow); scrollChat();
     }
     function hideTyping(){ if(typingRow){ typingRow.remove(); typingRow=null; } }
 
-    function renderChat(){
-      chatBody.innerHTML='';
-      messages.forEach(m=> bubble(m.role, escapeHTML(m.content).replace(/\n/g,'<br/>')));
-    }
-    renderChat();
-
-    /* ===== Envoi message → API ===== */
-    async function sendMessage(text){
-      const content=text.trim(); if(!content) return;
-      messages.push({ role:'user', content }); saveCurrent();
-      bubble('user', escapeHTML(content).replace(/\n/g,'<br/>'));
-      composer.value=''; statusEl.textContent='Rédaction…';
-
-      try{
-        showTyping();
-        const resp = await fetch('/api/chat', {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ message: content, proposalSpec: spec, history: messages.slice(-12), memory })
-        });
-        const data = await resp.json();
-        hideTyping();
-
-        const reply = data.reply || (getLang()==='en'?'I could not structure the proposal.':'Je n’ai pas pu structurer la proposition.');
-        messages.push({ role:'assistant', content: reply }); saveCurrent();
-        bubble('assistant', escapeHTML(reply).replace(/\n/g,'<br/>'));
-
-        // 1) Fusionner proposalSpec
-        if(data.proposalSpec){
-          const next = { ...(spec||{}), ...(data.proposalSpec||{}) };
-          next.meta = { ...(spec?.meta||{}), ...((data.proposalSpec||{}).meta||{}) };
-          if(next.meta){
-            next.meta.style = { ...((spec?.meta||{}).style||{}), ...((next.meta||{}).style||{}) };
-          }
-          spec = next;
-        }
-
-        // 2) Fusionner designSpecDiff → meta.style
-        if(data.designSpecDiff){
-          spec.meta = spec.meta || {};
-          spec.meta.style = { ...(spec.meta.style||{}), ...(data.designSpecDiff||{}) };
-        }
-
-        // 3) Mémoire ↑
-        if(data.memoryUpdate){
-          memory = {
-            design_prefs: { ...(memory.design_prefs||{}), ...(data.memoryUpdate.design_prefs||{}) },
-            facts: { ...(memory.facts||{}), ...(data.memoryUpdate.facts||{}) },
-            pending_questions: Array.from(new Set([ ...(memory.pending_questions||[]), ...((data.memoryUpdate.pending_questions||[]).filter(Boolean)) ]))
-          };
-        }
-
-        // Sauvegarde thread + rendu
-        saveCurrent();
-        renderSpec();
-        statusEl.textContent='Prêt';
-      }catch(e){
-        hideTyping();
-        statusEl.textContent='Erreur réseau';
-        bubble('assistant', '<em>Erreur réseau. Réessayez.</em>');
-      }
-    }
+    function renderChat(){ chatBody.innerHTML=''; messages.forEach(m=> bubble(m.role, escapeHTML(m.content).replace(/\n/g,'<br/>'))); scrollChat(); }
 
     composer.addEventListener('keydown', (e)=>{
       if(e.isComposing || e.keyCode===229) return;
@@ -497,30 +355,111 @@
     });
     sendBtn.onclick = ()=> sendMessage(composer.value);
 
-    /* i18n chat placeholders */
-    function applyChatLang(){
-      const en=(getLang()==='en');
-      composer.placeholder = en?'Type your message':'Écrivez votre message';
-      // Met à jour titre par défaut si vierge
-      if(!spec.meta?.title || spec.meta.title==='Nouvelle discussion'){
-        spec.meta = {...(spec.meta||{}), title: (en?'Business Proposal':'Proposition commerciale')};
-        saveCurrent(); renderConversations();
+    async function callChatAPI(content){
+      const resp = await fetch('/api/chat', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ message: content, proposalSpec: spec, history: messages.slice(-12), memory })
+      });
+      const raw = await resp.text(); let data = {};
+      try { data = JSON.parse(raw||'{}'); } catch { data = {}; }
+      if(!resp.ok) throw new Error(data?.error || `HTTP ${resp.status}`);
+      return data;
+    }
+    async function callStyleAPI(content){
+      const resp = await fetch('/api/style', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ userText: content, currentDesign: (spec?.meta?.style||{}) })
+      });
+      const raw = await resp.text(); let data={};
+      try { data = JSON.parse(raw||'{}'); } catch { data={}; }
+      if(!resp.ok) throw new Error(data?.error || `HTTP ${resp.status}`);
+      return data;
+    }
+
+    async function sendMessage(text){
+      const content=text.trim(); if(!content) return;
+      messages.push({ role:'user', content }); saveCurrent();
+      bubble('user', escapeHTML(content).replace(/\n/g,'<br/>'));
+      composer.value=''; statusEl.textContent='Rédaction…'; showTyping();
+
+      try{
+        // Lance chat & style en parallèle
+        const [chatRes, styleRes] = await Promise.allSettled([ callChatAPI(content), callStyleAPI(content) ]);
+        hideTyping();
+
+        // CHAT
+        if(chatRes.status==='fulfilled'){
+          const data = chatRes.value;
+          const reply = data.reply || (getLang()==='en'?'I could not structure the proposal.':'Je n’ai pas pu structurer la proposition.');
+          messages.push({ role:'assistant', content: reply }); bubble('assistant', escapeHTML(reply).replace(/\n/g,'<br/>'));
+
+          if(data.proposalSpec){
+            const next = { ...(spec||{}), ...(data.proposalSpec||{}) };
+            next.meta = { ...(spec?.meta||{}), ...((data.proposalSpec||{}).meta||{}) };
+            if(next.meta){ next.meta.style = { ...((spec?.meta||{}).style||{}), ...((next.meta||{}).style||{}) }; }
+            spec = next;
+          }
+          if(data.designSpecDiff){
+            spec.meta = spec.meta || {};
+            spec.meta.style = { ...(spec.meta.style||{}), ...(data.designSpecDiff||{}) };
+          }
+          if(data.memoryUpdate){
+            memory = {
+              design_prefs: { ...(memory.design_prefs||{}), ...(data.memoryUpdate.design_prefs||{}) },
+              facts: { ...(memory.facts||{}), ...(data.memoryUpdate.facts||{}) },
+              pending_questions: Array.from(new Set([ ...(memory.pending_questions||[]), ...((data.memoryUpdate.pending_questions||[]).filter(Boolean)) ]))
+            };
+          }
+        }else{
+          bubble('assistant', `<em>Erreur API chat: ${escapeHTML(chatRes.reason?.message||chatRes.reason)}</em>`);
+        }
+
+        // STYLE
+        if(styleRes.status==='fulfilled'){
+          const s = styleRes.value;
+          if(s?.designSpecDiff){
+            spec.meta = spec.meta || {};
+            spec.meta.style = { ...(spec.meta.style||{}), ...(s.designSpecDiff||{}) };
+          }
+        }else{
+          console.warn('Style API error:', styleRes.reason);
+        }
+
+        saveCurrent(); renderSpec();
+        statusEl.textContent='Prêt';
+      }catch(e){
+        hideTyping(); statusEl.textContent='Erreur réseau';
+        bubble('assistant', `<em>Erreur: ${escapeHTML(String(e?.message||e))}</em>`);
+        console.error('sendMessage error:', e);
       }
     }
-    applyChatLang();
-    window.addEventListener('langchange', ()=>{
-      spec.meta = { ...(spec.meta||{}), lang:getLang() };
-      saveCurrent();
-      applyChatLang();
-      renderSpec();
+
+    /* Upload logo */
+    const logoInput = document.getElementById('logoInput');
+    logoInput.addEventListener('change', async (e)=>{
+      const file = e.target.files?.[0]; if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ()=>{ const url = reader.result; spec.meta = { ...(spec.meta||{}), style:{ ...(spec.meta?.style||{}), logoDataUrl: url } }; saveCurrent(); renderSpec(); };
+      reader.readAsDataURL(file); e.target.value='';
     });
 
-    /* ====== THEME (tokens → CSS variables + décor) ====== */
+    /* Libellés */
+    const t = {
+      fr:{ title:"Proposition commerciale", to:"Pour", from:"Émis par", date:"Date", letter:"Lettre d’introduction", executive:"Résumé exécutif", objectives:"Objectifs", approach:"Approche & phasage", deliverables:"Livrables", in_scope:"Inclus", out_scope:"Hors-périmètre", timeline:"Planning", pricing:"Tarification", assumptions:"Hypothèses / Risques", next:"Prochaines étapes", price_model:"Modèle", terms:"Conditions", toc:"Sommaire" },
+      en:{ title:"Business Proposal", to:"To", from:"Issued by", date:"Date", letter:"Cover Letter", executive:"Executive Summary", objectives:"Objectives", approach:"Approach & Phasing", deliverables:"Deliverables", in_scope:"In scope", out_scope:"Out of scope", timeline:"Timeline", pricing:"Pricing", assumptions:"Assumptions / Risks", next:"Next Steps", price_model:"Model", terms:"Terms", toc:"Table of Contents" }
+    };
+
+    function safeArr(v){ return Array.isArray(v)?v:[]; }
+    function safeStr(v,fb=''){ return (v==null?'':String(v)).trim() || fb; }
+    function fmtDate(d){ try{ const dt=d?new Date(d):new Date(); return dt.toLocaleDateString(document.documentElement.lang||getLang(), {year:'numeric',month:'short',day:'2-digit'});}catch{return ''} }
+    function money(n,c){ try{ return new Intl.NumberFormat(document.documentElement.lang||getLang(),{style:'currency',currency:c||'EUR'}).format(Number(n||0)); }catch{ return String(n||0)+' '+(c||'€') } }
+
+    /* THEME */
     function applyStyleTokens(style){
       const palette = {
         primary: "#3B82F6", secondary: "#8B5CF6", surface: "#FFFFFF",
         ink: "#0A1020", muted: "#5C667A", stroke: "#E0E6F4",
-        accentA: "#60A5FA", accentB: "#93C5FD",
+        accentA: "#93C5FD", accentB:"#8B5CF6",
         ...(style?.palette||{})
       };
       const shapes = { radius:"12px", shadow:"0 18px 48px rgba(10,16,32,.12)", ...(style?.shapes||{}) };
@@ -537,7 +476,7 @@
       sheet.style.setProperty('--font-body', typo.body);
       sheet.style.setProperty('--font-heading', typo.heading);
 
-      renderDecorLayers(style?.decor_layers||[]);
+      renderDecorLayers(style?.decor_layers||[], palette);
     }
 
     function hsla(h,s,l,a){ return `hsla(${Number(h||0)},${Number(s||0)}%,${Number(l||0)}%,${Number(a||1)})`; }
@@ -551,19 +490,16 @@
       };
       return map[pos] || map.center;
     }
-    function renderDecorLayers(layers){
+    function renderDecorLayers(layers, palette){
       decor.innerHTML = '';
       if(!layers?.length) return;
       layers.forEach((L,i)=>{
         const layer = document.createElement('div');
-        layer.style.position='absolute';
-        layer.style.pointerEvents='none';
-        layer.style.mixBlendMode = (L.blend||'normal');
-        const pos = pickCorner(L.position);
-        Object.assign(layer.style, pos);
-        const rot = Number(L.rotate||0);
-        const scale = Math.max(0.25, Number(L.scale||1));
+        layer.style.position='absolute'; layer.style.pointerEvents='none'; layer.style.mixBlendMode = (L.blend||'normal');
+        const pos = pickCorner(L.position); Object.assign(layer.style, pos);
+        const rot = Number(L.rotate||0); const scale = Math.max(0.25, Number(L.scale||1));
         const color = hsla(L.h ?? 220, L.s ?? 60, L.l ?? 55, L.opacity ?? 0.18);
+
         switch((L.type||'').toLowerCase()){
           case 'glow': {
             const size = 900*scale; layer.style.width = layer.style.height = size+'px';
@@ -572,8 +508,8 @@
             layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`; break;
           }
           case 'gradient_blob': {
-            const w = 1000*scale, h = 700*scale;
-            layer.style.width = w+'px'; layer.style.height = h+'px'; layer.style.borderRadius='40%'; layer.style.filter='blur(24px)';
+            const w = 1000*scale, h = 700*scale; layer.style.width = w+'px'; layer.style.height = h+'px';
+            layer.style.borderRadius='40%'; layer.style.filter='blur(24px)';
             layer.style.background = `conic-gradient(from 180deg, ${color}, transparent 60%)`;
             layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`; break;
           }
@@ -586,8 +522,7 @@
             const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
             svg.setAttribute('viewBox','0 0 100 100'); svg.setAttribute('width','100%'); svg.setAttribute('height','100%');
             const defs = document.createElementNS(svg.namespaceURI,'defs');
-            const pat = document.createElementNS(svg.namespaceURI,'pattern');
-            pat.setAttribute('id',`p-${i}`); pat.setAttribute('width','10'); pat.setAttribute('height','10'); pat.setAttribute('patternUnits','userSpaceOnUse');
+            const pat = document.createElementNS(svg.namespaceURI,'pattern'); pat.setAttribute('id',`p-${i}`); pat.setAttribute('width','10'); pat.setAttribute('height','10'); pat.setAttribute('patternUnits','userSpaceOnUse');
             const path = document.createElementNS(svg.namespaceURI,'path'); path.setAttribute('d','M10 0 L0 0 0 10');
             path.setAttribute('fill','none'); path.setAttribute('stroke', color); path.setAttribute('stroke-width','0.4');
             pat.appendChild(path); defs.appendChild(pat); svg.appendChild(defs);
@@ -597,16 +532,12 @@
           }
           case 'dots': {
             const size = 1400*scale; layer.style.width = size+'px'; layer.style.height = size+'px';
-            const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-            svg.setAttribute('viewBox','0 0 100 100'); svg.setAttribute('width','100%'); svg.setAttribute('height','100%');
+            const svg = document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.setAttribute('viewBox','0 0 100 100'); svg.setAttribute('width','100%'); svg.setAttribute('height','100%');
             const defs = document.createElementNS(svg.namespaceURI,'defs');
-            const pat = document.createElementNS(svg.namespaceURI,'pattern');
-            pat.setAttribute('id',`d-${i}`); pat.setAttribute('width','6'); pat.setAttribute('height','6'); pat.setAttribute('patternUnits','userSpaceOnUse');
-            const circle = document.createElementNS(svg.namespaceURI,'circle');
-            circle.setAttribute('cx','1.5'); circle.setAttribute('cy','1.5'); circle.setAttribute('r','0.6'); circle.setAttribute('fill', color);
+            const pat = document.createElementNS(svg.namespaceURI,'pattern'); pat.setAttribute('id',`d-${i}`); pat.setAttribute('width','6'); pat.setAttribute('height','6'); pat.setAttribute('patternUnits','userSpaceOnUse');
+            const circle = document.createElementNS(svg.namespaceURI,'circle'); circle.setAttribute('cx','1.5'); circle.setAttribute('cy','1.5'); circle.setAttribute('r','0.6'); circle.setAttribute('fill', color);
             pat.appendChild(circle); defs.appendChild(pat); svg.appendChild(defs);
-            const rect = document.createElementNS(svg.namespaceURI,'rect');
-            rect.setAttribute('width','100%'); rect.setAttribute('height','100%'); rect.setAttribute('fill',`url(#d-${i})`);
+            const rect = document.createElementNS(svg.namespaceURI,'rect'); rect.setAttribute('width','100%'); rect.setAttribute('height','100%'); rect.setAttribute('fill',`url(#d-${i})`);
             svg.appendChild(rect); layer.appendChild(svg);
             layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`; break;
           }
@@ -621,7 +552,7 @@
       });
     }
 
-    /* Pages & rendu doc */
+    /* Pages */
     const sheetPages = [];
     function clearPages(){ sheetContent.innerHTML=''; sheetPages.length=0; }
     function makePage(kind='default'){
@@ -632,42 +563,20 @@
       sheetContent.appendChild(page); sheetPages.push({page, inner, pageDecor});
       return {page, inner, pageDecor};
     }
-    function H1(inner, text){ const el=document.createElement('div'); el.className='h1'; el.textContent=text; inner.appendChild(el); return el; }
-    function H2(inner, text){ const el=document.createElement('div'); el.className='h2'; el.textContent=text; inner.appendChild(el); return el; }
+    function H1(inner, text){ const el=document.createElement('div'); el.className='h1'; el.textContent=text; inner.appendChild(el); }
+    function H2(inner, text){ const el=document.createElement('div'); el.className='h2'; el.textContent=text; inner.appendChild(el); }
     function HR(inner){ inner.appendChild(Object.assign(document.createElement('div'),{className:'hr'})); }
-    function P(inner, text){ const p=document.createElement('p'); p.textContent=text; inner.appendChild(p); return p; }
-    function UL(inner, arr){ if(!arr?.length) return; const ul=document.createElement('ul'); arr.forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ul.appendChild(li); }); inner.appendChild(ul); return ul; }
-    function safeArr(v){ return Array.isArray(v)?v:[]; }
-    function safeStr(v,fb=''){ return (v==null?'':String(v)).trim() || fb; }
-    function fmtDate(d){ try{ const dt=d?new Date(d):new Date(); return dt.toLocaleDateString(document.documentElement.lang||getLang(), {year:'numeric',month:'short',day:'2-digit'});}catch{return ''} }
-    function money(n,c){ try{ return new Intl.NumberFormat(document.documentElement.lang||getLang(),{style:'currency',currency:c||'EUR'}).format(Number(n||0)); }catch{ return String(n||0)+' '+(c||'€') } }
-
-    const t = {
-      fr:{ title:"Proposition commerciale", to:"Pour", from:"Émis par", date:"Date", letter:"Lettre d’introduction", executive:"Résumé exécutif", objectives:"Objectifs", approach:"Approche & phasage", deliverables:"Livrables", in_scope:"Inclus", out_scope:"Hors-périmètre", timeline:"Planning", pricing:"Tarification", assumptions:"Hypothèses / Risques", next:"Prochaines étapes", price_model:"Modèle", terms:"Conditions", toc:"Sommaire" },
-      en:{ title:"Business Proposal", to:"To", from:"Issued by", date:"Date", letter:"Cover Letter", executive:"Executive Summary", objectives:"Objectives", approach:"Approach & Phasing", deliverables:"Deliverables", in_scope:"In scope", out_scope:"Out of scope", timeline:"Timeline", pricing:"Pricing", assumptions:"Assumptions / Risks", next:"Next Steps", price_model:"Model", terms:"Terms", toc:"Table of Contents" }
-    };
-
-    function bindEditable(el, getter, setter){
-      el.classList.add('editable');
-      el.contentEditable = "true";
-      el.addEventListener('blur', ()=>{
-        const val = (el.textContent||'').trim();
-        setter(val);
-        saveCurrent();
-        renderSpec();
-      });
-      const init = getter(); if(init) el.textContent = init;
-    }
+    function P(inner, text){ const p=document.createElement('p'); p.textContent=text; inner.appendChild(p); }
+    function UL(inner, arr){ if(!arr?.length) return; const ul=document.createElement('ul'); arr.forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ul.appendChild(li); }); inner.appendChild(ul); }
 
     function pageAccentBar(pageDecor, colorA, colorB){
       const band = document.createElement('div');
-      band.style.position='absolute'; band.style.inset='-10% -10% auto -10%'; band.style.height='40%';
+      band.style.position='absolute'; band.style.inset='-12% -12% auto -12%'; band.style.height='42%';
       band.style.background = `linear-gradient(135deg, ${colorA}, ${colorB})`;
-      band.style.opacity = .25; band.style.transform = 'skewY(-8deg)';
-      pageDecor.appendChild(band);
+      band.style.opacity = .25; band.style.transform = 'skewY(-8deg)'; pageDecor.appendChild(band);
     }
 
-    function renderCover(style, L, title, company, client, date, allowEdit=false){
+    function renderCover(style, L, title, company, client, date){
       const { inner, pageDecor } = makePage('cover');
       const pA = getComputedStyle(sheet).getPropertyValue('--accent').trim() || '#3B82F6';
       const pB = getComputedStyle(sheet).getPropertyValue('--accent2').trim() || '#8B5CF6';
@@ -680,113 +589,99 @@
       bi.innerHTML=`<div class="company">${company}</div><div class="muted">${date}</div>`;
       head.appendChild(logoBox); head.appendChild(bi); inner.appendChild(head);
 
-      const h1 = H1(inner, title);
+      H1(inner, title);
       const meta=document.createElement('div'); meta.className='meta';
-      meta.innerHTML = `${L.to}: <span class="tag" id="clTag">${client}</span> &nbsp;•&nbsp; ${L.from}: <span class="tag" id="coTag">${company}</span>`;
+      meta.innerHTML = `${L.to}: <span class="tag">${client}</span> &nbsp;•&nbsp; ${L.from}: <span class="tag">${company}</span>`;
       inner.appendChild(meta);
 
-      if(allowEdit){
-        bindEditable(h1, ()=>spec.meta?.title||'', v=>{ spec.meta = {...(spec.meta||{}), title: v||L.title }; });
-        const cl = meta.querySelector('#clTag');
-        const co = meta.querySelector('#coTag');
-        bindEditable(cl, ()=>spec.meta?.client||'Client', v=>{ spec.meta = {...(spec.meta||{}), client: v||'Client' }; });
-        bindEditable(co, ()=>spec.meta?.company||'Votre société', v=>{ spec.meta = {...(spec.meta||{}), company: v||'Votre société' }; });
-      }
-
       const band=document.createElement('div'); band.className='band';
-      band.textContent = (L===t.fr) ? "Aperçu généré automatiquement. Complétez via le chat ou en éditant les zones." : "Auto-generated preview. Complete via chat or inline edits.";
+      band.textContent = (L===t.fr) ? "Aperçu généré automatiquement selon votre brief." : "Preview auto-generated from your brief.";
       inner.appendChild(band);
     }
 
     function renderTOC(L, sections){
-      const present = sections.filter(s=>s.present);
-      if(present.length<3) return;
       const { inner } = makePage('toc');
       H2(inner, L.toc);
       const toc=document.createElement('div'); toc.className='toc';
       toc.innerHTML = `<b>${L.toc}</b>`;
-      present.forEach(s=>{ const a=document.createElement('a'); a.textContent=s.title; a.href='#'+s.id; toc.appendChild(a); });
+      sections.forEach(s=>{ const a=document.createElement('a'); a.textContent=s.title; a.href='#'+s.id; toc.appendChild(a); });
       inner.appendChild(toc);
     }
 
-    function renderLetter(L, letter, allowEdit=false){
-      const { inner } = makePage('letter');
-      const h = H2(inner, L.letter);
-      if(allowEdit) bindEditable(h, ()=>L.letter, ()=>{});
-      const g = P(inner, safeStr(letter?.greeting,''));
-      const arr = letter?.body_paragraphs?.length ? letter.body_paragraphs : (letter?.paragraphs||[]);
-      if(arr?.length){ arr.forEach(p=>P(inner, p)); }
-      else {
-        const p = P(inner, (L===t.fr)?'Cliquez pour rédiger votre intro…':'Click to write your intro…');
-        if(allowEdit) bindEditable(p, ()=>'', v=>{ const a = (spec.letter?.body_paragraphs)||[]; const next = a.slice(); next[0]=v; spec.letter = {...(spec.letter||{}), body_paragraphs: next }; });
+    function renderLetter(L, letter){
+      const { inner } = makePage('letter'); H2(inner, L.letter);
+      if(letter?.greeting || letter?.body_paragraphs?.length || letter?.paragraphs?.length || letter?.closing || letter?.signature){
+        if(letter?.greeting) P(inner, letter.greeting);
+        safeArr(letter?.body_paragraphs?.length?letter.body_paragraphs:letter?.paragraphs).forEach(p=>P(inner, p));
+        if(letter?.closing) P(inner, letter.closing);
+        if(letter?.signature) P(inner, letter.signature);
+      }else{
+        P(inner, (document.documentElement.lang==='en') ? "Write a friendly opening letter…" : "Rédigez une lettre d’introduction…");
       }
-      if(letter?.closing) P(inner, letter.closing);
-      if(letter?.signature) P(inner, letter.signature);
     }
 
-    function renderExecutive(L, exec, allowEdit=false){
-      const { inner } = makePage('executive');
-      const h = H2(inner, L.executive); if(allowEdit) bindEditable(h, ()=>L.executive, ()=>{});
-      const arr = safeArr(exec?.paragraphs);
-      if(arr.length){ arr.forEach(p=>P(inner, p)); }
-      else {
-        const p = P(inner, (L===t.fr)?'Résumé: bénéfices, preuves, approche en 3–4 lignes…':'Summary: benefits, proof, approach in 3–4 lines…');
-        if(allowEdit) bindEditable(p, ()=>'', v=>{ spec.executive_summary = { paragraphs: [v] }; });
-      }
+    function renderExecutive(L, exec){
+      const { inner } = makePage('executive'); H2(inner, L.executive);
+      if(safeArr(exec?.paragraphs).length){ safeArr(exec?.paragraphs).forEach(p=>P(inner, p)); }
+      else { P(inner, (document.documentElement.lang==='en') ? "Summarize the value proposition…" : "Résumez la proposition de valeur…"); }
     }
 
     function renderObjectives(L, obj){
-      const { inner } = makePage('objectives');
-      H2(inner, L.objectives);
-      UL(inner, obj?.bullets||[]);
+      const { inner } = makePage('objectives'); H2(inner, L.objectives);
+      if(safeArr(obj?.bullets).length) UL(inner, obj?.bullets||[]);
+      else P(inner, (document.documentElement.lang==='en') ? "List key objectives…" : "Listez les objectifs clés…");
     }
 
     function renderApproach(L, approach){
-      const { inner } = makePage('approach');
-      H2(inner, L.approach);
-      safeArr(approach?.phases).forEach((ph,i)=>{
-        const card=document.createElement('div'); card.className='card';
-        card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center">
-          <strong>Phase ${i+1} — ${safeStr(ph.title,'À confirmer')}</strong>
-          <span class="pill">${safeStr(ph.duration||'','')}</span></div>`;
-        inner.appendChild(card);
-        if(ph.description) P(inner, ph.description);
-        const acts=safeArr(ph.activities?.length?ph.activities:ph.steps); if(acts.length){ const p=document.createElement('p'); p.innerHTML='<em>Activités :</em>'; inner.appendChild(p); UL(inner, acts); }
-        const outs=safeArr(ph.outcomes); if(outs.length){ const p=document.createElement('p'); p.innerHTML='<em>Résultats attendus :</em>'; inner.appendChild(p); UL(inner, outs); }
-      });
+      const { inner } = makePage('approach'); H2(inner, L.approach);
+      if(safeArr(approach?.phases).length){
+        safeArr(approach?.phases).forEach((ph,i)=>{
+          const card=document.createElement('div'); card.className='card';
+          card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center">
+            <strong>Phase ${i+1} — ${safeStr(ph.title,'À confirmer')}</strong>
+            <span class="pill">${safeStr(ph.duration||'','')}</span></div>`;
+          inner.appendChild(card);
+          if(ph.description) P(inner, ph.description);
+          const acts=safeArr(ph.activities?.length?ph.activities:ph.steps); if(acts.length){ const p=document.createElement('p'); p.innerHTML='<em>Activités :</em>'; inner.appendChild(p); UL(inner, acts); }
+          const outs=safeArr(ph.outcomes); if(outs.length){ const p=document.createElement('p'); p.innerHTML='<em>Résultats attendus :</em>'; inner.appendChild(p); UL(inner, outs); }
+        });
+      }else{
+        P(inner, (document.documentElement.lang==='en') ? "Break the work into phases…" : "Découpez le travail en phases…");
+      }
     }
 
     function renderDeliverables(L, deliv){
-      const { inner } = makePage('deliverables');
-      H2(inner, L.deliverables);
+      const { inner } = makePage('deliverables'); H2(inner, L.deliverables);
       const grid=document.createElement('div'); grid.className='grid2';
       const a=document.createElement('div'); a.className='card'; a.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.in_scope}</div>`;
       const b=document.createElement('div'); b.className='card'; b.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.out_scope}</div>`;
       const ulA=document.createElement('ul'); safeArr(deliv?.in).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulA.appendChild(li); });
       const ulB=document.createElement('ul'); safeArr(deliv?.out).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulB.appendChild(li); });
       a.appendChild(ulA); b.appendChild(ulB); grid.appendChild(a); grid.appendChild(b); inner.appendChild(grid);
+      if(!safeArr(deliv?.in).length && !safeArr(deliv?.out).length) P(inner, (document.documentElement.lang==='en') ? "Detail inclusions/exclusions…" : "Détaillez l’inclus et le hors-périmètre…");
     }
 
     function renderTimeline(L, timeline){
-      const { inner } = makePage('timeline');
-      H2(inner, L.timeline);
-      const grid=document.createElement('div'); grid.className='grid2';
-      safeArr(timeline?.milestones).forEach(ms=>{
-        const c=document.createElement('div'); c.className='card';
-        c.innerHTML = `<div><strong>${safeStr(ms.title,'Étape')}</strong></div><div class="muted">${safeStr(ms.dateOrWeek || ms.date || ms.duration || '', '')}</div>`;
-        if(ms.notes){ const p=document.createElement('p'); p.textContent=ms.notes; c.appendChild(p); }
-        grid.appendChild(c);
-      });
-      inner.appendChild(grid);
+      const { inner } = makePage('timeline'); H2(inner, L.timeline);
+      if(safeArr(timeline?.milestones).length){
+        const grid=document.createElement('div'); grid.className='grid2';
+        safeArr(timeline?.milestones).forEach(ms=>{
+          const c=document.createElement('div'); c.className='card';
+          c.innerHTML = `<div><strong>${safeStr(ms.title,'Étape')}</strong></div><div class="muted">${safeStr(ms.dateOrWeek || ms.date || ms.duration || '', '')}</div>`;
+          if(ms.notes){ const p=document.createElement('p'); p.textContent=ms.notes; c.appendChild(p); }
+          grid.appendChild(c);
+        });
+        inner.appendChild(grid);
+      }else{
+        P(inner, (document.documentElement.lang==='en') ? "Sketch the timeline with key milestones…" : "Esquissez le planning avec les jalons clés…");
+      }
     }
 
     function renderPricing(L, pr, currencyFallback){
-      const { inner } = makePage('pricing');
-      H2(inner, L.pricing);
+      const { inner } = makePage('pricing'); H2(inner, L.pricing);
       const currency=pr?.currency||currencyFallback||'EUR';
       const meta=document.createElement('div'); meta.className='muted'; meta.style.margin='-6px 0 8px';
-      meta.innerHTML = `${L.price_model}: <span class="pill">${safeStr(pr?.model,'forfait')}</span>`;
-      inner.appendChild(meta);
+      meta.innerHTML = `${L.price_model}: <span class="pill">${safeStr(pr?.model,'forfait')}</span>`; inner.appendChild(meta);
 
       if(Array.isArray(pr?.items) && pr.items.length){
         const table=document.createElement('table');
@@ -820,34 +715,29 @@
       }
     }
 
-    function buildTOCList(L){
-      return [
-        { id:'s_letter', title:L.letter, present: safeArr(spec.letter?.body_paragraphs||spec.letter?.paragraphs).length || spec.letter?.greeting||spec.letter?.closing||spec.letter?.signature },
-        { id:'s_executive', title:L.executive, present: safeArr(spec.executive_summary?.paragraphs).length },
-        { id:'s_objectives', title:L.objectives, present: safeArr(spec.objectives?.bullets).length },
-        { id:'s_approach', title:L.approach, present: safeArr(spec.approach?.phases).length },
-        { id:'s_deliverables', title:L.deliverables, present: (spec.deliverables && (safeArr(spec.deliverables.in).length || safeArr(spec.deliverables.out).length)) },
-        { id:'s_timeline', title:L.timeline, present: safeArr(spec.timeline?.milestones).length },
-        { id:'s_pricing', title:L.pricing, present: (spec.pricing && (spec.pricing.items?.length || spec.pricing.price!=null)) },
-        { id:'s_assumptions', title:L.assumptions, present: safeArr(spec.assumptions?.paragraphs).length },
-        { id:'s_next', title:L.next, present: safeArr(spec.next_steps?.paragraphs).length },
-      ];
+    function renderAssumptions(L, asmp){
+      const { inner } = makePage('assumptions'); H2(inner, L.assumptions);
+      if(safeArr(asmp?.paragraphs).length) safeArr(asmp?.paragraphs).forEach(p=>P(inner,p));
+      else P(inner, (document.documentElement.lang==='en') ? "List assumptions/risks…" : "Listez les hypothèses/risques…");
+    }
+    function renderNext(L, next){
+      const { inner } = makePage('next'); H2(inner, L.next);
+      if(safeArr(next?.paragraphs).length) safeArr(next?.paragraphs).forEach(p=>P(inner,p));
+      else P(inner, (document.documentElement.lang==='en') ? "Suggest next steps…" : "Suggérez les prochaines étapes…");
     }
 
-    function renderSkeleton(L){
-      const title=safeStr(spec.meta?.title, L.title);
-      const company=safeStr(spec.meta?.company,'Votre société');
-      const client=safeStr(spec.meta?.client,'Client');
-      const date=safeStr(spec.meta?.date, fmtDate());
-
-      renderCover(spec?.meta?.style, L, title, company, client, date, true);
-      renderLetter(L, spec.letter, true);
-      renderExecutive(L, spec.executive_summary, true);
-
-      const { inner } = makePage('hints');
-      H2(inner, (L===t.fr)?'Complétez via le chat':'Complete via chat');
-      P(inner, (L===t.fr)?'Ex.: « style premium noir & or, serif titres » ou « Ajoute une phase de recette ».' :
-                           'E.g.: “premium black & gold, serif titles” or “Add a testing phase”.');
+    function allSections(L){
+      return [
+        { id:'s_letter', title:L.letter, render:()=>renderLetter(L, spec.letter) },
+        { id:'s_executive', title:L.executive, render:()=>renderExecutive(L, spec.executive_summary) },
+        { id:'s_objectives', title:L.objectives, render:()=>renderObjectives(L, spec.objectives) },
+        { id:'s_approach', title:L.approach, render:()=>renderApproach(L, spec.approach) },
+        { id:'s_deliverables', title:L.deliverables, render:()=>renderDeliverables(L, spec.deliverables) },
+        { id:'s_timeline', title:L.timeline, render:()=>renderTimeline(L, spec.timeline) },
+        { id:'s_pricing', title:L.pricing, render:()=>renderPricing(L, spec.pricing, spec.meta?.currency) },
+        { id:'s_assumptions', title:L.assumptions, render:()=>renderAssumptions(L, spec.assumptions) },
+        { id:'s_next', title:L.next, render:()=>renderNext(L, spec.next_steps) },
+      ];
     }
 
     function renderSpec(){
@@ -860,35 +750,24 @@
       const client=safeStr(spec.meta?.client,'Client');
       const date=safeStr(spec.meta?.date, fmtDate());
 
-      const tocList = buildTOCList(L);
-      const isEmpty = tocList.every(s=>!s.present);
+      renderCover(spec?.meta?.style, L, title, company, client, date);
 
-      if(isEmpty){
-        renderSkeleton(L);
-        statusEl.textContent = (spec.meta?.lang==='en') ? 'Live skeleton ready' : 'Squelette prêt';
-        return;
-      }
-
-      renderCover(spec?.meta?.style, L, title, company, client, date, false);
-      renderTOC(L, tocList);
-      if (tocList[0].present) renderLetter(L, spec.letter);
-      if (tocList[1].present) renderExecutive(L, spec.executive_summary);
-      if (tocList[2].present) renderObjectives(L, spec.objectives);
-      if (tocList[3].present) renderApproach(L, spec.approach);
-      if (tocList[4].present) renderDeliverables(L, spec.deliverables);
-      if (tocList[5].present) renderTimeline(L, spec.timeline);
-      if (tocList[6].present) renderPricing(L, spec.pricing, spec.meta?.currency);
-      if (tocList[7].present) renderAssumptions(L, spec.assumptions);
-      if (tocList[8].present) renderNext(L, spec.next_steps);
-
+      const sections = allSections(L);
+      renderTOC(L, sections); // TOC toujours visible
+      sections.forEach(s => s.render());
       statusEl.textContent = (spec.meta?.lang==='en') ? 'Preview ready' : 'Aperçu prêt';
     }
     renderSpec();
 
-    // Si dernier message user sans réponse → relance
-    if(messages.length && messages[messages.length-1].role==='user' && !chatBody.querySelector('.bubble-assistant')){
-      // Optionnel: relance auto. Ici on n'envoie pas automatiquement pour éviter confusion.
+    function applyChatLang(){
+      const en=(getLang()==='en');
+      document.getElementById('composer').placeholder = en?'Type your message':'Écrivez votre message';
     }
+    applyChatLang();
+    window.addEventListener('langchange', ()=>{
+      spec.meta = { ...(spec.meta||{}), lang:getLang() };
+      saveCurrent(); applyChatLang(); renderSpec();
+    });
   </script>
 </body>
 </html>
