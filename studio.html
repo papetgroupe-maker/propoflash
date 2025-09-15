@@ -11,21 +11,27 @@
       --accent:#3b82f6; --accent2:#8b5cf6; --accent-ink:#fff;
       --paper-w:210mm; --paper-h:297mm;
       --elev:0 18px 48px rgba(10,16,32,.10), inset 0 1px 0 #ffffffaa;
+
       --assistant-bubble: color-mix(in hsl, var(--panel) 86%, transparent);
       --user-bubble: linear-gradient(135deg, var(--accent), var(--accent2));
       --user-ink: #ffffff;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{ margin:0; height:100vh; overflow:hidden; background:linear-gradient(180deg,var(--bg),#eef3ff); font-family:Inter,system-ui,sans-serif; color:var(--ink) }
+    body{
+      margin:0;height:100vh;overflow:hidden;
+      background:linear-gradient(180deg,var(--bg),#eef3ff);
+      font-family:Inter,system-ui,sans-serif;color:var(--ink)
+    }
 
-    /* Bar */
+    /* Top bar */
     .bar{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--stroke);
       display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px;box-shadow:var(--elev)}
     .left,.right{display:flex;gap:10px;align-items:center}
     .brand{display:flex;gap:10px;align-items:center;font-weight:800;cursor:pointer}
     .spark{width:22px;height:22px;border-radius:6px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd)}
     .btn{border:1px solid var(--stroke);background:var(--panel);border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow:var(--elev)}
+    .btn.danger{color:#b91c1c;border-color:#fecaca}
     .sel{border:1px solid var(--stroke);border-radius:10px;padding:7px 10px;background:var(--panel);color:var(--ink)}
     .avatar{width:32px;height:32px;border-radius:50%;border:1px solid var(--stroke);display:grid;place-items:center;font-weight:800;background:var(--panel);cursor:pointer;box-shadow:var(--elev)}
     .menu{position:absolute;top:54px;right:14px;background:var(--panel);border:1px solid var(--stroke);border-radius:12px;box-shadow:var(--elev);display:none;overflow:hidden}
@@ -39,10 +45,13 @@
       grid-template-columns: clamp(520px, 38vw, 640px) 1fr;
       gap:18px; padding:18px 24px; align-items:stretch; min-height:0;
     }
-    .panel{ background:var(--panel); border:1px solid var(--stroke); border-radius:16px; box-shadow:var(--elev); display:flex; flex-direction:column; min-height:0; }
+    .panel{
+      background:var(--panel);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--elev);
+      display:flex;flex-direction:column;min-height:0;
+    }
 
     /* Chat */
-    .chat{min-height:0; display:flex; flex-direction:column;}
+    .chat{min-height:0; display:flex;flex-direction:column;}
     .chat-head{display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--stroke)}
     .chat-title{font-weight:800}
     .chat-body{ padding:12px; overflow:auto; flex:1; min-height:0; }
@@ -56,7 +65,8 @@
     .bubble-assistant{ background:var(--assistant-bubble); color:var(--ink); }
     .bubble-user{ background:var(--user-bubble); color:var(--user-ink); border-color:transparent; }
     .chat-compose{ position:relative; padding:12px; border-top:1px solid var(--stroke); display:flex;align-items:flex-end;gap:16px; }
-    .input{ display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--stroke); border-radius:14px;padding:8px;box-shadow:var(--elev); flex:1; }
+    .input{ display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--stroke);
+      border-radius:14px;padding:8px;box-shadow:var(--elev); flex:1; }
     .input textarea{flex:1;resize:vertical;min-height:72px;border:none;outline:none;background:transparent;font:500 14px/1.4 Inter;color:var(--ink)}
     .send{width:40px;height:40px;border-radius:12px;border:1px solid var(--stroke);background:#0a1020;color:#fff;display:grid;place-items:center;cursor:pointer}
     .typing{display:inline-flex;gap:5px;align-items:center}
@@ -102,18 +112,23 @@
     th{background:color-mix(in hsl, var(--panel) 85%, transparent)}
     tfoot td{font-weight:800}
 
-    /* Drawer Historique (masqué par défaut) */
-    .drawer{ position:fixed; top:64px; bottom:0; left:0; width:320px; max-width:90vw; background:var(--panel); border-right:1px solid var(--stroke); box-shadow:var(--elev); padding:12px; z-index:30; transform: translateX(-100%); transition: transform .25s ease; display:flex; flex-direction:column; gap:10px; overflow:auto; }
+    /* Drawer Conversations */
+    .drawer{ position:fixed; top:64px; bottom:0; left:0; width:340px; max-width:90vw; background:var(--panel); border-right:1px solid var(--stroke); box-shadow:var(--elev); padding:12px; z-index:30; transform: translateX(-100%); transition: transform .25s ease; display:flex; flex-direction:column; gap:10px; overflow:auto; }
     .drawer.open{ transform: translateX(0); }
     .drawer h3{ margin:0 0 6px; }
     .drawer-list{ display:grid; gap:8px; }
-    .row-item{ border:1px solid var(--stroke); border-radius:10px; padding:8px; cursor:pointer; background:var(--panel); }
+    .row-item{ border:1px solid var(--stroke); border-radius:10px; padding:8px; background:var(--panel); display:flex; justify-content:space-between; gap:8px; align-items:flex-start; }
+    .row-main{flex:1; cursor:pointer}
+    .row-title{font-weight:700}
+    .row-sub{color:var(--muted); font-size:12px}
+    .row-actions{display:flex; gap:6px}
+    .tiny{border:1px solid var(--stroke); background:var(--panel); border-radius:8px; padding:6px 8px; cursor:pointer; font-weight:600; font-size:12px}
+    .tiny.danger{color:#b91c1c;border-color:#fecaca}
     .row-item:hover{ background:color-mix(in hsl, var(--panel) 90%, transparent); }
 
     /* Editables */
     .editable{ outline: none; border-radius:8px; transition: box-shadow .15s ease, background .15s ease; }
     .editable:focus{ background: #f7fbff; box-shadow: 0 0 0 3px #bfdbfe; }
-    .hint-edit{ font-size:12px; color:var(--muted); margin:6px 0 0 }
 
     @media print{
       .bar{display:none}
@@ -140,6 +155,7 @@
     <div class="left">
       <div class="brand" id="homeBtn"><div class="spark" aria-hidden="true"></div>PropoFlash</div>
       <button class="btn" id="openHistory">Historique</button>
+      <button class="btn" id="newConvBtn">Nouvelle discussion</button>
       <span class="muted" id="status">Prêt</span>
     </div>
     <div class="right">
@@ -154,10 +170,10 @@
     </div>
   </div>
 
-  <!-- Tiroir Historique (masqué par défaut) -->
+  <!-- Drawer: conversations (masqué par défaut) -->
   <div class="drawer" id="drawer" aria-hidden="true">
-    <h3>Historique</h3>
-    <div class="drawer-list" id="histList"></div>
+    <h3>Discussions</h3>
+    <div class="drawer-list" id="convList"></div>
   </div>
 
   <!-- Main -->
@@ -166,6 +182,7 @@
     <div class="panel chat">
       <div class="chat-head"><strong class="chat-title">Chat</strong></div>
       <div class="chat-body" id="chatBody" aria-live="polite"></div>
+
       <div class="chat-compose">
         <div class="input">
           <textarea id="composer" placeholder="Écrivez votre message"></textarea>
@@ -186,7 +203,7 @@
   </div>
 
   <script>
-    /* Supabase guard */
+    /* ===== Supabase guard ===== */
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -201,7 +218,7 @@
     }
     guard();
 
-    /* Profil menu */
+    /* ===== Profil menu ===== */
     const avatar=document.getElementById('avatar'), menu=document.getElementById('menu'), logoutBtn=document.getElementById('logoutBtn');
     (async ()=>{
       const { data:{ session } } = await sb.auth.getSession();
@@ -211,36 +228,164 @@
     document.addEventListener('click', ()=> menu.style.display='none');
     logoutBtn.onclick = async ()=>{ await sb.auth.signOut(); location.reload(); };
 
-    /* Nav */
+    /* ===== Nav ===== */
     document.getElementById('homeBtn').onclick=()=>location.href='index.html';
 
-    /* Historique */
-    const drawer=document.getElementById('drawer'); const histList=document.getElementById('histList');
+    /* ===== Conversations store (localStorage) ===== */
+    const KEY_CONVS = 'pf_conversations';
+    const KEY_CURID = 'pf_current_cid';
+
+    function uid(){ return 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+    function nowISO(){ return new Date().toISOString(); }
+
+    function getConvs(){ try{ return JSON.parse(localStorage.getItem(KEY_CONVS)||'[]'); }catch{return []} }
+    function setConvs(arr){ localStorage.setItem(KEY_CONVS, JSON.stringify(arr)); }
+    function getCurId(){ return localStorage.getItem(KEY_CURID)||null; }
+    function setCurId(id){ localStorage.setItem(KEY_CURID, id); }
+
+    function defaultSpec(){
+      return { meta:{ lang:getLang(), title:(getLang()==='en'?'Business Proposal':'Proposition commerciale'), currency:'EUR' }, sections:[] };
+    }
+    function defaultMemory(){ return { design_prefs:{}, facts:{}, pending_questions:[] }; }
+
+    // Migration depuis ancien stockage simple si aucun thread
+    (function migrateIfNeeded(){
+      const convs = getConvs();
+      if (convs.length) return;
+      let spec=null, messages=null, memory=null;
+      try{ spec = JSON.parse(localStorage.getItem('pf_proposal')||'null'); }catch{}
+      try{ messages = JSON.parse(localStorage.getItem('pf_chat')||'null'); }catch{}
+      try{ memory = JSON.parse(localStorage.getItem('pf_memory')||'null'); }catch{}
+      if (spec || messages || memory){
+        const id = uid();
+        const conv = {
+          id, title: (spec?.meta?.title)||'Proposition', createdAt: nowISO(), updatedAt: nowISO(),
+          spec: spec||defaultSpec(), memory: memory||defaultMemory(), messages: messages||[]
+        };
+        setConvs([conv]); setCurId(id);
+        // nettoyer anciens clés
+        localStorage.removeItem('pf_proposal'); localStorage.removeItem('pf_chat'); localStorage.removeItem('pf_memory'); localStorage.removeItem('pf_history');
+      } else {
+        // créer une conversation vierge
+        const id = uid();
+        const conv = { id, title:'Nouvelle discussion', createdAt: nowISO(), updatedAt: nowISO(), spec: defaultSpec(), memory: defaultMemory(), messages: [] };
+        setConvs([conv]); setCurId(id);
+      }
+    })();
+
+    // Etat courant (pointe sur la conversation active)
+    let spec, memory, messages, currentId;
+
+    function loadCurrent(){
+      const convs = getConvs(); currentId = getCurId() || (convs[0]?.id);
+      const cur = convs.find(c=>c.id===currentId) || convs[0];
+      if(!cur){ // sécurité
+        const id = uid(); const conv = { id, title:'Nouvelle discussion', createdAt: nowISO(), updatedAt: nowISO(), spec: defaultSpec(), memory: defaultMemory(), messages: [] };
+        setConvs([conv]); setCurId(id); return loadCurrent();
+      }
+      spec = JSON.parse(JSON.stringify(cur.spec||defaultSpec()));
+      memory = JSON.parse(JSON.stringify(cur.memory||defaultMemory()));
+      messages = JSON.parse(JSON.stringify(cur.messages||[]));
+      setCurId(cur.id);
+    }
+    function saveCurrent(){
+      const convs = getConvs();
+      const idx = convs.findIndex(c=>c.id===getCurId());
+      if (idx>=0){
+        convs[idx] = {
+          ...convs[idx],
+          title: spec?.meta?.title || convs[idx].title || 'Proposition',
+          spec, memory, messages, updatedAt: nowISO()
+        };
+        setConvs(convs);
+        renderConversations(); // refresh list
+      }
+    }
+
+    function newConversation(){
+      const id = uid();
+      const title = (getLang()==='en'?'New conversation':'Nouvelle discussion');
+      const conv = { id, title, createdAt: nowISO(), updatedAt: nowISO(), spec: defaultSpec(), memory: defaultMemory(), messages: [] };
+      const convs = getConvs(); convs.unshift(conv); setConvs(convs); setCurId(id);
+      loadCurrent(); renderChat(); renderSpec(); renderConversations();
+      // focus composer
+      setTimeout(()=> document.getElementById('composer').focus(), 0);
+    }
+
+    function loadConversation(id){
+      setCurId(id); loadCurrent(); renderChat(); renderSpec(); renderConversations();
+    }
+
+    function renameConversation(id){
+      const convs = getConvs();
+      const c = convs.find(x=>x.id===id); if(!c) return;
+      const def = c.title || 'Proposition';
+      const label = (getLang()==='en'?'Rename conversation:':'Renommer la discussion :');
+      const nv = prompt(label, def);
+      if(nv && nv.trim()){
+        c.title = nv.trim();
+        // si on renomme la conversation courante, on peut aussi refléter dans spec.meta.title si vide
+        if (id===getCurId() && (!spec?.meta?.title || spec.meta.title===def)){
+          spec.meta = {...(spec.meta||{}), title: c.title };
+        }
+        c.updatedAt = nowISO();
+        setConvs(convs);
+        if(id===getCurId()){ saveCurrent(); renderSpec(); } else { renderConversations(); }
+      }
+    }
+
+    function deleteConversation(id){
+      const convs = getConvs();
+      const c = convs.find(x=>x.id===id); if(!c) return;
+      const label = (getLang()==='en'?'Delete this conversation? This cannot be undone.':'Supprimer cette discussion ? Action irréversible.');
+      if(!confirm(label)) return;
+      const next = convs.filter(x=>x.id!==id);
+      setConvs(next);
+      if(id===getCurId()){
+        if(next.length){ setCurId(next[0].id); }
+        else { newConversation(); return; }
+      }
+      loadCurrent(); renderChat(); renderSpec(); renderConversations();
+    }
+
+    /* ===== Drawer UI ===== */
+    const drawer=document.getElementById('drawer'); const convList=document.getElementById('convList');
     document.getElementById('openHistory').onclick = ()=>{
       drawer.classList.toggle('open');
       drawer.setAttribute('aria-hidden', drawer.classList.contains('open') ? 'false' : 'true');
     };
-    function saveHistory(title, spec, messages, memory){
-      const h=JSON.parse(localStorage.getItem('pf_history')||'[]');
-      h.unshift({ id:Date.now(), title, date:new Date().toISOString(), spec, messages, memory });
-      localStorage.setItem('pf_history', JSON.stringify(h.slice(0,100)));
-      renderHistory();
-    }
-    function renderHistory(){
-      const h=JSON.parse(localStorage.getItem('pf_history')||'[]');
-      histList.innerHTML='';
-      if(!h.length){ histList.innerHTML='<div class="muted" style="padding:8px">Aucun élément</div>'; return; }
-      h.forEach(item=>{
-        const d=new Date(item.date);
-        const div=document.createElement('div'); div.className='row-item';
-        div.innerHTML = `<strong>${item.title||'Sans titre'}</strong><br><span class="muted">${d.toLocaleString()}</span>`;
-        div.onclick=()=>{ spec=item.spec; messages=item.messages||[]; memory=item.memory||{}; localStorage.setItem('pf_proposal', JSON.stringify(spec)); localStorage.setItem('pf_chat', JSON.stringify(messages)); localStorage.setItem('pf_memory', JSON.stringify(memory)); renderSpec(); renderChat(); drawer.classList.remove('open'); drawer.setAttribute('aria-hidden','true'); };
-        histList.appendChild(div);
+    document.getElementById('newConvBtn').onclick = ()=> newConversation();
+
+    function renderConversations(){
+      const convs = getConvs();
+      convList.innerHTML='';
+      if(!convs.length){ convList.innerHTML='<div class="row-sub" style="padding:8px">Aucune discussion</div>'; return; }
+      convs.forEach(c=>{
+        const d = document.createElement('div'); d.className='row-item';
+        const main = document.createElement('div'); main.className='row-main';
+        const ttl  = document.createElement('div'); ttl.className='row-title'; ttl.textContent = c.title || 'Proposition';
+        if (c.id===getCurId()) ttl.style.textDecoration='underline';
+        const sub  = document.createElement('div'); sub.className='row-sub';
+        const dt   = new Date(c.updatedAt||c.createdAt||Date.now());
+        sub.textContent = dt.toLocaleString();
+        main.appendChild(ttl); main.appendChild(sub);
+        main.onclick = ()=> loadConversation(c.id);
+
+        const actions = document.createElement('div'); actions.className='row-actions';
+        const bRen = document.createElement('button'); bRen.className='tiny'; bRen.textContent='Renommer';
+        bRen.onclick = (e)=>{ e.stopPropagation(); renameConversation(c.id); };
+        const bDel = document.createElement('button'); bDel.className='tiny danger'; bDel.textContent='Supprimer';
+        bDel.onclick = (e)=>{ e.stopPropagation(); deleteConversation(c.id); };
+        actions.appendChild(bRen); actions.appendChild(bDel);
+
+        d.appendChild(main); d.appendChild(actions);
+        convList.appendChild(d);
       });
     }
-    renderHistory();
 
-    /* ETAT local */
+    /* ===== Etat courant init + rendu ===== */
+    loadCurrent(); renderConversations();
+
     const chatBody=document.getElementById('chatBody');
     const composer=document.getElementById('composer');
     const sendBtn=document.getElementById('sendBtn');
@@ -249,24 +394,14 @@
     const decor=document.getElementById('decor');
     const sheetContent=document.getElementById('sheetContent');
 
-    let messages = JSON.parse(localStorage.getItem('pf_chat')||'[]');
-    let spec = null;
-    let memory = null;
-
-    function loadSpec(){
-      try{ spec = JSON.parse(localStorage.getItem('pf_proposal')||'null'); }catch{ spec=null; }
-      if(!spec){ spec = { meta:{ lang:getLang(), title:(getLang()==='en'?'Business Proposal':'Proposition commerciale'), currency:'EUR' }, sections:[] }; }
-      if(!spec.meta) spec.meta = { lang:getLang() };
-    }
-    function loadMemory(){
-      try{ memory = JSON.parse(localStorage.getItem('pf_memory')||'null'); }catch{ memory=null; }
-      if(!memory) memory = { design_prefs:{}, facts:{}, pending_questions:[] };
-    }
-    loadSpec(); loadMemory();
-
+    // Consommer message d'accueil si présent (puis sauvegarder le thread)
     (function consumeWelcome(){
       const w = localStorage.getItem('pf_welcome_msg');
-      if(w){ messages.push({ role:'user', content:w }); localStorage.removeItem('pf_welcome_msg'); }
+      if(w){
+        messages.push({ role:'user', content:w });
+        localStorage.removeItem('pf_welcome_msg');
+        saveCurrent();
+      }
     })();
 
     function scrollChat(){ chatBody.scrollTop = chatBody.scrollHeight; }
@@ -300,10 +435,10 @@
     }
     renderChat();
 
-    /* === Envoi message → API === */
+    /* ===== Envoi message → API ===== */
     async function sendMessage(text){
       const content=text.trim(); if(!content) return;
-      messages.push({ role:'user', content }); localStorage.setItem('pf_chat', JSON.stringify(messages));
+      messages.push({ role:'user', content }); saveCurrent();
       bubble('user', escapeHTML(content).replace(/\n/g,'<br/>'));
       composer.value=''; statusEl.textContent='Rédaction…';
 
@@ -317,7 +452,7 @@
         hideTyping();
 
         const reply = data.reply || (getLang()==='en'?'I could not structure the proposal.':'Je n’ai pas pu structurer la proposition.');
-        messages.push({ role:'assistant', content: reply }); localStorage.setItem('pf_chat', JSON.stringify(messages));
+        messages.push({ role:'assistant', content: reply }); saveCurrent();
         bubble('assistant', escapeHTML(reply).replace(/\n/g,'<br/>'));
 
         // 1) Fusionner proposalSpec
@@ -328,14 +463,12 @@
             next.meta.style = { ...((spec?.meta||{}).style||{}), ...((next.meta||{}).style||{}) };
           }
           spec = next;
-          localStorage.setItem('pf_proposal', JSON.stringify(spec));
         }
 
         // 2) Fusionner designSpecDiff → meta.style
         if(data.designSpecDiff){
           spec.meta = spec.meta || {};
           spec.meta.style = { ...(spec.meta.style||{}), ...(data.designSpecDiff||{}) };
-          localStorage.setItem('pf_proposal', JSON.stringify(spec));
         }
 
         // 3) Mémoire ↑
@@ -345,11 +478,11 @@
             facts: { ...(memory.facts||{}), ...(data.memoryUpdate.facts||{}) },
             pending_questions: Array.from(new Set([ ...(memory.pending_questions||[]), ...((data.memoryUpdate.pending_questions||[]).filter(Boolean)) ]))
           };
-          localStorage.setItem('pf_memory', JSON.stringify(memory));
         }
 
+        // Sauvegarde thread + rendu
+        saveCurrent();
         renderSpec();
-        saveHistory(spec?.meta?.title || 'Proposition', spec, messages, memory);
         statusEl.textContent='Prêt';
       }catch(e){
         hideTyping();
@@ -368,11 +501,16 @@
     function applyChatLang(){
       const en=(getLang()==='en');
       composer.placeholder = en?'Type your message':'Écrivez votre message';
+      // Met à jour titre par défaut si vierge
+      if(!spec.meta?.title || spec.meta.title==='Nouvelle discussion'){
+        spec.meta = {...(spec.meta||{}), title: (en?'Business Proposal':'Proposition commerciale')};
+        saveCurrent(); renderConversations();
+      }
     }
     applyChatLang();
     window.addEventListener('langchange', ()=>{
       spec.meta = { ...(spec.meta||{}), lang:getLang() };
-      localStorage.setItem('pf_proposal', JSON.stringify(spec));
+      saveCurrent();
       applyChatLang();
       renderSpec();
     });
@@ -483,7 +621,7 @@
       });
     }
 
-    /* Pages */
+    /* Pages & rendu doc */
     const sheetPages = [];
     function clearPages(){ sheetContent.innerHTML=''; sheetPages.length=0; }
     function makePage(kind='default'){
@@ -494,8 +632,6 @@
       sheetContent.appendChild(page); sheetPages.push({page, inner, pageDecor});
       return {page, inner, pageDecor};
     }
-
-    // Helpers
     function H1(inner, text){ const el=document.createElement('div'); el.className='h1'; el.textContent=text; inner.appendChild(el); return el; }
     function H2(inner, text){ const el=document.createElement('div'); el.className='h2'; el.textContent=text; inner.appendChild(el); return el; }
     function HR(inner){ inner.appendChild(Object.assign(document.createElement('div'),{className:'hr'})); }
@@ -511,22 +647,18 @@
       en:{ title:"Business Proposal", to:"To", from:"Issued by", date:"Date", letter:"Cover Letter", executive:"Executive Summary", objectives:"Objectives", approach:"Approach & Phasing", deliverables:"Deliverables", in_scope:"In scope", out_scope:"Out of scope", timeline:"Timeline", pricing:"Pricing", assumptions:"Assumptions / Risks", next:"Next Steps", price_model:"Model", terms:"Terms", toc:"Table of Contents" }
     };
 
-    /* EDITABLES — liaison DOM → spec */
     function bindEditable(el, getter, setter){
       el.classList.add('editable');
       el.contentEditable = "true";
       el.addEventListener('blur', ()=>{
         const val = (el.textContent||'').trim();
         setter(val);
-        localStorage.setItem('pf_proposal', JSON.stringify(spec));
-        renderSpec(); // re-render pour cohérence
+        saveCurrent();
+        renderSpec();
       });
-      // init display
-      const init = getter();
-      if(init) el.textContent = init;
+      const init = getter(); if(init) el.textContent = init;
     }
 
-    /* Rendu de pages */
     function pageAccentBar(pageDecor, colorA, colorB){
       const band = document.createElement('div');
       band.style.position='absolute'; band.style.inset='-10% -10% auto -10%'; band.style.height='40%';
@@ -559,9 +691,6 @@
         const co = meta.querySelector('#coTag');
         bindEditable(cl, ()=>spec.meta?.client||'Client', v=>{ spec.meta = {...(spec.meta||{}), client: v||'Client' }; });
         bindEditable(co, ()=>spec.meta?.company||'Votre société', v=>{ spec.meta = {...(spec.meta||{}), company: v||'Votre société' }; });
-        const hint = document.createElement('div'); hint.className='hint-edit';
-        hint.textContent = 'Astuce: cliquez pour éditer le titre / client / société.';
-        inner.appendChild(hint);
       }
 
       const band=document.createElement('div'); band.className='band';
@@ -705,7 +834,6 @@
       ];
     }
 
-    /* === SQUELETTE si spec vide (pages vierges éditables) === */
     function renderSkeleton(L){
       const title=safeStr(spec.meta?.title, L.title);
       const company=safeStr(spec.meta?.company,'Votre société');
@@ -713,19 +841,15 @@
       const date=safeStr(spec.meta?.date, fmtDate());
 
       renderCover(spec?.meta?.style, L, title, company, client, date, true);
-
-      // Lettre
       renderLetter(L, spec.letter, true);
-      // Résumé
       renderExecutive(L, spec.executive_summary, true);
 
       const { inner } = makePage('hints');
       H2(inner, (L===t.fr)?'Complétez via le chat':'Complete via chat');
-      P(inner, (L===t.fr)?'Dites par ex. « style premium noir & or, ton sobre, serif pour les titres » ou « Ajoute une phase de recette ».' :
-                           'Say e.g. “premium black & gold, sober tone, serif titles” or “Add a testing phase”.');
+      P(inner, (L===t.fr)?'Ex.: « style premium noir & or, serif titres » ou « Ajoute une phase de recette ».' :
+                           'E.g.: “premium black & gold, serif titles” or “Add a testing phase”.');
     }
 
-    /* === RENDER SPEC === */
     function renderSpec(){
       applyStyleTokens(spec?.meta?.style || null);
       clearPages();
@@ -736,7 +860,6 @@
       const client=safeStr(spec.meta?.client,'Client');
       const date=safeStr(spec.meta?.date, fmtDate());
 
-      // Évalue si contenu quasi-vide
       const tocList = buildTOCList(L);
       const isEmpty = tocList.every(s=>!s.present);
 
@@ -746,7 +869,6 @@
         return;
       }
 
-      // Sinon, rendu complet
       renderCover(spec?.meta?.style, L, title, company, client, date, false);
       renderTOC(L, tocList);
       if (tocList[0].present) renderLetter(L, spec.letter);
@@ -763,9 +885,9 @@
     }
     renderSpec();
 
-    /* Auto relance si dernier msg user non répondu (au cas où) */
+    // Si dernier message user sans réponse → relance
     if(messages.length && messages[messages.length-1].role==='user' && !chatBody.querySelector('.bubble-assistant')){
-      sendMessage(messages[messages.length-1].content);
+      // Optionnel: relance auto. Ici on n'envoie pas automatiquement pour éviter confusion.
     }
   </script>
 </body>
