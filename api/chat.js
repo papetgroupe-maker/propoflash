@@ -1,167 +1,118 @@
 // /api/chat.js — Vercel Serverless (Node 18+)
-// => Toujours retourner du JSON (jamais d'HTML), pour que le front ne tombe pas en "Erreur réseau"
+// IA "Senior Proposal Strategist + 3D HTML/CSS Designer"
+// Sortie JSON stricte + fallback (jamais d’HTML) pour éviter les erreurs réseau.
 
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 const MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
 
-// --- Prompt & fewshots (tu peux adapter) ---
+// =========================== SYSTEM PROMPT ===========================
 const SYSTEM_PROMPT = `
-ROLE: Senior B2B Proposal Strategist, Brand Designer & Layout Artist (FR/EN).
-OBJECTIF: transformer chaque échange en une proposition exploitable ET stylée.
-Produire un "proposalSpec" cohérent + un "reply" clair. DÉDUIRE un STYLE complet
-à partir des indices utilisateur (couleurs, ambiance, industrie, sobriété vs fun),
-et proposer des couches décoratives subtiles.
+Tu es **PropoFlash Brain** : 
+- Expert mondial des **propositions commerciales** (B2B/B2C), structuration, valeur, pricing.
+- **Designer 3D HTML/CSS** (effets glow/mesh/dots/diagonal, élévations, grilles responsives, typographie).
+- Chef d'orchestre **conversationnel** : questionne, reformule, propose, mémorise, jamais redondant.
 
-SCHEMA DE SORTIE (JSON STRICT):
+## Objectifs
+1) Conduire un vrai **dialogue** : poser les bonnes questions (objectif, client, contexte, contraintes, style, budget/échéance, preuves).
+2) Construire/affiner une **proposition** cohérente et **super design**, pages verticales (cover, lettre, résumé, objectifs, approche/phasage, livrables in/out, planning, pricing, hypothèses/risques, prochaines étapes).
+3) Générer du **style live** (palette, typo, décor 3D doux, shapes) pour l’aperçu.
+4) Garder une **mémoire structurée** (ne pas faire répéter).
+
+## Dialogue — règles
+- **FR par défaut** si ambigu.
+- **Toujours 1 à 3 questions utiles max** pour avancer, jamais une liste interminable.
+- **Ne réinterroge pas** ce qui est déjà mémorisé ; exploite la mémoire.
+- Quand des infos manquent, **fais des hypothèses raisonnables** mais **marque-les** "à confirmer".
+
+## Style & accessibilité
+- Contraste suffisant (ink vs surface).
+- Design pro, subtil, moderne ; 2–4 layers décor max (glow/mesh/dots/diagonal/grid), pas flashy.
+- 3D soft : ombres réalistes, degrés faibles.
+
+## Sortie — JSON STRICT UNIQUEMENT
+Renvoie **exactement** cet objet (même si partiel) :
+
 {
-  "reply": "<texte lisible pour l'utilisateur>",
-  "proposalSpec": {
-    "meta": {
-      "lang":"fr|en",
-      "title": "", "company":"", "client":"", "date":"", "currency":"EUR",
-      "style": {
-        "palette": { "primary":"#hex", "secondary":"#hex", "surface":"#hex", "ink":"#hex", "muted":"#hex", "stroke":"#hex", "accentA":"#hex", "accentB":"#hex" },
-        "shapes": { "radius":"12px|16px", "shadow":"0 18px 48px rgba(...)" },
-        "typography": { "heading":"Inter|Montserrat|Poppins|...","body":"Inter|..." },
-        "logoDataUrl": "",
-        "decor_layers": [
-          { "type":"glow|gradient_blob|grid|dots|diagonal", "position":"top|bottom|left|right|center", "opacity":0.18, "h":220, "s":60, "l":55, "rotate":0, "scale":1, "blend":"normal|screen|overlay" }
-        ]
-      }
-    },
-    "letter": { "subject":"", "preheader":"", "greeting":"", "body_paragraphs":[""], "closing":"", "signature":"" },
-    "executive_summary": { "paragraphs":[""] },
-    "objectives": { "bullets":[""] },
-    "approach": { "phases":[{ "title":"", "duration":"", "activities":[""], "outcomes":[""] }] },
-    "deliverables": { "in":[""], "out":[""] },
-    "timeline": { "milestones":[{ "title":"", "dateOrWeek":"", "notes":"" }] },
-    "pricing": { "model":"forfait|regie", "currency":"EUR",
-                 "items":[{ "name":"", "qty":1, "unit":"jour|mois|forfait", "unit_price":0, "subtotal":0 }],
-                 "tax_rate":20, "terms":[""], "price": null },
-    "assumptions": { "paragraphs":[""] },
-    "next_steps": { "paragraphs":[""] }
-  }
+  "reply": "texte pour l'utilisateur (questions incluses si besoin)",
+  "proposalSpec": { ... },                // sections de la propal (tu peux envoyer des deltas)
+  "designSpecDiff": {                     // diff à fusionner dans meta.style
+    "palette": { "primary":"#hex", "secondary":"#hex", "surface":"#hex", "ink":"#hex", "muted":"#hex", "stroke":"#hex", "accentA":"#hex", "accentB":"#hex" },
+    "typography": { "heading":"Inter|Montserrat|Poppins|Playfair", "body":"Inter" },
+    "shapes": { "radius":"12px|16px", "shadow":"0 18px 48px rgba(10,16,32,.12)" },
+    "decor_layers": [
+      { "type":"glow|gradient_blob|grid|dots|diagonal|mesh", "position":"top|bottom|left|right|center", "opacity":0.18, "h":220, "s":60, "l":55, "rotate":0, "scale":1, "blend":"normal|screen|overlay" }
+    ]
+  },
+  "previewOps": [                        // actions ciblées pour l'aperçu (facultatif)
+    { "op":"set", "path":"meta.title", "value":"Proposition — ..." },
+    { "op":"ensureSection", "id":"executive_summary" },
+    { "op":"append", "path":"pricing.items", "value":{ "name":"Cadrage", "qty":1, "unit":"forfait", "unit_price":1500 } }
+  ],
+  "memoryPatch": {                       // ce que tu as compris/confirmé (sera mergé côté client)
+    "lang":"fr|en",
+    "client":"", "company":"", "industry":"",
+    "tone":["sobre","corporate"], "colors":["bleu","gris"],
+    "constraints":{"deadline":"","budget":""},
+    "known": ["..."], "unknown": ["besoin de ..."]
+  },
+  "actions": [                           // éventuels next steps machine
+    { "type":"ask", "field":"client", "hint":"Quel est le nom du client ?" },
+    { "type":"preview" }
+  ]
 }
 
-RÈGLES:
-- FR par défaut si ambigu. Ne JAMAIS inventer d'entités critiques; si info manque → propose des "actions: ask" implicites dans le reply.
-- Si budget incertain: items + hypothèses + marquer "à confirmer".
-- STYLE pro & accessible (contraste texte/surface). Palette extraite du brief si possible.
-- Décor subtil (2–4 layers max).
-- Respect strict du schéma, JSON strict uniquement.
+### Conseils design rapides
+- "luxe/premium/noir-or" -> noir #111827 + or #E5B344, texture faible.
+- "sobre/corporate/bleu" -> bleus froids, gris doux, Inter, décor léger.
+- "magazine/éditorial/serif" -> Playfair/Source Serif en heading.
+- "startup/vibrant" -> secondaires saturées, radius ↑, légère texture.
 `.trim();
 
+// =========================== FEWSHOTS (1 mini exemple) ===========================
 const FEWSHOTS = [
   {
     role: "user",
     content:
-      "Brief: Identité 'indus' noir & jaune, style énergique, diagonales, tech B2B FR. Offre: refonte site vitrine 6 pages. Deadline 5 semaines. Budget 8–10k.",
+      "Style sobre corporate bleu. Client banque. Je veux une proposition pour landing page d’un nouveau service. Délai 4 semaines.",
   },
   {
     role: "assistant",
     content: JSON.stringify({
       reply:
-        "Je prépare une proposition structurée (cadrage, design, dev) avec un style noir/jaune industriel et des diagonales subtiles.",
-      proposalSpec: {
-        meta: {
-          lang: "fr",
-          title: "Proposition — Refonte site vitrine",
-          currency: "EUR",
-          style: {
-            palette: {
-              primary: "#111827",
-              secondary: "#F59E0B",
-              surface: "#FFFFFF",
-              ink: "#0A1020",
-              muted: "#5C667A",
-              stroke: "#E5E7EB",
-              accentA: "#FCD34D",
-              accentB: "#F59E0B",
-            },
-            shapes: { radius: "12px", shadow: "0 18px 48px rgba(10,16,32,.16)" },
-            typography: { heading: "Montserrat", body: "Inter" },
-            decor_layers: [
-              {
-                type: "diagonal",
-                position: "top",
-                opacity: 0.18,
-                h: 45,
-                s: 95,
-                l: 50,
-                rotate: -20,
-                scale: 1.1,
-                blend: "overlay",
-              },
-              {
-                type: "dots",
-                position: "right",
-                opacity: 0.2,
-                h: 220,
-                s: 15,
-                l: 70,
-                rotate: 0,
-                scale: 1,
-              },
-            ],
-          },
+        "Parfait. Pour affiner : 1) Nom du client ? 2) Objectif clé de la landing (leads, rdv, souscriptions) ? 3) Avez-vous un budget indicatif ?",
+      designSpecDiff: {
+        palette: {
+          primary: "#0B5ED7",
+          secondary: "#5B8DEF",
+          surface: "#FFFFFF",
+          ink: "#0A1020",
+          muted: "#687086",
+          stroke: "#E3E8F5",
+          accentA: "#7FB3FF",
+          accentB: "#A6C8FF",
         },
-        executive_summary: {
-          paragraphs: [
-            "Refonte pour crédibiliser l’offre, améliorer la conversion et l’autonomie CMS.",
-          ],
-        },
-        objectives: {
-          bullets: ["Moderniser l’image", "Accroître les leads", "Optimiser SEO de base"],
-        },
-        approach: {
-          phases: [
-            {
-              title: "Cadrage",
-              duration: "1 semaine",
-              activities: ["Atelier objectifs", "Arborescence"],
-              outcomes: ["Backlog validé"],
-            },
-            {
-              title: "Design UI",
-              duration: "2 semaines",
-              activities: ["Maquettes", "Design system"],
-              outcomes: ["UI validée"],
-            },
-            {
-              title: "Développement",
-              duration: "1.5 semaine",
-              activities: ["Intégration", "CMS"],
-              outcomes: ["Site prêt"],
-            },
-            {
-              title: "Recette & Go-live",
-              duration: "0.5 semaine",
-              activities: ["Tests", "Corrections", "Mise en ligne"],
-              outcomes: ["Prod en ligne"],
-            },
-          ],
-        },
-        pricing: {
-          model: "forfait",
-          currency: "EUR",
-          tax_rate: 20,
-          items: [
-            { name: "Cadrage", qty: 1, unit: "forfait", unit_price: 1500, subtotal: 1500 },
-            { name: "Design (6 pages)", qty: 1, unit: "forfait", unit_price: 2800, subtotal: 2800 },
-            { name: "Dév & intégration", qty: 1, unit: "forfait", unit_price: 3600, subtotal: 3600 },
-          ],
-          terms: ["40% commande, 40% design, 20% livraison", "Validité: 30 jours"],
-        },
-        next_steps: { paragraphs: ["Point 30 min pour verrouiller le périmètre et le planning."] },
+        typography: { heading: "Inter", body: "Inter" },
+        shapes: { radius: "12px", shadow: "0 18px 48px rgba(10,16,32,.12)" },
+        decor_layers: [
+          { type: "glow", position: "top", opacity: 0.18, h: 220, s: 60, l: 55 },
+          { type: "dots", position: "right", opacity: 0.14, h: 220, s: 20, l: 70, scale: 1 },
+        ],
       },
+      memoryPatch: {
+        lang: "fr",
+        industry: "banque",
+        tone: ["sobre", "corporate"],
+        colors: ["bleu"],
+        constraints: { deadline: "4 semaines" },
+      },
+      actions: [{ type: "preview" }],
     }),
   },
 ];
 
-// --- Helpers ---
+// ============================== UTILITAIRES ===============================
 function jsonOnly(res, status, data) {
   res.status(status).setHeader("Content-Type", "application/json; charset=utf-8");
-  // CORS permissif si tu ouvres depuis un autre domaine / file://
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
@@ -169,87 +120,95 @@ function jsonOnly(res, status, data) {
 }
 
 function asJson(txt) {
-  try {
-    return JSON.parse(txt);
-  } catch {
-    const m = txt.match(/\{[\s\S]*\}$/);
-    if (m) {
-      try { return JSON.parse(m[0]); } catch {}
-    }
-    return null;
-  }
+  try { return JSON.parse(txt); } catch {}
+  const m = txt && txt.match(/\{[\s\S]*\}$/);
+  if (m) { try { return JSON.parse(m[0]); } catch {} }
+  return null;
 }
 
-function safeReply(e) {
+function safeReply(err) {
+  const e = err ? String(err.message || err) : undefined;
   return {
     reply:
-      "Je n’ai pas pu contacter le modèle pour le moment. Donnez-moi le client, le contexte, 3 objectifs clés et un style (ex. sobre/entreprise/bleu).",
+      "Je commence la proposition. Dites-moi le client, les objectifs business, le style (ex. sobre/entreprise/bleu) et un ordre de budget/délai.",
     proposalSpec: {
       meta: {
         lang: "fr",
         title: "Proposition commerciale",
         currency: "EUR",
-        style: {
-          palette: {
-            primary: "#0B2446",
-            secondary: "#3B82F6",
-            surface: "#FFFFFF",
-            ink: "#0A1020",
-            muted: "#6B7280",
-            stroke: "#E5E7EB",
-            accentA: "#60A5FA",
-            accentB: "#93C5FD",
-          },
-          shapes: { radius: "12px", shadow: "0 18px 48px rgba(10,16,32,.12)" },
-          typography: { heading: "Inter", body: "Inter" },
-          decor_layers: [{ type: "glow", position: "top", opacity: 0.18, h: 220, s: 60, l: 55 }],
-        },
       },
     },
-    error: e ? String(e.message || e) : undefined,
+    designSpecDiff: {
+      palette: {
+        primary: "#3B82F6",
+        secondary: "#8B5CF6",
+        surface: "#FFFFFF",
+        ink: "#0A1020",
+        muted: "#6B7280",
+        stroke: "#E5E7EB",
+        accentA: "#60A5FA",
+        accentB: "#93C5FD",
+      },
+      typography: { heading: "Inter", body: "Inter" },
+      shapes: { radius: "12px", shadow: "0 18px 48px rgba(10,16,32,.12)" },
+      decor_layers: [{ type: "glow", position: "top", opacity: 0.18, h: 220, s: 60, l: 55 }],
+    },
+    memoryPatch: { lang: "fr" },
+    actions: [{ type: "preview" }],
     fallback: true,
+    error: e,
   };
 }
 
-// --- Handler ---
+// ================================ HANDLER ================================
 export default async function handler(req, res) {
   if (req.method === "OPTIONS") return jsonOnly(res, 204, {});
-  if (req.method !== "POST")
-    return jsonOnly(res, 405, { error: "Use POST", ok: false });
+  if (req.method !== "POST") return jsonOnly(res, 405, { ok: false, error: "Use POST" });
 
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    // Ne pas casser l'UI : on répond 200 + fallback
-    return jsonOnly(res, 200, safeReply("Missing OPENAI_API_KEY"));
-  }
+  if (!apiKey) return jsonOnly(res, 200, safeReply("Missing OPENAI_API_KEY"));
 
+  // corps
   let body = {};
   try { body = req.body ?? JSON.parse(req.body || "{}"); } catch {}
-
   const message = String(body.message || "");
   const proposalSpec = body.proposalSpec || {};
+  const memory = body.memory || {};
   const history = Array.isArray(body.history) ? body.history : [];
 
+  // conversation
   const messages = [
     { role: "system", content: SYSTEM_PROMPT },
     ...FEWSHOTS,
-    ...history.slice(-10).map(m => ({
+    // petite mémoire synthétique injectée au modèle
+    {
+      role: "system",
+      content: `Mémoire actuelle (résumé JSON) : ${JSON.stringify(memory).slice(0, 3000)}`,
+    },
+    ...history.slice(-12).map((m) => ({
       role: m.role === "assistant" ? "assistant" : "user",
       content: String(m.content || ""),
     })),
-    { role: "user", content: message },
+    {
+      role: "user",
+      content:
+        `Dernier état (extrait) : ${JSON.stringify({
+          meta: proposalSpec?.meta || {},
+          sections: Object.keys(proposalSpec || {}).filter((k) => k !== "meta"),
+        }).slice(0, 1200)}\n\nMessage utilisateur : ${message}`,
+    },
   ];
 
   try {
     const r = await fetch(OPENAI_URL, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         model: MODEL,
-        temperature: 0.3,
+        temperature: 0.35,
         response_format: { type: "json_object" },
         messages,
       }),
@@ -257,15 +216,26 @@ export default async function handler(req, res) {
 
     const txt = await r.text();
     if (!r.ok) {
-      // Renvoie un fallback "200" pour ne pas casser le front
       return jsonOnly(res, 200, safeReply(new Error(`OpenAI ${r.status}: ${txt.slice(0, 600)}`)));
     }
-
     const out = asJson(txt) || {};
-    const reply = out.reply || "J’ai préparé une structure de proposition. Souhaitez-vous affiner le style ?";
+    // valeurs de secours au cas où
+    const reply = out.reply || "J’ai avancé la structure. Souhaitez-vous affiner le style ou le périmètre ?";
     const spec = out.proposalSpec || {};
+    const styleDiff = out.designSpecDiff || {};
+    const previewOps = Array.isArray(out.previewOps) ? out.previewOps : [];
+    const memoryPatch = out.memoryPatch || {};
+    const actions = Array.isArray(out.actions) ? out.actions : [{ type: "preview" }];
 
-    return jsonOnly(res, 200, { reply, proposalSpec: spec, ok: true });
+    return jsonOnly(res, 200, {
+      ok: true,
+      reply,
+      proposalSpec: spec,
+      designSpecDiff: styleDiff,
+      previewOps,
+      memoryPatch,
+      actions,
+    });
   } catch (e) {
     return jsonOnly(res, 200, safeReply(e));
   }
