@@ -22,7 +22,7 @@
     body{
       margin:0;
       height:100vh;
-      overflow:hidden;
+      overflow:hidden; /* pas de scroll */
       background:linear-gradient(180deg,var(--bg),#eef3ff);
       font-family:Inter,system-ui,sans-serif;color:var(--ink)
     }
@@ -45,7 +45,7 @@
     .main{
       height:calc(100vh - 64px);
       display:grid;
-      grid-template-columns: clamp(520px, 38vw, 640px) 1fr;
+      grid-template-columns: clamp(520px, 38vw, 640px) 1fr; /* chat élargi */
       gap:18px;
       padding:18px 24px;
       align-items:stretch;
@@ -130,7 +130,7 @@
     tfoot td{font-weight:800}
 
     /* Drawer Historique */
-    .drawer{position:fixed;top:64px;right:-380px;width:360px;height:calc(100vh - 64px);background:var(--panel);border-left:1px solid var(--stroke);box-shadow:var(--elev);border-top-left-radius:12px;border-bottom-left-radius:12px;transition:transform .25s ease, right .25s ease;padding:12px 10px;display:flex;flex-direction:column;gap:10px;z-index:30}
+    .drawer{position:fixed;top:64px;right:-380px;width:360px;height:calc(100vh - 64px);background:var(--panel);border-left:1px solid var(--stroke);box-shadow:var(--elev);border-top-left-radius:12px;border-bottom-left-radius:12px;transition:right .25s ease;padding:12px 10px;display:flex;flex-direction:column;gap:10px;z-index:30}
     .drawer.open{right:0}
     .drawer h3{margin:4px 6px 6px;font-size:16px}
     .drawer-list{flex:1;overflow:auto;padding:6px}
@@ -221,12 +221,11 @@
   </div>
 
   <script>
-    /* ---------- Constantes Supabase ---------- */
+    /* ---------- Supabase ---------- */
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-    /* ---------- Session / Auth UI ---------- */
     async function guard(){
       const { data:{ session } } = await sb.auth.getSession();
       if(session?.user) return true;
@@ -245,10 +244,9 @@
     avatar.onclick = (e)=>{ e.stopPropagation(); menu.style.display = menu.style.display==='block'?'none':'block'; };
     document.addEventListener('click', ()=> menu.style.display='none');
     logoutBtn.onclick = async ()=>{ await sb.auth.signOut(); location.reload(); };
-
     document.getElementById('homeBtn').onclick=()=>location.href='index.html';
 
-    /* ---------- Historique : par discussion ---------- */
+    /* ---------- Historique (par discussion) ---------- */
     const drawer=document.getElementById('drawer'); const histList=document.getElementById('histList');
     document.getElementById('openHistory').onclick = ()=> drawer.classList.toggle('open');
     document.getElementById('newChatBtn').onclick  = ()=> createNewSession();
@@ -257,10 +255,7 @@
     const CUR_KEY  = 'pf_current_session';
     function loadSessions(){ try{ return JSON.parse(localStorage.getItem(SESS_KEY)||'[]'); }catch{return []} }
     function saveSessions(arr){ localStorage.setItem(SESS_KEY, JSON.stringify(arr)); }
-
-    function getCurrentId(){
-      return localStorage.getItem(CUR_KEY) || null;
-    }
+    function getCurrentId(){ return localStorage.getItem(CUR_KEY) || null; }
     function setCurrentId(id){ localStorage.setItem(CUR_KEY, String(id)); }
 
     function createDefaultSpec(){
@@ -340,7 +335,6 @@
       });
     }
 
-    // Migration légère depuis pf_history (si existait)
     (function migrateOldHistory(){
       const sessions = loadSessions(); if(sessions.length) return;
       try{
@@ -364,6 +358,7 @@
 
     let messages = JSON.parse(localStorage.getItem('pf_chat')||'[]');
     let spec = null;
+    let isSending = false; // <- garde anti double envoi
 
     function loadSpec(){
       try{ spec = JSON.parse(localStorage.getItem('pf_proposal')||'null'); }catch{ spec=null; }
@@ -413,32 +408,13 @@
     }
     renderChat();
 
-    /* ---------- Helpers merge/patch ---------- */
-    function deepMerge(target, patch){
-      const isObj = (o)=>o && typeof o==='object' && !Array.isArray(o);
-      if(!isObj(target)) target = {};
-      if(!isObj(patch)) return target;
-      const out = Array.isArray(target) ? [...target] : { ...target };
-      for(const [k,v] of Object.entries(patch)){
-        if(Array.isArray(v)){ out[k] = v.slice(); continue; }
-        if(isObj(v)){ out[k] = deepMerge(out[k]||{}, v); continue; }
-        out[k] = v;
-      }
-      return out;
-    }
-    function setAtPath(obj, path, value){
-      const parts = String(path||'').split('.').filter(Boolean);
-      let cur=obj;
-      for(let i=0;i<parts.length-1;i++){ cur[parts[i]] = cur[parts[i]] ?? {}; cur = cur[parts[i]]; }
-      cur[parts[parts.length-1]] = value;
-    }
-    function getAtPath(obj, path){
-      return String(path||'').split('.').filter(Boolean).reduce((a,k)=> (a?a[k]:undefined), obj);
-    }
-
     async function sendMessage(text){
-      const content=text.trim(); if(!content) return;
-      messages.push({ role:'user', content }); localStorage.setItem('pf_chat', JSON.stringify(messages));
+      if(isSending) return;
+      const content=(text||'').trim(); if(!content) return;
+      isSending = true;
+
+      messages.push({ role:'user', content });
+      localStorage.setItem('pf_chat', JSON.stringify(messages));
       bubble('user', escapeHTML(content).replace(/\n/g,'<br/>'));
       composer.value='';
       statusEl.textContent='Rédaction…';
@@ -447,13 +423,9 @@
         showTyping();
 
         const resp = await fetch('/api/chat', {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({
-            message: content,
-            proposalSpec: spec,
-            history: messages.slice(-12),
-            memory: JSON.parse(localStorage.getItem('pf_memory')||'{}')
-          })
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ message: content, proposalSpec: spec, history: messages.slice(-10) })
         });
 
         if(!resp.ok){
@@ -465,68 +437,39 @@
         }
 
         const data = await resp.json();
-
         hideTyping();
 
         const reply = data.reply || (getLang()==='en'?'I could not structure the proposal.':'Je n’ai pas pu structurer la proposition.');
-        messages.push({ role:'assistant', content: reply }); localStorage.setItem('pf_chat', JSON.stringify(messages));
+        messages.push({ role:'assistant', content: reply });
+        localStorage.setItem('pf_chat', JSON.stringify(messages));
         bubble('assistant', escapeHTML(reply).replace(/\n/g,'<br/>'));
 
-        // ---- Fusion de la proposition
         if(data.proposalSpec){
-          spec = deepMerge(spec||{}, data.proposalSpec);
+          const next = { ...(spec||{}), ...(data.proposalSpec||{}) };
+          next.meta = { ...(spec?.meta||{}), ...((data.proposalSpec||{}).meta||{}) };
+          if(next.meta){ next.meta.style = { ...((spec?.meta||{}).style||{}), ...((next.meta||{}).style||{}) }; }
+          spec = next;
+          localStorage.setItem('pf_proposal', JSON.stringify(spec));
+          renderSpec();
         }
 
-        // ---- Style live (diff) -> fusion dans meta.style
-        if(data.designSpecDiff){
-          spec.meta = spec.meta || {};
-          spec.meta.style = deepMerge(spec.meta.style||{}, data.designSpecDiff);
-        }
+        // Style live (Edge Function -> designSpecDiff)
+        await refineStyleFromConversation(content);
 
-        // ---- Preview ops (set/append/ensureSection)
-        if(Array.isArray(data.previewOps)){
-          data.previewOps.forEach(op=>{
-            if(op.op==='set' && op.path){ setAtPath(spec, op.path, op.value); }
-            if(op.op==='append' && op.path){
-              const arr = getAtPath(spec, op.path) || [];
-              if(Array.isArray(arr)) setAtPath(spec, op.path, [...arr, op.value]);
-            }
-            if(op.op==='ensureSection' && op.id){
-              const id=op.id; if(!spec[id]) spec[id] = {};
-            }
-          });
-        }
-
-        // ---- Mémoire côté client
-        if(data.memoryPatch){
-          const mem = JSON.parse(localStorage.getItem('pf_memory')||'{}');
-          localStorage.setItem('pf_memory', JSON.stringify(deepMerge(mem, data.memoryPatch)));
-        }
-
-        // Sauvegarde + rendu
-        localStorage.setItem('pf_proposal', JSON.stringify(spec));
-        renderSpec();
         saveSessionState();
         statusEl.textContent='Prêt';
-
-        // (Optionnel) raffinement style via Edge Function (si dispo)
-        await refineStyleFromConversation(content);
       }catch(e){
         hideTyping();
         statusEl.textContent='Erreur réseau';
         bubble('assistant', `<em>Erreur réseau. Réessayez.</em><br><small>${escapeHTML(e?.message||'')}</small>`);
+      } finally {
+        isSending = false;
       }
     }
 
-    // Entrée = envoyer / Maj+Entrée = retour à la ligne
+    // Entrée = envoyer / Maj+Entrée = retour ligne (un seul listener)
     composer.addEventListener('keydown', (e)=>{
-      if(e.key==='Enter' && !e.shiftKey){
-        e.preventDefault();
-        sendMessage(composer.value);
-      }
-    });
-    // fallback mobiles
-    composer.addEventListener('keypress', (e)=>{
+      if(e.isComposing || e.keyCode===229) return;
       if(e.key==='Enter' && !e.shiftKey){
         e.preventDefault();
         sendMessage(composer.value);
@@ -534,7 +477,7 @@
     });
     sendBtn.onclick = ()=> sendMessage(composer.value);
 
-    /* ---------- Upload logo -> applique à la spec ---------- */
+    /* ---------- Upload logo -> spec ---------- */
     const logoInput = document.getElementById('logoInput');
     logoInput.addEventListener('change', async (e)=>{
       const file = e.target.files?.[0]; if(!file) return;
@@ -560,7 +503,7 @@
     function fmtDate(d){ try{ const dt=d?new Date(d):new Date(); return dt.toLocaleDateString(document.documentElement.lang||getLang(), {year:'numeric',month:'short',day:'2-digit'});}catch{return ''} }
     function money(n,c){ try{ return new Intl.NumberFormat(document.documentElement.lang||getLang(),{style:'currency',currency:c||'EUR'}).format(Number(n||0)); }catch{ return String(n||0)+' '+(c||'€') } }
 
-    /* ---------- THEME: applique meta.style ---------- */
+    /* ---------- THEME & décor ---------- */
     function applyStyleTokens(style){
       const palette = {
         primary: "#3B82F6", secondary: "#8B5CF6", surface: "#FFFFFF",
@@ -608,7 +551,7 @@
         Object.assign(layer.style, pos);
         const rot = Number(L.rotate||0);
         const scale = Math.max(0.25, Number(L.scale||1));
-        const color = `hsla(${Number(L.h??220)},${Number(L.s??60)}%,${Number(L.l??55)}%,${Number(L.opacity??0.18)})`;
+        const color = hsla(L.h ?? 220, L.s ?? 60, L.l ?? 55, L.opacity ?? 0.18);
 
         switch((L.type||'').toLowerCase()){
           case 'glow': {
@@ -907,7 +850,45 @@
       renderSpec();
     });
 
-    /* ---------- Style live : appel Edge Function Supabase ---------- */
+    /* ---------- Style live (Edge Function Supabase) ---------- */
+    function mapDesignDiffToStyle(diff){
+      const out = { ...(spec.meta?.style||{}) };
+
+      if(diff.palette){
+        out.palette = { ...(out.palette||{}), ...diff.palette };
+      }
+      if(diff.typography){
+        const heading = diff.typography.title?.family || out.typography?.heading || 'Inter';
+        const body    = diff.typography.body?.family  || out.typography?.body    || 'Inter';
+        out.typography = { ...(out.typography||{}), heading, body };
+      }
+      if(diff.layout?.radius){
+        const r = diff.layout.radius.panel || diff.layout.radius.card || 12;
+        out.shapes = { ...(out.shapes||{}), radius: (typeof r==='number'? r+'px' : r) };
+      }
+      if(diff.texture){
+        const kind = String(diff.texture.kind||'none').toLowerCase();
+        if(kind!=='none'){
+          out.decor_layers = out.decor_layers || [];
+          if(!out.decor_layers.length){
+            out.decor_layers.push({ type: (kind==='blob'?'gradient_blob':'glow'), position:'top', opacity:0.18, h:220, s:60, l:55, rotate:0, scale:1, blend:'overlay' });
+          }
+        }
+      }
+      return out;
+    }
+
+    function applyDesignDiff(diff){
+      const mapped = mapDesignDiffToStyle(diff||{});
+      spec.meta = spec.meta || {};
+      spec.meta.style = { ...(spec.meta.style||{}), ...mapped,
+        palette:{ ...((spec.meta.style||{}).palette||{}), ...(mapped.palette||{}) },
+        typography:{ ...((spec.meta.style||{}).typography||{}), ...(mapped.typography||{}) },
+        shapes:{ ...((spec.meta.style||{}).shapes||{}), ...(mapped.shapes||{}) },
+        decor_layers: mapped.decor_layers || spec.meta.style?.decor_layers || []
+      };
+    }
+
     async function refineStyleFromConversation(latestUserText){
       try{
         const body = {
@@ -932,8 +913,7 @@
         }
         const js = await r.json();
         if(js?.designSpecDiff){
-          spec.meta = spec.meta || {};
-          spec.meta.style = deepMerge(spec.meta.style||{}, js.designSpecDiff);
+          applyDesignDiff(js.designSpecDiff);
           localStorage.setItem('pf_proposal', JSON.stringify(spec));
           renderSpec();
           saveSessionState();
@@ -941,11 +921,6 @@
       }catch(err){
         console.warn('style err', err);
       }
-    }
-
-    /* ---------- Relance si dernier message user sans réponse ---------- */
-    if(messages.length && messages[messages.length-1].role==='user' && !chatBody.querySelector('.bubble-assistant')){
-      sendMessage(messages[messages.length-1].content);
     }
   </script>
 </body>
