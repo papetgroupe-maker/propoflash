@@ -413,6 +413,29 @@
     }
     renderChat();
 
+    /* ---------- Helpers merge/patch ---------- */
+    function deepMerge(target, patch){
+      const isObj = (o)=>o && typeof o==='object' && !Array.isArray(o);
+      if(!isObj(target)) target = {};
+      if(!isObj(patch)) return target;
+      const out = Array.isArray(target) ? [...target] : { ...target };
+      for(const [k,v] of Object.entries(patch)){
+        if(Array.isArray(v)){ out[k] = v.slice(); continue; }
+        if(isObj(v)){ out[k] = deepMerge(out[k]||{}, v); continue; }
+        out[k] = v;
+      }
+      return out;
+    }
+    function setAtPath(obj, path, value){
+      const parts = String(path||'').split('.').filter(Boolean);
+      let cur=obj;
+      for(let i=0;i<parts.length-1;i++){ cur[parts[i]] = cur[parts[i]] ?? {}; cur = cur[parts[i]]; }
+      cur[parts[parts.length-1]] = value;
+    }
+    function getAtPath(obj, path){
+      return String(path||'').split('.').filter(Boolean).reduce((a,k)=> (a?a[k]:undefined), obj);
+    }
+
     async function sendMessage(text){
       const content=text.trim(); if(!content) return;
       messages.push({ role:'user', content }); localStorage.setItem('pf_chat', JSON.stringify(messages));
@@ -425,7 +448,12 @@
 
         const resp = await fetch('/api/chat', {
           method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ message: content, proposalSpec: spec, history: messages.slice(-10) })
+          body: JSON.stringify({
+            message: content,
+            proposalSpec: spec,
+            history: messages.slice(-12),
+            memory: JSON.parse(localStorage.getItem('pf_memory')||'{}')
+          })
         });
 
         if(!resp.ok){
@@ -444,20 +472,45 @@
         messages.push({ role:'assistant', content: reply }); localStorage.setItem('pf_chat', JSON.stringify(messages));
         bubble('assistant', escapeHTML(reply).replace(/\n/g,'<br/>'));
 
+        // ---- Fusion de la proposition
         if(data.proposalSpec){
-          const next = { ...(spec||{}), ...(data.proposalSpec||{}) };
-          next.meta = { ...(spec?.meta||{}), ...((data.proposalSpec||{}).meta||{}) };
-          if(next.meta){ next.meta.style = { ...((spec?.meta||{}).style||{}), ...((next.meta||{}).style||{}) }; }
-          spec = next;
-          localStorage.setItem('pf_proposal', JSON.stringify(spec));
-          renderSpec();
+          spec = deepMerge(spec||{}, data.proposalSpec);
         }
 
-        // >>> STYLE LIVE via Edge Function Supabase
-        await refineStyleFromConversation(content);
+        // ---- Style live (diff) -> fusion dans meta.style
+        if(data.designSpecDiff){
+          spec.meta = spec.meta || {};
+          spec.meta.style = deepMerge(spec.meta.style||{}, data.designSpecDiff);
+        }
 
+        // ---- Preview ops (set/append/ensureSection)
+        if(Array.isArray(data.previewOps)){
+          data.previewOps.forEach(op=>{
+            if(op.op==='set' && op.path){ setAtPath(spec, op.path, op.value); }
+            if(op.op==='append' && op.path){
+              const arr = getAtPath(spec, op.path) || [];
+              if(Array.isArray(arr)) setAtPath(spec, op.path, [...arr, op.value]);
+            }
+            if(op.op==='ensureSection' && op.id){
+              const id=op.id; if(!spec[id]) spec[id] = {};
+            }
+          });
+        }
+
+        // ---- Mémoire côté client
+        if(data.memoryPatch){
+          const mem = JSON.parse(localStorage.getItem('pf_memory')||'{}');
+          localStorage.setItem('pf_memory', JSON.stringify(deepMerge(mem, data.memoryPatch)));
+        }
+
+        // Sauvegarde + rendu
+        localStorage.setItem('pf_proposal', JSON.stringify(spec));
+        renderSpec();
         saveSessionState();
         statusEl.textContent='Prêt';
+
+        // (Optionnel) raffinement style via Edge Function (si dispo)
+        await refineStyleFromConversation(content);
       }catch(e){
         hideTyping();
         statusEl.textContent='Erreur réseau';
@@ -543,7 +596,7 @@
       };
       return map[pos] || map.center;
     }
-    function renderDecorLayers(layers, palette){
+    function renderDecorLayers(layers){
       decor.innerHTML = '';
       if(!layers?.length) return;
       layers.forEach((L,i)=>{
@@ -555,7 +608,7 @@
         Object.assign(layer.style, pos);
         const rot = Number(L.rotate||0);
         const scale = Math.max(0.25, Number(L.scale||1));
-        const color = hsla(L.h ?? 220, L.s ?? 60, L.l ?? 55, L.opacity ?? 0.18);
+        const color = `hsla(${Number(L.h??220)},${Number(L.s??60)}%,${Number(L.l??55)}%,${Number(L.opacity??0.18)})`;
 
         switch((L.type||'').toLowerCase()){
           case 'glow': {
@@ -855,46 +908,6 @@
     });
 
     /* ---------- Style live : appel Edge Function Supabase ---------- */
-    function mapDesignDiffToStyle(diff){
-      const out = { ...(spec.meta?.style||{}) };
-
-      if(diff.palette){
-        out.palette = { ...(out.palette||{}), ...diff.palette };
-      }
-      if(diff.typography){
-        const heading = diff.typography.title?.family || out.typography?.heading || 'Inter';
-        const body    = diff.typography.body?.family  || out.typography?.body    || 'Inter';
-        out.typography = { ...(out.typography||{}), heading, body };
-      }
-      if(diff.layout?.radius){
-        const r = diff.layout.radius.panel || diff.layout.radius.card || 12;
-        out.shapes = { ...(out.shapes||{}), radius: (typeof r==='number'? r+'px' : r) };
-      }
-      if(diff.texture){
-        // on pourrait décider d’activer des decor_layers selon texture.kind
-        // exemple simple : légère glow si "mesh" / "blob"
-        const kind = String(diff.texture.kind||'none').toLowerCase();
-        if(kind!=='none'){
-          out.decor_layers = out.decor_layers || [];
-          if(!out.decor_layers.length){
-            out.decor_layers.push({ type: (kind==='blob'?'gradient_blob':'glow'), position:'top', opacity:0.18, h:220, s:60, l:55, rotate:0, scale:1, blend:'overlay' });
-          }
-        }
-      }
-      return out;
-    }
-
-    function applyDesignDiff(diff){
-      const mapped = mapDesignDiffToStyle(diff||{});
-      spec.meta = spec.meta || {};
-      spec.meta.style = { ...(spec.meta.style||{}), ...mapped,
-        palette:{ ...((spec.meta.style||{}).palette||{}), ...(mapped.palette||{}) },
-        typography:{ ...((spec.meta.style||{}).typography||{}), ...(mapped.typography||{}) },
-        shapes:{ ...((spec.meta.style||{}).shapes||{}), ...(mapped.shapes||{}) },
-        decor_layers: mapped.decor_layers || spec.meta.style?.decor_layers || []
-      };
-    }
-
     async function refineStyleFromConversation(latestUserText){
       try{
         const body = {
@@ -919,7 +932,8 @@
         }
         const js = await r.json();
         if(js?.designSpecDiff){
-          applyDesignDiff(js.designSpecDiff);
+          spec.meta = spec.meta || {};
+          spec.meta.style = deepMerge(spec.meta.style||{}, js.designSpecDiff);
           localStorage.setItem('pf_proposal', JSON.stringify(spec));
           renderSpec();
           saveSessionState();
