@@ -1,242 +1,123 @@
-// /api/chat.js — Vercel Serverless (Node 18+)
-// IA "Senior Proposal Strategist + 3D HTML/CSS Designer"
-// Sortie JSON stricte + fallback (jamais d’HTML) pour éviter les erreurs réseau.
+// /api/chat.js  (Vercel – Node runtime)
+export default async function handler(req, res) {
+  try {
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Method not allowed' });
+    }
 
-const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
-const MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: 'Missing OPENAI_API_KEY' });
+    }
 
-// =========================== SYSTEM PROMPT ===========================
-const SYSTEM_PROMPT = `
-Tu es **PropoFlash Brain** : 
-- Expert mondial des **propositions commerciales** (B2B/B2C), structuration, valeur, pricing.
-- **Designer 3D HTML/CSS** (effets glow/mesh/dots/diagonal, élévations, grilles responsives, typographie).
-- Chef d'orchestre **conversationnel** : questionne, reformule, propose, mémorise, jamais redondant.
+    const {
+      message,
+      proposalSpec = {},
+      history = [],
+      memory = {}
+    } = (req.body || {});
 
-## Objectifs
-1) Conduire un vrai **dialogue** : poser les bonnes questions (objectif, client, contexte, contraintes, style, budget/échéance, preuves).
-2) Construire/affiner une **proposition** cohérente et **super design**, pages verticales (cover, lettre, résumé, objectifs, approche/phasage, livrables in/out, planning, pricing, hypothèses/risques, prochaines étapes).
-3) Générer du **style live** (palette, typo, décor 3D doux, shapes) pour l’aperçu.
-4) Garder une **mémoire structurée** (ne pas faire répéter).
+    if (!message || typeof message !== 'string') {
+      return res.status(400).json({ error: 'message is required' });
+    }
 
-## Dialogue — règles
-- **FR par défaut** si ambigu.
-- **Toujours 1 à 3 questions utiles max** pour avancer, jamais une liste interminable.
-- **Ne réinterroge pas** ce qui est déjà mémorisé ; exploite la mémoire.
-- Quand des infos manquent, **fais des hypothèses raisonnables** mais **marque-les** "à confirmer".
+    // 🔧 SYSTEM PROMPT — Expert proposition + Designer HTML/CSS 3D
+    const system = `
+Tu es **PropoFlash**, une IA experte en **propositions commerciales** ET **design front (HTML/CSS/3D)**.
 
-## Style & accessibilité
-- Contraste suffisant (ink vs surface).
-- Design pro, subtil, moderne ; 2–4 layers décor max (glow/mesh/dots/diagonal/grid), pas flashy.
-- 3D soft : ombres réalistes, degrés faibles.
+Objectifs :
+- Conduire une **discussion proactive** (questions, validations, suggestions).
+- Ne pas faire répéter : mémorise tout (client, marque, ton, couleurs, public, contraintes).
+- Construire / améliorer la **structure de la proposition** (letter, executive_summary, objectives, approach/phases, deliverables in/out, timeline, pricing, assumptions, next_steps).
+- Savoir **designer** : palette, typo, rayons, ombres, décor 3D doux (blobs/mesh/glows/grids), et indiquer les diffs de style.
 
-## Sortie — JSON STRICT UNIQUEMENT
-Renvoie **exactement** cet objet (même si partiel) :
+Contraintes de sortie :
+- Tu dois renvoyer **uniquement** un JSON valide, **sans texte** hors JSON.
+- Schéma EXACT (champs optionnels acceptés) :
 
 {
-  "reply": "texte pour l'utilisateur (questions incluses si besoin)",
-  "proposalSpec": { ... },                // sections de la propal (tu peux envoyer des deltas)
-  "designSpecDiff": {                     // diff à fusionner dans meta.style
-    "palette": { "primary":"#hex", "secondary":"#hex", "surface":"#hex", "ink":"#hex", "muted":"#hex", "stroke":"#hex", "accentA":"#hex", "accentB":"#hex" },
-    "typography": { "heading":"Inter|Montserrat|Poppins|Playfair", "body":"Inter" },
-    "shapes": { "radius":"12px|16px", "shadow":"0 18px 48px rgba(10,16,32,.12)" },
+  "reply": "string, message chat pour l'utilisateur",
+  "titleSuggestion": "string | null",
+  "followUps": ["string", ...] | null,
+  "proposalSpecPatch": { ... },       // patch ou objet partiel à fusionner
+  "designSpecDiff": {                  // tokens de style à appliquer
+    "palette": { "primary": "#...", "secondary": "#...", "surface": "#...", "ink": "#...", "muted": "#...", "stroke": "#..." },
+    "typography": { "heading": "Inter", "body": "Inter" },
+    "shapes": { "radius": "12px", "shadow": "0 18px 48px rgba(10,16,32,.12)" },
     "decor_layers": [
-      { "type":"glow|gradient_blob|grid|dots|diagonal|mesh", "position":"top|bottom|left|right|center", "opacity":0.18, "h":220, "s":60, "l":55, "rotate":0, "scale":1, "blend":"normal|screen|overlay" }
+      { "type": "glow|gradient_blob|grid|dots|diagonal", "position": "top|bottom|left|right|center", "opacity": 0.18, "h":220, "s":60, "l":55, "rotate":0, "scale":1, "blend":"overlay" }
     ]
   },
-  "previewOps": [                        // actions ciblées pour l'aperçu (facultatif)
-    { "op":"set", "path":"meta.title", "value":"Proposition — ..." },
-    { "op":"ensureSection", "id":"executive_summary" },
-    { "op":"append", "path":"pricing.items", "value":{ "name":"Cadrage", "qty":1, "unit":"forfait", "unit_price":1500 } }
+  "previewOps": [                     // micro-opérations ciblées
+    { "op": "set",    "path": "letter.greeting", "value": "Bonjour ..." },
+    { "op": "append", "path": "timeline.milestones", "value": { "title": "Kickoff", "date": "S1" } },
+    { "op": "merge",  "path": "pricing", "value": { "model": "forfait", "currency": "EUR" } }
   ],
-  "memoryPatch": {                       // ce que tu as compris/confirmé (sera mergé côté client)
-    "lang":"fr|en",
-    "client":"", "company":"", "industry":"",
-    "tone":["sobre","corporate"], "colors":["bleu","gris"],
-    "constraints":{"deadline":"","budget":""},
-    "known": ["..."], "unknown": ["besoin de ..."]
-  },
-  "actions": [                           // éventuels next steps machine
-    { "type":"ask", "field":"client", "hint":"Quel est le nom du client ?" },
-    { "type":"preview" }
-  ]
+  "memoryPatch": { ... }              // ex: { brand:"Crédit Agricole", tone:"sobre", mainColor:"#0E4AA8" }
 }
 
-### Conseils design rapides
-- "luxe/premium/noir-or" -> noir #111827 + or #E5B344, texture faible.
-- "sobre/corporate/bleu" -> bleus froids, gris doux, Inter, décor léger.
-- "magazine/éditorial/serif" -> Playfair/Source Serif en heading.
-- "startup/vibrant" -> secondaires saturées, radius ↑, légère texture.
-`.trim();
+Bonnes pratiques :
+- Toujours **proposer 1-3 questions de suivi** pertinentes (followUps) si le brief est incomplet.
+- Si l’utilisateur parle de **style** (ex: sobre, corporate, bleu, banque, 3D léger), refléter cela dans **designSpecDiff**.
+- Si le client/secteur est connu (banque, santé, luxe, SaaS), adapter terminologie et phasage métier.
+- Préparer **pricing** simple par défaut (forfait ou T&M) si non précisé.
+    `.trim();
 
-// =========================== FEWSHOTS (1 mini exemple) ===========================
-const FEWSHOTS = [
-  {
-    role: "user",
-    content:
-      "Style sobre corporate bleu. Client banque. Je veux une proposition pour landing page d’un nouveau service. Délai 4 semaines.",
-  },
-  {
-    role: "assistant",
-    content: JSON.stringify({
-      reply:
-        "Parfait. Pour affiner : 1) Nom du client ? 2) Objectif clé de la landing (leads, rdv, souscriptions) ? 3) Avez-vous un budget indicatif ?",
-      designSpecDiff: {
-        palette: {
-          primary: "#0B5ED7",
-          secondary: "#5B8DEF",
-          surface: "#FFFFFF",
-          ink: "#0A1020",
-          muted: "#687086",
-          stroke: "#E3E8F5",
-          accentA: "#7FB3FF",
-          accentB: "#A6C8FF",
-        },
-        typography: { heading: "Inter", body: "Inter" },
-        shapes: { radius: "12px", shadow: "0 18px 48px rgba(10,16,32,.12)" },
-        decor_layers: [
-          { type: "glow", position: "top", opacity: 0.18, h: 220, s: 60, l: 55 },
-          { type: "dots", position: "right", opacity: 0.14, h: 220, s: 20, l: 70, scale: 1 },
-        ],
-      },
-      memoryPatch: {
-        lang: "fr",
-        industry: "banque",
-        tone: ["sobre", "corporate"],
-        colors: ["bleu"],
-        constraints: { deadline: "4 semaines" },
-      },
-      actions: [{ type: "preview" }],
-    }),
-  },
-];
+    const user = `
+Mémoire: ${JSON.stringify(memory || {})}
+Spec actuelle (résumé): ${JSON.stringify(proposalSpec || {})}
+Historique (derniers): ${JSON.stringify(history.slice(-10) || [])}
+Message utilisateur: ${message}
+    `.trim();
 
-// ============================== UTILITAIRES ===============================
-function jsonOnly(res, status, data) {
-  res.status(status).setHeader("Content-Type", "application/json; charset=utf-8");
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.send(JSON.stringify(data));
-}
+    const body = {
+      model: 'gpt-4o-mini',
+      temperature: 0.6,
+      messages: [
+        { role: 'system', content: system },
+        { role: 'user', content: user }
+      ],
+      // On essaye d'obtenir du JSON strict (si le modèle le supporte)
+      response_format: { type: 'json_object' }
+    };
 
-function asJson(txt) {
-  try { return JSON.parse(txt); } catch {}
-  const m = txt && txt.match(/\{[\s\S]*\}$/);
-  if (m) { try { return JSON.parse(m[0]); } catch {} }
-  return null;
-}
-
-function safeReply(err) {
-  const e = err ? String(err.message || err) : undefined;
-  return {
-    reply:
-      "Je commence la proposition. Dites-moi le client, les objectifs business, le style (ex. sobre/entreprise/bleu) et un ordre de budget/délai.",
-    proposalSpec: {
-      meta: {
-        lang: "fr",
-        title: "Proposition commerciale",
-        currency: "EUR",
-      },
-    },
-    designSpecDiff: {
-      palette: {
-        primary: "#3B82F6",
-        secondary: "#8B5CF6",
-        surface: "#FFFFFF",
-        ink: "#0A1020",
-        muted: "#6B7280",
-        stroke: "#E5E7EB",
-        accentA: "#60A5FA",
-        accentB: "#93C5FD",
-      },
-      typography: { heading: "Inter", body: "Inter" },
-      shapes: { radius: "12px", shadow: "0 18px 48px rgba(10,16,32,.12)" },
-      decor_layers: [{ type: "glow", position: "top", opacity: 0.18, h: 220, s: 60, l: 55 }],
-    },
-    memoryPatch: { lang: "fr" },
-    actions: [{ type: "preview" }],
-    fallback: true,
-    error: e,
-  };
-}
-
-// ================================ HANDLER ================================
-export default async function handler(req, res) {
-  if (req.method === "OPTIONS") return jsonOnly(res, 204, {});
-  if (req.method !== "POST") return jsonOnly(res, 405, { ok: false, error: "Use POST" });
-
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return jsonOnly(res, 200, safeReply("Missing OPENAI_API_KEY"));
-
-  // corps
-  let body = {};
-  try { body = req.body ?? JSON.parse(req.body || "{}"); } catch {}
-  const message = String(body.message || "");
-  const proposalSpec = body.proposalSpec || {};
-  const memory = body.memory || {};
-  const history = Array.isArray(body.history) ? body.history : [];
-
-  // conversation
-  const messages = [
-    { role: "system", content: SYSTEM_PROMPT },
-    ...FEWSHOTS,
-    // petite mémoire synthétique injectée au modèle
-    {
-      role: "system",
-      content: `Mémoire actuelle (résumé JSON) : ${JSON.stringify(memory).slice(0, 3000)}`,
-    },
-    ...history.slice(-12).map((m) => ({
-      role: m.role === "assistant" ? "assistant" : "user",
-      content: String(m.content || ""),
-    })),
-    {
-      role: "user",
-      content:
-        `Dernier état (extrait) : ${JSON.stringify({
-          meta: proposalSpec?.meta || {},
-          sections: Object.keys(proposalSpec || {}).filter((k) => k !== "meta"),
-        }).slice(0, 1200)}\n\nMessage utilisateur : ${message}`,
-    },
-  ];
-
-  try {
-    const r = await fetch(OPENAI_URL, {
-      method: "POST",
+    const r = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        model: MODEL,
-        temperature: 0.35,
-        response_format: { type: "json_object" },
-        messages,
-      }),
+      body: JSON.stringify(body)
     });
 
-    const txt = await r.text();
     if (!r.ok) {
-      return jsonOnly(res, 200, safeReply(new Error(`OpenAI ${r.status}: ${txt.slice(0, 600)}`)));
+      const t = await r.text().catch(() => '');
+      return res.status(502).json({ error: 'OpenAI error', details: t });
     }
-    const out = asJson(txt) || {};
-    // valeurs de secours au cas où
-    const reply = out.reply || "J’ai avancé la structure. Souhaitez-vous affiner le style ou le périmètre ?";
-    const spec = out.proposalSpec || {};
-    const styleDiff = out.designSpecDiff || {};
-    const previewOps = Array.isArray(out.previewOps) ? out.previewOps : [];
-    const memoryPatch = out.memoryPatch || {};
-    const actions = Array.isArray(out.actions) ? out.actions : [{ type: "preview" }];
 
-    return jsonOnly(res, 200, {
-      ok: true,
-      reply,
-      proposalSpec: spec,
-      designSpecDiff: styleDiff,
-      previewOps,
-      memoryPatch,
-      actions,
-    });
+    const js = await r.json();
+    const raw = js?.choices?.[0]?.message?.content?.trim() || '{}';
+
+    let payload;
+    try {
+      payload = JSON.parse(raw);
+    } catch {
+      // fallback: on encapsule la réponse brute
+      payload = { reply: raw };
+    }
+
+    const out = {
+      reply: payload.reply || "D'accord, je continue.",
+      titleSuggestion: payload.titleSuggestion || null,
+      followUps: Array.isArray(payload.followUps) ? payload.followUps : null,
+      proposalSpecPatch: payload.proposalSpecPatch || payload.proposalSpec || null, // compat
+      designSpecDiff: payload.designSpecDiff || null,
+      previewOps: Array.isArray(payload.previewOps) ? payload.previewOps : null,
+      memoryPatch: payload.memoryPatch || null
+    };
+
+    return res.status(200).json(out);
   } catch (e) {
-    return jsonOnly(res, 200, safeReply(e));
+    return res.status(500).json({ error: 'Server failure', details: String(e?.message || e) });
   }
 }
