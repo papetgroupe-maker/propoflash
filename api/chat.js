@@ -1,6 +1,6 @@
 // /api/chat.js  — Vercel Serverless (Node / ESM)
 // Répond au front avec { reply, proposalSpec } en JSON strict.
-// Nécessite la variable d'env Vercel: OPEN API
+// Nécessite la variable d'env Vercel: OPENAI_API_KEY
 
 import OpenAI from "openai";
 
