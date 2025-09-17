@@ -12,7 +12,7 @@
       --paper-w:210mm; --paper-h:297mm;
       --elev:0 18px 48px rgba(10,16,32,.10), inset 0 1px 0 #ffffffaa;
 
-      /* Chat theme */
+      /* Chat themes */
       --assistant-bubble: color-mix(in hsl, var(--panel) 86%, transparent);
       --user-bubble: linear-gradient(135deg, var(--accent), var(--accent2));
       --user-ink: #ffffff;
@@ -20,7 +20,9 @@
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0; height:100vh; overflow:hidden;
+      margin:0;
+      height:100vh;
+      overflow:hidden;
       background:linear-gradient(180deg,var(--bg),#eef3ff);
       font-family:Inter,system-ui,sans-serif;color:var(--ink)
     }
@@ -39,12 +41,15 @@
     .menu a,.menu button{display:block;width:100%;text-align:left;padding:10px 12px;border:none;background:var(--panel);cursor:pointer;font-weight:600;color:var(--ink)}
     .menu a:hover,.menu button:hover{background:color-mix(in hsl, var(--panel) 80%, transparent)}
 
-    /* Layout */
+    /* Layout principal */
     .main{
       height:calc(100vh - 64px);
       display:grid;
       grid-template-columns: clamp(520px, 38vw, 640px) 1fr;
-      gap:18px; padding:18px 24px; align-items:stretch; min-height:0;
+      gap:18px;
+      padding:18px 24px;
+      align-items:stretch;
+      min-height:0;
     }
     .panel{
       background:var(--panel);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--elev);
@@ -56,16 +61,20 @@
     .chat-head{display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--stroke)}
     .chat-title{font-weight:800}
     .chat-body{padding:12px;overflow:auto;flex:1;min-height:0}
+
     .msg{display:flex;gap:10px;margin:10px 0;align-items:flex-end;width:100%}
     .msg.assistant{justify-content:flex-start}
     .msg.user{justify-content:flex-end}
+
     .avatar-badge{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:11px;border:1px solid var(--stroke);box-shadow:var(--elev);background:var(--panel);color:var(--ink);user-select:none}
     .avatar-badge.bot{background:#111827;color:#fff;border-color:#111827}
     .avatar-badge.you{background:var(--accent);color:#fff;border-color:transparent}
+
     .bubble{max-width:min(100%, 560px);padding:10px 12px;border-radius:14px;border:1px solid var(--stroke);box-shadow:var(--elev);word-wrap:break-word;overflow-wrap:anywhere}
     .bubble-assistant{background:var(--assistant-bubble);color:var(--ink)}
     .bubble-user{background:var(--user-bubble);color:var(--user-ink);border-color:transparent}
 
+    /* Composer + upload logo */
     .chat-compose{position:relative;padding:12px;border-top:1px solid var(--stroke);display:flex;align-items:flex-end;gap:16px}
     .logo-wrap{position:relative;flex:0 0 auto}
     .input{display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--stroke);border-radius:14px;padding:8px;box-shadow:var(--elev);flex:1}
@@ -76,17 +85,18 @@
     .logo-tip{position:absolute;left:0;bottom:44px;background:#111;color:#fff;font-size:12px;padding:6px 8px;border-radius:8px;display:none;white-space:nowrap}
     .logo-wrap:hover .logo-tip{display:block}
 
-    /* Typing */
+    /* Indicateur de frappe */
     .typing{display:inline-flex;gap:5px;align-items:center}
     .dot{width:6px;height:6px;border-radius:50%;background:#8aa0c6;opacity:.7;animation:bounce 1.2s infinite}
     .dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
     @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
 
-    /* Preview */
+    /* Aperçu */
     .sheet-wrap{flex:1;min-height:0;overflow:auto;display:flex;justify-content:center;align-items:flex-start;padding:12px 24px}
     .sheet{position:relative;overflow:visible;width:var(--paper-w);max-width:100%;background:transparent;border:none;box-shadow:none;color:var(--ink);font-family: var(--font-body, Inter), system-ui, sans-serif}
     .decor{position:fixed;inset:0;pointer-events:none;z-index:0}
     .content{position:relative;z-index:1}
+
     .page{position:relative;width:var(--paper-w);min-height:var(--paper-h);background:var(--panel);border:1px solid var(--stroke);border-radius:var(--radius, 12px);box-shadow:var(--elev);margin:0 0 16mm 0;overflow:hidden}
     .page:last-child{margin-bottom:0}
     .inner{padding:22mm 18mm;position:relative;z-index:1}
@@ -129,14 +139,9 @@
     .row-actions{display:flex;gap:6px}
     .icon-btn{border:1px solid var(--stroke);background:var(--panel);border-radius:8px;padding:6px;cursor:pointer}
 
-    /* Debug pane */
-    .debug{position:fixed;bottom:10px;left:10px;background:#111;color:#e3e7ef;padding:10px 12px;border-radius:10px;font:12px/1.4 monospace;max-width:44vw;max-height:40vh;overflow:auto;display:none;z-index:40}
-    .debug.open{display:block}
-    .dbg-toggle{position:fixed;bottom:10px;right:10px;border:1px solid var(--stroke);background:var(--panel);border-radius:999px;box-shadow:var(--elev);padding:8px 12px;cursor:pointer;z-index:41}
-
-    /* Print */
+    /* Impression */
     @media print{
-      .bar,.drawer,.dbg-toggle,.debug{display:none}
+      .bar,.drawer{display:none}
       body{overflow:visible;height:auto;background:#fff}
       .main{height:auto}
       .sheet-wrap{overflow:visible;flex:auto;min-height:auto;padding:0}
@@ -154,10 +159,7 @@
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    /* --- i18n minimal (utilise lang.js si dispo, sinon FR) --- */
-    window.getLang = window.getLang || (function(){ try{ return (localStorage.getItem('pf_lang')||navigator.language||'fr').slice(0,2) }catch{ return 'fr' }})();
-  </script>
+  <script src="lang.js"></script>
 </head>
 <body>
   <!-- Top bar -->
@@ -201,7 +203,8 @@
           <div class="logo-tip">Ajouter votre logo</div>
         </div>
         <div class="input">
-          <textarea id="composer" placeholder="Écrivez votre message"></textarea>
+          <!-- enterkeyhint="send" pour claviers mobiles -->
+          <textarea id="composer" placeholder="Écrivez votre message" enterkeyhint="send" autocomplete="off"></textarea>
           <button class="send" id="sendBtn" title="Envoyer" aria-label="Envoyer">
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="20" height="20"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
           </button>
@@ -218,18 +221,13 @@
     </div>
   </div>
 
-  <!-- Debug -->
-  <button class="dbg-toggle" id="dbgBtn">🪲 Debug</button>
-  <pre class="debug" id="debug"></pre>
-
   <script>
-    /* =========================
-       SUPABASE / AUTH (frontend)
-       ========================= */
+    /* ---------- Constantes Supabase ---------- */
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
+    /* ---------- Session / Auth UI ---------- */
     async function guard(){
       const { data:{ session } } = await sb.auth.getSession();
       if(session?.user) return true;
@@ -248,11 +246,10 @@
     avatar.onclick = (e)=>{ e.stopPropagation(); menu.style.display = menu.style.display==='block'?'none':'block'; };
     document.addEventListener('click', ()=> menu.style.display='none');
     logoutBtn.onclick = async ()=>{ await sb.auth.signOut(); location.reload(); };
+
     document.getElementById('homeBtn').onclick=()=>location.href='index.html';
 
-    /* =========================
-       HISTORIQUE PAR DISCUSSION
-       ========================= */
+    /* ---------- Historique : par discussion ---------- */
     const drawer=document.getElementById('drawer'); const histList=document.getElementById('histList');
     document.getElementById('openHistory').onclick = ()=> drawer.classList.toggle('open');
     document.getElementById('newChatBtn').onclick  = ()=> createNewSession();
@@ -261,7 +258,10 @@
     const CUR_KEY  = 'pf_current_session';
     function loadSessions(){ try{ return JSON.parse(localStorage.getItem(SESS_KEY)||'[]'); }catch{return []} }
     function saveSessions(arr){ localStorage.setItem(SESS_KEY, JSON.stringify(arr)); }
-    function getCurrentId(){ return localStorage.getItem(CUR_KEY) || null; }
+
+    function getCurrentId(){
+      return localStorage.getItem(CUR_KEY) || null;
+    }
     function setCurrentId(id){ localStorage.setItem(CUR_KEY, String(id)); }
 
     function createDefaultSpec(){
@@ -327,7 +327,8 @@
       sessions.forEach(s=>{
         const d=new Date(s.date);
         const row=document.createElement('div'); row.className='row-item';
-        const left=document.createElement('div'); left.style.display='flex'; left.style.flexDirection='column';
+        const left=document.createElement('div');
+        left.style.display='flex'; left.style.flexDirection='column';
         const title=document.createElement('strong'); title.textContent=s.title||'Sans titre'; title.onclick=()=>loadSession(s.id);
         const small=document.createElement('span'); small.className='muted'; small.style.fontSize='12px'; small.textContent=d.toLocaleString();
         left.appendChild(title); left.appendChild(small);
@@ -340,8 +341,8 @@
       });
     }
 
-    // Migration legacy (si ancien localStorage)
-    (function migrateOld(){
+    // Migration légère depuis pf_history (si existait)
+    (function migrateOldHistory(){
       const sessions = loadSessions(); if(sessions.length) return;
       try{
         const h=JSON.parse(localStorage.getItem('pf_history')||'[]');
@@ -353,9 +354,7 @@
     })();
     renderHistory();
 
-    /* =========================
-       CHAT + PRÉVIEW LIÉ
-       ========================= */
+    /* ---------- Chat + Spec ---------- */
     const chatBody=document.getElementById('chatBody');
     const composer=document.getElementById('composer');
     const sendBtn=document.getElementById('sendBtn');
@@ -363,29 +362,17 @@
     const sheet=document.getElementById('sheet');
     const decor=document.getElementById('decor');
     const sheetContent=document.getElementById('sheetContent');
-    const dbgBtn=document.getElementById('dbgBtn');
-    const dbg=document.getElementById('debug');
-    let debugOpen=false; dbgBtn.onclick=()=>{ debugOpen=!debugOpen; dbg.classList.toggle('open', debugOpen); };
 
     let messages = JSON.parse(localStorage.getItem('pf_chat')||'[]');
     let spec = null;
 
-    function createDefaultTitle(lang){ return (lang==='en')?'Business Proposal':'Proposition commerciale'; }
-
     function loadSpec(){
       try{ spec = JSON.parse(localStorage.getItem('pf_proposal')||'null'); }catch{ spec=null; }
       if(!spec){ spec = createDefaultSpec(); }
-      if(!spec.meta) spec.meta = { lang:getLang(), title:createDefaultTitle(getLang()) };
+      if(!spec.meta) spec.meta = { lang:getLang() };
     }
     loadSpec();
 
-    // Consommer un message "welcome" venant de l'index si présent
-    (function consumeWelcome(){
-      const w = localStorage.getItem('pf_welcome_msg');
-      if(w){ messages.push({ role:'user', content:w }); localStorage.removeItem('pf_welcome_msg'); }
-    })();
-
-    // Boot session courante
     (function bootSession(){
       const sessions = loadSessions();
       if(!getCurrentId()){
@@ -393,7 +380,7 @@
         else { createNewSession('Nouvelle proposition'); }
       }else{
         const s = sessions.find(x=>String(x.id)===String(getCurrentId()));
-        if(s){ spec = s.spec || createDefaultSpec(); messages = s.messages || []; renderChat(); renderSpec(); }
+        if(s){ spec = s.spec || createDefaultSpec(); messages = s.messages || []; }
       }
     })();
 
@@ -427,144 +414,8 @@
     }
     renderChat();
 
-    // Envoi (Enter = envoyer, Shift+Enter = ligne)
-    function handleSend(){
-      sendMessage(composer.value);
-    }
-    composer.addEventListener('keydown', (e)=>{
-      if(e.isComposing || e.keyCode===229) return; // IME
-      if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); handleSend(); }
-    });
-    composer.addEventListener('keypress', (e)=>{ // mobile fallback
-      if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); handleSend(); }
-    });
-    sendBtn.onclick = handleSend;
-
-    // Helpers JSON strict / extraction
-    function extractFirstJson(text){
-      try{
-        const start = text.indexOf('{');
-        const end   = text.lastIndexOf('}');
-        if(start>=0 && end>start){ return JSON.parse(text.slice(start, end+1)); }
-      }catch(_){}
-      return null;
-    }
-
-    function deepMerge(a,b){
-      if(Array.isArray(a) && Array.isArray(b)) return b; // remplace
-      if(a && typeof a==='object' && b && typeof b==='object'){
-        const out = { ...a };
-        for(const k of Object.keys(b)) out[k] = deepMerge(a[k], b[k]);
-        return out;
-      }
-      return (b===undefined)?a:b;
-    }
-
-    function mapDesignDiffToStyle(diff){
-      const out = { ...(spec.meta?.style||{}) };
-      if(diff.palette){ out.palette = { ...(out.palette||{}), ...diff.palette }; }
-      if(diff.typography){
-        const heading = diff.typography.title?.family || out.typography?.heading || 'Inter';
-        const body    = diff.typography.body?.family  || out.typography?.body    || 'Inter';
-        out.typography = { ...(out.typography||{}), heading, body };
-      }
-      if(diff.layout?.radius){
-        const r = diff.layout.radius.panel || diff.layout.radius.card || 12;
-        out.shapes = { ...(out.shapes||{}), radius: (typeof r==='number'? r+'px' : r) };
-      }
-      if(diff.texture){
-        const kind = String(diff.texture.kind||'none').toLowerCase();
-        if(kind!=='none'){
-          out.decor_layers = out.decor_layers || [];
-          if(!out.decor_layers.length){
-            out.decor_layers.push({ type: (kind==='blob'?'gradient_blob':'glow'), position:'top', opacity:0.18, h:220, s:60, l:55, rotate:0, scale:1, blend:'overlay' });
-          }
-        }
-      }
-      return out;
-    }
-
-    function applyDesignDiff(diff){
-      const mapped = mapDesignDiffToStyle(diff||{});
-      spec.meta = spec.meta || {};
-      spec.meta.style = {
-        ...(spec.meta.style||{}),
-        ...mapped,
-        palette:{ ...((spec.meta.style||{}).palette||{}), ...(mapped.palette||{}) },
-        typography:{ ...((spec.meta.style||{}).typography||{}), ...(mapped.typography||{}) },
-        shapes:{ ...((spec.meta.style||{}).shapes||{}), ...(mapped.shapes||{}) },
-        decor_layers: mapped.decor_layers || spec.meta.style?.decor_layers || []
-      };
-    }
-
-    // Fallback local si Edge Function KO
-    function naiveStyleHeuristic(txt){
-      const s = txt.toLowerCase();
-      const out = { palette:{}, typography:{}, shapes:{}, decor_layers:[] };
-      if(/noir|dark|sombre|corporate|sobre|luxe|premium/.test(s)){
-        out.palette.primary = '#111827'; out.palette.secondary = '#E5B344';
-        out.palette.surface = '#FFFFFF'; out.palette.ink = '#0A1020';
-        out.typography.heading = 'Inter'; out.typography.body='Inter';
-        out.shapes.radius='12px';
-        out.decor_layers = [{ type:'glow', position:'top', opacity:0.18, h:220, s:20, l:40, rotate:0, scale:1.1, blend:'overlay' }];
-      }else if(/fun|startup|vibrant|pop|violet|rose|flash/.test(s)){
-        out.palette.primary='#8B5CF6'; out.palette.secondary='#F472B6';
-        out.palette.surface='#ffffff'; out.palette.ink='#0A1020';
-        out.typography.heading='Poppins'; out.typography.body='Inter';
-        out.shapes.radius='16px';
-        out.decor_layers=[{ type:'gradient_blob', position:'right', opacity:0.22, h:290, s:70, l:55, rotate:0, scale:1.2, blend:'screen' }];
-      }else if(/bleu|blue|tech/.test(s)){
-        out.palette.primary='#3B82F6'; out.palette.secondary='#60A5FA';
-        out.typography.heading='Montserrat'; out.typography.body='Inter';
-        out.shapes.radius='12px';
-        out.decor_layers=[{ type:'grid', position:'center', opacity:0.12, h:220, s:20, l:60, rotate:0, scale:1, blend:'overlay' }];
-      }
-      return out;
-    }
-
-    async function refineStyleFromConversation(latestUserText){
-      try{
-        const body = {
-          mode: "style",
-          userText: latestUserText || (messages.filter(m=>m.role==='user').slice(-1)[0]?.content || ''),
-          currentDesign: spec.meta?.style || {},
-          proposalSpec: spec,
-          history: messages.slice(-8).map(m=>({ role: m.role==='assistant'?'assistant':'user', content: m.content }))
-        };
-        const r = await fetch(`${SUPABASE_URL}/functions/v1/chat`, {
-          method:'POST',
-          headers:{ 'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_ANON },
-          body: JSON.stringify(body)
-        });
-        if(!r.ok){
-          dbgLog('Edge style error '+r.status, await r.text().catch(()=>'' ));
-          // Fallback heuristique
-          applyDesignDiff(naiveStyleHeuristic(body.userText));
-          localStorage.setItem('pf_proposal', JSON.stringify(spec));
-          renderSpec(); saveSessionState();
-          return;
-        }
-        const js = await r.json();
-        if(js?.designSpecDiff){
-          applyDesignDiff(js.designSpecDiff);
-          localStorage.setItem('pf_proposal', JSON.stringify(spec));
-          renderSpec(); saveSessionState();
-        }
-      }catch(err){
-        dbgLog('Edge style exception', err?.message||String(err));
-        applyDesignDiff(naiveStyleHeuristic(latestUserText||'')); renderSpec(); saveSessionState();
-      }
-    }
-
-    function dbgLog(...args){
-      try{
-        const line = args.map(a=> (typeof a==='string'? a : JSON.stringify(a,null,2))).join(' ');
-        dbg.textContent = (dbg.textContent + '\n' + line).trim().slice(-4000);
-      }catch{}
-    }
-
     async function sendMessage(text){
-      const content = (text||'').trim(); if(!content) return;
+      const content=text.trim(); if(!content) return;
       messages.push({ role:'user', content }); localStorage.setItem('pf_chat', JSON.stringify(messages));
       bubble('user', escapeHTML(content).replace(/\n/g,'<br/>'));
       composer.value='';
@@ -582,39 +433,28 @@
           const txt = await resp.text().catch(()=> '');
           hideTyping();
           statusEl.textContent='Erreur réseau';
-          bubble('assistant', `<em>Erreur réseau (${resp.status}).</em><br><small>${escapeHTML(txt).slice(0,600)}</small>`);
-          dbgLog('API /api/chat error '+resp.status, txt);
+          bubble('assistant', `<em>Erreur réseau (${resp.status}).</em><br><small>${escapeHTML(txt).slice(0,300)}</small>`);
           return;
         }
 
-        const dataText = await resp.text(); // lecture brute pour debug + JSON
-        dbgLog('API raw:', dataText.slice(0,1500));
-        let data = {};
-        try{ data = JSON.parse(dataText); }catch{ data = extractFirstJson(dataText)||{}; }
+        const data = await resp.json();
 
         hideTyping();
 
-        const reply = data?.reply || (getLang()==='en'?'I could not structure the proposal.':'Je n’ai pas pu structurer la proposition.');
+        const reply = data.reply || (getLang()==='en'?'I could not structure the proposal.':'Je n’ai pas pu structurer la proposition.');
         messages.push({ role:'assistant', content: reply }); localStorage.setItem('pf_chat', JSON.stringify(messages));
         bubble('assistant', escapeHTML(reply).replace(/\n/g,'<br/>'));
 
-        // Merge proposalSpec (si fourni) OU extraire JSON depuis reply si le modèle a parlé autour
-        let incomingSpec = null;
-        if(data?.proposalSpec) incomingSpec = data.proposalSpec;
-        if(!incomingSpec){
-          const j = extractFirstJson(reply);
-          if(j?.proposalSpec) incomingSpec = j.proposalSpec;
-        }
-        if(incomingSpec){
-          spec = deepMerge(spec||{}, incomingSpec||{});
-          // sécurise meta/style
-          spec.meta = deepMerge(spec.meta||{}, incomingSpec?.meta||{});
-          if(spec.meta){ spec.meta.style = deepMerge(spec.meta.style||{}, incomingSpec?.meta?.style||{}); }
+        if(data.proposalSpec){
+          const next = { ...(spec||{}), ...(data.proposalSpec||{}) };
+          next.meta = { ...(spec?.meta||{}), ...((data.proposalSpec||{}).meta||{}) };
+          if(next.meta){ next.meta.style = { ...((spec?.meta||{}).style||{}), ...((next.meta||{}).style||{}) }; }
+          spec = next;
           localStorage.setItem('pf_proposal', JSON.stringify(spec));
           renderSpec();
         }
 
-        // Déduire/améliorer le STYLE à partir de la dernière phrase utilisateur
+        // >>> STYLE LIVE via Edge Function Supabase
         await refineStyleFromConversation(content);
 
         saveSessionState();
@@ -623,13 +463,34 @@
         hideTyping();
         statusEl.textContent='Erreur réseau';
         bubble('assistant', `<em>Erreur réseau. Réessayez.</em><br><small>${escapeHTML(e?.message||'')}</small>`);
-        dbgLog('sendMessage exception', e?.message||String(e));
       }
     }
 
-    /* =========================
-       UPLOAD LOGO
-       ========================= */
+    /* ---------- Envoi: Entrée = envoyer (robuste desktop & mobile) ---------- */
+    function handleSend(){
+      const v = composer.value;
+      if (!v || !v.trim()) return;
+      sendMessage(v);
+    }
+    function isPlainEnter(e){
+      return e.key === 'Enter' && !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey;
+    }
+    ['keydown','keyup'].forEach(evt => {
+      composer.addEventListener(evt, (e) => {
+        if (isPlainEnter(e)) {
+          e.preventDefault();
+          handleSend();
+        }
+      });
+    });
+    composer.addEventListener('blur', () => {
+      if (composer.value && /\n$/.test(composer.value)) {
+        composer.value = composer.value.replace(/\n+$/,'');
+      }
+    });
+    sendBtn.addEventListener('click', handleSend);
+
+    /* ---------- Upload logo -> applique à la spec ---------- */
     const logoInput = document.getElementById('logoInput');
     logoInput.addEventListener('change', async (e)=>{
       const file = e.target.files?.[0]; if(!file) return;
@@ -644,18 +505,18 @@
       e.target.value='';
     });
 
-    /* =========================
-       RENDU APERÇU
-       ========================= */
+    /* ---------- Libellés ---------- */
     const t = {
       fr:{ title:"Proposition commerciale", to:"Pour", from:"Émis par", date:"Date", letter:"Lettre d’introduction", executive:"Résumé exécutif", objectives:"Objectifs", approach:"Approche & phasage", deliverables:"Livrables", in_scope:"Inclus", out_scope:"Hors-périmètre", timeline:"Planning", pricing:"Tarification", assumptions:"Hypothèses / Risques", next:"Prochaines étapes", price_model:"Modèle", terms:"Conditions", toc:"Sommaire" },
       en:{ title:"Business Proposal", to:"To", from:"Issued by", date:"Date", letter:"Cover Letter", executive:"Executive Summary", objectives:"Objectives", approach:"Approach & Phasing", deliverables:"Deliverables", in_scope:"In scope", out_scope:"Out of scope", timeline:"Timeline", pricing:"Pricing", assumptions:"Assumptions / Risks", next:"Next Steps", price_model:"Model", terms:"Terms", toc:"Table of Contents" }
     };
+
     function safeArr(v){ return Array.isArray(v)?v:[]; }
     function safeStr(v,fb=''){ return (v==null?'':String(v)).trim() || fb; }
     function fmtDate(d){ try{ const dt=d?new Date(d):new Date(); return dt.toLocaleDateString(document.documentElement.lang||getLang(), {year:'numeric',month:'short',day:'2-digit'});}catch{return ''} }
     function money(n,c){ try{ return new Intl.NumberFormat(document.documentElement.lang||getLang(),{style:'currency',currency:c||'EUR'}).format(Number(n||0)); }catch{ return String(n||0)+' '+(c||'€') } }
 
+    /* ---------- THEME: applique meta.style ---------- */
     function applyStyleTokens(style){
       const palette = {
         primary: "#3B82F6", secondary: "#8B5CF6", surface: "#FFFFFF",
@@ -664,7 +525,7 @@
         ...(style?.palette||{})
       };
       const shapes = { radius:"12px", shadow:"0 18px 48px rgba(10,16,32,.12)", ...(style?.shapes||{}) };
-      const typo   = { heading:"Inter", body:"Inter", ...(style?.typography||{}) };
+      const typo   = { heading:"Inter", body:"Inter", accent:"Inter", ...(style?.typography||{}) };
 
       sheet.style.setProperty('--panel', palette.surface);
       sheet.style.setProperty('--ink', palette.ink);
@@ -782,6 +643,7 @@
       });
     }
 
+    /* ---------- Pages ---------- */
     const sheetPages = [];
     function clearPages(){ sheetContent.innerHTML=''; sheetPages.length=0; }
     function makePage(kind='default'){
@@ -803,7 +665,8 @@
       const band = document.createElement('div');
       band.style.position='absolute'; band.style.inset='-10% -10% auto -10%'; band.style.height='40%';
       band.style.background = `linear-gradient(135deg, ${colorA}, ${colorB})`;
-      band.style.opacity = .25; band.style.transform = 'skewY(-8deg)';
+      band.style.opacity = .25;
+      band.style.transform = 'skewY(-8deg)';
       pageDecor.appendChild(band);
     }
 
@@ -826,7 +689,7 @@
       inner.appendChild(meta);
 
       const band=document.createElement('div'); band.className='band';
-      band.textContent = (spec.meta?.lang==='en') ? "Preview auto-generated from your brief." : "Aperçu généré automatiquement selon votre brief.";
+      band.textContent = (L===t.fr) ? "Aperçu généré automatiquement selon votre brief." : "Preview auto-generated from your brief.";
       inner.appendChild(band);
     }
 
@@ -835,7 +698,8 @@
       if(present.length<3) return;
       const { inner } = makePage('toc');
       H2(inner, L.toc);
-      const toc=document.createElement('div'); toc.className='toc'; toc.innerHTML = `<b>${L.toc}</b>`;
+      const toc=document.createElement('div'); toc.className='toc';
+      toc.innerHTML = `<b>${L.toc}</b>`;
       present.forEach(s=>{ const a=document.createElement('a'); a.textContent=s.title; a.href='#'+s.id; toc.appendChild(a); });
       inner.appendChild(toc);
     }
@@ -844,7 +708,7 @@
       const { inner } = makePage('letter');
       H2(inner, L.letter);
       if(letter?.greeting) P(inner, letter.greeting);
-      safeArr(letter?.body_paragraphs?.length?letter.body_paragraphs:letter?.paragraphs).forEach(p=>P(inner, p));
+      (Array.isArray(letter?.body_paragraphs) ? letter.body_paragraphs : (letter?.paragraphs||[])).forEach(p=>P(inner, p));
       if(letter?.closing) P(inner, letter.closing);
       if(letter?.signature) P(inner, letter.signature);
     }
@@ -852,7 +716,7 @@
     function renderExecutive(L, exec){
       const { inner } = makePage('executive');
       H2(inner, L.executive);
-      safeArr(exec?.paragraphs).forEach(p=>P(inner, p));
+      (exec?.paragraphs||[]).forEach(p=>P(inner, p));
     }
 
     function renderObjectives(L, obj){
@@ -864,15 +728,15 @@
     function renderApproach(L, approach){
       const { inner } = makePage('approach');
       H2(inner, L.approach);
-      safeArr(approach?.phases).forEach((ph,i)=>{
+      (approach?.phases||[]).forEach((ph,i)=>{
         const card=document.createElement('div'); card.className='card';
         card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center">
-          <strong>Phase ${i+1} — ${safeStr(ph.title,'À confirmer')}</strong>
-          <span class="pill">${safeStr(ph.duration||'','')}</span></div>`;
+          <strong>Phase ${i+1} — ${String(ph.title||'À confirmer')}</strong>
+          <span class="pill">${String(ph.duration||'')}</span></div>`;
         inner.appendChild(card);
         if(ph.description) P(inner, ph.description);
-        const acts=safeArr(ph.activities?.length?ph.activities:ph.steps); if(acts.length){ const p=document.createElement('p'); p.innerHTML='<em>Activités :</em>'; inner.appendChild(p); UL(inner, acts); }
-        const outs=safeArr(ph.outcomes); if(outs.length){ const p=document.createElement('p'); p.innerHTML='<em>Résultats attendus :</em>'; inner.appendChild(p); UL(inner, outs); }
+        const acts=(ph.activities?.length?ph.activities:ph.steps)||[]; if(acts.length){ const p=document.createElement('p'); p.innerHTML='<em>Activités :</em>'; inner.appendChild(p); UL(inner, acts); }
+        const outs=ph.outcomes||[]; if(outs.length){ const p=document.createElement('p'); p.innerHTML='<em>Résultats attendus :</em>'; inner.appendChild(p); UL(inner, outs); }
       });
     }
 
@@ -882,8 +746,8 @@
       const grid=document.createElement('div'); grid.className='grid2';
       const a=document.createElement('div'); a.className='card'; a.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.in_scope}</div>`;
       const b=document.createElement('div'); b.className='card'; b.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.out_scope}</div>`;
-      const ulA=document.createElement('ul'); safeArr(deliv?.in).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulA.appendChild(li); });
-      const ulB=document.createElement('ul'); safeArr(deliv?.out).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulB.appendChild(li); });
+      const ulA=document.createElement('ul'); (deliv?.in||[]).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulA.appendChild(li); });
+      const ulB=document.createElement('ul'); (deliv?.out||[]).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulB.appendChild(li); });
       a.appendChild(ulA); b.appendChild(ulB); grid.appendChild(a); grid.appendChild(b); inner.appendChild(grid);
     }
 
@@ -891,9 +755,9 @@
       const { inner } = makePage('timeline');
       H2(inner, L.timeline);
       const grid=document.createElement('div'); grid.className='grid2';
-      safeArr(timeline?.milestones).forEach(ms=>{
+      (timeline?.milestones||[]).forEach(ms=>{
         const c=document.createElement('div'); c.className='card';
-        c.innerHTML = `<div><strong>${safeStr(ms.title,'Étape')}</strong></div><div class="muted">${safeStr(ms.dateOrWeek || ms.date || ms.duration || '', '')}</div>`;
+        c.innerHTML = `<div><strong>${String(ms.title||'Étape')}</strong></div><div class="muted">${String(ms.dateOrWeek || ms.date || ms.duration || '')}</div>`;
         if(ms.notes){ const p=document.createElement('p'); p.textContent=ms.notes; c.appendChild(p); }
         grid.appendChild(c);
       });
@@ -905,7 +769,7 @@
       H2(inner, L.pricing);
       const currency=pr?.currency||currencyFallback||'EUR';
       const meta=document.createElement('div'); meta.className='muted'; meta.style.margin='-6px 0 8px';
-      meta.innerHTML = `${L.price_model}: <span class="pill">${safeStr(pr?.model,'forfait')}</span>`;
+      meta.innerHTML = `${L.price_model}: <span class="pill">${String(pr?.model||'forfait')}</span>`;
       inner.appendChild(meta);
 
       if(Array.isArray(pr?.items) && pr.items.length){
@@ -918,7 +782,7 @@
         pr.items.forEach(it=>{
           const tr=document.createElement('tr');
           const qty=Number(it.qty||1), up=Number(it.unit_price||0), st=(it.subtotal!=null)?Number(it.subtotal):qty*up;
-          tr.innerHTML=`<td>${safeStr(it.name,'—')}</td><td>${Number.isFinite(qty)?qty:1}</td><td>${safeStr(it.unit||'—')}</td><td>${money(up,currency)}</td><td>${money(st,currency)}</td>`;
+          tr.innerHTML=`<td>${String(it.name||'—')}</td><td>${Number.isFinite(qty)?qty:1}</td><td>${String(it.unit||'—')}</td><td>${money(up,currency)}</td><td>${money(st,currency)}</td>`;
           tb.appendChild(tr);
         });
         inner.appendChild(table);
@@ -935,25 +799,25 @@
       }else{
         const priceBox=document.createElement('div'); priceBox.className='card';
         const price=pr?.price!=null?String(pr.price):'—';
-        priceBox.innerHTML=`<div class="price">${money(price,currency)}</div><div class="muted" style="margin-top:4px">${L.price_model}: <span>${safeStr(pr?.model,'forfait')}</span></div>`;
+        priceBox.innerHTML=`<div class="price">${money(price,currency)}</div><div class="muted" style="margin-top:4px">${L.price_model}: <span>${String(pr?.model||'forfait')}</span></div>`;
         inner.appendChild(priceBox);
       }
     }
 
-    function renderAssumptions(L, asmp){ const { inner } = makePage('assumptions'); H2(inner, L.assumptions); safeArr(asmp?.paragraphs).forEach(p=>P(inner, p)); }
-    function renderNext(L, next){ const { inner } = makePage('next'); H2(inner, L.next); safeArr(next?.paragraphs).forEach(p=>P(inner, p)); }
+    function renderAssumptions(L, asmp){ const { inner } = makePage('assumptions'); H2(inner, L.assumptions); (asmp?.paragraphs||[]).forEach(p=>P(inner, p)); }
+    function renderNext(L, next){ const { inner } = makePage('next'); H2(inner, L.next); (next?.paragraphs||[]).forEach(p=>P(inner, p)); }
 
     function buildTOCList(L){
       return [
-        { id:'s_letter', title:L.letter, present: safeArr(spec.letter?.body_paragraphs||spec.letter?.paragraphs).length || spec.letter?.greeting||spec.letter?.closing||spec.letter?.signature },
-        { id:'s_executive', title:L.executive, present: safeArr(spec.executive_summary?.paragraphs).length },
-        { id:'s_objectives', title:L.objectives, present: safeArr(spec.objectives?.bullets).length },
-        { id:'s_approach', title:L.approach, present: safeArr(spec.approach?.phases).length },
-        { id:'s_deliverables', title:L.deliverables, present: (spec.deliverables && (safeArr(spec.deliverables.in).length || safeArr(spec.deliverables.out).length)) },
-        { id:'s_timeline', title:L.timeline, present: safeArr(spec.timeline?.milestones).length },
+        { id:'s_letter', title:L.letter, present: (spec.letter && ((spec.letter.body_paragraphs||spec.letter.paragraphs||[]).length || spec.letter.greeting||spec.letter.closing||spec.letter.signature)) },
+        { id:'s_executive', title:L.executive, present: (spec.executive_summary && (spec.executive_summary.paragraphs||[]).length) },
+        { id:'s_objectives', title:L.objectives, present: (spec.objectives && (spec.objectives.bullets||[]).length) },
+        { id:'s_approach', title:L.approach, present: (spec.approach && (spec.approach.phases||[]).length) },
+        { id:'s_deliverables', title:L.deliverables, present: (spec.deliverables && ((spec.deliverables.in||[]).length || (spec.deliverables.out||[]).length)) },
+        { id:'s_timeline', title:L.timeline, present: (spec.timeline && (spec.timeline.milestones||[]).length) },
         { id:'s_pricing', title:L.pricing, present: (spec.pricing && (spec.pricing.items?.length || spec.pricing.price!=null)) },
-        { id:'s_assumptions', title:L.assumptions, present: safeArr(spec.assumptions?.paragraphs).length },
-        { id:'s_next', title:L.next, present: safeArr(spec.next_steps?.paragraphs).length },
+        { id:'s_assumptions', title:L.assumptions, present: (spec.assumptions && (spec.assumptions.paragraphs||[]).length) },
+        { id:'s_next', title:L.next, present: (spec.next_steps && (spec.next_steps.paragraphs||[]).length) },
       ];
     }
 
@@ -962,10 +826,10 @@
       clearPages();
 
       const L=t[spec.meta?.lang||getLang()]||t.fr;
-      const title=safeStr(spec.meta?.title, L.title);
-      const company=safeStr(spec.meta?.company || spec.meta?.brand?.company,'Votre société');
-      const client=safeStr(spec.meta?.client,'Client');
-      const date=safeStr(spec.meta?.date, fmtDate());
+      const title=String(spec.meta?.title || L.title);
+      const company=String(spec.meta?.company || spec.meta?.brand?.company || 'Votre société');
+      const client=String(spec.meta?.client || 'Client');
+      const date=String(spec.meta?.date || fmtDate());
 
       renderCover(spec?.meta?.style, L, title, company, client, date);
 
@@ -986,25 +850,93 @@
     }
     renderSpec();
 
-    /* =========================
-       LANG
-       ========================= */
+    /* ---------- Lang ---------- */
     function applyChatLang(){
       const en=(getLang()==='en');
       composer.placeholder = en?'Type your message':'Écrivez votre message';
-      document.getElementById('langSel').value = getLang();
     }
     applyChatLang();
-    document.getElementById('langSel').onchange = (e)=>{
-      const L = e.target.value; try{ localStorage.setItem('pf_lang', L); }catch{}
-      spec.meta = { ...(spec.meta||{}), lang:L };
+    window.addEventListener('langchange', ()=>{
+      spec.meta = { ...(spec.meta||{}), lang:getLang() };
       localStorage.setItem('pf_proposal', JSON.stringify(spec));
-      applyChatLang(); renderSpec(); saveSessionState();
-    };
+      applyChatLang();
+      renderSpec();
+    });
 
-    /* =========================
-       RELANCE AUTO SI DERNIER USER SANS RÉPONSE
-       ========================= */
+    /* ---------- Style live : appel Edge Function Supabase ---------- */
+    function mapDesignDiffToStyle(diff){
+      const out = { ...(spec.meta?.style||{}) };
+
+      if(diff.palette){
+        out.palette = { ...(out.palette||{}), ...diff.palette };
+      }
+      if(diff.typography){
+        const heading = diff.typography.title?.family || out.typography?.heading || 'Inter';
+        const body    = diff.typography.body?.family  || out.typography?.body    || 'Inter';
+        out.typography = { ...(out.typography||{}), heading, body };
+      }
+      if(diff.layout?.radius){
+        const r = diff.layout.radius.panel || diff.layout.radius.card || 12;
+        out.shapes = { ...(out.shapes||{}), radius: (typeof r==='number'? r+'px' : r) };
+      }
+      if(diff.texture){
+        const kind = String(diff.texture.kind||'none').toLowerCase();
+        if(kind!=='none'){
+          out.decor_layers = out.decor_layers || [];
+          if(!out.decor_layers.length){
+            out.decor_layers.push({ type: (kind==='blob'?'gradient_blob':'glow'), position:'top', opacity:0.18, h:220, s:60, l:55, rotate:0, scale:1, blend:'overlay' });
+          }
+        }
+      }
+      return out;
+    }
+
+    function applyDesignDiff(diff){
+      const mapped = mapDesignDiffToStyle(diff||{});
+      spec.meta = spec.meta || {};
+      spec.meta.style = { ...(spec.meta.style||{}), ...mapped,
+        palette:{ ...((spec.meta.style||{}).palette||{}), ...(mapped.palette||{}) },
+        typography:{ ...((spec.meta.style||{}).typography||{}), ...(mapped.typography||{}) },
+        shapes:{ ...((spec.meta.style||{}).shapes||{}), ...(mapped.shapes||{}) },
+        decor_layers: mapped.decor_layers || spec.meta.style?.decor_layers || []
+      };
+    }
+
+    async function refineStyleFromConversation(latestUserText){
+      try{
+        const body = {
+          mode: "style",
+          userText: latestUserText || (messages.filter(m=>m.role==='user').slice(-1)[0]?.content || ''),
+          currentDesign: spec.meta?.style || {},
+          proposalSpec: spec,
+          history: messages.slice(-8).map(m=>({ role: m.role==='assistant'?'assistant':'user', content: m.content }))
+        };
+        const r = await fetch(`${SUPABASE_URL}/functions/v1/chat`, {
+          method:'POST',
+          headers:{
+            'Content-Type':'application/json',
+            'Authorization': 'Bearer ' + SUPABASE_ANON
+          },
+          body: JSON.stringify(body)
+        });
+        if(!r.ok){
+          const tx = await r.text().catch(()=> '');
+          console.warn('style fetch error', r.status, tx);
+          return;
+        }
+        const js = await r.json();
+        if(js?.designSpecDiff){
+          applyDesignDiff(js.designSpecDiff);
+          localStorage.setItem('pf_proposal', JSON.stringify(spec));
+          renderSpec();
+          saveSessionState();
+        }
+      }catch(err){
+        console.warn('style err', err);
+      }
+    }
+
+    /* ---------- Relance si dernier message user sans réponse ---------- */
     if(messages.length && messages[messages.length-1].role==='user' && !chatBody.querySelector('.bubble-assistant')){
       sendMessage(messages[messages.length-1].content);
     }
