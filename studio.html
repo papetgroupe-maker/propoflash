@@ -12,7 +12,7 @@
       --paper-w:210mm; --paper-h:297mm;
       --elev:0 18px 48px rgba(10,16,32,.10), inset 0 1px 0 #ffffffaa;
 
-      /* Chat themes */
+      /* Chat theme */
       --assistant-bubble: color-mix(in hsl, var(--panel) 86%, transparent);
       --user-bubble: linear-gradient(135deg, var(--accent), var(--accent2));
       --user-ink: #ffffff;
@@ -20,9 +20,7 @@
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0;
-      height:100vh;
-      overflow:hidden; /* pas de scroll */
+      margin:0; height:100vh; overflow:hidden;
       background:linear-gradient(180deg,var(--bg),#eef3ff);
       font-family:Inter,system-ui,sans-serif;color:var(--ink)
     }
@@ -41,15 +39,12 @@
     .menu a,.menu button{display:block;width:100%;text-align:left;padding:10px 12px;border:none;background:var(--panel);cursor:pointer;font-weight:600;color:var(--ink)}
     .menu a:hover,.menu button:hover{background:color-mix(in hsl, var(--panel) 80%, transparent)}
 
-    /* Layout principal */
+    /* Layout */
     .main{
       height:calc(100vh - 64px);
       display:grid;
-      grid-template-columns: clamp(520px, 38vw, 640px) 1fr; /* chat élargi */
-      gap:18px;
-      padding:18px 24px;
-      align-items:stretch;
-      min-height:0;
+      grid-template-columns: clamp(520px, 38vw, 640px) 1fr;
+      gap:18px; padding:18px 24px; align-items:stretch; min-height:0;
     }
     .panel{
       background:var(--panel);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--elev);
@@ -61,20 +56,16 @@
     .chat-head{display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--stroke)}
     .chat-title{font-weight:800}
     .chat-body{padding:12px;overflow:auto;flex:1;min-height:0}
-
     .msg{display:flex;gap:10px;margin:10px 0;align-items:flex-end;width:100%}
     .msg.assistant{justify-content:flex-start}
     .msg.user{justify-content:flex-end}
-
     .avatar-badge{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:11px;border:1px solid var(--stroke);box-shadow:var(--elev);background:var(--panel);color:var(--ink);user-select:none}
     .avatar-badge.bot{background:#111827;color:#fff;border-color:#111827}
     .avatar-badge.you{background:var(--accent);color:#fff;border-color:transparent}
-
     .bubble{max-width:min(100%, 560px);padding:10px 12px;border-radius:14px;border:1px solid var(--stroke);box-shadow:var(--elev);word-wrap:break-word;overflow-wrap:anywhere}
     .bubble-assistant{background:var(--assistant-bubble);color:var(--ink)}
     .bubble-user{background:var(--user-bubble);color:var(--user-ink);border-color:transparent}
 
-    /* Composer + upload logo */
     .chat-compose{position:relative;padding:12px;border-top:1px solid var(--stroke);display:flex;align-items:flex-end;gap:16px}
     .logo-wrap{position:relative;flex:0 0 auto}
     .input{display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--stroke);border-radius:14px;padding:8px;box-shadow:var(--elev);flex:1}
@@ -85,18 +76,17 @@
     .logo-tip{position:absolute;left:0;bottom:44px;background:#111;color:#fff;font-size:12px;padding:6px 8px;border-radius:8px;display:none;white-space:nowrap}
     .logo-wrap:hover .logo-tip{display:block}
 
-    /* Indicateur de frappe */
+    /* Typing */
     .typing{display:inline-flex;gap:5px;align-items:center}
     .dot{width:6px;height:6px;border-radius:50%;background:#8aa0c6;opacity:.7;animation:bounce 1.2s infinite}
     .dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
     @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
 
-    /* Aperçu */
+    /* Preview */
     .sheet-wrap{flex:1;min-height:0;overflow:auto;display:flex;justify-content:center;align-items:flex-start;padding:12px 24px}
     .sheet{position:relative;overflow:visible;width:var(--paper-w);max-width:100%;background:transparent;border:none;box-shadow:none;color:var(--ink);font-family: var(--font-body, Inter), system-ui, sans-serif}
     .decor{position:fixed;inset:0;pointer-events:none;z-index:0}
     .content{position:relative;z-index:1}
-
     .page{position:relative;width:var(--paper-w);min-height:var(--paper-h);background:var(--panel);border:1px solid var(--stroke);border-radius:var(--radius, 12px);box-shadow:var(--elev);margin:0 0 16mm 0;overflow:hidden}
     .page:last-child{margin-bottom:0}
     .inner{padding:22mm 18mm;position:relative;z-index:1}
@@ -130,7 +120,7 @@
     tfoot td{font-weight:800}
 
     /* Drawer Historique */
-    .drawer{position:fixed;top:64px;right:-380px;width:360px;height:calc(100vh - 64px);background:var(--panel);border-left:1px solid var(--stroke);box-shadow:var(--elev);border-top-left-radius:12px;border-bottom-left-radius:12px;transition:right .25s ease;padding:12px 10px;display:flex;flex-direction:column;gap:10px;z-index:30}
+    .drawer{position:fixed;top:64px;right:-380px;width:360px;height:calc(100vh - 64px);background:var(--panel);border-left:1px solid var(--stroke);box-shadow:var(--elev);border-top-left-radius:12px;border-bottom-left-radius:12px;transition:transform .25s ease, right .25s ease;padding:12px 10px;display:flex;flex-direction:column;gap:10px;z-index:30}
     .drawer.open{right:0}
     .drawer h3{margin:4px 6px 6px;font-size:16px}
     .drawer-list{flex:1;overflow:auto;padding:6px}
@@ -139,9 +129,14 @@
     .row-actions{display:flex;gap:6px}
     .icon-btn{border:1px solid var(--stroke);background:var(--panel);border-radius:8px;padding:6px;cursor:pointer}
 
-    /* Impression */
+    /* Debug pane */
+    .debug{position:fixed;bottom:10px;left:10px;background:#111;color:#e3e7ef;padding:10px 12px;border-radius:10px;font:12px/1.4 monospace;max-width:44vw;max-height:40vh;overflow:auto;display:none;z-index:40}
+    .debug.open{display:block}
+    .dbg-toggle{position:fixed;bottom:10px;right:10px;border:1px solid var(--stroke);background:var(--panel);border-radius:999px;box-shadow:var(--elev);padding:8px 12px;cursor:pointer;z-index:41}
+
+    /* Print */
     @media print{
-      .bar,.drawer{display:none}
+      .bar,.drawer,.dbg-toggle,.debug{display:none}
       body{overflow:visible;height:auto;background:#fff}
       .main{height:auto}
       .sheet-wrap{overflow:visible;flex:auto;min-height:auto;padding:0}
@@ -159,7 +154,10 @@
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="lang.js"></script>
+  <script>
+    /* --- i18n minimal (utilise lang.js si dispo, sinon FR) --- */
+    window.getLang = window.getLang || (function(){ try{ return (localStorage.getItem('pf_lang')||navigator.language||'fr').slice(0,2) }catch{ return 'fr' }})();
+  </script>
 </head>
 <body>
   <!-- Top bar -->
@@ -220,8 +218,14 @@
     </div>
   </div>
 
+  <!-- Debug -->
+  <button class="dbg-toggle" id="dbgBtn">🪲 Debug</button>
+  <pre class="debug" id="debug"></pre>
+
   <script>
-    /* ---------- Supabase ---------- */
+    /* =========================
+       SUPABASE / AUTH (frontend)
+       ========================= */
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -246,7 +250,9 @@
     logoutBtn.onclick = async ()=>{ await sb.auth.signOut(); location.reload(); };
     document.getElementById('homeBtn').onclick=()=>location.href='index.html';
 
-    /* ---------- Historique (par discussion) ---------- */
+    /* =========================
+       HISTORIQUE PAR DISCUSSION
+       ========================= */
     const drawer=document.getElementById('drawer'); const histList=document.getElementById('histList');
     document.getElementById('openHistory').onclick = ()=> drawer.classList.toggle('open');
     document.getElementById('newChatBtn').onclick  = ()=> createNewSession();
@@ -321,8 +327,7 @@
       sessions.forEach(s=>{
         const d=new Date(s.date);
         const row=document.createElement('div'); row.className='row-item';
-        const left=document.createElement('div');
-        left.style.display='flex'; left.style.flexDirection='column';
+        const left=document.createElement('div'); left.style.display='flex'; left.style.flexDirection='column';
         const title=document.createElement('strong'); title.textContent=s.title||'Sans titre'; title.onclick=()=>loadSession(s.id);
         const small=document.createElement('span'); small.className='muted'; small.style.fontSize='12px'; small.textContent=d.toLocaleString();
         left.appendChild(title); left.appendChild(small);
@@ -335,7 +340,8 @@
       });
     }
 
-    (function migrateOldHistory(){
+    // Migration legacy (si ancien localStorage)
+    (function migrateOld(){
       const sessions = loadSessions(); if(sessions.length) return;
       try{
         const h=JSON.parse(localStorage.getItem('pf_history')||'[]');
@@ -347,7 +353,9 @@
     })();
     renderHistory();
 
-    /* ---------- Chat + Spec ---------- */
+    /* =========================
+       CHAT + PRÉVIEW LIÉ
+       ========================= */
     const chatBody=document.getElementById('chatBody');
     const composer=document.getElementById('composer');
     const sendBtn=document.getElementById('sendBtn');
@@ -355,18 +363,29 @@
     const sheet=document.getElementById('sheet');
     const decor=document.getElementById('decor');
     const sheetContent=document.getElementById('sheetContent');
+    const dbgBtn=document.getElementById('dbgBtn');
+    const dbg=document.getElementById('debug');
+    let debugOpen=false; dbgBtn.onclick=()=>{ debugOpen=!debugOpen; dbg.classList.toggle('open', debugOpen); };
 
     let messages = JSON.parse(localStorage.getItem('pf_chat')||'[]');
     let spec = null;
-    let isSending = false; // <- garde anti double envoi
+
+    function createDefaultTitle(lang){ return (lang==='en')?'Business Proposal':'Proposition commerciale'; }
 
     function loadSpec(){
       try{ spec = JSON.parse(localStorage.getItem('pf_proposal')||'null'); }catch{ spec=null; }
       if(!spec){ spec = createDefaultSpec(); }
-      if(!spec.meta) spec.meta = { lang:getLang() };
+      if(!spec.meta) spec.meta = { lang:getLang(), title:createDefaultTitle(getLang()) };
     }
     loadSpec();
 
+    // Consommer un message "welcome" venant de l'index si présent
+    (function consumeWelcome(){
+      const w = localStorage.getItem('pf_welcome_msg');
+      if(w){ messages.push({ role:'user', content:w }); localStorage.removeItem('pf_welcome_msg'); }
+    })();
+
+    // Boot session courante
     (function bootSession(){
       const sessions = loadSessions();
       if(!getCurrentId()){
@@ -374,7 +393,7 @@
         else { createNewSession('Nouvelle proposition'); }
       }else{
         const s = sessions.find(x=>String(x.id)===String(getCurrentId()));
-        if(s){ spec = s.spec || createDefaultSpec(); messages = s.messages || []; }
+        if(s){ spec = s.spec || createDefaultSpec(); messages = s.messages || []; renderChat(); renderSpec(); }
       }
     })();
 
@@ -408,13 +427,145 @@
     }
     renderChat();
 
-    async function sendMessage(text){
-      if(isSending) return;
-      const content=(text||'').trim(); if(!content) return;
-      isSending = true;
+    // Envoi (Enter = envoyer, Shift+Enter = ligne)
+    function handleSend(){
+      sendMessage(composer.value);
+    }
+    composer.addEventListener('keydown', (e)=>{
+      if(e.isComposing || e.keyCode===229) return; // IME
+      if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); handleSend(); }
+    });
+    composer.addEventListener('keypress', (e)=>{ // mobile fallback
+      if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); handleSend(); }
+    });
+    sendBtn.onclick = handleSend;
 
-      messages.push({ role:'user', content });
-      localStorage.setItem('pf_chat', JSON.stringify(messages));
+    // Helpers JSON strict / extraction
+    function extractFirstJson(text){
+      try{
+        const start = text.indexOf('{');
+        const end   = text.lastIndexOf('}');
+        if(start>=0 && end>start){ return JSON.parse(text.slice(start, end+1)); }
+      }catch(_){}
+      return null;
+    }
+
+    function deepMerge(a,b){
+      if(Array.isArray(a) && Array.isArray(b)) return b; // remplace
+      if(a && typeof a==='object' && b && typeof b==='object'){
+        const out = { ...a };
+        for(const k of Object.keys(b)) out[k] = deepMerge(a[k], b[k]);
+        return out;
+      }
+      return (b===undefined)?a:b;
+    }
+
+    function mapDesignDiffToStyle(diff){
+      const out = { ...(spec.meta?.style||{}) };
+      if(diff.palette){ out.palette = { ...(out.palette||{}), ...diff.palette }; }
+      if(diff.typography){
+        const heading = diff.typography.title?.family || out.typography?.heading || 'Inter';
+        const body    = diff.typography.body?.family  || out.typography?.body    || 'Inter';
+        out.typography = { ...(out.typography||{}), heading, body };
+      }
+      if(diff.layout?.radius){
+        const r = diff.layout.radius.panel || diff.layout.radius.card || 12;
+        out.shapes = { ...(out.shapes||{}), radius: (typeof r==='number'? r+'px' : r) };
+      }
+      if(diff.texture){
+        const kind = String(diff.texture.kind||'none').toLowerCase();
+        if(kind!=='none'){
+          out.decor_layers = out.decor_layers || [];
+          if(!out.decor_layers.length){
+            out.decor_layers.push({ type: (kind==='blob'?'gradient_blob':'glow'), position:'top', opacity:0.18, h:220, s:60, l:55, rotate:0, scale:1, blend:'overlay' });
+          }
+        }
+      }
+      return out;
+    }
+
+    function applyDesignDiff(diff){
+      const mapped = mapDesignDiffToStyle(diff||{});
+      spec.meta = spec.meta || {};
+      spec.meta.style = {
+        ...(spec.meta.style||{}),
+        ...mapped,
+        palette:{ ...((spec.meta.style||{}).palette||{}), ...(mapped.palette||{}) },
+        typography:{ ...((spec.meta.style||{}).typography||{}), ...(mapped.typography||{}) },
+        shapes:{ ...((spec.meta.style||{}).shapes||{}), ...(mapped.shapes||{}) },
+        decor_layers: mapped.decor_layers || spec.meta.style?.decor_layers || []
+      };
+    }
+
+    // Fallback local si Edge Function KO
+    function naiveStyleHeuristic(txt){
+      const s = txt.toLowerCase();
+      const out = { palette:{}, typography:{}, shapes:{}, decor_layers:[] };
+      if(/noir|dark|sombre|corporate|sobre|luxe|premium/.test(s)){
+        out.palette.primary = '#111827'; out.palette.secondary = '#E5B344';
+        out.palette.surface = '#FFFFFF'; out.palette.ink = '#0A1020';
+        out.typography.heading = 'Inter'; out.typography.body='Inter';
+        out.shapes.radius='12px';
+        out.decor_layers = [{ type:'glow', position:'top', opacity:0.18, h:220, s:20, l:40, rotate:0, scale:1.1, blend:'overlay' }];
+      }else if(/fun|startup|vibrant|pop|violet|rose|flash/.test(s)){
+        out.palette.primary='#8B5CF6'; out.palette.secondary='#F472B6';
+        out.palette.surface='#ffffff'; out.palette.ink='#0A1020';
+        out.typography.heading='Poppins'; out.typography.body='Inter';
+        out.shapes.radius='16px';
+        out.decor_layers=[{ type:'gradient_blob', position:'right', opacity:0.22, h:290, s:70, l:55, rotate:0, scale:1.2, blend:'screen' }];
+      }else if(/bleu|blue|tech/.test(s)){
+        out.palette.primary='#3B82F6'; out.palette.secondary='#60A5FA';
+        out.typography.heading='Montserrat'; out.typography.body='Inter';
+        out.shapes.radius='12px';
+        out.decor_layers=[{ type:'grid', position:'center', opacity:0.12, h:220, s:20, l:60, rotate:0, scale:1, blend:'overlay' }];
+      }
+      return out;
+    }
+
+    async function refineStyleFromConversation(latestUserText){
+      try{
+        const body = {
+          mode: "style",
+          userText: latestUserText || (messages.filter(m=>m.role==='user').slice(-1)[0]?.content || ''),
+          currentDesign: spec.meta?.style || {},
+          proposalSpec: spec,
+          history: messages.slice(-8).map(m=>({ role: m.role==='assistant'?'assistant':'user', content: m.content }))
+        };
+        const r = await fetch(`${SUPABASE_URL}/functions/v1/chat`, {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_ANON },
+          body: JSON.stringify(body)
+        });
+        if(!r.ok){
+          dbgLog('Edge style error '+r.status, await r.text().catch(()=>'' ));
+          // Fallback heuristique
+          applyDesignDiff(naiveStyleHeuristic(body.userText));
+          localStorage.setItem('pf_proposal', JSON.stringify(spec));
+          renderSpec(); saveSessionState();
+          return;
+        }
+        const js = await r.json();
+        if(js?.designSpecDiff){
+          applyDesignDiff(js.designSpecDiff);
+          localStorage.setItem('pf_proposal', JSON.stringify(spec));
+          renderSpec(); saveSessionState();
+        }
+      }catch(err){
+        dbgLog('Edge style exception', err?.message||String(err));
+        applyDesignDiff(naiveStyleHeuristic(latestUserText||'')); renderSpec(); saveSessionState();
+      }
+    }
+
+    function dbgLog(...args){
+      try{
+        const line = args.map(a=> (typeof a==='string'? a : JSON.stringify(a,null,2))).join(' ');
+        dbg.textContent = (dbg.textContent + '\n' + line).trim().slice(-4000);
+      }catch{}
+    }
+
+    async function sendMessage(text){
+      const content = (text||'').trim(); if(!content) return;
+      messages.push({ role:'user', content }); localStorage.setItem('pf_chat', JSON.stringify(messages));
       bubble('user', escapeHTML(content).replace(/\n/g,'<br/>'));
       composer.value='';
       statusEl.textContent='Rédaction…';
@@ -423,8 +574,7 @@
         showTyping();
 
         const resp = await fetch('/api/chat', {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
+          method:'POST', headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ message: content, proposalSpec: spec, history: messages.slice(-10) })
         });
 
@@ -432,28 +582,39 @@
           const txt = await resp.text().catch(()=> '');
           hideTyping();
           statusEl.textContent='Erreur réseau';
-          bubble('assistant', `<em>Erreur réseau (${resp.status}).</em><br><small>${escapeHTML(txt).slice(0,300)}</small>`);
+          bubble('assistant', `<em>Erreur réseau (${resp.status}).</em><br><small>${escapeHTML(txt).slice(0,600)}</small>`);
+          dbgLog('API /api/chat error '+resp.status, txt);
           return;
         }
 
-        const data = await resp.json();
+        const dataText = await resp.text(); // lecture brute pour debug + JSON
+        dbgLog('API raw:', dataText.slice(0,1500));
+        let data = {};
+        try{ data = JSON.parse(dataText); }catch{ data = extractFirstJson(dataText)||{}; }
+
         hideTyping();
 
-        const reply = data.reply || (getLang()==='en'?'I could not structure the proposal.':'Je n’ai pas pu structurer la proposition.');
-        messages.push({ role:'assistant', content: reply });
-        localStorage.setItem('pf_chat', JSON.stringify(messages));
+        const reply = data?.reply || (getLang()==='en'?'I could not structure the proposal.':'Je n’ai pas pu structurer la proposition.');
+        messages.push({ role:'assistant', content: reply }); localStorage.setItem('pf_chat', JSON.stringify(messages));
         bubble('assistant', escapeHTML(reply).replace(/\n/g,'<br/>'));
 
-        if(data.proposalSpec){
-          const next = { ...(spec||{}), ...(data.proposalSpec||{}) };
-          next.meta = { ...(spec?.meta||{}), ...((data.proposalSpec||{}).meta||{}) };
-          if(next.meta){ next.meta.style = { ...((spec?.meta||{}).style||{}), ...((next.meta||{}).style||{}) }; }
-          spec = next;
+        // Merge proposalSpec (si fourni) OU extraire JSON depuis reply si le modèle a parlé autour
+        let incomingSpec = null;
+        if(data?.proposalSpec) incomingSpec = data.proposalSpec;
+        if(!incomingSpec){
+          const j = extractFirstJson(reply);
+          if(j?.proposalSpec) incomingSpec = j.proposalSpec;
+        }
+        if(incomingSpec){
+          spec = deepMerge(spec||{}, incomingSpec||{});
+          // sécurise meta/style
+          spec.meta = deepMerge(spec.meta||{}, incomingSpec?.meta||{});
+          if(spec.meta){ spec.meta.style = deepMerge(spec.meta.style||{}, incomingSpec?.meta?.style||{}); }
           localStorage.setItem('pf_proposal', JSON.stringify(spec));
           renderSpec();
         }
 
-        // Style live (Edge Function -> designSpecDiff)
+        // Déduire/améliorer le STYLE à partir de la dernière phrase utilisateur
         await refineStyleFromConversation(content);
 
         saveSessionState();
@@ -462,22 +623,13 @@
         hideTyping();
         statusEl.textContent='Erreur réseau';
         bubble('assistant', `<em>Erreur réseau. Réessayez.</em><br><small>${escapeHTML(e?.message||'')}</small>`);
-      } finally {
-        isSending = false;
+        dbgLog('sendMessage exception', e?.message||String(e));
       }
     }
 
-    // Entrée = envoyer / Maj+Entrée = retour ligne (un seul listener)
-    composer.addEventListener('keydown', (e)=>{
-      if(e.isComposing || e.keyCode===229) return;
-      if(e.key==='Enter' && !e.shiftKey){
-        e.preventDefault();
-        sendMessage(composer.value);
-      }
-    });
-    sendBtn.onclick = ()=> sendMessage(composer.value);
-
-    /* ---------- Upload logo -> spec ---------- */
+    /* =========================
+       UPLOAD LOGO
+       ========================= */
     const logoInput = document.getElementById('logoInput');
     logoInput.addEventListener('change', async (e)=>{
       const file = e.target.files?.[0]; if(!file) return;
@@ -492,18 +644,18 @@
       e.target.value='';
     });
 
-    /* ---------- Libellés ---------- */
+    /* =========================
+       RENDU APERÇU
+       ========================= */
     const t = {
       fr:{ title:"Proposition commerciale", to:"Pour", from:"Émis par", date:"Date", letter:"Lettre d’introduction", executive:"Résumé exécutif", objectives:"Objectifs", approach:"Approche & phasage", deliverables:"Livrables", in_scope:"Inclus", out_scope:"Hors-périmètre", timeline:"Planning", pricing:"Tarification", assumptions:"Hypothèses / Risques", next:"Prochaines étapes", price_model:"Modèle", terms:"Conditions", toc:"Sommaire" },
       en:{ title:"Business Proposal", to:"To", from:"Issued by", date:"Date", letter:"Cover Letter", executive:"Executive Summary", objectives:"Objectives", approach:"Approach & Phasing", deliverables:"Deliverables", in_scope:"In scope", out_scope:"Out of scope", timeline:"Timeline", pricing:"Pricing", assumptions:"Assumptions / Risks", next:"Next Steps", price_model:"Model", terms:"Terms", toc:"Table of Contents" }
     };
-
     function safeArr(v){ return Array.isArray(v)?v:[]; }
     function safeStr(v,fb=''){ return (v==null?'':String(v)).trim() || fb; }
     function fmtDate(d){ try{ const dt=d?new Date(d):new Date(); return dt.toLocaleDateString(document.documentElement.lang||getLang(), {year:'numeric',month:'short',day:'2-digit'});}catch{return ''} }
     function money(n,c){ try{ return new Intl.NumberFormat(document.documentElement.lang||getLang(),{style:'currency',currency:c||'EUR'}).format(Number(n||0)); }catch{ return String(n||0)+' '+(c||'€') } }
 
-    /* ---------- THEME & décor ---------- */
     function applyStyleTokens(style){
       const palette = {
         primary: "#3B82F6", secondary: "#8B5CF6", surface: "#FFFFFF",
@@ -512,7 +664,7 @@
         ...(style?.palette||{})
       };
       const shapes = { radius:"12px", shadow:"0 18px 48px rgba(10,16,32,.12)", ...(style?.shapes||{}) };
-      const typo   = { heading:"Inter", body:"Inter", accent:"Inter", ...(style?.typography||{}) };
+      const typo   = { heading:"Inter", body:"Inter", ...(style?.typography||{}) };
 
       sheet.style.setProperty('--panel', palette.surface);
       sheet.style.setProperty('--ink', palette.ink);
@@ -539,7 +691,7 @@
       };
       return map[pos] || map.center;
     }
-    function renderDecorLayers(layers){
+    function renderDecorLayers(layers, palette){
       decor.innerHTML = '';
       if(!layers?.length) return;
       layers.forEach((L,i)=>{
@@ -630,7 +782,6 @@
       });
     }
 
-    /* ---------- Pages ---------- */
     const sheetPages = [];
     function clearPages(){ sheetContent.innerHTML=''; sheetPages.length=0; }
     function makePage(kind='default'){
@@ -652,8 +803,7 @@
       const band = document.createElement('div');
       band.style.position='absolute'; band.style.inset='-10% -10% auto -10%'; band.style.height='40%';
       band.style.background = `linear-gradient(135deg, ${colorA}, ${colorB})`;
-      band.style.opacity = .25;
-      band.style.transform = 'skewY(-8deg)';
+      band.style.opacity = .25; band.style.transform = 'skewY(-8deg)';
       pageDecor.appendChild(band);
     }
 
@@ -676,7 +826,7 @@
       inner.appendChild(meta);
 
       const band=document.createElement('div'); band.className='band';
-      band.textContent = (L===t.fr) ? "Aperçu généré automatiquement selon votre brief." : "Preview auto-generated from your brief.";
+      band.textContent = (spec.meta?.lang==='en') ? "Preview auto-generated from your brief." : "Aperçu généré automatiquement selon votre brief.";
       inner.appendChild(band);
     }
 
@@ -685,8 +835,7 @@
       if(present.length<3) return;
       const { inner } = makePage('toc');
       H2(inner, L.toc);
-      const toc=document.createElement('div'); toc.className='toc';
-      toc.innerHTML = `<b>${L.toc}</b>`;
+      const toc=document.createElement('div'); toc.className='toc'; toc.innerHTML = `<b>${L.toc}</b>`;
       present.forEach(s=>{ const a=document.createElement('a'); a.textContent=s.title; a.href='#'+s.id; toc.appendChild(a); });
       inner.appendChild(toc);
     }
@@ -837,90 +986,27 @@
     }
     renderSpec();
 
-    /* ---------- Lang ---------- */
+    /* =========================
+       LANG
+       ========================= */
     function applyChatLang(){
       const en=(getLang()==='en');
       composer.placeholder = en?'Type your message':'Écrivez votre message';
+      document.getElementById('langSel').value = getLang();
     }
     applyChatLang();
-    window.addEventListener('langchange', ()=>{
-      spec.meta = { ...(spec.meta||{}), lang:getLang() };
+    document.getElementById('langSel').onchange = (e)=>{
+      const L = e.target.value; try{ localStorage.setItem('pf_lang', L); }catch{}
+      spec.meta = { ...(spec.meta||{}), lang:L };
       localStorage.setItem('pf_proposal', JSON.stringify(spec));
-      applyChatLang();
-      renderSpec();
-    });
+      applyChatLang(); renderSpec(); saveSessionState();
+    };
 
-    /* ---------- Style live (Edge Function Supabase) ---------- */
-    function mapDesignDiffToStyle(diff){
-      const out = { ...(spec.meta?.style||{}) };
-
-      if(diff.palette){
-        out.palette = { ...(out.palette||{}), ...diff.palette };
-      }
-      if(diff.typography){
-        const heading = diff.typography.title?.family || out.typography?.heading || 'Inter';
-        const body    = diff.typography.body?.family  || out.typography?.body    || 'Inter';
-        out.typography = { ...(out.typography||{}), heading, body };
-      }
-      if(diff.layout?.radius){
-        const r = diff.layout.radius.panel || diff.layout.radius.card || 12;
-        out.shapes = { ...(out.shapes||{}), radius: (typeof r==='number'? r+'px' : r) };
-      }
-      if(diff.texture){
-        const kind = String(diff.texture.kind||'none').toLowerCase();
-        if(kind!=='none'){
-          out.decor_layers = out.decor_layers || [];
-          if(!out.decor_layers.length){
-            out.decor_layers.push({ type: (kind==='blob'?'gradient_blob':'glow'), position:'top', opacity:0.18, h:220, s:60, l:55, rotate:0, scale:1, blend:'overlay' });
-          }
-        }
-      }
-      return out;
-    }
-
-    function applyDesignDiff(diff){
-      const mapped = mapDesignDiffToStyle(diff||{});
-      spec.meta = spec.meta || {};
-      spec.meta.style = { ...(spec.meta.style||{}), ...mapped,
-        palette:{ ...((spec.meta.style||{}).palette||{}), ...(mapped.palette||{}) },
-        typography:{ ...((spec.meta.style||{}).typography||{}), ...(mapped.typography||{}) },
-        shapes:{ ...((spec.meta.style||{}).shapes||{}), ...(mapped.shapes||{}) },
-        decor_layers: mapped.decor_layers || spec.meta.style?.decor_layers || []
-      };
-    }
-
-    async function refineStyleFromConversation(latestUserText){
-      try{
-        const body = {
-          mode: "style",
-          userText: latestUserText || (messages.filter(m=>m.role==='user').slice(-1)[0]?.content || ''),
-          currentDesign: spec.meta?.style || {},
-          proposalSpec: spec,
-          history: messages.slice(-8).map(m=>({ role: m.role==='assistant'?'assistant':'user', content: m.content }))
-        };
-        const r = await fetch(`${SUPABASE_URL}/functions/v1/chat`, {
-          method:'POST',
-          headers:{
-            'Content-Type':'application/json',
-            'Authorization': 'Bearer ' + SUPABASE_ANON
-          },
-          body: JSON.stringify(body)
-        });
-        if(!r.ok){
-          const tx = await r.text().catch(()=> '');
-          console.warn('style fetch error', r.status, tx);
-          return;
-        }
-        const js = await r.json();
-        if(js?.designSpecDiff){
-          applyDesignDiff(js.designSpecDiff);
-          localStorage.setItem('pf_proposal', JSON.stringify(spec));
-          renderSpec();
-          saveSessionState();
-        }
-      }catch(err){
-        console.warn('style err', err);
-      }
+    /* =========================
+       RELANCE AUTO SI DERNIER USER SANS RÉPONSE
+       ========================= */
+    if(messages.length && messages[messages.length-1].role==='user' && !chatBody.querySelector('.bubble-assistant')){
+      sendMessage(messages[messages.length-1].content);
     }
   </script>
 </body>
