@@ -11,11 +11,8 @@
       --accent:#3b82f6; --accent2:#8b5cf6; --accent-ink:#fff;
       --paper-w:210mm; --paper-h:297mm;
       --elev:0 18px 48px rgba(10,16,32,.10), inset 0 1px 0 #ffffffaa;
-
-      /* Chat themes */
-      --assistant-bubble: color-mix(in hsl, var(--panel) 86%, transparent);
-      --user-bubble: linear-gradient(135deg, var(--accent), var(--accent2));
-      --user-ink: #ffffff;
+      --transition: .18s cubic-bezier(.4,0,.2,1);
+      --focus: #a5b4fc;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -24,57 +21,40 @@
       height:100vh;
       overflow:hidden;
       background:linear-gradient(180deg,var(--bg),#eef3ff);
-      font-family:Inter,system-ui,sans-serif;color:var(--ink)
+      font-family:Inter,system-ui,sans-serif;color:var(--ink);
+      transition:background var(--transition);
     }
-
+    a:focus, button:focus, input:focus, textarea:focus {outline:2px solid var(--focus);}
+    .main{height:calc(100vh - 64px);display:grid;grid-template-columns: clamp(520px, 38vw, 640px) 1fr;gap:18px;padding:18px 24px;align-items:stretch;min-height:0;}
+    @media (max-width:1100px){.main{grid-template-columns:1fr}}
     /* Top bar */
     .bar{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--stroke);
       display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px;box-shadow:var(--elev)}
     .left,.right{display:flex;gap:10px;align-items:center}
     .brand{display:flex;gap:10px;align-items:center;font-weight:800;cursor:pointer}
     .spark{width:22px;height:22px;border-radius:6px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd)}
-    .btn{border:1px solid var(--stroke);background:var(--panel);border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow:var(--elev)}
+    .btn{border:1px solid var(--stroke);background:var(--panel);border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow:var(--elev);transition:background var(--transition),color var(--transition);}
     .btn.primary{background:#0a1020;color:#fff;border-color:#0a1020}
     .sel{border:1px solid var(--stroke);border-radius:10px;padding:7px 10px;background:var(--panel);color:var(--ink)}
     .avatar{width:32px;height:32px;border-radius:50%;border:1px solid var(--stroke);display:grid;place-items:center;font-weight:800;background:var(--panel);cursor:pointer;box-shadow:var(--elev)}
     .menu{position:absolute;top:54px;right:14px;background:var(--panel);border:1px solid var(--stroke);border-radius:12px;box-shadow:var(--elev);display:none;overflow:hidden}
     .menu a,.menu button{display:block;width:100%;text-align:left;padding:10px 12px;border:none;background:var(--panel);cursor:pointer;font-weight:600;color:var(--ink)}
     .menu a:hover,.menu button:hover{background:color-mix(in hsl, var(--panel) 80%, transparent)}
-
-    /* Layout principal */
-    .main{
-      height:calc(100vh - 64px);
-      display:grid;
-      grid-template-columns: clamp(520px, 38vw, 640px) 1fr;
-      gap:18px;
-      padding:18px 24px;
-      align-items:stretch;
-      min-height:0;
-    }
-    .panel{
-      background:var(--panel);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--elev);
-      display:flex;flex-direction:column;min-height:0;
-    }
-
+    .panel{background:var(--panel);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--elev);display:flex;flex-direction:column;min-height:0;}
     /* Chat */
-    .chat{min-height:0; display:flex;flex-direction:column;}
+    .chat{min-height:0;display:flex;flex-direction:column;}
     .chat-head{display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--stroke)}
     .chat-title{font-weight:800}
     .chat-body{padding:12px;overflow:auto;flex:1;min-height:0}
-
     .msg{display:flex;gap:10px;margin:10px 0;align-items:flex-end;width:100%}
     .msg.assistant{justify-content:flex-start}
     .msg.user{justify-content:flex-end}
-
     .avatar-badge{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:11px;border:1px solid var(--stroke);box-shadow:var(--elev);background:var(--panel);color:var(--ink);user-select:none}
     .avatar-badge.bot{background:#111827;color:#fff;border-color:#111827}
     .avatar-badge.you{background:var(--accent);color:#fff;border-color:transparent}
-
     .bubble{max-width:min(100%, 560px);padding:10px 12px;border-radius:14px;border:1px solid var(--stroke);box-shadow:var(--elev);word-wrap:break-word;overflow-wrap:anywhere}
-    .bubble-assistant{background:var(--assistant-bubble);color:var(--ink)}
-    .bubble-user{background:var(--user-bubble);color:var(--user-ink);border-color:transparent}
-
-    /* Composer + upload logo */
+    .bubble-assistant{background:color-mix(in hsl, var(--panel) 86%, transparent);color:var(--ink)}
+    .bubble-user{background:linear-gradient(135deg, var(--accent), var(--accent2));color:var(--accent-ink);border-color:transparent}
     .chat-compose{position:relative;padding:12px;border-top:1px solid var(--stroke);display:flex;align-items:flex-end;gap:16px}
     .logo-wrap{position:relative;flex:0 0 auto}
     .input{display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--stroke);border-radius:14px;padding:8px;box-shadow:var(--elev);flex:1}
@@ -84,24 +64,18 @@
     .logo-btn input{display:none}
     .logo-tip{position:absolute;left:0;bottom:44px;background:#111;color:#fff;font-size:12px;padding:6px 8px;border-radius:8px;display:none;white-space:nowrap}
     .logo-wrap:hover .logo-tip{display:block}
-
-    /* Indicateur de frappe */
     .typing{display:inline-flex;gap:5px;align-items:center}
     .dot{width:6px;height:6px;border-radius:50%;background:#8aa0c6;opacity:.7;animation:bounce 1.2s infinite}
     .dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
     @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
-
-    /* Aperçu */
     .sheet-wrap{flex:1;min-height:0;overflow:auto;display:flex;justify-content:center;align-items:flex-start;padding:12px 24px}
     .sheet{position:relative;overflow:visible;width:var(--paper-w);max-width:100%;background:transparent;border:none;box-shadow:none;color:var(--ink);font-family: var(--font-body, Inter), system-ui, sans-serif}
     .decor{position:fixed;inset:0;pointer-events:none;z-index:0}
     .content{position:relative;z-index:1}
-
-    .page{position:relative;width:var(--paper-w);min-height:var(--paper-h);background:var(--panel);border:1px solid var(--stroke);border-radius:var(--radius, 12px);box-shadow:var(--elev);margin:0 0 16mm 0;overflow:hidden}
+    .page{position:relative;width:var(--paper-w);min-height:var(--paper-h);background:var(--panel);border:1px solid var(--stroke);border-radius:var(--radius, 12px);box-shadow:var(--elev);margin:0 0 16mm 0;overflow:hidden;transition:box-shadow var(--transition), border-color var(--transition);}
     .page:last-child{margin-bottom:0}
     .inner{padding:22mm 18mm;position:relative;z-index:1}
     .page .page-decor{position:absolute;inset:0;pointer-events:none;z-index:0}
-
     .doc-header{display:grid;grid-template-columns:100px 1fr;gap:16px;align-items:center;margin-bottom:16px}
     .logo-box{width:100px;height:100px;border:1px solid var(--stroke);border-radius:var(--radius, 12px);display:grid;place-items:center;overflow:hidden;background:var(--panel)}
     .logo-box img{width:100%;height:100%;object-fit:contain}
@@ -128,8 +102,6 @@
     th,td{border:1px solid var(--stroke);padding:8px;text-align:left}
     th{background:color-mix(in hsl, var(--panel) 85%, transparent)}
     tfoot td{font-weight:800}
-
-    /* Drawer Historique */
     .drawer{position:fixed;top:64px;right:-380px;width:360px;height:calc(100vh - 64px);background:var(--panel);border-left:1px solid var(--stroke);box-shadow:var(--elev);border-top-left-radius:12px;border-bottom-left-radius:12px;transition:transform .25s ease, right .25s ease;padding:12px 10px;display:flex;flex-direction:column;gap:10px;z-index:30}
     .drawer.open{right:0}
     .drawer h3{margin:4px 6px 6px;font-size:16px}
@@ -138,8 +110,6 @@
     .row-item strong{cursor:pointer}
     .row-actions{display:flex;gap:6px}
     .icon-btn{border:1px solid var(--stroke);background:var(--panel);border-radius:8px;padding:6px;cursor:pointer}
-
-    /* Impression */
     @media print{
       .bar,.drawer{display:none}
       body{overflow:visible;height:auto;background:#fff}
@@ -150,14 +120,15 @@
       .inner{padding:18mm 16mm}
       a[href]:after{content:""}
     }
-
-    @media (max-width:1100px){
-      .main{grid-template-columns:1fr}
-      .page{width:100%;min-height:auto}
-      .drawer{top:112px;height:calc(100vh - 112px)}
-    }
+    .fade-in { animation:fadeIn .9s cubic-bezier(.4,0,.2,1) both; }
+    @keyframes fadeIn { 0%{opacity:0;transform:translateY(32px);} 100%{opacity:1;transform:none;} }
+    .page { transition:box-shadow var(--transition), border-color var(--transition); }
+    .bubble { transition:background var(--transition), color var(--transition);}
+    .btn, .sel { transition:background var(--transition), color var(--transition);}
+    .loader { display:inline-block;width:32px;height:32px;border-radius:50%;border:3px solid var(--accent2);border-top:3px solid var(--accent);animation:spin 1.1s linear infinite;margin:auto;}
+    @keyframes spin{ to{ transform:rotate(360deg); } }
+    .color-sample{display:inline-block;width:18px;height:18px;border-radius:6px;margin-right:4px;border:1.5px solid #ddd;vertical-align:middle;}
   </style>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="lang.js"></script>
 </head>
@@ -181,20 +152,12 @@
       </div>
     </div>
   </div>
-
-  <!-- History drawer -->
-  <div class="drawer" id="drawer">
-    <h3>Historique</h3>
-    <div class="drawer-list" id="histList"></div>
-  </div>
-
-  <!-- Main -->
+  <div class="drawer" id="drawer"><h3>Historique</h3><div class="drawer-list" id="histList"></div></div>
   <div class="main">
     <!-- Chat -->
     <div class="panel chat">
       <div class="chat-head"><strong class="chat-title">Chat</strong></div>
       <div class="chat-body" id="chatBody" aria-live="polite"></div>
-
       <div class="chat-compose">
         <div class="logo-wrap">
           <label class="logo-btn" title="Ajouter un logo (PNG/JPG/SVG)">
@@ -210,360 +173,22 @@
         </div>
       </div>
     </div>
-
     <!-- Aperçu -->
     <div class="panel sheet-wrap">
       <div class="sheet" id="sheet">
         <div class="decor" id="decor"></div>
         <div class="content" id="sheetContent"></div>
+        <div id="debug" style="font-size:12px;color:#999;margin-top:10px;"></div>
       </div>
     </div>
   </div>
-
   <script>
-    /* ---------- Constantes Supabase ---------- */
+    // ---------- Constantes Supabase ----------
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-    /* ---------- SYSTÈME 3D AVANCÉ ---------- */
-    class Advanced3DRenderer {
-      constructor(sheet, decor) {
-        this.sheet = sheet;
-        this.decor = decor;
-        this.activeAnimations = new Set();
-      }
-
-      // Génère des effets CSS 3D complexes selon le type de projet
-      renderAdvanced3DEffects(effects3d, projectType = 'corporate') {
-        this.clearEffects();
-        
-        if (!effects3d || !effects3d.layers) return;
-        
-        // Configuration perspective
-        this.sheet.style.perspective = effects3d.perspective || '1200px';
-        this.sheet.style.perspectiveOrigin = '50% 30%';
-        
-        // Rendu des layers avancés
-        effects3d.layers.forEach((layer, i) => {
-          this.renderAdvancedLayer(layer, i, projectType);
-        });
-        
-        // Application des animations
-        if (effects3d.animations) {
-          this.applyAdvancedAnimations(effects3d.animations);
-        }
-      }
-
-      renderAdvancedLayer(layer, index, projectType) {
-        const element = document.createElement('div');
-        element.className = `advanced-layer-${index}`;
-        element.style.position = 'absolute';
-        element.style.pointerEvents = 'none';
-        element.style.zIndex = `-${index + 1}`;
-        
-        switch (layer.type) {
-          case 'holographic':
-            this.createHolographicEffect(element, layer);
-            break;
-          case 'mesh_gradient':
-            this.createMeshGradient(element, layer);
-            break;
-          case 'particle_field':
-            this.createParticleField(element, layer);
-            break;
-          case 'geometric_pattern':
-            this.createGeometricPattern(element, layer);
-            break;
-          case 'glass_morphism':
-            this.createGlassMorphism(element, layer);
-            break;
-          default:
-            this.createCustomEffect(element, layer);
-        }
-        
-        this.decor.appendChild(element);
-      }
-
-      createHolographicEffect(element, layer) {
-        const size = (layer.scale || 1) * 800;
-        element.style.width = `${size}px`;
-        element.style.height = `${size}px`;
-        element.style.top = '-20%';
-        element.style.left = '-20%';
-        element.style.borderRadius = '50%';
-        
-        // Effet holographique complexe
-        element.style.background = `
-          conic-gradient(
-            from ${layer.rotate || 0}deg,
-            hsl(${layer.h || 280}, 90%, 60%) 0deg,
-            hsl(${(layer.h || 280) + 60}, 85%, 65%) 120deg,
-            hsl(${(layer.h || 280) + 120}, 90%, 60%) 240deg,
-            hsl(${layer.h || 280}, 90%, 60%) 360deg
-          )
-        `;
-        
-        element.style.filter = `
-          blur(${layer.blur || 60}px) 
-          brightness(1.2) 
-          contrast(1.1)
-        `;
-        
-        element.style.opacity = layer.opacity || 0.15;
-        element.style.mixBlendMode = layer.blend || 'screen';
-        element.style.transform = layer.transform || 'rotateX(15deg) rotateY(15deg)';
-        
-        // Animation holographique
-        const animName = `holographic-${Date.now()}`;
-        const keyframes = `
-          @keyframes ${animName} {
-            0% { transform: rotateX(15deg) rotateY(15deg) rotateZ(0deg); }
-            33% { transform: rotateX(10deg) rotateY(20deg) rotateZ(5deg); }
-            66% { transform: rotateX(20deg) rotateY(10deg) rotateZ(-3deg); }
-            100% { transform: rotateX(15deg) rotateY(15deg) rotateZ(0deg); }
-          }
-        `;
-        this.injectKeyframes(keyframes);
-        element.style.animation = `${animName} 8s cubic-bezier(0.4, 0, 0.2, 1) infinite`;
-      }
-
-      createMeshGradient(element, layer) {
-        const size = (layer.scale || 1) * 1000;
-        element.style.width = `${size}px`;
-        element.style.height = `${size * 0.6}px`;
-        element.style.top = '-10%';
-        element.style.right = '-15%';
-        
-        // Mesh gradient complexe avec multiple couleurs
-        const h1 = layer.h || 220;
-        const h2 = (h1 + 80) % 360;
-        const h3 = (h1 + 160) % 360;
-        const h4 = (h1 + 240) % 360;
-        
-        element.style.background = `
-          radial-gradient(
-            ellipse 80% 50% at 20% 40%,
-            hsla(${h1}, 70%, 60%, ${layer.opacity || 0.15}) 0%,
-            transparent 50%
-          ),
-          radial-gradient(
-            ellipse 60% 40% at 80% 20%,
-            hsla(${h2}, 65%, 65%, ${layer.opacity || 0.12}) 0%,
-            transparent 50%
-          ),
-          radial-gradient(
-            ellipse 70% 60% at 40% 80%,
-            hsla(${h3}, 75%, 55%, ${layer.opacity || 0.13}) 0%,
-            transparent 50%
-          ),
-          radial-gradient(
-            ellipse 50% 70% at 60% 60%,
-            hsla(${h4}, 68%, 62%, ${layer.opacity || 0.14}) 0%,
-            transparent 50%
-          )
-        `;
-        
-        element.style.filter = 'blur(40px) saturate(1.2)';
-        element.style.mixBlendMode = layer.blend || 'overlay';
-        element.style.transform = layer.transform || 'rotateX(10deg) rotateZ(-5deg)';
-        
-        // Animation mesh fluide
-        const animName = `mesh-flow-${Date.now()}`;
-        const keyframes = `
-          @keyframes ${animName} {
-            0%, 100% { transform: rotateX(10deg) rotateZ(-5deg) translateY(0px); }
-            25% { transform: rotateX(8deg) rotateZ(-3deg) translateY(-10px); }
-            50% { transform: rotateX(12deg) rotateZ(-7deg) translateY(5px); }
-            75% { transform: rotateX(9deg) rotateZ(-4deg) translateY(-5px); }
-          }
-        `;
-        this.injectKeyframes(keyframes);
-        element.style.animation = `${animName} 12s ease-in-out infinite`;
-      }
-
-      createParticleField(element, layer) {
-        element.style.width = '100%';
-        element.style.height = '100%';
-        element.style.top = '0';
-        element.style.left = '0';
-        
-        // Création SVG pour particules
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('width', '100%');
-        svg.setAttribute('height', '100%');
-        svg.style.position = 'absolute';
-        svg.style.top = '0';
-        svg.style.left = '0';
-        
-        const particleCount = layer.count || 30;
-        const color = `hsl(${layer.h || 200}, ${layer.s || 60}%, ${layer.l || 60}%)`;
-        
-        for (let i = 0; i < particleCount; i++) {
-          const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          circle.setAttribute('cx', Math.random() * 100 + '%');
-          circle.setAttribute('cy', Math.random() * 100 + '%');
-          circle.setAttribute('r', Math.random() * 2 + 1);
-          circle.setAttribute('fill', color);
-          circle.setAttribute('opacity', Math.random() * 0.6 + 0.2);
-          
-          // Animation particule individuelle
-          const animName = `particle-${i}-${Date.now()}`;
-          const duration = Math.random() * 8 + 4;
-          const keyframes = `
-            @keyframes ${animName} {
-              0% { transform: translateZ(0px) scale(1); opacity: ${Math.random() * 0.6 + 0.2}; }
-              50% { transform: translateZ(${Math.random() * 100 + 50}px) scale(${Math.random() * 1.5 + 0.8}); opacity: ${Math.random() * 0.4 + 0.6}; }
-              100% { transform: translateZ(0px) scale(1); opacity: ${Math.random() * 0.6 + 0.2}; }
-            }
-          `;
-          this.injectKeyframes(keyframes);
-          circle.style.animation = `${animName} ${duration}s ease-in-out infinite`;
-          
-          svg.appendChild(circle);
-        }
-        
-        element.appendChild(svg);
-        element.style.transform = layer.transform || 'translateZ(-100px)';
-        element.style.opacity = layer.opacity || 0.4;
-      }
-
-      createGeometricPattern(element, layer) {
-        const size = (layer.scale || 1) * 1200;
-        element.style.width = `${size}px`;
-        element.style.height = `${size}px`;
-        element.style.top = '-25%';
-        element.style.left = '-25%';
-        
-        // Pattern géométrique avec clip-path
-        element.style.background = `
-          linear-gradient(
-            ${layer.rotate || 45}deg,
-            hsla(${layer.h || 210}, ${layer.s || 60}%, ${layer.l || 55}%, ${layer.opacity || 0.08}) 0%,
-            transparent 25%,
-            hsla(${(layer.h || 210) + 30}, ${layer.s || 60}%, ${layer.l || 55}%, ${layer.opacity || 0.06}) 50%,
-            transparent 75%,
-            hsla(${layer.h || 210}, ${layer.s || 60}%, ${layer.l || 55}%, ${layer.opacity || 0.08}) 100%
-          )
-        `;
-        
-        // Clip-path complexe pour forme géométrique
-        element.style.clipPath = `
-          polygon(
-            0% 20%, 
-            20% 0%, 
-            80% 0%, 
-            100% 20%, 
-            100% 80%, 
-            80% 100%, 
-            20% 100%, 
-            0% 80%
-          )
-        `;
-        
-        element.style.transform = layer.transform || 'rotateX(25deg) rotateY(-10deg) translateZ(30px)';
-        element.style.mixBlendMode = layer.blend || 'multiply';
-        
-        // Animation géométrique
-        const animName = `geometric-${Date.now()}`;
-        const keyframes = `
-          @keyframes ${animName} {
-            0% { transform: rotateX(25deg) rotateY(-10deg) translateZ(30px); }
-            50% { transform: rotateX(30deg) rotateY(-5deg) translateZ(50px); }
-            100% { transform: rotateX(25deg) rotateY(-10deg) translateZ(30px); }
-          }
-        `;
-        this.injectKeyframes(keyframes);
-        element.style.animation = `${animName} 10s ease-in-out infinite`;
-      }
-
-      createGlassMorphism(element, layer) {
-        const size = (layer.scale || 1) * 600;
-        element.style.width = `${size}px`;
-        element.style.height = `${size * 0.7}px`;
-        element.style.top = '10%';
-        element.style.right = '5%';
-        element.style.borderRadius = '20px';
-        
-        // Effet glass morphism
-        element.style.background = `
-          linear-gradient(135deg, 
-            rgba(255, 255, 255, ${layer.opacity || 0.1}) 0%,
-            rgba(255, 255, 255, ${(layer.opacity || 0.1) * 0.5}) 100%
-          )
-        `;
-        
-        element.style.backdropFilter = 'blur(20px) saturate(180%)';
-        element.style.border = '1px solid rgba(255, 255, 255, 0.2)';
-        element.style.boxShadow = `
-          0 8px 32px rgba(0, 0, 0, 0.1),
-          inset 0 1px 0 rgba(255, 255, 255, 0.2),
-          inset 0 -1px 0 rgba(255, 255, 255, 0.1)
-        `;
-        
-        element.style.transform = layer.transform || 'rotateX(15deg) rotateY(5deg) translateZ(40px)';
-        
-        // Animation glass subtile
-        const animName = `glass-${Date.now()}`;
-        const keyframes = `
-          @keyframes ${animName} {
-            0%, 100% { transform: rotateX(15deg) rotateY(5deg) translateZ(40px); }
-            50% { transform: rotateX(18deg) rotateY(8deg) translateZ(60px); }
-          }
-        `;
-        this.injectKeyframes(keyframes);
-        element.style.animation = `${animName} 8s ease-in-out infinite`;
-      }
-
-      createCustomEffect(element, layer) {
-        // Applique le CSS custom directement
-        if (layer.css) {
-          element.style.cssText = layer.css;
-        }
-        if (layer.transform) {
-          element.style.transform = layer.transform;
-        }
-        if (layer.blend) {
-          element.style.mixBlendMode = layer.blend;
-        }
-      }
-
-      applyAdvancedAnimations(animations) {
-        animations.forEach((anim, i) => {
-          if (anim.keyframes && anim.name) {
-            const keyframeRule = `@keyframes ${anim.name} { ${anim.keyframes} }`;
-            this.injectKeyframes(keyframeRule);
-            
-            // Applique l'animation aux éléments cibles
-            const targets = this.decor.querySelectorAll(`[class*="advanced-layer"]`);
-            targets.forEach(target => {
-              target.style.animation = `${anim.name} ${anim.duration || '4s'} ${anim.timing || 'ease-in-out'} ${anim.iteration || 'infinite'}`;
-            });
-          }
-        });
-      }
-
-      injectKeyframes(keyframeRule) {
-        if (!this.styleSheet) {
-          const style = document.createElement('style');
-          document.head.appendChild(style);
-          this.styleSheet = style.sheet;
-        }
-        
-        try {
-          this.styleSheet.insertRule(keyframeRule, this.styleSheet.cssRules.length);
-        } catch (e) {
-          console.warn('Keyframe injection failed:', e);
-        }
-      }
-
-      clearEffects() {
-        this.decor.innerHTML = '';
-        this.activeAnimations.clear();
-      }
-    }
-
-    /* ---------- Session / Auth UI ---------- */
+    // ---------- Session / Auth UI ----------
     async function guard(){
       const { data:{ session } } = await sb.auth.getSession();
       if(session?.user) return true;
@@ -585,7 +210,7 @@
 
     document.getElementById('homeBtn').onclick=()=>location.href='index.html';
 
-    /* ---------- Historique : par discussion ---------- */
+    // ---------- Historique : par discussion ----------
     const drawer=document.getElementById('drawer'); const histList=document.getElementById('histList');
     document.getElementById('openHistory').onclick = ()=> drawer.classList.toggle('open');
     document.getElementById('newChatBtn').onclick  = ()=> createNewSession();
@@ -594,10 +219,7 @@
     const CUR_KEY  = 'pf_current_session';
     function loadSessions(){ try{ return JSON.parse(localStorage.getItem(SESS_KEY)||'[]'); }catch{return []} }
     function saveSessions(arr){ localStorage.setItem(SESS_KEY, JSON.stringify(arr)); }
-
-    function getCurrentId(){
-      return localStorage.getItem(CUR_KEY) || null;
-    }
+    function getCurrentId(){ return localStorage.getItem(CUR_KEY) || null; }
     function setCurrentId(id){ localStorage.setItem(CUR_KEY, String(id)); }
 
     function createDefaultSpec(){
@@ -716,8 +338,7 @@
       }catch{}
     })();
     renderHistory();
-
-    /* ---------- Chat + Spec ---------- */
+    // ---------- Chat + Spec ----------
     const chatBody=document.getElementById('chatBody');
     const composer=document.getElementById('composer');
     const sendBtn=document.getElementById('sendBtn');
@@ -804,7 +425,7 @@
 
         hideTyping();
 
-        const reply = data.reply || (getLang()==='en'?'I could not structure the proposal.':'Je n'ai pas pu structurer la proposition.');
+        const reply = data.reply || (getLang()==='en'?'I could not structure the proposal.':'Je n\'ai pas pu structurer la proposition.');
         messages.push({ role:'assistant', content: reply }); localStorage.setItem('pf_chat', JSON.stringify(messages));
         bubble('assistant', escapeHTML(reply).replace(/\n/g,'<br/>'));
 
@@ -817,9 +438,6 @@
           renderSpec();
         }
 
-        // >>> STYLE LIVE via Edge Function Supabase
-        await refineStyleFromConversation(content);
-
         saveSessionState();
         statusEl.textContent='Prêt';
       }catch(e){
@@ -829,7 +447,6 @@
       }
     }
 
-    /* ---------- Envoi: Entrée = envoyer (robuste desktop & mobile) ---------- */
     function handleSend(){
       const v = composer.value;
       if (!v || !v.trim()) return;
@@ -853,7 +470,7 @@
     });
     sendBtn.addEventListener('click', handleSend);
 
-    /* ---------- Upload logo -> applique à la spec ---------- */
+    // ---------- Upload logo -> applique à la spec ----------
     const logoInput = document.getElementById('logoInput');
     logoInput.addEventListener('change', async (e)=>{
       const file = e.target.files?.[0]; if(!file) return;
@@ -868,7 +485,7 @@
       e.target.value='';
     });
 
-    /* ---------- Libellés ---------- */
+    // ---------- Libellés ----------
     const t = {
       fr:{ title:"Proposition commerciale", to:"Pour", from:"Émis par", date:"Date", letter:"Lettre d'introduction", executive:"Résumé exécutif", objectives:"Objectifs", approach:"Approche & phasage", deliverables:"Livrables", in_scope:"Inclus", out_scope:"Hors-périmètre", timeline:"Planning", pricing:"Tarification", assumptions:"Hypothèses / Risques", next:"Prochaines étapes", price_model:"Modèle", terms:"Conditions", toc:"Sommaire" },
       en:{ title:"Business Proposal", to:"To", from:"Issued by", date:"Date", letter:"Cover Letter", executive:"Executive Summary", objectives:"Objectives", approach:"Approach & Phasing", deliverables:"Deliverables", in_scope:"In scope", out_scope:"Out of scope", timeline:"Timeline", pricing:"Pricing", assumptions:"Assumptions / Risks", next:"Next Steps", price_model:"Model", terms:"Terms", toc:"Table of Contents" }
@@ -879,248 +496,254 @@
     function fmtDate(d){ try{ const dt=d?new Date(d):new Date(); return dt.toLocaleDateString(document.documentElement.lang||getLang(), {year:'numeric',month:'short',day:'2-digit'});}catch{return ''} }
     function money(n,c){ try{ return new Intl.NumberFormat(document.documentElement.lang||getLang(),{style:'currency',currency:c||'EUR'}).format(Number(n||0)); }catch{ return String(n||0)+' '+(c||'€') } }
 
-    /* ---------- THEME + 3D: applique meta.style avec nouveau système ---------- */
+    // ---------- THEME + 3D: applique meta.style avec nouveau système ----------
+    // (Reste à venir dans le bloc suivant)
+  </script>
+    // ---------- THEME + 3D ----------
     function applyStyleTokens(style){
-      const palette = {
-        primary: "#3B82F6", secondary: "#8B5CF6", surface: "#FFFFFF",
-        ink: "#0A1020", muted: "#5C667A", stroke: "#E0E6F4",
-        accentA: "#60A5FA", accentB: "#93C5FD",
-        ...(style?.palette||{})
-      };
-      const shapes = { radius:"12px", shadow:"0 18px 48px rgba(10,16,32,.12)", ...(style?.shapes||{}) };
-      const typo   = { heading:"Inter", body:"Inter", accent:"Inter", ...(style?.typography||{}) };
-
-      sheet.style.setProperty('--panel', palette.surface);
-      sheet.style.setProperty('--ink', palette.ink);
-      sheet.style.setProperty('--muted', palette.muted);
-      sheet.style.setProperty('--stroke', palette.stroke);
-      sheet.style.setProperty('--accent', palette.primary);
-      sheet.style.setProperty('--accent2', palette.secondary);
-      sheet.style.setProperty('--elev', shapes.shadow);
-      sheet.style.setProperty('--radius', shapes.radius);
-      sheet.style.setProperty('--font-body', typo.body);
-      sheet.style.setProperty('--font-heading', typo.heading);
-
-      // NOUVEAU: Rendu des effets 3D avancés
-      if (style?.effects_3d) {
-        const renderer = new Advanced3DRenderer(sheet, decor);
-        const projectType = spec.meta?.project_type || 'corporate';
-        renderer.renderAdvanced3DEffects(style.effects_3d, projectType);
-      } else {
-        // Fallback vers les anciens effets simples
-        renderDecorLayers(style?.decor_layers||[], palette);
+      if(!style) return;
+      const r = document.documentElement;
+      if(style.palette){
+        for(const [k,v] of Object.entries(style.palette)){
+          r.style.setProperty('--'+k.replace(/_/g,'-'), v);
+        }
+      }
+      if(style.shapes){
+        if(style.shapes.radius) r.style.setProperty('--radius', style.shapes.radius);
+        if(style.shapes.shadow) r.style.setProperty('--elev', style.shapes.shadow);
+      }
+      if(style.typography){
+        if(style.typography.body) r.style.setProperty('--font-body', style.typography.body);
+        if(style.typography.heading) r.style.setProperty('--font-heading', style.typography.heading);
       }
     }
 
-    function hsla(h,s,l,a){ return `hsla(${Number(h||0)},${Number(s||0)}%,${Number(l||0)}%,${Number(a||1)})`; }
-    function pickCorner(pos){
-      const map = {
-        top: {top:'-15vh', left:'50%', transform:'translateX(-50%)'},
-        bottom: {bottom:'-15vh', left:'50%', transform:'translateX(-50%)'},
-        left: {left:'-15vw', top:'50%', transform:'translateY(-50%)'},
-        right:{right:'-15vw', top:'50%', transform:'translateY(-50%)'},
-        center:{top:'50%', left:'50%', transform:'translate(-50%,-50%)'}
-      };
-      return map[pos] || map.center;
-    }
-    function renderDecorLayers(layers, palette){
-      decor.innerHTML = '';
-      if(!layers?.length) return;
-      layers.forEach((L,i)=>{
-        const layer = document.createElement('div');
-        layer.style.position='absolute';
-        layer.style.pointerEvents='none';
-        layer.style.mixBlendMode = (L.blend||'normal');
-        const pos = pickCorner(L.position);
-        Object.assign(layer.style, pos);
-        const rot = Number(L.rotate||0);
-        const scale = Math.max(0.25, Number(L.scale||1));
-        const color = hsla(L.h ?? 220, L.s ?? 60, L.l ?? 55, L.opacity ?? 0.18);
-
-        switch((L.type||'').toLowerCase()){
-          case 'glow': {
-            const size = 900*scale;
-            layer.style.width = layer.style.height = size+'px';
-            layer.style.borderRadius='50%';
-            layer.style.filter='blur(48px)';
-            layer.style.background = `radial-gradient(closest-side, ${color} 0%, transparent 70%)`;
-            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
-            break;
-          }
-          case 'gradient_blob': {
-            const w = 1000*scale, h = 700*scale;
-            layer.style.width = w+'px'; layer.style.height = h+'px';
-            layer.style.borderRadius='40%';
-            layer.style.filter='blur(24px)';
-            layer.style.background = `conic-gradient(from 180deg, ${color}, transparent 60%)`;
-            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
-            break;
-          }
-          case 'diagonal': {
-            const size = 1600*scale;
-            layer.style.width = size+'px'; layer.style.height = size+'px';
-            layer.style.background = `
-              repeating-linear-gradient(${rot}deg,
-                ${color} 0px, ${color} 4px,
-                transparent 4px, transparent 22px)`;
-            break;
-          }
-          case 'grid': {
-            const size = 1400*scale;
-            layer.style.width = size+'px'; layer.style.height = size+'px';
-            const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-            svg.setAttribute('viewBox','0 0 100 100'); svg.setAttribute('width','100%'); svg.setAttribute('height','100%');
-            const defs = document.createElementNS(svg.namespaceURI,'defs');
-            const pat = document.createElementNS(svg.namespaceURI,'pattern');
-            pat.setAttribute('id',`p-${i}`); pat.setAttribute('width','10'); pat.setAttribute('height','10'); pat.setAttribute('patternUnits','userSpaceOnUse');
-            const path = document.createElementNS(svg.namespaceURI,'path');
-            path.setAttribute('d','M10 0 L0 0 0 10'); path.setAttribute('fill','none'); path.setAttribute('stroke', color); path.setAttribute('stroke-width','0.4');
-            pat.appendChild(path); defs.appendChild(pat); svg.appendChild(defs);
-            const rect = document.createElementNS(svg.namespaceURI,'rect');
-            rect.setAttribute('width','100%'); rect.setAttribute('height','100%'); rect.setAttribute('fill',`url(#p-${i})`);
-            svg.appendChild(rect);
-            layer.appendChild(svg);
-            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
-            break;
-          }
-          case 'dots': {
-            const size = 1400*scale;
-            layer.style.width = size+'px'; layer.style.height = size+'px';
-            const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-            svg.setAttribute('viewBox','0 0 100 100'); svg.setAttribute('width','100%'); svg.setAttribute('height','100%');
-            const defs = document.createElementNS(svg.namespaceURI,'defs');
-            const pat = document.createElementNS(svg.namespaceURI,'pattern');
-            pat.setAttribute('id',`d-${i}`); pat.setAttribute('width','6'); pat.setAttribute('height','6'); pat.setAttribute('patternUnits','userSpaceOnUse');
-            const circle = document.createElementNS(svg.namespaceURI,'circle');
-            circle.setAttribute('cx','1.5'); circle.setAttribute('cy','1.5'); circle.setAttribute('r','0.6'); circle.setAttribute('fill', color);
-            pat.appendChild(circle); defs.appendChild(pat); svg.appendChild(defs);
-            const rect = document.createElementNS(svg.namespaceURI,'rect');
-            rect.setAttribute('width','100%'); rect.setAttribute('height','100%'); rect.setAttribute('fill',`url(#d-${i})`);
-            svg.appendChild(rect);
-            layer.appendChild(svg);
-            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
-            break;
-          }
-          default: {
-            const size = 1000*scale;
-            layer.style.width = layer.style.height = size+'px';
-            layer.style.borderRadius='50%';
-            layer.style.filter='blur(40px)';
-            layer.style.background = `radial-gradient(closest-side, ${color} 0%, transparent 70%)`;
-            layer.style.transform = (pos.transform?pos.transform+' ':'') + `rotate(${rot}deg)`;
-          }
+    // Effets décoratifs 3D (optionnel)
+    function renderDecor(style){
+      decor.innerHTML='';
+      if(!style?.effects_3d) return;
+      const { perspective, layers=[] } = style.effects_3d;
+      decor.style.perspective = perspective || "1200px";
+      layers.forEach((layer,i)=>{
+        const d=document.createElement('div');
+        d.style.position='absolute';d.style.inset=0;d.style.pointerEvents='none';d.style.zIndex=i;
+        if(layer.type==='glow'){
+          d.style.background=`radial-gradient(ellipse at ${layer.position||'top'} center, hsla(${layer.h||220},${layer.s||60}%,${layer.l||60}%,${layer.opacity||.16}), transparent)`;
+          d.style.mixBlendMode=layer.blend||'overlay';
+          d.style.transform=`rotate(${layer.rotate||0}deg) scale(${layer.scale||1})`;
         }
-        decor.appendChild(layer);
+        decor.appendChild(d);
       });
     }
 
-    /* ---------- Pages ---------- */
-    const sheetPages = [];
-    function clearPages(){ sheetContent.innerHTML=''; sheetPages.length=0; }
-    function makePage(kind='default'){
-      const page = document.createElement('div'); page.className='page'; page.dataset.kind=kind;
-      const pageDecor = document.createElement('div'); pageDecor.className='page-decor';
-      const inner = document.createElement('div'); inner.className='inner';
-      page.appendChild(pageDecor); page.appendChild(inner);
-      sheetContent.appendChild(page); sheetPages.push({page, inner, pageDecor});
-      return {page, inner, pageDecor};
+    // ---------- Rendu dynamique des pages ----------
+    let sheetPages=[];
+    function clearPages(){ sheetContent.innerHTML=''; sheetPages=[]; }
+    function makePage(key){
+      const page=document.createElement('div'); page.className='page fade-in';
+      const inner=document.createElement('div'); inner.className='inner';
+      page.appendChild(inner);
+      sheetContent.appendChild(page);
+      sheetPages.push({page,inner,key});
+      return {page,inner};
     }
 
-    function H1(inner, text){ const el=document.createElement('div'); el.className='h1'; el.textContent=text; inner.appendChild(el); }
-    function H2(inner, text){ const el=document.createElement('div'); el.className='h2'; el.textContent=text; inner.appendChild(el); }
-    function HR(inner){ inner.appendChild(Object.assign(document.createElement('div'),{className:'hr'})); }
-    function P(inner, text){ const p=document.createElement('p'); p.textContent=text; inner.appendChild(p); }
-    function UL(inner, arr){ if(!arr?.length) return; const ul=document.createElement('ul'); arr.forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ul.appendChild(li); }); inner.appendChild(ul); }
+    function H2(parent,txt){ const h=document.createElement('div'); h.className='h2'; h.textContent=txt; parent.appendChild(h); }
+    function P(parent,txt){ const p=document.createElement('p'); p.textContent=txt; parent.appendChild(p); }
+    function UL(parent,arr){ const ul=document.createElement('ul'); arr.forEach(x=>{const li=document.createElement('li');li.textContent=x;ul.appendChild(li);}); parent.appendChild(ul); }
 
-    function pageAccentBar(pageDecor, colorA, colorB){
-      const band = document.createElement('div');
-      band.style.position='absolute'; band.style.inset='-10% -10% auto -10%'; band.style.height='40%';
-      band.style.background = `linear-gradient(135deg, ${colorA}, ${colorB})`;
-      band.style.opacity = .25;
-      band.style.transform = 'skewY(-8deg)';
-      pageDecor.appendChild(band);
-    }
-
+    // --- Fonctions de rendu des différentes pages/propriétés ---
     function renderCover(style, L, title, company, client, date){
-      const { inner, pageDecor } = makePage('cover');
-      const pA = getComputedStyle(sheet).getPropertyValue('--accent').trim() || '#3B82F6';
-      const pB = getComputedStyle(sheet).getPropertyValue('--accent2').trim() || '#8B5CF6';
-      pageAccentBar(pageDecor, pA, pB);
-
-      const head=document.createElement('div'); head.className='doc-header';
+      renderDecor(style);
+      const {inner} = makePage('cover');
+      // Bandeau haut/logo
+      const header=document.createElement('div'); header.className='doc-header';
       const logoBox=document.createElement('div'); logoBox.className='logo-box';
-      if(style?.logoDataUrl){ const im=new Image(); im.src=style.logoDataUrl; logoBox.appendChild(im); } else { logoBox.textContent='LOGO'; logoBox.style.color='#9aa6bf'; }
-      const bi=document.createElement('div'); bi.className='brand-info';
-      bi.innerHTML=`<div class="company">${company}</div><div class="muted">${date}</div>`;
-      head.appendChild(logoBox); head.appendChild(bi); inner.appendChild(head);
-
-      H1(inner, title);
-      const meta=document.createElement('div'); meta.className='meta';
-      meta.innerHTML = `${L.to}: <span class="tag">${client}</span> &nbsp;•&nbsp; ${L.from}: <span class="tag">${company}</span>`;
-      inner.appendChild(meta);
-
-      const band=document.createElement('div'); band.className='band';
-      band.textContent = (L===t.fr) ? "Aperçu généré automatiquement selon votre brief." : "Preview auto-generated from your brief.";
-      inner.appendChild(band);
+      if(style?.logoDataUrl){ const img=document.createElement('img'); img.src=style.logoDataUrl; logoBox.appendChild(img); }
+      else{ logoBox.innerHTML='<span class="muted">Logo</span>'; }
+      const brandInfo=document.createElement('div');brandInfo.className='brand-info';
+      brandInfo.innerHTML=`<div class="company">${escapeHTML(company||'')}</div>
+        <div class="muted">${L.to||'Pour'} : <strong>${escapeHTML(client||'')}</strong></div>
+        <div class="muted">${L.date||'Date'} : ${escapeHTML(date||fmtDate())}</div>`;
+      header.appendChild(logoBox); header.appendChild(brandInfo); inner.appendChild(header);
+      // Titre
+      const h1 = document.createElement('div'); h1.className='h1'; h1.textContent = title||L.title||'Proposition';
+      inner.appendChild(h1);
     }
 
-    function renderTOC(L, sections){
-      const present = sections.filter(s=>s.present);
-      if(present.length<3) return;
-      const { inner } = makePage('toc');
-      H2(inner, L.toc);
-      const toc=document.createElement('div'); toc.className='toc';
-      toc.innerHTML = `<b>${L.toc}</b>`;
-      present.forEach(s=>{ const a=document.createElement('a'); a.textContent=s.title; a.href='#'+s.id; toc.appendChild(a); });
-      inner.appendChild(toc);
+    function renderExecutive(L, executive){
+      const {inner}=makePage('executive');
+      H2(inner,L.executive||'Résumé exécutif');
+      safeArr(executive.paragraphs).forEach(p=>P(inner,p));
     }
-
-    function renderLetter(L, letter){
-      const { inner } = makePage('letter');
-      H2(inner, L.letter);
-      if(letter?.greeting) P(inner, letter.greeting);
-      (Array.isArray(letter?.body_paragraphs) ? letter.body_paragraphs : (letter?.paragraphs||[])).forEach(p=>P(inner, p));
-      if(letter?.closing) P(inner, letter.closing);
-      if(letter?.signature) P(inner, letter.signature);
+    function renderObjectives(L, objectives){
+      const {inner}=makePage('objectives');
+      H2(inner,L.objectives||'Objectifs');
+      UL(inner, safeArr(objectives.bullets));
     }
-
-    function renderExecutive(L, exec){
-      const { inner } = makePage('executive');
-      H2(inner, L.executive);
-      (exec?.paragraphs||[]).forEach(p=>P(inner, p));
-    }
-
-    function renderObjectives(L, obj){
-      const { inner } = makePage('objectives');
-      H2(inner, L.objectives);
-      UL(inner, obj?.bullets||[]);
-    }
-
     function renderApproach(L, approach){
-      const { inner } = makePage('approach');
-      H2(inner, L.approach);
-      (approach?.phases||[]).forEach((ph,i)=>{
-        const card=document.createElement('div'); card.className='card';
-        card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center">
-          <strong>Phase ${i+1} — ${String(ph.title||'À confirmer')}</strong>
-          <span class="pill">${String(ph.duration||'')}</span></div>`;
-        inner.appendChild(card);
-        if(ph.description) P(inner, ph.description);
-        const acts=(ph.activities?.length?ph.activities:ph.steps)||[]; if(acts.length){ const p=document.createElement('p'); p.innerHTML='<em>Activités :</em>'; inner.appendChild(p); UL(inner, acts); }
-        const outs=ph.outcomes||[]; if(outs.length){ const p=document.createElement('p'); p.innerHTML='<em>Résultats attendus :</em>'; inner.appendChild(p); UL(inner, outs); }
+      const {inner}=makePage('approach');
+      H2(inner,L.approach||'Approche & phasage');
+      safeArr(approach.phases).forEach(phase=>{
+        if(phase.title) { const b=document.createElement('div'); b.className='band'; b.innerHTML='<strong>'+escapeHTML(phase.title)+'</strong>'; inner.appendChild(b);}
+        safeArr(phase.paragraphs).forEach(p=>P(inner,p));
       });
     }
-
-    function renderDeliverables(L, deliv){
-      const { inner } = makePage('deliverables');
-      H2(inner, L.deliverables);
-      const grid=document.createElement('div'); grid.className='grid2';
-      const a=document.createElement('div'); a.className='card'; a.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.in_scope}</div>`;
-      const b=document.createElement('div'); b.className='card'; b.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.out_scope}</div>`;
-      const ulA=document.createElement('ul'); (deliv?.in||[]).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulA.appendChild(li); });
-      const ulB=document.createElement('ul'); (deliv?.out||[]).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ulB.appendChild(li); });
-      a.appendChild(ulA); b.appendChild(ulB); grid.appendChild(a); grid.appendChild(b); inner.appendChild(grid);
+    function renderDeliverables(L, deliverables){
+      const {inner}=makePage('deliverables');
+      H2(inner,L.deliverables||'Livrables');
+      if(safeArr(deliverables.in).length){
+        const inc=document.createElement('div');inc.innerHTML='<span class="tag">'+(L.in_scope||'Inclus')+'</span>';
+        UL(inc,deliverables.in); inner.appendChild(inc);
+      }
+      if(safeArr(deliverables.out).length){
+        const out=document.createElement('div');out.innerHTML='<span class="tag">'+(L.out_scope||'Hors-périmètre')+'</span>';
+        UL(out,deliverables.out); inner.appendChild(out);
+      }
+    }
+    function renderTimeline(L, timeline){
+      const {inner}=makePage('timeline');
+      H2(inner,L.timeline||'Planning');
+      if(safeArr(timeline.milestones).length){
+        const table=document.createElement('table');
+        table.innerHTML='<thead><tr><th>Étape</th><th>Date</th></tr></thead>';
+        const tbody=document.createElement('tbody');
+        timeline.milestones.forEach(m=>{
+          const row=document.createElement('tr');
+          row.innerHTML='<td>'+escapeHTML(m.title||'')+'</td><td>'+escapeHTML(fmtDate(m.date))+'</td>';
+          tbody.appendChild(row);
+        });
+        table.appendChild(tbody);inner.appendChild(table);
+      }
+    }
+    function renderPricing(L, pricing){
+      const { inner } = makePage('pricing');
+      H2(inner, L.pricing||'Tarification');
+      if(pricing.price){
+        const el = document.createElement('div');
+        el.innerHTML = `<span class="price">${money(pricing.price, pricing.currency)}</span> <span class="muted">${L.price_model||'Modèle'}: ${pricing.model||''}</span>`;
+        inner.appendChild(el);
+      }
+      if(safeArr(pricing.items).length){
+        const table = document.createElement('table');
+        table.innerHTML = "<thead><tr><th>Item</th><th>Prix</th></tr></thead>";
+        const tbody = document.createElement('tbody');
+        pricing.items.forEach(item=>{
+          const row = document.createElement('tr');
+          row.innerHTML = `<td>${escapeHTML(item.title||'')}</td><td>${money(item.price, pricing.currency)}</td>`;
+          tbody.appendChild(row);
+        });
+        table.appendChild(tbody);
+        inner.appendChild(table);
+      }
+      if(safeArr(pricing.terms).length){
+        const ul = document.createElement('ul');
+        pricing.terms.forEach(term=>{
+          const li = document.createElement('li');
+          li.textContent = term;
+          ul.appendChild(li);
+        });
+        inner.appendChild(ul);
+      }
+    }
+    function renderAssumptions(L, assumptions){
+      const { inner } = makePage('assumptions');
+      H2(inner, L.assumptions||'Hypothèses / Risques');
+      safeArr(assumptions.paragraphs).forEach(p=>P(inner,p));
+    }
+    function renderNextSteps(L, next){
+      const { inner } = makePage('next');
+      H2(inner, L.next||'Prochaines étapes');
+      safeArr(next.paragraphs).forEach(p=>P(inner,p));
     }
 
-    function renderTimeline(L, timeline){
-      const { inner
+    // ---------- Rendu global de la proposition ----------
+    function renderSpec() {
+      clearPages();
+      const style = spec?.meta?.style || {};
+      applyStyleTokens(style);
+
+      // Debug complet
+      document.getElementById('debug').textContent = "SPEC:\n" + JSON.stringify(spec, null, 2);
+
+      const L = t[getLang()] || t.fr;
+      const meta = spec?.meta || {};
+      const notes = spec?.client_notes || {};
+      const letter = spec?.letter || {};
+      const executive = spec?.executive_summary || {};
+      const objectives = spec?.objectives || {};
+      const approach = spec?.approach || {};
+      const deliverables = spec?.deliverables || {};
+      const timeline = spec?.timeline || {};
+      const pricing = spec?.pricing || {};
+      const assumptions = spec?.assumptions || {};
+      const next = spec?.next_steps || {};
+
+      // PAGE 1: Couverture
+      renderCover(style, L, meta.title, meta.company, meta.client, fmtDate(meta.date));
+      // Palette dynamique — visualise les couleurs
+      if(style.palette){
+        const { inner } = sheetPages[0] || {};
+        if(inner){
+          const paletteDiv = document.createElement('div');
+          paletteDiv.style.margin = "16px 0";
+          paletteDiv.innerHTML = "<strong>Palette :</strong> " + Object.entries(style.palette)
+            .map(([k,v]) => `<span class="color-sample" style="background:${v};"></span><span style="font-size:12px;">${k}</span>`)
+            .join(" ");
+          inner.appendChild(paletteDiv);
+        }
+      }
+      if(safeArr(executive.paragraphs).length) renderExecutive(L, executive);
+      if(safeArr(objectives.bullets).length) renderObjectives(L, objectives);
+      if(safeArr(approach.phases).length) renderApproach(L, approach);
+      if(safeArr(deliverables.in).length || safeArr(deliverables.out).length) renderDeliverables(L, deliverables);
+      if(safeArr(timeline.milestones).length) renderTimeline(L, timeline);
+      if(safeArr(pricing.items).length || pricing.price) renderPricing(L, pricing);
+      if(safeArr(assumptions.paragraphs).length) renderAssumptions(L, assumptions);
+      if(safeArr(next.paragraphs).length) renderNextSteps(L, next);
+
+      if(!sheetPages.length){
+        const p = makePage().inner;
+        p.innerHTML = "<div class='muted fade-in'>Aucune donnée à afficher.<br>Commencez une discussion à gauche pour voir l’aperçu ici !</div>";
+      }
+    }
+
+    // ---------- Langues ----------
+    function getLang(){
+      return document.getElementById('langSel').value || 'fr';
+    }
+    document.getElementById('langSel').addEventListener('change',e=>{
+      document.documentElement.lang = getLang();
+      localStorage.setItem('pf_lang', getLang());
+      renderSpec();
+      renderChat();
+    });
+    document.documentElement.lang = localStorage.getItem('pf_lang') || 'fr';
+    document.getElementById('langSel').value = document.documentElement.lang;
+
+    // ---------- Initialisation ----------
+    renderSpec();
+  </script>
+</body>
+</html>
+    // ---------- Helpers divers et sécurité minimaliste ----------
+    // (Tu peux ajouter ici d'autres helpers, tracking, analytics, etc.)
+
+    // Protection contre F5 accidentel (optionnel, décommenter si besoin)
+    // window.addEventListener('beforeunload', (e) => {
+    //   e.preventDefault(); e.returnValue = '';
+    // });
+
+    // Petites améliorations UX
+    window.addEventListener('keydown', e=>{
+      if(e.key==='Escape'){
+        if(drawer.classList.contains('open')) drawer.classList.remove('open');
+        if(menu.style.display==='block') menu.style.display='none';
+      }
+    });
+
+    // Mise au point : console pour debug rapide
+    window.studio = { messages, spec, setSpec: s=>{spec=s;localStorage.setItem('pf_proposal',JSON.stringify(s));renderSpec();}, setMessages: m=>{messages=m;localStorage.setItem('pf_chat',JSON.stringify(m));renderChat();} };
+  </script>
+</body>
+</html>
