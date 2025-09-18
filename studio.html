@@ -4,175 +4,138 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>PropoFlash — Studio</title>
+  <!-- Polices cohérentes avec le reste du site -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --bg:#f6f8fc; --panel:#ffffff; --ink:#0a1020; --muted:#5c667a; --stroke:#e0e6f4;
-      --accent:#3b82f6; --accent2:#8b5cf6; --accent-ink:#fff;
-      --paper-w:210mm; --paper-h:297mm;
-      --elev:0 18px 48px rgba(10,16,32,.10), inset 0 1px 0 #ffffffaa;
-      --transition: .18s cubic-bezier(.4,0,.2,1);
+    :root {
+      --bg: #f6f8fc;
+      --panel: #ffffff;
+      --ink: #0a1020;
+      --muted: #5c667a;
+      --stroke: #e0e6f4;
+      --accent: #3b82f6;
+      --accent2: #8b5cf6;
+      --accent-ink: #fff;
+      --paper-w: 210mm;
+      --paper-h: 297mm;
+      --elev: 0 18px 48px rgba(10, 16, 32, 0.10), inset 0 1px 0 #ffffffaa;
+      --transition: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
       --focus: #a5b4fc;
       --radius: 12px;
       --font-heading: 'Playfair Display', serif;
       --font-body: 'Inter', sans-serif;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%; margin:0; overflow:hidden}
-    body{
-      height:100vh;
-      background:linear-gradient(180deg,var(--bg),#eef3ff);
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; overflow: hidden; }
+    body {
+      height: 100vh;
+      background: linear-gradient(180deg, var(--bg), #eef3ff);
       font-family: var(--font-body);
       color: var(--ink);
       perspective: 1200px;
     }
-    .main{height:calc(100vh - 64px);display:grid;grid-template-columns: clamp(520px, 38vw, 640px) 1fr;gap:18px;padding:18px 24px;align-items:stretch;min-height:0}
-    @media (max-width:1100px){.main{grid-template-columns:1fr}}
-    /* Top bar */
-    .bar{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--stroke);display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px;box-shadow:var(--elev)}
-    .left,.right{display:flex;gap:10px;align-items:center}
-    .brand{display:flex;gap:10px;align-items:center;font-weight:800;cursor:pointer}
-    .spark{width:22px;height:22px;border-radius:6px;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd)}
-    .btn{border:1px solid var(--stroke);background:var(--panel);border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer;box-shadow:var(--elev);transition:all var(--transition)}
-    .btn.primary{background:#0a1020;color:#fff;border-color:#0a1020}
-    .sel{border:1px solid var(--stroke);border-radius:10px;padding:7px 10px;background:var(--panel);color:var(--ink)}
-    .avatar{width:32px;height:32px;border-radius:50%;border:1px solid var(--stroke);display:grid;place-items:center;font-weight:800;background:var(--panel);cursor:pointer;box-shadow:var(--elev)}
-    .menu{position:absolute;top:54px;right:14px;background:var(--panel);border:1px solid var(--stroke);border-radius:12px;box-shadow:var(--elev);display:none;overflow:hidden}
-    .menu a,.menu button{display:block;width:100%;text-align:left;padding:10px 12px;border:none;background:var(--panel);cursor:pointer;font-weight:600;color:var(--ink)}
-    .menu a:hover,.menu button:hover{background:color-mix(in hsl, var(--panel) 80%, transparent)}
-    .panel{background:var(--panel);border:1px solid var(--stroke);border-radius:16px;box-shadow:var(--elev);display:flex;flex-direction:column;min-height:0}
-    /* Chat */
-    .chat{min-height:0;display:flex;flex-direction:column}
-    .chat-head{display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--stroke)}
-    .chat-title{font-weight:800}
-    .chat-body{padding:12px;overflow:auto;flex:1;min-height:0}
-    .msg{display:flex;gap:10px;margin:10px 0;align-items:flex-end;width:100%}
-    .msg.assistant{justify-content:flex-start}
-    .msg.user{justify-content:flex-end}
-    .avatar-badge{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:11px;border:1px solid var(--stroke);box-shadow:var(--elev);background:var(--panel);color:var(--ink);user-select:none}
-    .avatar-badge.bot{background:#111827;color:#fff;border-color:#111827}
-    .avatar-badge.you{background:var(--accent);color:#fff;border-color:transparent}
-    .bubble{max-width:min(100%, 560px);padding:10px 12px;border-radius:14px;border:1px solid var(--stroke);box-shadow:var(--elev);word-wrap:break-word;overflow-wrap:anywhere}
-    .bubble-assistant{background:color-mix(in hsl, var(--panel) 86%, transparent);color:var(--ink)}
-    .bubble-user{background:linear-gradient(135deg, var(--accent), var(--accent2));color:var(--accent-ink);border-color:transparent}
-    .chat-compose{position:relative;padding:12px;border-top:1px solid var(--stroke);display:flex;align-items:flex-end;gap:16px}
-    .logo-wrap{position:relative;flex:0 0 auto}
-    .input{display:flex;gap:8px;align-items:flex-end;background:var(--panel);border:1px solid var(--stroke);border-radius:14px;padding:8px;box-shadow:var(--elev);flex:1}
-    .input textarea{flex:1;resize:vertical;min-height:72px;border:none;outline:none;background:transparent;font:500 14px/1.4 var(--font-body);color:var(--ink)}
-    .send{width:40px;height:40px;border-radius:12px;border:1px solid var(--stroke);background:#0a1020;color:#fff;display:grid;place-items:center;cursor:pointer}
-    .logo-btn{width:34px;height:34px;border-radius:10px;border:1px solid #0002;background:conic-gradient(from 180deg,#93c5fd,#c4b5fd,#60a5fa,#93c5fd);box-shadow:var(--elev);display:grid;place-items:center;cursor:pointer}
-    .logo-btn input{display:none}
-    .logo-tip{position:absolute;left:0;bottom:44px;background:#111;color:#fff;font-size:12px;padding:6px 8px;border-radius:8px;display:none;white-space:nowrap}
-    .logo-wrap:hover .logo-tip{display:block}
-    .typing{display:inline-flex;gap:5px;align-items:center}
-    .dot{width:6px;height:6px;border-radius:50%;background:#8aa0c6;opacity:.7;animation:bounce 1.2s infinite}
-    .dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
-    @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
-    /* Aperçu */
-    .sheet-wrap{flex:1;min-height:0;overflow:auto;display:flex;justify-content:center;align-items:flex-start;padding:12px 24px;position:relative}
-    .sheet{position:relative;width:var(--paper-w);max-width:100%;background:transparent;border:none;box-shadow:none;color:var(--ink);font-family: var(--font-body)}
-    .decor{position:fixed;inset:0;pointer-events:none;z-index:0}
-    .content{position:relative;z-index:1;width:100%}
-    .page{position:relative;width:var(--paper-w);min-height:var(--paper-h);background:var(--panel);border:1px solid var(--stroke);border-radius:var(--radius);box-shadow:var(--elev);margin:0 0 16mm 0;overflow:hidden}
-    .page:last-child{margin-bottom:0}
-    .inner{padding:22mm 18mm;position:relative;z-index:1}
-    .page .page-decor{position:absolute;inset:0;pointer-events:none;z-index:0}
-    .doc-header{display:grid;grid-template-columns:100px 1fr;gap:16px;align-items:center;margin-bottom:16px}
-    .logo-box{width:100px;height:100px;border:1px solid var(--stroke);border-radius:var(--radius);display:grid;place-items:center;overflow:hidden;background:var(--panel)}
-    .logo-box img{width:100%;height:100%;object-fit:contain}
-    .brand-info .company{font-weight:800;font-size:18px;font-family: var(--font-heading)}
-    .brand-info .muted{color:var(--muted);font-size:12px}
-    .h1{font-size:34px;line-height:1.05;margin:0 0 10px;font-weight:900;letter-spacing:-.01em;font-family: var(--font-heading)}
-    .h2{margin:0 0 10px;font-size:22px;font-weight:800;letter-spacing:.2px;font-family: var(--font-heading)}
-    .meta{color:var(--muted);font-size:14px;margin-bottom:18px}
-    .band{border-radius:var(--radius);padding:14px 16px;background:color-mix(in hsl, var(--accent) 12%, var(--panel));border:1px solid var(--stroke);margin:10px 0}
-    .hr{height:1px;background:var(--stroke);margin:12px 0}
-    .tag{display:inline-block;padding:3px 8px;border-radius:999px;background:color-mix(in hsl, var(--accent) 16%, transparent);border:1px solid var(--stroke);font-size:12px;color:var(--ink)}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .card{border:1px solid var(--stroke);border-radius:var(--radius);padding:12px;background:var(--panel);box-shadow:var(--elev)}
-    .price{font-weight:800;font-size:18px}
-    .muted{color:var(--muted)}
-    .pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--stroke);font-size:12px;background:var(--panel)}
-    table{border-collapse:collapse;width:100%;font-size:14px}
-    th,td{border:1px solid var(--stroke);padding:8px;text-align:left}
-    th{background:color-mix(in hsl, var(--panel) 85%, transparent)}
-    tfoot td{font-weight:800}
-    /* 3D Container */
-    #three-container{width:100%;height:300px;position:relative;background:linear-gradient(to bottom, #f0f4ff, #e6f0ff);border-radius:var(--radius);overflow:hidden;box-shadow:var(--elev);margin:10px 0}
-    /* Drawer */
-    .drawer{position:fixed;top:64px;right:-380px;width:360px;height:calc(100vh - 64px);background:var(--panel);border-left:1px solid var(--stroke);box-shadow:var(--elev);border-top-left-radius:12px;border-bottom-left-radius:12px;transition:transform .25s ease, right .25s ease;padding:12px 10px;display:flex;flex-direction:column;gap:10px;z-index:30}
-    .drawer.open{right:0}
-    .drawer h3{margin:4px 6px 6px;font-size:16px}
-    .drawer-list{flex:1;overflow:auto;padding:6px}
-    .row-item{border:1px solid var(--stroke);border-radius:10px;padding:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px}
-    .row-item strong{cursor:pointer}
-    .row-actions{display:flex;gap:6px}
-    .icon-btn{border:1px solid var(--stroke);background:var(--panel);border-radius:8px;padding:6px;cursor:pointer}
-    /* Animations */
-    .fade-in { animation:fadeIn .9s cubic-bezier(.4,0,.2,1) both; }
-    @keyframes fadeIn { 0%{opacity:0;transform:translateY(32px);} 100%{opacity:1;transform:none;} }
-    .loader { display:inline-block;width:32px;height:32px;border-radius:50%;border:3px solid var(--accent2);border-top:3px solid var(--accent);animation:spin 1.1s linear infinite;margin:auto;}
-    @keyframes spin{ to{ transform:rotate(360deg); } }
-    .color-sample{display:inline-block;width:18px;height:18px;border-radius:6px;margin-right:4px;border:1.5px solid #ddd;vertical-align:middle;}
-    @media print{
-      .bar,.drawer{display:none}
-      body{overflow:visible;height:auto;background:#fff}
-      .main{height:auto}
-      .sheet-wrap{overflow:visible;flex:auto;min-height:auto;padding:0}
-      .page{page-break-after:always;box-shadow:none;margin:0;border:0;border-radius:0}
-      .page:last-child{page-break-after:auto}
-      .inner{padding:18mm 16mm}
-      a[href]:after{content:""}
+
+    /* --- Layout Principal --- */
+    .main {
+      height: calc(100vh - 64px);
+      display: grid;
+      grid-template-columns: clamp(520px, 38vw, 640px) 1fr;
+      gap: 18px;
+      padding: 18px 24px;
+      align-items: stretch;
+      min-height: 0;
     }
+    @media (max-width: 1100px) { .main { grid-template-columns: 1fr; } }
+
+    /* --- Barre Supérieure --- */
+    .bar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: var(--panel);
+      border-bottom: 1px solid var(--stroke);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      box-shadow: var(--elev);
+    }
+    .brand { display: flex; gap: 10px; align-items: center; font-weight: 800; cursor: pointer; }
+    .spark { width: 22px; height: 22px; border-radius: 6px; background: conic-gradient(from 180deg, #93c5fd, #c4b5fd, #60a5fa, #93c5fd); }
+    .btn { border: 1px solid var(--stroke); background: var(--panel); border-radius: 10px; padding: 8px 12px; font-weight: 700; cursor: pointer; box-shadow: var(--elev); transition: all var(--transition); }
+    .btn.primary { background: #0a1020; color: #fff; border-color: #0a1020; }
+
+    /* --- Chat --- */
+    .chat { min-height: 0; display: flex; flex-direction: column; }
+    .chat-body { padding: 12px; overflow: auto; flex: 1; min-height: 0; }
+    .msg { display: flex; gap: 10px; margin: 10px 0; align-items: flex-end; width: 100%; }
+    .bubble { max-width: min(100%, 560px); padding: 10px 12px; border-radius: 14px; border: 1px solid var(--stroke); box-shadow: var(--elev); word-wrap: break-word; }
+    .bubble-assistant { background: color-mix(in hsl, var(--panel) 86%, transparent); }
+    .bubble-user { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: var(--accent-ink); border-color: transparent; }
+    .chat-compose { position: relative; padding: 12px; border-top: 1px solid var(--stroke); display: flex; align-items: flex-end; gap: 16px; }
+    .input textarea { flex: 1; resize: vertical; min-height: 72px; border: none; outline: none; background: transparent; font: 500 14px/1.4 var(--font-body); color: var(--ink); }
+
+    /* --- Aperçu --- */
+    .sheet-wrap { flex: 1; min-height: 0; overflow: auto; display: flex; justify-content: center; align-items: flex-start; padding: 12px 24px; }
+    .sheet { position: relative; width: var(--paper-w); max-width: 100%; background: transparent; border: none; box-shadow: none; color: var(--ink); font-family: var(--font-body); }
+    .page { position: relative; width: var(--paper-w); min-height: var(--paper-h); background: var(--panel); border: 1px solid var(--stroke); border-radius: var(--radius); box-shadow: var(--elev); margin: 0 0 16mm 0; overflow: hidden; }
+    .inner { padding: 22mm 18mm; position: relative; z-index: 1; }
+    .h1 { font-family: var(--font-heading); font-size: 34px; line-height: 1.05; margin: 0 0 10px; font-weight: 900; letter-spacing: -0.01em; }
+    .h2 { font-family: var(--font-heading); margin: 0 0 10px; font-size: 22px; font-weight: 800; letter-spacing: 0.2px; }
+
+    /* --- Conteneur 3D --- */
+    #three-container {
+      width: 100%;
+      height: 300px;
+      position: relative;
+      background: linear-gradient(to bottom, #f0f4ff, #e6f0ff);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--elev);
+      margin: 10px 0;
+    }
+
+    /* --- Animations --- */
+    .fade-in { animation: fadeIn 0.9s cubic-bezier(0.4, 0, 0.2, 1) both; }
+    @keyframes fadeIn { 0% { opacity: 0; transform: translateY(32px); } 100% { opacity: 1; transform: none; } }
   </style>
+  <!-- Dépendances critiques -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.11.4/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="lang.js"></script>
 </head>
 <body>
-  <!-- Top bar -->
+  <!-- Barre supérieure -->
   <div class="bar">
     <div class="left">
-      <div class="brand" id="homeBtn"><div class="spark" aria-hidden="true"></div>PropoFlash</div>
+      <div class="brand" id="homeBtn"><div class="spark"></div>PropoFlash</div>
       <button class="btn" id="openHistory">Historique</button>
       <button class="btn primary" id="newChatBtn">Nouvelle discussion</button>
       <span class="muted" id="status">Prêt</span>
     </div>
     <div class="right">
       <label class="muted">Langue</label>
-      <select class="sel" id="langSel" data-lang-picker><option value="fr">FR</option><option value="en">EN</option></select>
+      <select class="sel" id="langSel" data-lang-picker>
+        <option value="fr">FR</option>
+        <option value="en">EN</option>
+      </select>
       <div class="avatar" id="avatar">U</div>
-      <div class="menu" id="menu">
-        <a href="studio.html">Studio</a>
-        <a href="#history">Historique</a>
-        <button id="logoutBtn">Se déconnecter</button>
-      </div>
     </div>
   </div>
 
-  <!-- Drawer -->
-  <div class="drawer" id="drawer">
-    <h3>Historique</h3>
-    <div class="drawer-list" id="histList"></div>
-  </div>
-
-  <!-- Main -->
+  <!-- Conteneur principal -->
   <div class="main">
     <!-- Chat -->
     <div class="panel chat">
-      <div class="chat-head"><strong class="chat-title" id="chatTitle">Chat</strong></div>
-      <div class="chat-body" id="chatBody" aria-live="polite"></div>
+      <div class="chat-head"><strong class="chat-title">Chat</strong></div>
+      <div class="chat-body" id="chatBody"></div>
       <div class="chat-compose">
-        <div class="logo-wrap">
-          <label class="logo-btn" title="Ajouter un logo (PNG/JPG/SVG)">
-            <input type="file" id="logoInput" accept="image/*,.svg"/>
-          </label>
-          <div class="logo-tip">Ajouter votre logo</div>
-        </div>
         <div class="input">
           <textarea id="composer" placeholder="Écrivez votre message" enterkeyhint="send" autocomplete="off"></textarea>
-          <button class="send" id="sendBtn" title="Envoyer">
+          <button class="send" id="sendBtn">
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="20" height="20">
               <path d="M22 2L11 13"></path>
               <path d="M22 2l-7 20-4-9-9-4 20-7z"></path>
@@ -185,306 +148,44 @@
     <!-- Aperçu -->
     <div class="panel sheet-wrap">
       <div class="sheet" id="sheet">
-        <div class="decor" id="decor"></div>
-        <div class="content" id="sheetContent"></div>
         <div id="three-container"></div>
-        <div id="debug" style="font-size:12px;color:#999;margin-top:10px;"></div>
+        <div class="content" id="sheetContent"></div>
       </div>
     </div>
   </div>
 
   <script>
-    // ---------- Constantes Supabase ----------
+    // --- Configuration Supabase ---
     const SUPABASE_URL = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-    // ---------- Session / Auth UI ----------
-    async function guard() {
-      const { data: { session } } = await sb.auth.getSession();
-      if (session) return true;
-      const tries = parseInt(localStorage.getItem('pf_anon_uses') || '0', 10);
-      if (tries >= 1) { location.href = 'auth.html?return=studio'; return false; }
-      localStorage.setItem('pf_anon_uses', String(tries + 1));
-      return true;
-    }
-    guard();
-
-    const avatar = document.getElementById('avatar');
-    const menu = document.getElementById('menu');
-    const logoutBtn = document.getElementById('logoutBtn');
-    (async () => {
-      const { data: { session } } = await sb.auth.getSession();
-      avatar.textContent = session?.user ? (session.user.email || '?')[0].toUpperCase() : 'U';
-    })();
-    avatar.onclick = (e) => { e.stopPropagation(); menu.style.display = menu.style.display === 'block' ? 'none' : 'block'; };
-    document.addEventListener('click', () => menu.style.display = 'none');
-    logoutBtn.onclick = async () => { await sb.auth.signOut(); location.reload(); };
-    document.getElementById('homeBtn').onclick = () => location.href = 'index.html';
-
-    // ---------- Historique : par discussion ----------
-    const drawer = document.getElementById('drawer');
-    const histList = document.getElementById('histList');
-    document.getElementById('openHistory').onclick = () => drawer.classList.toggle('open');
-    document.getElementById('newChatBtn').onclick = () => createNewSession();
-
-    const SESS_KEY = 'pf_sessions';
-    const CUR_KEY = 'pf_current_session';
-
-    function loadSessions() { try { return JSON.parse(localStorage.getItem(SESS_KEY) || '[]'); } catch { return []; } }
-    function saveSessions(arr) { localStorage.setItem(SESS_KEY, JSON.stringify(arr)); }
-    function getCurrentId() { return localStorage.getItem(CUR_KEY) || null; }
-    function setCurrentId(id) { localStorage.setItem(CUR_KEY, String(id)); }
-
-    function createDefaultSpec() {
-      return {
-        meta: {
-          lang: getLang(),
-          title: getLang() === 'en' ? 'Business Proposal' : 'Proposition commerciale',
-          currency: 'EUR',
-          project_type: 'site',
-          urgency: 'standard',
-          budget_range: '5k-15k',
-          style: {
-            palette: {
-              primary: "#3B82F6", secondary: "#8B5CF6", surface: "#FFFFFF",
-              ink: "#0A1020", muted: "#5C667A", stroke: "#E0E6F4",
-              accentA: "#60A5FA", accentB: "#93C5FD"
-            },
-            typography: { heading: "Playfair Display", body: "Inter" },
-            effects_3d: {
-              perspective: "1200px",
-              layers: [{
-                type: "glow", position: "top", opacity: 0.18,
-                h: 220, s: 60, l: 55, rotate: 0, scale: 1, blend: "overlay"
-              }]
-            }
-          }
-        },
-        client_notes: { pain_points: [], budget_signals: [], decision_process: "", competition: [], timeline_pressure: "" },
-        sections: []
-      };
-    }
-
-    function createNewSession(title) {
-      const sessions = loadSessions();
-      const id = Date.now();
-      const session = {
-        id,
-        title: title || (getLang() === 'en' ? 'New Proposal' : 'Nouvelle proposition'),
-        date: new Date().toISOString(),
-        messages: [],
-        spec: createDefaultSpec()
-      };
-      sessions.unshift(session);
-      saveSessions(sessions);
-      setCurrentId(id);
-      messages = [];
-      spec = session.spec;
-      localStorage.setItem('pf_proposal', JSON.stringify(spec));
-      renderChat();
-      renderSpec();
-      renderHistory();
-      composer.focus();
-    }
-
-    function saveSessionState() {
-      const id = getCurrentId();
-      if (!id) return;
-      const sessions = loadSessions();
-      const ix = sessions.findIndex(s => String(s.id) === String(id));
-      const title = spec?.meta?.title || sessions[ix]?.title || (getLang() === 'en' ? 'Proposal' : 'Proposition');
-      const obj = { id, title, date: new Date().toISOString(), messages, spec };
-      if (ix >= 0) sessions[ix] = obj;
-      else sessions.unshift(obj);
-      saveSessions(sessions);
-    }
-
-    function loadSession(id) {
-      const sessions = loadSessions();
-      const s = sessions.find(x => String(x.id) === String(id));
-      if (!s) return;
-      setCurrentId(id);
-      spec = s.spec || createDefaultSpec();
-      messages = Array.isArray(s.messages) ? s.messages : [];
-      localStorage.setItem('pf_proposal', JSON.stringify(spec));
-      localStorage.setItem('pf_chat', JSON.stringify(messages));
-      renderChat();
-      renderSpec();
-      drawer.classList.remove('open');
-      composer.focus();
-    }
-
-    function renameSession(id, newTitle) {
-      const sessions = loadSessions();
-      const ix = sessions.findIndex(s => String(s.id) === String(id));
-      if (ix < 0) return;
-      sessions[ix].title = (newTitle || '').trim() || sessions[ix].title;
-      saveSessions(sessions);
-      renderHistory();
-    }
-
-    function deleteSession(id) {
-      let sessions = loadSessions();
-      sessions = sessions.filter(s => String(s.id) !== String(id));
-      saveSessions(sessions);
-      const cur = getCurrentId();
-      if (String(cur) === String(id)) {
-        if (sessions.length) { setCurrentId(sessions[0].id); loadSession(sessions[0].id); }
-        else { localStorage.removeItem(CUR_KEY); spec = createDefaultSpec(); messages = []; renderChat(); renderSpec(); }
-      }
-      renderHistory();
-    }
-
-    function renderHistory() {
-      const sessions = loadSessions();
-      histList.innerHTML = '';
-      if (!sessions.length) {
-        histList.innerHTML = '<div class="muted" style="padding:8px">Aucune discussion</div>';
-        return;
-      }
-      sessions.forEach(s => {
-        const d = new Date(s.date);
-        const row = document.createElement('div');
-        row.className = 'row-item';
-        const left = document.createElement('div');
-        left.style.display = 'flex';
-        left.style.flexDirection = 'column';
-        const title = document.createElement('strong');
-        title.textContent = s.title || (getLang() === 'en' ? 'Untitled' : 'Sans titre');
-        title.onclick = () => loadSession(s.id);
-        const small = document.createElement('span');
-        small.className = 'muted';
-        small.style.fontSize = '12px';
-        small.textContent = d.toLocaleString();
-        left.appendChild(title);
-        left.appendChild(small);
-        const actions = document.createElement('div');
-        actions.className = 'row-actions';
-        const ren = document.createElement('button');
-        ren.className = 'icon-btn';
-        ren.title = getLang() === 'en' ? 'Rename' : 'Renommer';
-        ren.textContent = '✏️';
-        ren.onclick = () => {
-          const nv = prompt(getLang() === 'en' ? 'New title' : 'Nouveau titre', s.title || '');
-          if (nv != null) renameSession(s.id, nv);
-        };
-        const del = document.createElement('button');
-        del.className = 'icon-btn';
-        del.title = getLang() === 'en' ? 'Delete' : 'Supprimer';
-        del.textContent = '🗑️';
-        del.onclick = () => {
-          if (confirm(getLang() === 'en' ? 'Delete this chat?' : 'Supprimer cette discussion ?'))
-            deleteSession(s.id);
-        };
-        actions.appendChild(ren);
-        actions.appendChild(del);
-        row.appendChild(left);
-        row.appendChild(actions);
-        histList.appendChild(row);
-      });
-    }
-
-    // Migration légère depuis pf_history
-    (function migrateOldHistory() {
-      const sessions = loadSessions();
-      if (sessions.length) return;
-      try {
-        const h = JSON.parse(localStorage.getItem('pf_history') || '[]');
-        if (h.length) {
-          const mapped = h.slice(0, 15).map(x => ({
-            id: x.id || Date.now(),
-            title: x.title || (getLang() === 'en' ? 'Proposal' : 'Proposition'),
-            date: x.date || new Date().toISOString(),
-            messages: x.messages || [],
-            spec: x.spec || createDefaultSpec()
-          }));
-          saveSessions(mapped);
-          setCurrentId(mapped[0].id);
+    // --- Variables globales ---
+    let messages = JSON.parse(localStorage.getItem('pf_chat') || '[]');
+    let spec = JSON.parse(localStorage.getItem('pf_proposal') || JSON.stringify({
+      meta: {
+        lang: 'fr',
+        title: 'Proposition commerciale',
+        style: {
+          palette: { primary: "#3B82F6", secondary: "#8B5CF6" },
+          typography: { heading: "Playfair Display", body: "Inter" }
         }
-      } catch {}
-    })();
-    renderHistory();
+      }
+    }));
 
-    // ---------- Chat + Spec ----------
+    // --- DOM Elements ---
     const chatBody = document.getElementById('chatBody');
     const composer = document.getElementById('composer');
     const sendBtn = document.getElementById('sendBtn');
     const statusEl = document.getElementById('status');
-    const sheet = document.getElementById('sheet');
-    const decor = document.getElementById('decor');
     const sheetContent = document.getElementById('sheetContent');
     const threeContainer = document.getElementById('three-container');
-    let messages = JSON.parse(localStorage.getItem('pf_chat') || '[]');
-    let spec = null;
+
+    // --- Three.js Setup ---
     let scene, camera, renderer, cube;
-
-    function loadSpec() {
-      try { spec = JSON.parse(localStorage.getItem('pf_proposal') || 'null'); } catch { spec = null; }
-      if (!spec) spec = createDefaultSpec();
-      if (!spec.meta) spec.meta = { lang: getLang() };
-    }
-    loadSpec();
-
-    (function bootSession() {
-      const sessions = loadSessions();
-      if (!getCurrentId()) {
-        if (sessions.length) { setCurrentId(sessions[0].id); loadSession(sessions[0].id); }
-        else createNewSession(getLang() === 'en' ? 'New Proposal' : 'Nouvelle proposition');
-      } else {
-        const s = sessions.find(x => String(x.id) === String(getCurrentId()));
-        if (s) { spec = s.spec || createDefaultSpec(); messages = s.messages || []; }
-      }
-    })();
-
-    function scrollChat() { chatBody.scrollTop = chatBody.scrollHeight; }
-    function escapeHTML(s) { return String(s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m])); }
-
-    function bubble(role, html) {
-      const row = document.createElement('div');
-      row.className = 'msg ' + (role === 'assistant' ? 'assistant' : 'user');
-      const ava = document.createElement('div');
-      ava.className = 'avatar-badge ' + (role === 'assistant' ? 'bot' : 'you');
-      ava.textContent = role === 'assistant' ? 'PF' : 'ME';
-      const bub = document.createElement('div');
-      bub.className = 'bubble ' + (role === 'assistant' ? 'bubble-assistant' : 'bubble-user');
-      bub.innerHTML = html;
-      if (role === 'assistant') { row.appendChild(ava); row.appendChild(bub); }
-      else { row.appendChild(bub); row.appendChild(ava); }
-      chatBody.appendChild(row);
-      scrollChat();
-      return row;
-    }
-
-    let typingRow = null;
-    function showTyping() {
-      if (typingRow) return;
-      typingRow = document.createElement('div');
-      typingRow.className = 'msg assistant';
-      const ava = document.createElement('div');
-      ava.className = 'avatar-badge bot';
-      ava.textContent = 'PF';
-      const bub = document.createElement('div');
-      bub.className = 'bubble bubble-assistant';
-      bub.innerHTML = `<span class="typing"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>`;
-      typingRow.appendChild(ava);
-      typingRow.appendChild(bub);
-      chatBody.appendChild(typingRow);
-      scrollChat();
-    }
-
-    function hideTyping() { if (typingRow) { typingRow.remove(); typingRow = null; } }
-
-    function renderChat() {
-      chatBody.innerHTML = '';
-      messages.forEach(m => bubble(m.role, escapeHTML(m.content).replace(/\n/g, '<br/>')));
-      composer.focus();
-    }
-    renderChat();
-
-    // ---------- Three.js Setup ----------
     function initThreeJS() {
-      if (scene) return;
+      if (scene) return; // Évite les doublons
+
       scene = new THREE.Scene();
       camera = new THREE.PerspectiveCamera(75, threeContainer.clientWidth / 300, 0.1, 1000);
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -493,7 +194,11 @@
 
       // Cube 3D par défaut
       const geometry = new THREE.BoxGeometry();
-      const material = new THREE.MeshBasicMaterial({ color: 0x3B82F6, transparent: true, opacity: 0.8 });
+      const material = new THREE.MeshBasicMaterial({
+        color: spec.meta.style.palette.primary || 0x3B82F6,
+        transparent: true,
+        opacity: 0.8
+      });
       cube = new THREE.Mesh(geometry, material);
       scene.add(cube);
 
@@ -515,434 +220,152 @@
       });
     }
 
-    // ---------- Rendu 3D depuis le code généré ----------
-    function render3DFromCode(code) {
-      if (!code) return;
-      try {
-        if (code.js) new Function(code.js)();
-        if (code.css) {
-          const style = document.createElement('style');
-          style.textContent = code.css;
-          document.head.appendChild(style);
-        }
-      } catch (e) {
-        console.error("Erreur d'exécution du code 3D :", e);
-      }
+    // --- Rendu de l'aperçu ---
+    function renderPreview() {
+      sheetContent.innerHTML = `
+        <div class="page fade-in">
+          <div class="inner">
+            <h1 class="h1">${spec.meta.title || 'Proposition commerciale'}</h1>
+            <p style="font-family: var(--font-body);">Aperçu en temps réel de votre proposition.</p>
+            <div style="margin: 20px 0; font-family: var(--font-body);">
+              <strong>Style actuel :</strong>
+              <div>Police titre: ${spec.meta.style.typography.heading}</div>
+              <div>Police texte: ${spec.meta.style.typography.body}</div>
+            </div>
+          </div>
+        </div>
+      `;
     }
 
-    // ---------- Envoi de message et synchronisation temps réel ----------
-    async function sendMessage(text, isDraft = false) {
-      const content = text.trim();
+    // --- Envoi de message avec gestion d'erreur robuste ---
+    async function sendMessage() {
+      const content = composer.value.trim();
       if (!content) return;
 
-      if (!isDraft) {
-        messages.push({ role: 'user', content });
-        localStorage.setItem('pf_chat', JSON.stringify(messages));
-        bubble('user', escapeHTML(content).replace(/\n/g, '<br/>'));
-        composer.value = '';
-      }
+      // Ajoute le message utilisateur
+      messages.push({ role: 'user', content });
+      localStorage.setItem('pf_chat', JSON.stringify(messages));
+      chatBody.innerHTML += `
+        <div class="msg user">
+          <div class="bubble bubble-user">${escapeHTML(content).replace(/\n/g, '<br/>')}</div>
+        </div>
+      `;
+      composer.value = '';
+      scrollChat();
 
-      statusEl.textContent = isDraft ? 'Brouillon…' : 'Rédaction…';
-      showTyping();
+      // Affiche l'état de chargement
+      statusEl.textContent = 'Génération en cours...';
+      chatBody.innerHTML += `
+        <div class="msg assistant" id="typing-indicator">
+          <div class="avatar-badge bot">PF</div>
+          <div class="bubble bubble-assistant">
+            <span class="typing">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </span>
+          </div>
+        </div>
+      `;
+      scrollChat();
 
       try {
-        const endpoint = isDraft ? '/api/chat/draft' : '/api/chat';
-        const resp = await fetch(endpoint, {
+        const response = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: content, proposalSpec: spec, history: messages.slice(-10) })
+          body: JSON.stringify({
+            message: content,
+            proposalSpec: spec,
+            history: messages.slice(-10)
+          })
         });
 
-        if (!resp.ok) throw new Error(`Erreur ${resp.status}`);
+        if (!response.ok) throw new Error(`Erreur ${response.status}: ${response.statusText}`);
 
-        const data = await resp.json();
-        hideTyping();
+        const data = await response.json();
 
-        if (!isDraft) {
-          const reply = data.reply || (getLang() === 'en' ? 'I could not structure the proposal.' : 'Je n\'ai pas pu structurer la proposition.');
-          messages.push({ role: 'assistant', content: reply });
-          localStorage.setItem('pf_chat', JSON.stringify(messages));
-          bubble('assistant', escapeHTML(reply).replace(/\n/g, '<br/>'));
-        }
+        // Supprime l'indicateur de typing
+        document.getElementById('typing-indicator')?.remove();
 
+        // Ajoute la réponse de l'IA
+        messages.push({ role: 'assistant', content: data.reply });
+        chatBody.innerHTML += `
+          <div class="msg assistant">
+            <div class="avatar-badge bot">PF</div>
+            <div class="bubble bubble-assistant">${escapeHTML(data.reply).replace(/\n/g, '<br/>')}</div>
+          </div>
+        `;
+
+        // Met à jour la spec et l'aperçu
         if (data.proposalSpec) {
           spec = { ...spec, ...data.proposalSpec };
           localStorage.setItem('pf_proposal', JSON.stringify(spec));
-          renderSpec();
-          if (data.proposalSpec.meta?.style?.effects_3d) {
-            render3DFromCode(data.proposalSpec.meta.style.effects_3d.layers[0]);
+          renderPreview();
+
+          // Met à jour Three.js si des couleurs changent
+          if (cube && data.proposalSpec.meta?.style?.palette?.primary) {
+            cube.material.color.set(data.proposalSpec.meta.style.palette.primary);
           }
         }
 
-        saveSessionState();
         statusEl.textContent = 'Prêt';
-      } catch (e) {
-        hideTyping();
+      } catch (error) {
+        console.error("Erreur API:", error);
         statusEl.textContent = 'Erreur réseau';
-        if (!isDraft) {
-          bubble('assistant', `<em>${getLang() === 'en' ? 'Network error. Please retry.' : 'Erreur réseau. Réessayez.'}</em>`);
-        }
+        document.getElementById('typing-indicator')?.remove();
+        chatBody.innerHTML += `
+          <div class="msg assistant">
+            <div class="avatar-badge bot">PF</div>
+            <div class="bubble bubble-assistant">
+              <em style="color: #e74c3c;">Erreur de connexion. Vérifiez votre réseau ou réessayez.</em>
+            </div>
+          </div>
+        `;
       }
+      scrollChat();
     }
 
-    // Synchronisation temps réel (drafts)
-    let draftTimeout;
-    composer.addEventListener('input', (e) => {
-      clearTimeout(draftTimeout);
-      draftTimeout = setTimeout(() => {
-        if (composer.value.trim().length > 3) {
-          sendMessage(composer.value.trim(), true);
-        }
-      }, 1000);
-    });
-
-    function handleSend() {
-      const v = composer.value;
-      if (!v || !v.trim()) return;
-      sendMessage(v);
+    // --- Gestion du scroll du chat ---
+    function scrollChat() {
+      chatBody.scrollTop = chatBody.scrollHeight;
     }
 
-    function isPlainEnter(e) {
-      return e.key === 'Enter' && !e.shiftKey && !e.altKey && !e.ctrlKey && !e.metaKey;
+    // --- Échappement HTML pour sécurité ---
+    function escapeHTML(s) {
+      return String(s || '').replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+      }[m]));
     }
 
-    ['keydown', 'keyup'].forEach(evt => {
-      composer.addEventListener(evt, (e) => {
-        if (isPlainEnter(e)) {
-          e.preventDefault();
-          handleSend();
-        }
+    // --- Initialisation ---
+    function init() {
+      // Charge l'historique du chat
+      messages.forEach(m => {
+        chatBody.innerHTML += `
+          <div class="msg ${m.role}">
+            ${m.role === 'assistant' ?
+              `<div class="avatar-badge bot">PF</div><div class="bubble bubble-assistant">${escapeHTML(m.content).replace(/\n/g, '<br/>')}</div>` :
+              `<div class="bubble bubble-user">${escapeHTML(m.content).replace(/\n/g, '<br/>')}</div><div class="avatar-badge you">ME</div>`}
+          </div>
+        `;
       });
-    });
 
-    composer.addEventListener('blur', () => {
-      if (composer.value && /\n$/.test(composer.value)) {
-        composer.value = composer.value.replace(/\n+$/, '');
-      }
-    });
-
-    sendBtn.addEventListener('click', handleSend);
-
-    // ---------- Upload logo ----------
-    const logoInput = document.getElementById('logoInput');
-    logoInput.addEventListener('change', async (e) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        const url = reader.result;
-        spec.meta = { ...(spec.meta || {}), style: { ...(spec.meta?.style || {}), logoDataUrl: url } };
-        localStorage.setItem('pf_proposal', JSON.stringify(spec));
-        renderSpec();
-        saveSessionState();
-      };
-      reader.readAsDataURL(file);
-      e.target.value = '';
-    });
-
-    // ---------- Libellés ----------
-    const t = {
-      fr: {
-        title: "Proposition commerciale", to: "Pour", from: "Émis par", date: "Date",
-        letter: "Lettre d'introduction", executive: "Résumé exécutif", objectives: "Objectifs",
-        approach: "Approche & phasage", deliverables: "Livrables", in_scope: "Inclus", out_scope: "Hors-périmètre",
-        timeline: "Planning", pricing: "Tarification", assumptions: "Hypothèses / Risques", next: "Prochaines étapes",
-        price_model: "Modèle", terms: "Conditions", toc: "Sommaire"
-      },
-      en: {
-        title: "Business Proposal", to: "To", from: "Issued by", date: "Date",
-        letter: "Cover Letter", executive: "Executive Summary", objectives: "Objectives",
-        approach: "Approach & Phasing", deliverables: "Deliverables", in_scope: "In scope", out_scope: "Out of scope",
-        timeline: "Timeline", pricing: "Pricing", assumptions: "Assumptions / Risks", next: "Next Steps",
-        price_model: "Model", terms: "Terms", toc: "Table of Contents"
-      }
-    };
-
-    function safeArr(v) { return Array.isArray(v) ? v : []; }
-    function safeStr(v, fb = '') { return (v == null ? '' : String(v)).trim() || fb; }
-    function fmtDate(d) {
-      try {
-        const dt = d ? new Date(d) : new Date();
-        return dt.toLocaleDateString(document.documentElement.lang || getLang(), { year: 'numeric', month: 'short', day: '2-digit' });
-      } catch { return ''; }
-    }
-    function money(n, c) {
-      try { return new Intl.NumberFormat(document.documentElement.lang || getLang(), { style: 'currency', currency: c || 'EUR' }).format(Number(n || 0)); }
-      catch { return String(n || 0) + ' ' + (c || '€'); }
-    }
-
-    // ---------- THEME + 3D ----------
-    function applyStyleTokens(style) {
-      if (!style) return;
-      const r = document.documentElement;
-      if (style.palette) {
-        for (const [k, v] of Object.entries(style.palette)) {
-          r.style.setProperty('--' + k.replace(/_/g, '-'), v);
-        }
-      }
-      if (style.shapes) {
-        if (style.shapes.radius) r.style.setProperty('--radius', style.shapes.radius);
-        if (style.shapes.shadow) r.style.setProperty('--elev', style.shapes.shadow);
-      }
-      if (style.typography) {
-        if (style.typography.body) r.style.setProperty('--font-body', style.typography.body);
-        if (style.typography.heading) r.style.setProperty('--font-heading', style.typography.heading);
-      }
-    }
-
-    function renderDecor(style) {
-      decor.innerHTML = '';
-      if (!style?.effects_3d) return;
-      const { perspective, layers = [] } = style.effects_3d;
-      decor.style.perspective = perspective || "1200px";
-      layers.forEach((layer, i) => {
-        const d = document.createElement('div');
-        d.style.position = 'absolute';
-        d.style.inset = 0;
-        d.style.pointerEvents = 'none';
-        d.style.zIndex = i;
-        if (layer.type === 'glow') {
-          d.style.background = `radial-gradient(ellipse at ${layer.position || 'top'} center, hsla(${layer.h || 220},${layer.s || 60}%,${layer.l || 60}%,${layer.opacity || .16}), transparent)`;
-          d.style.mixBlendMode = layer.blend || 'overlay';
-          d.style.transform = `rotate(${layer.rotate || 0}deg) scale(${layer.scale || 1})`;
-        }
-        decor.appendChild(d);
-      });
-    }
-
-    // ---------- Rendu dynamique des pages ----------
-    let sheetPages = [];
-    function clearPages() { sheetContent.innerHTML = ''; sheetPages = []; }
-    function makePage(key) {
-      const page = document.createElement('div');
-      page.className = 'page fade-in';
-      const inner = document.createElement('div');
-      inner.className = 'inner';
-      page.appendChild(inner);
-      sheetContent.appendChild(page);
-      sheetPages.push({ page, inner, key });
-      return { page, inner };
-    }
-
-    function H2(parent, txt) {
-      const h = document.createElement('div');
-      h.className = 'h2';
-      h.textContent = txt;
-      parent.appendChild(h);
-    }
-
-    function P(parent, txt) {
-      const p = document.createElement('p');
-      p.textContent = txt;
-      parent.appendChild(p);
-    }
-
-    function UL(parent, arr) {
-      const ul = document.createElement('ul');
-      arr.forEach(x => {
-        const li = document.createElement('li');
-        li.textContent = x;
-        ul.appendChild(li);
-      });
-      parent.appendChild(ul);
-    }
-
-    // --- Fonctions de rendu des différentes pages ---
-    function renderCover(style, L, title, company, client, date) {
-      renderDecor(style);
-      const { inner } = makePage('cover');
-      const header = document.createElement('div');
-      header.className = 'doc-header';
-      const logoBox = document.createElement('div');
-      logoBox.className = 'logo-box';
-      if (style?.logoDataUrl) {
-        const img = document.createElement('img');
-        img.src = style.logoDataUrl;
-        logoBox.appendChild(img);
-      } else logoBox.innerHTML = '<span class="muted">Logo</span>';
-      const brandInfo = document.createElement('div');
-      brandInfo.className = 'brand-info';
-      brandInfo.innerHTML = `
-        <div class="company">${escapeHTML(company || '')}</div>
-        <div class="muted">${L.to || 'Pour'} : <strong>${escapeHTML(client || '')}</strong></div>
-        <div class="muted">${L.date || 'Date'} : ${escapeHTML(date || fmtDate())}</div>
-      `;
-      header.appendChild(logoBox);
-      header.appendChild(brandInfo);
-      inner.appendChild(header);
-      const h1 = document.createElement('div');
-      h1.className = 'h1';
-      h1.textContent = title || L.title || 'Proposition';
-      inner.appendChild(h1);
-    }
-
-    function renderExecutive(L, executive) {
-      const { inner } = makePage('executive');
-      H2(inner, L.executive || 'Résumé exécutif');
-      safeArr(executive.paragraphs).forEach(p => P(inner, p));
-    }
-
-    function renderObjectives(L, objectives) {
-      const { inner } = makePage('objectives');
-      H2(inner, L.objectives || 'Objectifs');
-      UL(inner, safeArr(objectives.bullets));
-    }
-
-    function renderApproach(L, approach) {
-      const { inner } = makePage('approach');
-      H2(inner, L.approach || 'Approche & phasage');
-      safeArr(approach.phases).forEach(phase => {
-        if (phase.title) {
-          const b = document.createElement('div');
-          b.className = 'band';
-          b.innerHTML = '<strong>' + escapeHTML(phase.title) + '</strong>';
-          inner.appendChild(b);
-        }
-        safeArr(phase.paragraphs).forEach(p => P(inner, p));
-      });
-    }
-
-    function renderDeliverables(L, deliverables) {
-      const { inner } = makePage('deliverables');
-      H2(inner, L.deliverables || 'Livrables');
-      if (safeArr(deliverables.in).length) {
-        const inc = document.createElement('div');
-        inc.innerHTML = '<span class="tag">' + (L.in_scope || 'Inclus') + '</span>';
-        UL(inc, deliverables.in);
-        inner.appendChild(inc);
-      }
-      if (safeArr(deliverables.out).length) {
-        const out = document.createElement('div');
-        out.innerHTML = '<span class="tag">' + (L.out_scope || 'Hors-périmètre') + '</span>';
-        UL(out, deliverables.out);
-        inner.appendChild(out);
-      }
-    }
-
-    function renderTimeline(L, timeline) {
-      const { inner } = makePage('timeline');
-      H2(inner, L.timeline || 'Planning');
-      if (safeArr(timeline.milestones).length) {
-        const table = document.createElement('table');
-        table.innerHTML = '<thead><tr><th>Étape</th><th>Date</th></tr></thead>';
-        const tbody = document.createElement('tbody');
-        timeline.milestones.forEach(m => {
-          const row = document.createElement('tr');
-          row.innerHTML = '<td>' + escapeHTML(m.title || '') + '</td><td>' + escapeHTML(fmtDate(m.date)) + '</td>';
-          tbody.appendChild(row);
-        });
-        table.appendChild(tbody);
-        inner.appendChild(table);
-      }
-    }
-
-    function renderPricing(L, pricing) {
-      const { inner } = makePage('pricing');
-      H2(inner, L.pricing || 'Tarification');
-      if (pricing.price) {
-        const el = document.createElement('div');
-        el.innerHTML = `<span class="price">${money(pricing.price, pricing.currency)}</span> <span class="muted">${L.price_model || 'Modèle'}: ${pricing.model || ''}</span>`;
-        inner.appendChild(el);
-      }
-      if (safeArr(pricing.items).length) {
-        const table = document.createElement('table');
-        table.innerHTML = "<thead><tr><th>Item</th><th>Prix</th></tr></thead>";
-        const tbody = document.createElement('tbody');
-        pricing.items.forEach(item => {
-          const row = document.createElement('tr');
-          row.innerHTML = `<td>${escapeHTML(item.title || '')}</td><td>${money(item.price, pricing.currency)}</td>`;
-          tbody.appendChild(row);
-        });
-        table.appendChild(tbody);
-        inner.appendChild(table);
-      }
-      if (safeArr(pricing.terms).length) {
-        const ul = document.createElement('ul');
-        pricing.terms.forEach(term => {
-          const li = document.createElement('li');
-          li.textContent = term;
-          ul.appendChild(li);
-        });
-        inner.appendChild(ul);
-      }
-    }
-
-    function renderAssumptions(L, assumptions) {
-      const { inner } = makePage('assumptions');
-      H2(inner, L.assumptions || 'Hypothèses / Risques');
-      safeArr(assumptions.paragraphs).forEach(p => P(inner, p));
-    }
-
-    function renderNextSteps(L, next) {
-      const { inner } = makePage('next');
-      H2(inner, L.next || 'Prochaines étapes');
-      safeArr(next.paragraphs).forEach(p => P(inner, p));
-    }
-
-    // ---------- Rendu global de la proposition ----------
-    function renderSpec() {
-      clearPages();
-      const style = spec?.meta?.style || {};
-      applyStyleTokens(style);
+      // Initialise Three.js et l'aperçu
       initThreeJS();
-      const L = t[getLang()] || t.fr;
-      const meta = spec?.meta || {};
-      const notes = spec?.client_notes || {};
-      const letter = spec?.letter || {};
-      const executive = spec?.executive_summary || {};
-      const objectives = spec?.objectives || {};
-      const approach = spec?.approach || {};
-      const deliverables = spec?.deliverables || {};
-      const timeline = spec?.timeline || {};
-      const pricing = spec?.pricing || {};
-      const assumptions = spec?.assumptions || {};
-      const next = spec?.next_steps || {};
+      renderPreview();
 
-      // PAGE 1: Couverture
-      renderCover(style, L, meta.title, meta.company, meta.client, fmtDate(meta.date));
-
-      // Palette dynamique
-      if (style.palette) {
-        const { inner } = sheetPages[0] || {};
-        if (inner) {
-          const paletteDiv = document.createElement('div');
-          paletteDiv.style.margin = "16px 0";
-          paletteDiv.innerHTML = "<strong>Palette :</strong> " + Object.entries(style.palette)
-            .map(([k, v]) => `<span class="color-sample" style="background:${v};"></span><span style="font-size:12px;">${k}</span>`)
-            .join(" ");
-          inner.appendChild(paletteDiv);
+      // Écouteurs d'événements
+      sendBtn.addEventListener('click', sendMessage);
+      composer.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
         }
-      }
-
-      if (safeArr(executive.paragraphs).length) renderExecutive(L, executive);
-      if (safeArr(objectives.bullets).length) renderObjectives(L, objectives);
-      if (safeArr(approach.phases).length) renderApproach(L, approach);
-      if (safeArr(deliverables.in).length || safeArr(deliverables.out).length) renderDeliverables(L, deliverables);
-      if (safeArr(timeline.milestones).length) renderTimeline(L, timeline);
-      if (safeArr(pricing.items).length || pricing.price) renderPricing(L, pricing);
-      if (safeArr(assumptions.paragraphs).length) renderAssumptions(L, assumptions);
-      if (safeArr(next.paragraphs).length) renderNextSteps(L, next);
-
-      if (!sheetPages.length) {
-        const p = makePage().inner;
-        p.innerHTML = `<div class='muted fade-in'>${getLang() === 'en' ? 'No data to display.<br>Start a chat on the left to see the preview here!' : 'Aucune donnée à afficher.<br>Commencez une discussion à gauche pour voir l’aperçu ici !'}</div>`;
-      }
+      });
     }
 
-    // ---------- Langues ----------
-    function getLang() { return document.getElementById('langSel').value || 'fr'; }
-    document.getElementById('langSel').addEventListener('change', e => {
-      document.documentElement.lang = getLang();
-      localStorage.setItem('pf_lang', getLang());
-      renderSpec();
-      renderChat();
-    });
-    document.documentElement.lang = localStorage.getItem('pf_lang') || 'fr';
-    document.getElementById('langSel').value = document.documentElement.lang;
-
-    // ---------- Initialisation ----------
-    renderSpec();
-    composer.focus();
+    // Démarre l'application
+    init();
   </script>
 </body>
 </html>
