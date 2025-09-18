@@ -203,7 +203,6 @@
           <div class="logo-tip">Ajouter votre logo</div>
         </div>
         <div class="input">
-          <!-- enterkeyhint="send" pour claviers mobiles -->
           <textarea id="composer" placeholder="Écrivez votre message" enterkeyhint="send" autocomplete="off"></textarea>
           <button class="send" id="sendBtn" title="Envoyer" aria-label="Envoyer">
             <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" width="20" height="20"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
@@ -226,6 +225,343 @@
     const SUPABASE_URL  = 'https://lxiaaplvbitqqgvaxelt.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4aWFhcGx2Yml0cXFndmF4ZWx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTU0NjQsImV4cCI6MjA3MjM5MTQ2NH0.C3LzDFt67_GM978JIkSHDShmrr0mSYBr4jjVUxXgKtE';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    /* ---------- SYSTÈME 3D AVANCÉ ---------- */
+    class Advanced3DRenderer {
+      constructor(sheet, decor) {
+        this.sheet = sheet;
+        this.decor = decor;
+        this.activeAnimations = new Set();
+      }
+
+      // Génère des effets CSS 3D complexes selon le type de projet
+      renderAdvanced3DEffects(effects3d, projectType = 'corporate') {
+        this.clearEffects();
+        
+        if (!effects3d || !effects3d.layers) return;
+        
+        // Configuration perspective
+        this.sheet.style.perspective = effects3d.perspective || '1200px';
+        this.sheet.style.perspectiveOrigin = '50% 30%';
+        
+        // Rendu des layers avancés
+        effects3d.layers.forEach((layer, i) => {
+          this.renderAdvancedLayer(layer, i, projectType);
+        });
+        
+        // Application des animations
+        if (effects3d.animations) {
+          this.applyAdvancedAnimations(effects3d.animations);
+        }
+      }
+
+      renderAdvancedLayer(layer, index, projectType) {
+        const element = document.createElement('div');
+        element.className = `advanced-layer-${index}`;
+        element.style.position = 'absolute';
+        element.style.pointerEvents = 'none';
+        element.style.zIndex = `-${index + 1}`;
+        
+        switch (layer.type) {
+          case 'holographic':
+            this.createHolographicEffect(element, layer);
+            break;
+          case 'mesh_gradient':
+            this.createMeshGradient(element, layer);
+            break;
+          case 'particle_field':
+            this.createParticleField(element, layer);
+            break;
+          case 'geometric_pattern':
+            this.createGeometricPattern(element, layer);
+            break;
+          case 'glass_morphism':
+            this.createGlassMorphism(element, layer);
+            break;
+          default:
+            this.createCustomEffect(element, layer);
+        }
+        
+        this.decor.appendChild(element);
+      }
+
+      createHolographicEffect(element, layer) {
+        const size = (layer.scale || 1) * 800;
+        element.style.width = `${size}px`;
+        element.style.height = `${size}px`;
+        element.style.top = '-20%';
+        element.style.left = '-20%';
+        element.style.borderRadius = '50%';
+        
+        // Effet holographique complexe
+        element.style.background = `
+          conic-gradient(
+            from ${layer.rotate || 0}deg,
+            hsl(${layer.h || 280}, 90%, 60%) 0deg,
+            hsl(${(layer.h || 280) + 60}, 85%, 65%) 120deg,
+            hsl(${(layer.h || 280) + 120}, 90%, 60%) 240deg,
+            hsl(${layer.h || 280}, 90%, 60%) 360deg
+          )
+        `;
+        
+        element.style.filter = `
+          blur(${layer.blur || 60}px) 
+          brightness(1.2) 
+          contrast(1.1)
+        `;
+        
+        element.style.opacity = layer.opacity || 0.15;
+        element.style.mixBlendMode = layer.blend || 'screen';
+        element.style.transform = layer.transform || 'rotateX(15deg) rotateY(15deg)';
+        
+        // Animation holographique
+        const animName = `holographic-${Date.now()}`;
+        const keyframes = `
+          @keyframes ${animName} {
+            0% { transform: rotateX(15deg) rotateY(15deg) rotateZ(0deg); }
+            33% { transform: rotateX(10deg) rotateY(20deg) rotateZ(5deg); }
+            66% { transform: rotateX(20deg) rotateY(10deg) rotateZ(-3deg); }
+            100% { transform: rotateX(15deg) rotateY(15deg) rotateZ(0deg); }
+          }
+        `;
+        this.injectKeyframes(keyframes);
+        element.style.animation = `${animName} 8s cubic-bezier(0.4, 0, 0.2, 1) infinite`;
+      }
+
+      createMeshGradient(element, layer) {
+        const size = (layer.scale || 1) * 1000;
+        element.style.width = `${size}px`;
+        element.style.height = `${size * 0.6}px`;
+        element.style.top = '-10%';
+        element.style.right = '-15%';
+        
+        // Mesh gradient complexe avec multiple couleurs
+        const h1 = layer.h || 220;
+        const h2 = (h1 + 80) % 360;
+        const h3 = (h1 + 160) % 360;
+        const h4 = (h1 + 240) % 360;
+        
+        element.style.background = `
+          radial-gradient(
+            ellipse 80% 50% at 20% 40%,
+            hsla(${h1}, 70%, 60%, ${layer.opacity || 0.15}) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            ellipse 60% 40% at 80% 20%,
+            hsla(${h2}, 65%, 65%, ${layer.opacity || 0.12}) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            ellipse 70% 60% at 40% 80%,
+            hsla(${h3}, 75%, 55%, ${layer.opacity || 0.13}) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            ellipse 50% 70% at 60% 60%,
+            hsla(${h4}, 68%, 62%, ${layer.opacity || 0.14}) 0%,
+            transparent 50%
+          )
+        `;
+        
+        element.style.filter = 'blur(40px) saturate(1.2)';
+        element.style.mixBlendMode = layer.blend || 'overlay';
+        element.style.transform = layer.transform || 'rotateX(10deg) rotateZ(-5deg)';
+        
+        // Animation mesh fluide
+        const animName = `mesh-flow-${Date.now()}`;
+        const keyframes = `
+          @keyframes ${animName} {
+            0%, 100% { transform: rotateX(10deg) rotateZ(-5deg) translateY(0px); }
+            25% { transform: rotateX(8deg) rotateZ(-3deg) translateY(-10px); }
+            50% { transform: rotateX(12deg) rotateZ(-7deg) translateY(5px); }
+            75% { transform: rotateX(9deg) rotateZ(-4deg) translateY(-5px); }
+          }
+        `;
+        this.injectKeyframes(keyframes);
+        element.style.animation = `${animName} 12s ease-in-out infinite`;
+      }
+
+      createParticleField(element, layer) {
+        element.style.width = '100%';
+        element.style.height = '100%';
+        element.style.top = '0';
+        element.style.left = '0';
+        
+        // Création SVG pour particules
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '100%');
+        svg.setAttribute('height', '100%');
+        svg.style.position = 'absolute';
+        svg.style.top = '0';
+        svg.style.left = '0';
+        
+        const particleCount = layer.count || 30;
+        const color = `hsl(${layer.h || 200}, ${layer.s || 60}%, ${layer.l || 60}%)`;
+        
+        for (let i = 0; i < particleCount; i++) {
+          const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          circle.setAttribute('cx', Math.random() * 100 + '%');
+          circle.setAttribute('cy', Math.random() * 100 + '%');
+          circle.setAttribute('r', Math.random() * 2 + 1);
+          circle.setAttribute('fill', color);
+          circle.setAttribute('opacity', Math.random() * 0.6 + 0.2);
+          
+          // Animation particule individuelle
+          const animName = `particle-${i}-${Date.now()}`;
+          const duration = Math.random() * 8 + 4;
+          const keyframes = `
+            @keyframes ${animName} {
+              0% { transform: translateZ(0px) scale(1); opacity: ${Math.random() * 0.6 + 0.2}; }
+              50% { transform: translateZ(${Math.random() * 100 + 50}px) scale(${Math.random() * 1.5 + 0.8}); opacity: ${Math.random() * 0.4 + 0.6}; }
+              100% { transform: translateZ(0px) scale(1); opacity: ${Math.random() * 0.6 + 0.2}; }
+            }
+          `;
+          this.injectKeyframes(keyframes);
+          circle.style.animation = `${animName} ${duration}s ease-in-out infinite`;
+          
+          svg.appendChild(circle);
+        }
+        
+        element.appendChild(svg);
+        element.style.transform = layer.transform || 'translateZ(-100px)';
+        element.style.opacity = layer.opacity || 0.4;
+      }
+
+      createGeometricPattern(element, layer) {
+        const size = (layer.scale || 1) * 1200;
+        element.style.width = `${size}px`;
+        element.style.height = `${size}px`;
+        element.style.top = '-25%';
+        element.style.left = '-25%';
+        
+        // Pattern géométrique avec clip-path
+        element.style.background = `
+          linear-gradient(
+            ${layer.rotate || 45}deg,
+            hsla(${layer.h || 210}, ${layer.s || 60}%, ${layer.l || 55}%, ${layer.opacity || 0.08}) 0%,
+            transparent 25%,
+            hsla(${(layer.h || 210) + 30}, ${layer.s || 60}%, ${layer.l || 55}%, ${layer.opacity || 0.06}) 50%,
+            transparent 75%,
+            hsla(${layer.h || 210}, ${layer.s || 60}%, ${layer.l || 55}%, ${layer.opacity || 0.08}) 100%
+          )
+        `;
+        
+        // Clip-path complexe pour forme géométrique
+        element.style.clipPath = `
+          polygon(
+            0% 20%, 
+            20% 0%, 
+            80% 0%, 
+            100% 20%, 
+            100% 80%, 
+            80% 100%, 
+            20% 100%, 
+            0% 80%
+          )
+        `;
+        
+        element.style.transform = layer.transform || 'rotateX(25deg) rotateY(-10deg) translateZ(30px)';
+        element.style.mixBlendMode = layer.blend || 'multiply';
+        
+        // Animation géométrique
+        const animName = `geometric-${Date.now()}`;
+        const keyframes = `
+          @keyframes ${animName} {
+            0% { transform: rotateX(25deg) rotateY(-10deg) translateZ(30px); }
+            50% { transform: rotateX(30deg) rotateY(-5deg) translateZ(50px); }
+            100% { transform: rotateX(25deg) rotateY(-10deg) translateZ(30px); }
+          }
+        `;
+        this.injectKeyframes(keyframes);
+        element.style.animation = `${animName} 10s ease-in-out infinite`;
+      }
+
+      createGlassMorphism(element, layer) {
+        const size = (layer.scale || 1) * 600;
+        element.style.width = `${size}px`;
+        element.style.height = `${size * 0.7}px`;
+        element.style.top = '10%';
+        element.style.right = '5%';
+        element.style.borderRadius = '20px';
+        
+        // Effet glass morphism
+        element.style.background = `
+          linear-gradient(135deg, 
+            rgba(255, 255, 255, ${layer.opacity || 0.1}) 0%,
+            rgba(255, 255, 255, ${(layer.opacity || 0.1) * 0.5}) 100%
+          )
+        `;
+        
+        element.style.backdropFilter = 'blur(20px) saturate(180%)';
+        element.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+        element.style.boxShadow = `
+          0 8px 32px rgba(0, 0, 0, 0.1),
+          inset 0 1px 0 rgba(255, 255, 255, 0.2),
+          inset 0 -1px 0 rgba(255, 255, 255, 0.1)
+        `;
+        
+        element.style.transform = layer.transform || 'rotateX(15deg) rotateY(5deg) translateZ(40px)';
+        
+        // Animation glass subtile
+        const animName = `glass-${Date.now()}`;
+        const keyframes = `
+          @keyframes ${animName} {
+            0%, 100% { transform: rotateX(15deg) rotateY(5deg) translateZ(40px); }
+            50% { transform: rotateX(18deg) rotateY(8deg) translateZ(60px); }
+          }
+        `;
+        this.injectKeyframes(keyframes);
+        element.style.animation = `${animName} 8s ease-in-out infinite`;
+      }
+
+      createCustomEffect(element, layer) {
+        // Applique le CSS custom directement
+        if (layer.css) {
+          element.style.cssText = layer.css;
+        }
+        if (layer.transform) {
+          element.style.transform = layer.transform;
+        }
+        if (layer.blend) {
+          element.style.mixBlendMode = layer.blend;
+        }
+      }
+
+      applyAdvancedAnimations(animations) {
+        animations.forEach((anim, i) => {
+          if (anim.keyframes && anim.name) {
+            const keyframeRule = `@keyframes ${anim.name} { ${anim.keyframes} }`;
+            this.injectKeyframes(keyframeRule);
+            
+            // Applique l'animation aux éléments cibles
+            const targets = this.decor.querySelectorAll(`[class*="advanced-layer"]`);
+            targets.forEach(target => {
+              target.style.animation = `${anim.name} ${anim.duration || '4s'} ${anim.timing || 'ease-in-out'} ${anim.iteration || 'infinite'}`;
+            });
+          }
+        });
+      }
+
+      injectKeyframes(keyframeRule) {
+        if (!this.styleSheet) {
+          const style = document.createElement('style');
+          document.head.appendChild(style);
+          this.styleSheet = style.sheet;
+        }
+        
+        try {
+          this.styleSheet.insertRule(keyframeRule, this.styleSheet.cssRules.length);
+        } catch (e) {
+          console.warn('Keyframe injection failed:', e);
+        }
+      }
+
+      clearEffects() {
+        this.decor.innerHTML = '';
+        this.activeAnimations.clear();
+      }
+    }
 
     /* ---------- Session / Auth UI ---------- */
     async function guard(){
@@ -265,7 +601,34 @@
     function setCurrentId(id){ localStorage.setItem(CUR_KEY, String(id)); }
 
     function createDefaultSpec(){
-      return { meta:{ lang:getLang(), title:(getLang()==='en'?'Business Proposal':'Proposition commerciale'), currency:'EUR', style:{} }, sections:[] };
+      return { 
+        meta:{ 
+          lang:getLang(), 
+          title:(getLang()==='en'?'Business Proposal':'Proposition commerciale'), 
+          currency:'EUR',
+          project_type: 'site',
+          urgency: 'standard',
+          budget_range: '5k-15k',
+          style:{
+            palette: {
+              primary: "#3B82F6", secondary: "#8B5CF6", surface: "#FFFFFF",
+              ink: "#0A1020", muted: "#5C667A", stroke: "#E0E6F4",
+              accentA: "#60A5FA", accentB: "#93C5FD"
+            },
+            shapes: { radius: "12px", shadow: "0 18px 48px rgba(10,16,32,.12)" },
+            typography: { heading: "Inter", body: "Inter" },
+            effects_3d: {
+              perspective: "1200px",
+              layers: [{
+                type: "glow", position: "top", opacity: 0.18,
+                h: 220, s: 60, l: 55, rotate: 0, scale: 1, blend: "overlay"
+              }]
+            }
+          }
+        }, 
+        client_notes: { pain_points: [], budget_signals: [], decision_process: "", competition: [], timeline_pressure: "" },
+        sections:[] 
+      };
     }
 
     function createNewSession(title){
@@ -441,7 +804,7 @@
 
         hideTyping();
 
-        const reply = data.reply || (getLang()==='en'?'I could not structure the proposal.':'Je n’ai pas pu structurer la proposition.');
+        const reply = data.reply || (getLang()==='en'?'I could not structure the proposal.':'Je n'ai pas pu structurer la proposition.');
         messages.push({ role:'assistant', content: reply }); localStorage.setItem('pf_chat', JSON.stringify(messages));
         bubble('assistant', escapeHTML(reply).replace(/\n/g,'<br/>'));
 
@@ -507,7 +870,7 @@
 
     /* ---------- Libellés ---------- */
     const t = {
-      fr:{ title:"Proposition commerciale", to:"Pour", from:"Émis par", date:"Date", letter:"Lettre d’introduction", executive:"Résumé exécutif", objectives:"Objectifs", approach:"Approche & phasage", deliverables:"Livrables", in_scope:"Inclus", out_scope:"Hors-périmètre", timeline:"Planning", pricing:"Tarification", assumptions:"Hypothèses / Risques", next:"Prochaines étapes", price_model:"Modèle", terms:"Conditions", toc:"Sommaire" },
+      fr:{ title:"Proposition commerciale", to:"Pour", from:"Émis par", date:"Date", letter:"Lettre d'introduction", executive:"Résumé exécutif", objectives:"Objectifs", approach:"Approche & phasage", deliverables:"Livrables", in_scope:"Inclus", out_scope:"Hors-périmètre", timeline:"Planning", pricing:"Tarification", assumptions:"Hypothèses / Risques", next:"Prochaines étapes", price_model:"Modèle", terms:"Conditions", toc:"Sommaire" },
       en:{ title:"Business Proposal", to:"To", from:"Issued by", date:"Date", letter:"Cover Letter", executive:"Executive Summary", objectives:"Objectives", approach:"Approach & Phasing", deliverables:"Deliverables", in_scope:"In scope", out_scope:"Out of scope", timeline:"Timeline", pricing:"Pricing", assumptions:"Assumptions / Risks", next:"Next Steps", price_model:"Model", terms:"Terms", toc:"Table of Contents" }
     };
 
@@ -516,7 +879,7 @@
     function fmtDate(d){ try{ const dt=d?new Date(d):new Date(); return dt.toLocaleDateString(document.documentElement.lang||getLang(), {year:'numeric',month:'short',day:'2-digit'});}catch{return ''} }
     function money(n,c){ try{ return new Intl.NumberFormat(document.documentElement.lang||getLang(),{style:'currency',currency:c||'EUR'}).format(Number(n||0)); }catch{ return String(n||0)+' '+(c||'€') } }
 
-    /* ---------- THEME: applique meta.style ---------- */
+    /* ---------- THEME + 3D: applique meta.style avec nouveau système ---------- */
     function applyStyleTokens(style){
       const palette = {
         primary: "#3B82F6", secondary: "#8B5CF6", surface: "#FFFFFF",
@@ -538,7 +901,15 @@
       sheet.style.setProperty('--font-body', typo.body);
       sheet.style.setProperty('--font-heading', typo.heading);
 
-      renderDecorLayers(style?.decor_layers||[], palette);
+      // NOUVEAU: Rendu des effets 3D avancés
+      if (style?.effects_3d) {
+        const renderer = new Advanced3DRenderer(sheet, decor);
+        const projectType = spec.meta?.project_type || 'corporate';
+        renderer.renderAdvanced3DEffects(style.effects_3d, projectType);
+      } else {
+        // Fallback vers les anciens effets simples
+        renderDecorLayers(style?.decor_layers||[], palette);
+      }
     }
 
     function hsla(h,s,l,a){ return `hsla(${Number(h||0)},${Number(s||0)}%,${Number(l||0)}%,${Number(a||1)})`; }
@@ -752,194 +1123,4 @@
     }
 
     function renderTimeline(L, timeline){
-      const { inner } = makePage('timeline');
-      H2(inner, L.timeline);
-      const grid=document.createElement('div'); grid.className='grid2';
-      (timeline?.milestones||[]).forEach(ms=>{
-        const c=document.createElement('div'); c.className='card';
-        c.innerHTML = `<div><strong>${String(ms.title||'Étape')}</strong></div><div class="muted">${String(ms.dateOrWeek || ms.date || ms.duration || '')}</div>`;
-        if(ms.notes){ const p=document.createElement('p'); p.textContent=ms.notes; c.appendChild(p); }
-        grid.appendChild(c);
-      });
-      inner.appendChild(grid);
-    }
-
-    function renderPricing(L, pr, currencyFallback){
-      const { inner } = makePage('pricing');
-      H2(inner, L.pricing);
-      const currency=pr?.currency||currencyFallback||'EUR';
-      const meta=document.createElement('div'); meta.className='muted'; meta.style.margin='-6px 0 8px';
-      meta.innerHTML = `${L.price_model}: <span class="pill">${String(pr?.model||'forfait')}</span>`;
-      inner.appendChild(meta);
-
-      if(Array.isArray(pr?.items) && pr.items.length){
-        const table=document.createElement('table');
-        table.innerHTML=`<thead><tr><th>Item</th><th>Qté</th><th>Unité</th><th>PU</th><th>Sous-total</th></tr></thead><tbody></tbody><tfoot>
-          <tr><td colspan="4" style="text-align:right">Sous-total</td><td id="ft_subtotal"></td></tr>
-          <tr><td colspan="4" style="text-align:right">Taxes</td><td id="ft_tax"></td></tr>
-          <tr><td colspan="4" style="text-align:right">Total</td><td id="ft_total"></td></tr></tfoot>`;
-        const tb=table.querySelector('tbody');
-        pr.items.forEach(it=>{
-          const tr=document.createElement('tr');
-          const qty=Number(it.qty||1), up=Number(it.unit_price||0), st=(it.subtotal!=null)?Number(it.subtotal):qty*up;
-          tr.innerHTML=`<td>${String(it.name||'—')}</td><td>${Number.isFinite(qty)?qty:1}</td><td>${String(it.unit||'—')}</td><td>${money(up,currency)}</td><td>${money(st,currency)}</td>`;
-          tb.appendChild(tr);
-        });
-        inner.appendChild(table);
-        const subtotal=Array.from(tb.children).reduce((s,tr)=>{ const v=(tr.children[4]?.textContent||'0').replace(/[^\d.,-]/g,'').replace(',','.'); return s + (parseFloat(v)||0); },0);
-        const taxRate=Number(pr.tax_rate||0); const taxes=subtotal*(taxRate/100); const total=subtotal+taxes;
-        table.querySelector('#ft_subtotal').textContent=money(subtotal,currency);
-        table.querySelector('#ft_tax').textContent=`${money(taxes,currency)} ${taxRate?`(${taxRate}%)`:''}`;
-        table.querySelector('#ft_total').textContent=money(total,currency);
-        if((pr.terms||[]).length){
-          const terms=document.createElement('div'); terms.className='card'; terms.style.marginTop='8px';
-          terms.innerHTML=`<div class="muted" style="margin-bottom:6px">${L.terms}</div><ul>${(pr.terms||[]).map(x=>`<li>${x}</li>`).join('')}</ul>`;
-          inner.appendChild(terms);
-        }
-      }else{
-        const priceBox=document.createElement('div'); priceBox.className='card';
-        const price=pr?.price!=null?String(pr.price):'—';
-        priceBox.innerHTML=`<div class="price">${money(price,currency)}</div><div class="muted" style="margin-top:4px">${L.price_model}: <span>${String(pr?.model||'forfait')}</span></div>`;
-        inner.appendChild(priceBox);
-      }
-    }
-
-    function renderAssumptions(L, asmp){ const { inner } = makePage('assumptions'); H2(inner, L.assumptions); (asmp?.paragraphs||[]).forEach(p=>P(inner, p)); }
-    function renderNext(L, next){ const { inner } = makePage('next'); H2(inner, L.next); (next?.paragraphs||[]).forEach(p=>P(inner, p)); }
-
-    function buildTOCList(L){
-      return [
-        { id:'s_letter', title:L.letter, present: (spec.letter && ((spec.letter.body_paragraphs||spec.letter.paragraphs||[]).length || spec.letter.greeting||spec.letter.closing||spec.letter.signature)) },
-        { id:'s_executive', title:L.executive, present: (spec.executive_summary && (spec.executive_summary.paragraphs||[]).length) },
-        { id:'s_objectives', title:L.objectives, present: (spec.objectives && (spec.objectives.bullets||[]).length) },
-        { id:'s_approach', title:L.approach, present: (spec.approach && (spec.approach.phases||[]).length) },
-        { id:'s_deliverables', title:L.deliverables, present: (spec.deliverables && ((spec.deliverables.in||[]).length || (spec.deliverables.out||[]).length)) },
-        { id:'s_timeline', title:L.timeline, present: (spec.timeline && (spec.timeline.milestones||[]).length) },
-        { id:'s_pricing', title:L.pricing, present: (spec.pricing && (spec.pricing.items?.length || spec.pricing.price!=null)) },
-        { id:'s_assumptions', title:L.assumptions, present: (spec.assumptions && (spec.assumptions.paragraphs||[]).length) },
-        { id:'s_next', title:L.next, present: (spec.next_steps && (spec.next_steps.paragraphs||[]).length) },
-      ];
-    }
-
-    function renderSpec(){
-      applyStyleTokens(spec?.meta?.style || null);
-      clearPages();
-
-      const L=t[spec.meta?.lang||getLang()]||t.fr;
-      const title=String(spec.meta?.title || L.title);
-      const company=String(spec.meta?.company || spec.meta?.brand?.company || 'Votre société');
-      const client=String(spec.meta?.client || 'Client');
-      const date=String(spec.meta?.date || fmtDate());
-
-      renderCover(spec?.meta?.style, L, title, company, client, date);
-
-      const tocList = buildTOCList(L);
-      renderTOC(L, tocList);
-
-      if (tocList[0].present) renderLetter(L, spec.letter);
-      if (tocList[1].present) renderExecutive(L, spec.executive_summary);
-      if (tocList[2].present) renderObjectives(L, spec.objectives);
-      if (tocList[3].present) renderApproach(L, spec.approach);
-      if (tocList[4].present) renderDeliverables(L, spec.deliverables);
-      if (tocList[5].present) renderTimeline(L, spec.timeline);
-      if (tocList[6].present) renderPricing(L, spec.pricing, spec.meta?.currency);
-      if (tocList[7].present) renderAssumptions(L, spec.assumptions);
-      if (tocList[8].present) renderNext(L, spec.next_steps);
-
-      statusEl.textContent = (spec.meta?.lang==='en') ? 'Preview ready' : 'Aperçu prêt';
-    }
-    renderSpec();
-
-    /* ---------- Lang ---------- */
-    function applyChatLang(){
-      const en=(getLang()==='en');
-      composer.placeholder = en?'Type your message':'Écrivez votre message';
-    }
-    applyChatLang();
-    window.addEventListener('langchange', ()=>{
-      spec.meta = { ...(spec.meta||{}), lang:getLang() };
-      localStorage.setItem('pf_proposal', JSON.stringify(spec));
-      applyChatLang();
-      renderSpec();
-    });
-
-    /* ---------- Style live : appel Edge Function Supabase ---------- */
-    function mapDesignDiffToStyle(diff){
-      const out = { ...(spec.meta?.style||{}) };
-
-      if(diff.palette){
-        out.palette = { ...(out.palette||{}), ...diff.palette };
-      }
-      if(diff.typography){
-        const heading = diff.typography.title?.family || out.typography?.heading || 'Inter';
-        const body    = diff.typography.body?.family  || out.typography?.body    || 'Inter';
-        out.typography = { ...(out.typography||{}), heading, body };
-      }
-      if(diff.layout?.radius){
-        const r = diff.layout.radius.panel || diff.layout.radius.card || 12;
-        out.shapes = { ...(out.shapes||{}), radius: (typeof r==='number'? r+'px' : r) };
-      }
-      if(diff.texture){
-        const kind = String(diff.texture.kind||'none').toLowerCase();
-        if(kind!=='none'){
-          out.decor_layers = out.decor_layers || [];
-          if(!out.decor_layers.length){
-            out.decor_layers.push({ type: (kind==='blob'?'gradient_blob':'glow'), position:'top', opacity:0.18, h:220, s:60, l:55, rotate:0, scale:1, blend:'overlay' });
-          }
-        }
-      }
-      return out;
-    }
-
-    function applyDesignDiff(diff){
-      const mapped = mapDesignDiffToStyle(diff||{});
-      spec.meta = spec.meta || {};
-      spec.meta.style = { ...(spec.meta.style||{}), ...mapped,
-        palette:{ ...((spec.meta.style||{}).palette||{}), ...(mapped.palette||{}) },
-        typography:{ ...((spec.meta.style||{}).typography||{}), ...(mapped.typography||{}) },
-        shapes:{ ...((spec.meta.style||{}).shapes||{}), ...(mapped.shapes||{}) },
-        decor_layers: mapped.decor_layers || spec.meta.style?.decor_layers || []
-      };
-    }
-
-    async function refineStyleFromConversation(latestUserText){
-      try{
-        const body = {
-          mode: "style",
-          userText: latestUserText || (messages.filter(m=>m.role==='user').slice(-1)[0]?.content || ''),
-          currentDesign: spec.meta?.style || {},
-          proposalSpec: spec,
-          history: messages.slice(-8).map(m=>({ role: m.role==='assistant'?'assistant':'user', content: m.content }))
-        };
-        const r = await fetch(`${SUPABASE_URL}/functions/v1/chat`, {
-          method:'POST',
-          headers:{
-            'Content-Type':'application/json',
-            'Authorization': 'Bearer ' + SUPABASE_ANON
-          },
-          body: JSON.stringify(body)
-        });
-        if(!r.ok){
-          const tx = await r.text().catch(()=> '');
-          console.warn('style fetch error', r.status, tx);
-          return;
-        }
-        const js = await r.json();
-        if(js?.designSpecDiff){
-          applyDesignDiff(js.designSpecDiff);
-          localStorage.setItem('pf_proposal', JSON.stringify(spec));
-          renderSpec();
-          saveSessionState();
-        }
-      }catch(err){
-        console.warn('style err', err);
-      }
-    }
-
-    /* ---------- Relance si dernier message user sans réponse ---------- */
-    if(messages.length && messages[messages.length-1].role==='user' && !chatBody.querySelector('.bubble-assistant')){
-      sendMessage(messages[messages.length-1].content);
-    }
-  </script>
-</body>
-</html>
+      const { inner
